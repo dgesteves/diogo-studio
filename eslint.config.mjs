@@ -17,6 +17,9 @@ const eslintConfig = defineConfig([
     // Project-specific ignores:
     "coverage/**",
     "node_modules/**",
+    "playwright-report/**",
+    "test-results/**",
+    "playwright/.cache/**",
   ]),
 ]);
 

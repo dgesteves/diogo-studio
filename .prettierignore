@@ -7,3 +7,6 @@ pnpm-lock.yaml
 next-env.d.ts
 *.tsbuildinfo
 public
+playwright-report
+test-results
+CHANGELOG.md
