@@ -1,0 +1,67 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      next:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+          - "@next/*"
+      react:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "@types/react"
+          - "@types/react-dom"
+      tailwind:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "prettier-plugin-tailwindcss"
+      testing:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "@vitejs/plugin-react"
+          - "@testing-library/*"
+          - "jsdom"
+      linting:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "prettier"
+          - "@commitlint/*"
+          - "lint-staged"
+          - "husky"
+      types:
+        patterns:
+          - "@types/*"
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Etc/UTC
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: ci
+      include: scope
