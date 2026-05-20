@@ -11,12 +11,12 @@ updates:
     versioning-strategy: increase
     # Wait for new releases to age before opening PRs.
     # Matches the pnpm `minimum-release-age` supply-chain policy so auto-merged
-    # patches don't land in the lockfile faster than the policy allows.
+    # bumps don't land in the lockfile faster than the policy allows.
     cooldown:
-      default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
+      default-days: 1
+      semver-major-days: 1
+      semver-minor-days: 1
+      semver-patch-days: 1
     labels:
       - dependencies
     commit-message:
@@ -68,10 +68,10 @@ updates:
       timezone: Etc/UTC
     open-pull-requests-limit: 5
     cooldown:
-      default-days: 7
-      semver-major-days: 30
-      semver-minor-days: 7
-      semver-patch-days: 3
+      default-days: 1
+      semver-major-days: 1
+      semver-minor-days: 1
+      semver-patch-days: 1
     labels:
       - dependencies
       - github-actions
