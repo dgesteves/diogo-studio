@@ -23,7 +23,10 @@
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "e2e:install": "playwright install --with-deps",
-    "validate": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm test",
+    "knip": "knip",
+    "size": "size-limit",
+    "size:why": "size-limit --why",
+    "validate": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm test && pnpm knip",
     "prepare": "husky"
   },
   "dependencies": {
@@ -34,10 +37,12 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.11.3",
     "@commitlint/cli": "^21.0.1",
     "@commitlint/config-conventional": "^21.0.1",
     "@next/bundle-analyzer": "^16.2.6",
     "@playwright/test": "^1.60.0",
+    "@size-limit/file": "^12.1.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
@@ -53,9 +58,11 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
+    "knip": "^6.14.1",
     "lint-staged": "^17.0.5",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
+    "size-limit": "^12.1.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.6"

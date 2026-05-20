@@ -1,4 +1,4 @@
-/** @type {import("@commitlint/types").UserConfig} */
+/** @type {{ extends: string[] }} */
 const config = {
   extends: ["@commitlint/config-conventional"],
 };
