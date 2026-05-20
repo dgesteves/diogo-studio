@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreDependencies": ["sharp"],
   "playwright": {
     "config": ["playwright.config.ts"],
     "entry": ["e2e/**/*.spec.ts"]
