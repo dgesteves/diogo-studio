@@ -25,11 +25,16 @@ React 19, TypeScript, and Tailwind CSS v4.
 
 ```bash
 pnpm install
+cp .env.example .env.local   # fill in any secrets (Sentry, etc.)
 pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the app.
 Edit `src/app/page.tsx` to start building.
+
+Environment variables are validated at build/runtime by [`src/env.ts`](./src/env.ts).
+See [`.env.example`](./.env.example) for the full list (including optional
+developer toggles like `ANALYZE` and `SKIP_ENV_VALIDATION`).
 
 ## Scripts
 
