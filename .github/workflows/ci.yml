@@ -26,7 +26,7 @@ jobs:
           standalone: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -43,7 +43,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -60,7 +60,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -76,7 +76,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -99,7 +99,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -116,7 +116,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -132,7 +132,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
@@ -165,7 +165,7 @@ jobs:
       - uses: pnpm/action-setup@v6
         with:
           standalone: true
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
