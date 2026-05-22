@@ -2,8 +2,18 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { AppProviders } from "@/components/providers";
+import { SiteFooter } from "@/components/site/site-footer";
+import { SiteNav } from "@/components/site/site-nav";
 import { env } from "@/env";
+import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
+
+// Vercel Analytics + Speed Insights only resolve their script payloads on
+// Vercel-hosted deployments (`/_vercel/insights/script.js`). Outside Vercel
+// they 404, polluting the console and dragging the Lighthouse "Best
+// practices" score for no functional benefit.
+const isVercel = process.env.VERCEL === "1";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +26,9 @@ const geistMono = Geist_Mono({
 });
 
 const siteUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-const siteName = "Diogo Esteves";
-const siteTitle = "Diogo Esteves — Portfolio & Digital Studio";
-const siteDescription = "Selected work, experiments, and writing by Diogo Esteves.";
+const siteName = siteConfig.name;
+const siteTitle = `${siteConfig.name} — ${siteConfig.role}`;
+const siteDescription = siteConfig.tagline;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -31,7 +41,18 @@ export const metadata: Metadata = {
   authors: [{ name: siteName, url: siteUrl }],
   creator: siteName,
   publisher: siteName,
-  keywords: ["portfolio", "design", "engineering", "digital studio", siteName],
+  keywords: [
+    "Staff Engineer",
+    "Principal Engineer",
+    "Frontend Platform",
+    "AI-native",
+    "design systems",
+    "Next.js",
+    "React",
+    "TypeScript",
+    "agentic UX",
+    siteName,
+  ],
   alternates: {
     canonical: "/",
   },
@@ -47,7 +68,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
-    creator: "@dgesteves",
+    creator: siteConfig.twitterHandle,
   },
   robots: {
     index: true,
@@ -77,11 +98,28 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col">
-        {children}
-        <Analytics />
-        <SpeedInsights />
+    <html
+      lang="en"
+      // Next 16 honors `data-scroll-behavior="smooth"` to preserve our CSS
+      // `scroll-behavior: smooth` during App-Router transitions.
+      data-scroll-behavior="smooth"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="bg-background text-foreground flex min-h-full flex-col">
+        <AppProviders>
+          <SiteNav />
+          <main id="main" className="flex flex-1 flex-col">
+            {children}
+          </main>
+          <SiteFooter />
+        </AppProviders>
+        {isVercel ? (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        ) : null}
       </body>
     </html>
   );

@@ -20,6 +20,10 @@
 /blob-report
 /playwright/.cache
 
+# lighthouse local reports
+/lighthouse-*.json
+/lighthouse-*.html
+
 # next.js
 /.next/
 /out/

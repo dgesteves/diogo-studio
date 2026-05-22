@@ -25,6 +25,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  // Allow HMR through the IDE's browser-preview proxy (127.0.0.1) and the LAN
+  // IP next prints on `pnpm dev`. Has no effect on production.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
       {
@@ -50,8 +53,14 @@ export default sentryEnabled
       disableLogger: true,
       automaticVercelMonitors: true,
       // Source maps are uploaded only when SENTRY_AUTH_TOKEN is present.
+      // We deliberately keep the `//# sourceMappingURL=` references in the
+      // shipped JS (and the maps on disk) so Lighthouse's
+      // `valid-source-maps` audit passes and debugging is easy in browser
+      // devtools. For a portfolio, exposing maps is a net positive
+      // (transparency); for a security-sensitive app this should flip.
       sourcemaps: {
         disable: !process.env.SENTRY_AUTH_TOKEN,
+        deleteSourcemapsAfterUpload: false,
       },
     })
   : wrappedConfig;
