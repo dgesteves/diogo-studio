@@ -208,15 +208,17 @@
 }
 
 /*
- * Career Graph SVG — node + tooltip styles.
+ * Career Graph SVG — node hover/focus styles.
  *
- * Pure CSS, no JS state. `.cg-node-link` is the `<a>` wrapper rendered by
- * next/link; we drive hover/focus state via `:hover` and `:focus-visible`.
- * The tooltip is a `<foreignObject>` inside the same `<g>`, so it tracks
- * the node's transform automatically.
+ * Pure CSS, no JS state. `.cg-node-link` is the next/link anchor wrapping
+ * each node's SVG group. Hover and focus brighten the ring and halo so the
+ * active node is unmistakeable.
+ *
+ * We deliberately don't ship a popup/tooltip layer — the SVG `<title>`
+ * element inside each node gives browsers their default tooltip and screen
+ * readers the full description, with zero risk of layout collisions.
  */
 .cg-node-link {
-  /* Make the SVG group below a real interactive surface. */
   outline: none;
 }
 .cg-node-link:focus-visible .cg-node-ring,
@@ -240,85 +242,40 @@
 }
 .cg-node-link:hover .cg-node-dot,
 .cg-node-link:focus-visible .cg-node-dot {
-  r: 5;
+  r: 6;
 }
 
-/* Tooltip — invisible by default, fades + lifts in on hover/focus. */
-.cg-tooltip {
-  opacity: 0;
-  transform: translate(0, var(--tooltip-y, 0)) translateY(6px);
-  transition:
-    opacity 160ms ease-out,
-    transform 200ms ease-out;
+/* Career-graph edge tracers — a short dashed segment that travels along
+   each edge from older engagement to newer. The total animation period is
+   3.6s; per-edge `animation-delay` (set inline via React) staggers them so
+   the cohort pulses in waves rather than in lockstep. */
+@keyframes cg-edge-tracer-flow {
+  from {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
+  }
+  85% {
+    opacity: 0.85;
+  }
+  to {
+    /* Negative offset travels the dash forward along the path. The
+       magnitude must exceed the longest edge length in viewBox units
+       so the bright segment always exits the end. */
+    stroke-dashoffset: -1200;
+    opacity: 0;
+  }
 }
-.cg-node-link:hover .cg-tooltip,
-.cg-node-link:focus-visible .cg-tooltip {
-  opacity: 1;
-  transform: translate(0, var(--tooltip-y, 0)) translateY(0);
+.cg-edge-tracer {
+  animation: cg-edge-tracer-flow 3.6s linear infinite;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 60%, transparent));
 }
 
-.cg-tooltip-panel {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  width: 280px;
-  padding: 0.75rem 0.875rem;
-  border-radius: 0.625rem;
-  border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--surface) 88%, transparent);
-  backdrop-filter: blur(10px) saturate(140%);
-  -webkit-backdrop-filter: blur(10px) saturate(140%);
-  box-shadow:
-    0 1px 0 color-mix(in srgb, white 6%, transparent) inset,
-    0 12px 28px -12px rgba(0, 0, 0, 0.5);
-  font-family: var(--font-sans);
-  color: var(--foreground);
-}
-.cg-tooltip-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--subtle-foreground);
-}
-.cg-tooltip-years {
-  color: var(--accent);
-}
-.cg-tooltip-name {
-  margin: 0.125rem 0 0;
-  font-size: 13px;
-  font-weight: 500;
-  letter-spacing: -0.01em;
-}
-.cg-tooltip-summary {
-  margin: 0;
-  font-size: 11.5px;
-  line-height: 1.45;
-  color: var(--muted-foreground);
-}
-.cg-tooltip-tags {
-  list-style: none;
-  margin: 0.375rem 0 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-}
-.cg-tooltip-tag {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.125rem 0.375rem;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background: var(--surface-inset);
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+@media (prefers-reduced-motion: reduce) {
+  .cg-edge-tracer {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /*

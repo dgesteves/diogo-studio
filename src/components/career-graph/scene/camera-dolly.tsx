@@ -11,19 +11,21 @@ import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 
 /**
- * Scroll-driven camera dolly + subtle parallax orbit.
+ * Scroll- and mouse-driven camera dolly + subtle idle orbit.
  *
- * - Reads `window.scrollY` against the hero's bounding rect on every frame.
- *   Lenis already smooths the underlying scroll, so we don't need our own
- *   easing on the read.
- * - Eases the camera position toward a target each frame so the dolly feels
- *   like inertia rather than a stiff binding to scroll.
- * - A slow, idle orbit gives the scene life even when the page is static —
- *   tuned low enough that it doesn't trigger motion-sickness or compete with
- *   the user's scroll.
+ * Three signals feed the camera target each frame:
+ *   1. **Scroll progress** — zooms the camera in slightly and drifts it
+ *      laterally as the hero scrolls out of view, giving the scene a sense
+ *      of "the user is moving through space."
+ *   2. **Mouse parallax** — the cursor position inside the hero biases the
+ *      camera by ±0.15 units on x/y. This is what makes the scene feel
+ *      "reactive" without any explicit interaction.
+ *   3. **Idle orbit** — a very slow figure-eight so the scene breathes
+ *      even when the user is perfectly still.
  *
- * Reduced-motion never mounts this component (the canvas itself is gated),
- * so we don't need an additional check here.
+ * All three sources are smoothed via a critically-damped lerp so input
+ * feels inertial, never twitchy. Reduced-motion never mounts the canvas,
+ * so this component is always allowed to animate when present.
  */
 export function CameraDolly({
   containerRef,
@@ -35,44 +37,88 @@ export function CameraDolly({
   // Cached state read in useFrame — refs to avoid React re-renders.
   const scrollProgress = useRef(0);
   const targetProgress = useRef(0);
+  const mouseTarget = useRef({ x: 0, y: 0 });
+  const mouseCurrent = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    function read() {
+    // PERF: both `scroll` and `pointermove` can fire 1000+ times per second
+    // on high-refresh displays, and both handlers below call
+    // `getBoundingClientRect()` which forces a layout flush. Coalesce all
+    // updates through a single requestAnimationFrame tick so we do at most
+    // one layout read per frame regardless of input rate.
+    let rafId = 0;
+    let pendingScroll = false;
+    let pendingMouse = false;
+    let mouseX = 0;
+    let mouseY = 0;
+
+    const flush = () => {
+      rafId = 0;
       const el = containerRef.current;
       if (!el) return;
-      const rect = el.getBoundingClientRect();
-      // Progress 0 when the hero top is at viewport top, 1 when it has fully
-      // scrolled out. Clamped.
-      const viewportH = window.innerHeight;
-      const traveled = Math.max(0, -rect.top);
-      const distance = Math.max(1, rect.height - viewportH * 0.4);
-      targetProgress.current = Math.min(1, traveled / distance);
-    }
-    read();
-    window.addEventListener("scroll", read, { passive: true });
-    window.addEventListener("resize", read);
+      const rect = el.getBoundingClientRect(); // a single layout flush
+
+      if (pendingScroll) {
+        pendingScroll = false;
+        const viewportH = window.innerHeight;
+        const traveled = Math.max(0, -rect.top);
+        const distance = Math.max(1, rect.height - viewportH * 0.4);
+        targetProgress.current = Math.min(1, traveled / distance);
+      }
+      if (pendingMouse) {
+        pendingMouse = false;
+        const x = ((mouseX - rect.left) / rect.width) * 2 - 1;
+        const y = -(((mouseY - rect.top) / rect.height) * 2 - 1);
+        mouseTarget.current = { x, y };
+      }
+    };
+    const schedule = () => {
+      if (!rafId) rafId = requestAnimationFrame(flush);
+    };
+    const onScroll = () => {
+      pendingScroll = true;
+      schedule();
+    };
+    const onMouse = (e: PointerEvent) => {
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+      pendingMouse = true;
+      schedule();
+    };
+    const onBlur = () => {
+      mouseTarget.current = { x: 0, y: 0 };
+    };
+
+    // Initial read so the first frame doesn't have to wait for an event.
+    pendingScroll = true;
+    schedule();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    window.addEventListener("pointermove", onMouse, { passive: true });
+    window.addEventListener("blur", onBlur);
     return () => {
-      window.removeEventListener("scroll", read);
-      window.removeEventListener("resize", read);
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("pointermove", onMouse);
+      window.removeEventListener("blur", onBlur);
     };
   }, [containerRef]);
 
   useFrame((state, delta) => {
-    // Critically-damped lerp toward the target progress so input feels alive
-    // without overshooting.
     const lerpRate = 1 - Math.exp(-delta * 4);
     scrollProgress.current += (targetProgress.current - scrollProgress.current) * lerpRate;
-    const p = scrollProgress.current;
+    mouseCurrent.current.x += (mouseTarget.current.x - mouseCurrent.current.x) * lerpRate;
+    mouseCurrent.current.y += (mouseTarget.current.y - mouseCurrent.current.y) * lerpRate;
 
-    // Idle orbit — a *very* slow figure-eight around the origin. Tuned by
-    // taste, not physics.
+    const p = scrollProgress.current;
     const t = state.clock.elapsedTime;
     const orbitX = Math.sin(t * 0.08) * 0.18;
     const orbitY = Math.sin(t * 0.05) * 0.1;
 
-    // Dolly: zoom in slightly on scroll while drifting left to suggest depth.
-    const targetX = orbitX - p * 0.25;
-    const targetY = orbitY + p * 0.08;
+    const targetX = orbitX - p * 0.25 + mouseCurrent.current.x * 0.18;
+    const targetY = orbitY + p * 0.08 + mouseCurrent.current.y * 0.12;
     const targetZ = 4.4 - p * 0.7;
 
     camera.position.x += (targetX - camera.position.x) * lerpRate;

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Balancer } from "react-wrap-balancer";
 import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -46,13 +45,13 @@ export function ComingSoon({
 
         <h1
           id="coming-soon-heading"
-          className="text-foreground text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] font-medium tracking-tight"
+          className="text-foreground text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] font-medium tracking-tight text-balance"
         >
-          <Balancer>{title}</Balancer>
+          {title}
         </h1>
 
-        <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed">
-          <Balancer>{description}</Balancer>
+        <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed text-balance">
+          {description}
         </p>
 
         <dl className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-2">

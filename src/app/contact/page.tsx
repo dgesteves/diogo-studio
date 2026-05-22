@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Balancer } from "react-wrap-balancer";
 import { ArrowLeft, Mail } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
@@ -33,17 +32,15 @@ export default function ContactPage() {
 
         <h1
           id="contact-heading"
-          className="text-foreground text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] font-medium tracking-tight"
+          className="text-foreground text-[clamp(2rem,5vw,3.5rem)] leading-[1.05] font-medium tracking-tight text-balance"
         >
-          <Balancer>Tell me about the system you’re trying to build.</Balancer>
+          Tell me about the system you’re trying to build.
         </h1>
 
-        <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed">
-          <Balancer>
-            Email gets the fastest response. Mention the role altitude (IC, Founding, VPE), the
-            company stage, and one decision you’re wrestling with. I’ll respond with how I’d
-            approach it.
-          </Balancer>
+        <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed text-balance">
+          Email gets the fastest response. Mention the role altitude (IC, Founding, VPE), the
+          company stage, and one decision you’re wrestling with. I’ll respond with how I’d approach
+          it.
         </p>
 
         <ul className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-3">

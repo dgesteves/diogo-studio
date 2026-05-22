@@ -13,21 +13,17 @@ import {
 /**
  * Career Graph — SVG canonical surface.
  *
- * After we tried (and rejected) layering 3D nodes on top of this graph,
- * the SVG is now the single source of truth for the career graph:
- *
- * - Server-rendered so it owns LCP.
- * - Always visible, never hidden behind a canvas.
- * - Owns clicks, hover tooltips, focus, screen-reader access.
- * - Carries the time axis, year markers, pattern-colored edges.
+ * Visible at all times. Server-rendered. Owns:
+ *   - LCP frame
+ *   - The actual career data (time axis, labels, edges)
+ *   - Clicks, focus, screen-reader story (native `<title>` per node)
  *
  * The R3F canvas (when motion is allowed) renders BEHIND this SVG as a
- * pure atmospheric layer: heatmap field, slow scroll-parallax, restrained
- * postprocessing. It adds depth without competing with the actual data.
+ * pure atmospheric layer. It must never compete with this surface.
  *
- * Tooltips: pure CSS, revealed on group hover / focus-within. No JS state,
- * no client component required. Lives inside the same `<g>` per node so
- * it tracks position even if the SVG scales.
+ * No popups. No hover overlays. Each node shows its company + years
+ * always — the SVG `<title>` element gives browsers their default hover
+ * tooltip and lets screen readers announce the long-form description.
  */
 
 const VIEWPORT = {
@@ -36,14 +32,14 @@ const VIEWPORT = {
   padding: { x: 80, top: 60, bottom: 80 },
 } as const;
 
-// Newest engagements first — used for the screen-reader summary and tab order.
+// Newest engagements first — used for the screen-reader summary.
 const sortedNodes = [...nodes].sort((a, b) => b.position[0] - a.position[0]);
 
 const TIMELINE_YEARS = [2016, 2018, 2020, 2022, 2024, 2026] as const;
 
-// Where to place each node's label relative to its marker. Top-half of the
-// viewport gets labels below, bottom-half gets labels above — keeps the
-// timeline axis (y near bottom) and the cluster (y near top) uncluttered.
+// Decide whether a node's label sits above or below its marker. Top half of
+// the viewport gets labels below; bottom half gets labels above. Keeps the
+// time-axis row and the upper cluster uncrowded.
 function labelPlacement(p: { x: number; y: number }): "above" | "below" {
   return p.y < VIEWPORT.height * 0.55 ? "below" : "above";
 }
@@ -69,10 +65,10 @@ export function CareerGraphSvg({
         role="img"
         aria-labelledby={ariaLabelledBy}
         aria-hidden={ariaHidden}
-        className="block h-full w-full overflow-visible"
+        className="block h-full w-full"
       >
         <defs>
-          {/* Pattern-colored line gradients give edges a tracer-quality fade. */}
+          {/* Pattern-colored edge gradients. */}
           {Object.values(patterns).map((p) => (
             <linearGradient key={p.id} id={`cg-edge-${p.id}`} gradientUnits="userSpaceOnUse">
               <stop offset="0%" stopColor={`var(--${p.colorVar})`} stopOpacity={0.05} />
@@ -81,14 +77,12 @@ export function CareerGraphSvg({
             </linearGradient>
           ))}
 
-          {/* Soft halo behind each node. */}
           <radialGradient id="cg-node-halo" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.5} />
+            <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.55} />
             <stop offset="55%" stopColor="var(--accent)" stopOpacity={0.08} />
             <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
           </radialGradient>
 
-          {/* Console grid — fades at the edges via the mask below. */}
           <pattern id="cg-grid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
             <path
               d="M 48 0 L 0 0 0 48"
@@ -106,7 +100,6 @@ export function CareerGraphSvg({
             <rect width="100%" height="100%" fill="url(#cg-grid-mask)" />
           </mask>
 
-          {/* Glow filter used on the active node when hovered/focused. */}
           <filter id="cg-node-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="3" result="blur" />
             <feMerge>
@@ -124,31 +117,60 @@ export function CareerGraphSvg({
           opacity="0.5"
         />
 
-        {/* Time-axis baseline + year ticks — anchors the graph chronologically. */}
         <Axis />
 
-        {/* Edges — under the nodes so they don't draw over the markers. */}
+        {/* Edges — under the nodes. Each edge gets a base stroke plus a
+            short animated "tracer" segment that flows from the older
+            engagement (lower x) to the newer one, sized as ~14% of the
+            edge length. Direction matches career chronology. */}
         <g aria-hidden="true">
-          {edges.map((edge) => {
+          {edges.map((edge, idx) => {
             const a = positions[edge.from];
             const b = positions[edge.to];
+            // Ensure tracer travels old → new regardless of edge data order.
+            const fromOld = a.x <= b.x ? a : b;
+            const toNew = a.x <= b.x ? b : a;
+            const len = Math.hypot(toNew.x - fromOld.x, toNew.y - fromOld.y);
+            const tracer = Math.max(18, len * 0.14);
+            // Stagger the tracer phase per edge so they don't all pulse in
+            // lockstep — phase is multiples of 0.6s, wrapped within the
+            // animation period (3.6s in `cg-edge-tracer`).
+            const delay = -(idx * 0.6) % 3.6;
             return (
-              <line
-                key={edge.id}
-                x1={a.x}
-                y1={a.y}
-                x2={b.x}
-                y2={b.y}
-                stroke={`url(#cg-edge-${edge.pattern})`}
-                strokeWidth="1.25"
-                strokeLinecap="round"
-              />
+              <g key={edge.id}>
+                {/* Static base stroke. */}
+                <line
+                  x1={a.x}
+                  y1={a.y}
+                  x2={b.x}
+                  y2={b.y}
+                  stroke={`url(#cg-edge-${edge.pattern})`}
+                  strokeWidth="1.25"
+                  strokeLinecap="round"
+                />
+                {/* Animated tracer — a short dash that travels along the
+                    edge from old to new. Stroke uses the pattern's solid
+                    color so the moving segment reads brighter than the
+                    base gradient. */}
+                <line
+                  x1={fromOld.x}
+                  y1={fromOld.y}
+                  x2={toNew.x}
+                  y2={toNew.y}
+                  className="cg-edge-tracer"
+                  stroke={`var(--${patterns[edge.pattern].colorVar})`}
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeDasharray={`${tracer} ${Math.max(20, len)}`}
+                  style={{ animationDelay: `${delay}s` }}
+                />
+              </g>
             );
           })}
         </g>
 
-        {/* Nodes — each is a Link-wrapped <g> so the entire marker + label is
-            one big hit target. Hover/focus reveals the tooltip via CSS. */}
+        {/* Nodes — each is a Link-wrapped <g>, generous hit area, native
+            <title> for browser + a11y tooltips. */}
         {sortedNodes.map((node) => {
           const p = positions[node.id]!;
           return <Node key={node.id} node={node} position={p} />;
@@ -181,10 +203,10 @@ function Axis() {
           <g key={year} transform={`translate(${x} ${VIEWPORT.height - 36})`}>
             <line y2="6" stroke="var(--border-strong)" strokeOpacity="0.5" />
             <text
-              y="22"
+              y="26"
               textAnchor="middle"
               fontFamily="var(--font-mono)"
-              fontSize="10"
+              fontSize="14"
               letterSpacing="0.08em"
               fill="var(--subtle-foreground)"
             >
@@ -197,20 +219,20 @@ function Axis() {
         x={VIEWPORT.padding.x}
         y={VIEWPORT.height - 8}
         fontFamily="var(--font-mono)"
-        fontSize="9"
-        letterSpacing="0.12em"
+        fontSize="11"
+        letterSpacing="0.14em"
         fill="var(--subtle-foreground)"
         opacity="0.7"
       >
-        OLDEST
+        ← OLDEST
       </text>
       <text
         x={VIEWPORT.width - VIEWPORT.padding.x}
         y={VIEWPORT.height - 8}
         textAnchor="end"
         fontFamily="var(--font-mono)"
-        fontSize="9"
-        letterSpacing="0.12em"
+        fontSize="11"
+        letterSpacing="0.14em"
         fill="var(--subtle-foreground)"
         opacity="0.7"
       >
@@ -221,40 +243,33 @@ function Axis() {
 }
 
 function Node({ node, position }: { node: CareerNode; position: { x: number; y: number } }) {
-  const r = 9 * node.weight;
-  const hitR = Math.max(r * 3, 28); // generous click/focus target, never < 56px diameter
+  const r = 11 * node.weight;
+  const hitR = Math.max(r * 2.6, 32);
   const placement = labelPlacement(position);
-  const labelY = placement === "below" ? r + 18 : -r - 14;
-  const yearY = placement === "below" ? r + 32 : -r - 28;
-  const tooltipY = placement === "below" ? r + 48 : -r - 44;
-  const tooltipAnchor = placement === "below" ? "start" : "end";
+  const labelOffset = placement === "below" ? r + 22 : -r - 16;
+  const yearOffset = placement === "below" ? r + 40 : -r - 34;
+  const dominantBaseline = placement === "below" ? "hanging" : "auto";
 
   return (
     <Link
       href={nodeHref(node)}
-      aria-label={`${node.fullName} — ${node.role}, ${node.years}. ${node.summary}`}
       data-career-graph-node={node.id}
-      // SVG <g> wrapped in a Link works because next/link forwards href onto
-      // its child anchor. The whole subtree is one big hit target now.
+      aria-label={`${node.fullName} — ${node.role}, ${node.years}. ${node.summary}`}
       className="cg-node-link group cursor-pointer outline-none"
-      style={
-        {
-          // CSS custom property lets the focus ring colorize uniformly.
-          "--cg-active": "var(--accent)",
-        } as React.CSSProperties
-      }
     >
-      {/* The actual rendered marker + label. Pointer events on the whole `<g>`
-          so any pixel of the marker, label, halo, or hit-circle is clickable. */}
       <g transform={`translate(${position.x} ${position.y})`} style={{ pointerEvents: "all" }}>
-        {/* Invisible hit circle — guarantees a generous tap target even for
-            the lowest-weight (Deloitte) marker. */}
+        {/* Native SVG tooltip — gives browsers a default hover popup and
+            adds the engagement summary to the accessibility tree. */}
+        <title>{`${node.fullName} — ${node.role}\n${node.years}\n${node.summary}`}</title>
+
+        {/* Generous invisible hit target so every node, including the
+            smaller-weight Deloitte/BMW markers, is comfortably clickable. */}
         <circle r={hitR} fill="transparent" />
 
-        {/* Halo (always faint, brightens on hover/focus). */}
+        {/* Halo. */}
         <circle r={r * 4} fill="url(#cg-node-halo)" className="cg-node-halo" />
 
-        {/* Outer ring. */}
+        {/* Ring + dot. */}
         <circle
           r={r}
           fill="var(--surface)"
@@ -262,67 +277,44 @@ function Node({ node, position }: { node: CareerNode; position: { x: number; y: 
           strokeWidth="1.5"
           className="cg-node-ring"
         />
-        {/* Inner dot. */}
         <circle r={r * 0.45} fill="var(--accent)" className="cg-node-dot" />
 
-        {/* Company label — mono caps. */}
+        {/* Company label — paint-order trick gives us a background "halo" so
+            labels stay readable when an edge or the heatmap field crosses
+            behind them. */}
         <text
-          y={labelY}
+          y={labelOffset}
           textAnchor="middle"
-          dominantBaseline={placement === "below" ? "hanging" : "auto"}
+          dominantBaseline={dominantBaseline}
           fontFamily="var(--font-mono)"
-          fontSize="11"
+          fontSize="15"
           letterSpacing="0.08em"
           fill="var(--foreground)"
-          style={{ paintOrder: "stroke", stroke: "var(--background)", strokeWidth: 3 }}
+          style={{
+            paintOrder: "stroke",
+            stroke: "var(--background)",
+            strokeWidth: 4,
+            fontWeight: 500,
+          }}
         >
           {node.label.toUpperCase()}
         </text>
-        {/* Years — secondary mono. */}
         <text
-          y={yearY}
+          y={yearOffset}
           textAnchor="middle"
-          dominantBaseline={placement === "below" ? "hanging" : "auto"}
+          dominantBaseline={dominantBaseline}
           fontFamily="var(--font-mono)"
-          fontSize="9"
+          fontSize="12"
           letterSpacing="0.1em"
           fill="var(--subtle-foreground)"
-          style={{ paintOrder: "stroke", stroke: "var(--background)", strokeWidth: 3 }}
+          style={{
+            paintOrder: "stroke",
+            stroke: "var(--background)",
+            strokeWidth: 4,
+          }}
         >
           {node.years}
         </text>
-
-        {/* Hover/focus tooltip — purely CSS-driven, no JS state. */}
-        <g className="cg-tooltip pointer-events-none" transform={`translate(0 ${tooltipY})`}>
-          <foreignObject
-            // Width-wide enough for the longest summary, centered horizontally.
-            x={tooltipAnchor === "start" ? -120 : -240}
-            y="0"
-            width="360"
-            height="160"
-            style={{ overflow: "visible" }}
-          >
-            <div className="cg-tooltip-panel">
-              <div className="cg-tooltip-header">
-                <span className="cg-tooltip-years">{node.years}</span>
-                <span className="cg-tooltip-role">{node.role}</span>
-              </div>
-              <p className="cg-tooltip-name">{node.fullName}</p>
-              <p className="cg-tooltip-summary">{node.summary}</p>
-              <ul className="cg-tooltip-tags">
-                {node.patterns.map((p) => (
-                  <li
-                    key={p}
-                    style={{ color: `var(--${patterns[p].colorVar})` }}
-                    className="cg-tooltip-tag"
-                  >
-                    {patterns[p].label}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </foreignObject>
-        </g>
       </g>
     </Link>
   );
@@ -330,8 +322,6 @@ function Node({ node, position }: { node: CareerNode; position: { x: number; y: 
 
 /**
  * Hidden long-form description used by screen readers and search engines.
- * Sits outside the SVG so it's announced once regardless of which surface
- * is active.
  */
 export function CareerGraphAccessibleDescription({ id }: { id: string }) {
   return (

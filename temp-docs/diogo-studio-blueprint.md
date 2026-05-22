@@ -119,7 +119,7 @@ Reads like a postmortem from a senior engineer, not a brochure.
 Toggleable dev-mode overlay (keyboard shortcut, off by default) showing:
 
 - Live Web Vitals (LCP, INP, CLS, TTFB) via `web-vitals`.
-- Real-time FPS, draw calls, GPU memory for the 3D scene (`r3f-perf`).
+- Real-time FPS, draw calls, GPU memory for the 3D scene (custom panel built on `three`'s `WebGLRenderer.info` — `r3f-perf` was dropped in Phase 2 for Turbopack incompatibility).
 - Bundle size for the current route (built-in via `size-limit` snapshot).
 - Reduced-motion / low-power mode indicator.
 
@@ -262,14 +262,29 @@ react-wrap-balancer             balanced headlines
 ```
 three                           core 3D engine
 @react-three/fiber              R3F renderer
-@react-three/drei               R3F helpers (OrbitControls, Text, Html, etc.)
+@react-three/drei               R3F helpers (cameras, AdaptiveDpr, <Stats>, Preload)
 @react-three/postprocessing     bloom, chromatic aberration, vignette
 maath                           math utilities (curves, easing, sampling)
-@xyflow/react                   2D system diagrams + reduced-motion fallback
-d3-force                        physics layout for graph nodes
-leva                            dev-only param tweaking (gated by NODE_ENV)
-r3f-perf                        dev-only FPS / draw-call HUD
 ```
+
+Phase 2 deltas from the original plan (decided during build, shipped as-is):
+
+- **`r3f-perf` → drei `<Stats>`.** `r3f-perf` ships its bitmap font as a
+  base64 `.mjs` payload that Turbopack (Next 16 default) can't parse as
+  UTF-8 source, breaking the dev build outright. The drei `<Stats>` panel
+  covers the FPS/ms readout we actually use day-to-day; the richer perf
+  surface (draw calls, GPU memory, web-vitals) belongs to the S4 Inspector
+  Overlay anyway. Gated by `NEXT_PUBLIC_PERF_HUD=1` and dead-code-eliminated
+  in production.
+- **No `leva` panel.** Shader/postfx values are hard-coded with tuning
+  comments next to each pass. The cost of wiring a live param panel didn't
+  pay back once the scene was settled; revisit only if we re-open the look.
+- **No `@xyflow/react` / `d3-force` for the reduced-motion fallback.** The
+  fallback is a hand-built SVG (`career-graph-svg.tsx`) with a deterministic
+  `projectToSvg` projection, not a force-laid-out xyflow diagram. It carries
+  the same nodes/edges/metadata, doubles as the LCP frame, and ships zero
+  client JS for the layout. `@xyflow/react` is still earmarked for Phase 3
+  case-study system diagrams.
 
 #### Phase 3 — Content layer (case studies as dashboards)
 
@@ -378,8 +393,8 @@ end of every phase — we do not accumulate big-bang risk.
 - Hover tooltips, click-to-route deep links.
 - Heatmap-flavored ambient shader (custom GLSL, kept small).
 - Postprocessing pass (bloom + vignette, restrained).
-- Reduced-motion fallback: SVG/Canvas 2D version with the same data.
-- Dev-only `leva` panel and `r3f-perf` HUD gated by env.
+- Reduced-motion fallback: hand-built SVG with the same data, doubling as the LCP frame.
+- Dev-only FPS/ms HUD via drei `<Stats>`, gated by `NEXT_PUBLIC_PERF_HUD=1` (see Phase 2 deltas in §5.2 for why we dropped `r3f-perf` and `leva`).
 
 **Exit criteria**:
 
@@ -530,9 +545,10 @@ hiring managers reach out about _the work_, not the visuals.
 
 ## 11. Status log
 
-| Date       | Phase                | Status | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------- | -------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-05-22 | Phase 0 (planning)   | Done   | Blueprint authored.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| 2026-05-22 | Phase 1 (foundation) | Done   | Tokens (OKLCH, light + deep-space dark, signal-cyan accent, all WCAG 2.2 AA contrast-verified). Providers: theme, motion-preference (system pref ∪ low-power signals ∪ user override via `useSyncExternalStore`), motion, lenis, ⌘K. Site shell: nav, mobile drawer (vaul), footer, command menu (cmdk + Radix Dialog, Navigate mode), theme toggle. UI primitives: Button (cva), Badge, Kbd, StatusDot, brand icons, ComingSoon. Typography hero + operating altitudes + trust strip. All nav routes have working placeholder pages. `pnpm validate` green. E2E: 10/10 (home, ⌘K, mobile nav, axe a11y on light + dark + command-menu-open). **Lighthouse: desktop 100/100/100/100 ✓ ; mobile 90/100/100/100** (10-pt perf gap is Sentry SDK + Replay-on-error + cmdk + Lenis in initial bundle — Phase 5 will lazy-load these alongside the inspector overlay). Build 350/400 KB. Docs: `docs/design-system.md`, rewritten `README.md`. Locked: typeface = Geist, accent = signal-cyan. |
+| Date       | Phase                | Status | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------- | -------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-05-22 | Phase 0 (planning)   | Done   | Blueprint authored.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 2026-05-22 | Phase 1 (foundation) | Done   | Tokens (OKLCH, light + deep-space dark, signal-cyan accent, all WCAG 2.2 AA contrast-verified). Providers: theme, motion-preference (system pref ∪ low-power signals ∪ user override via `useSyncExternalStore`), motion, lenis, ⌘K. Site shell: nav, mobile drawer (vaul), footer, command menu (cmdk + Radix Dialog, Navigate mode), theme toggle. UI primitives: Button (cva), Badge, Kbd, StatusDot, brand icons, ComingSoon. Typography hero + operating altitudes + trust strip. All nav routes have working placeholder pages. `pnpm validate` green. E2E: 10/10 (home, ⌘K, mobile nav, axe a11y on light + dark + command-menu-open). **Lighthouse: desktop 100/100/100/100 ✓ ; mobile 90/100/100/100** (10-pt perf gap is Sentry SDK + Replay-on-error + cmdk + Lenis in initial bundle — Phase 5 will lazy-load these alongside the inspector overlay). Build 350/400 KB. Docs: `docs/design-system.md`, rewritten `README.md`. Locked: typeface = Geist, accent = signal-cyan.                                                 |
+| 2026-05-22 | Phase 2 (hero)       | Done   | 3D Career Graph shipped: R3F canvas (`career-graph-canvas.tsx`) with volumetric heatmap (raymarched 3D FBM), radar sweep, perspective grid floor, drifting particles, scroll+mouse camera dolly, postprocessing (bloom + chromatic aberration + vignette). AdaptiveDpr + AdaptiveEvents + IntersectionObserver pause; canvas is `next/dynamic({ ssr:false })` and only mounts when motion is allowed and in-view. Hand-built SVG (`career-graph-svg.tsx`) carries data, hover `<title>` tooltips, `Link`-wrapped click-to-route, full screen-reader description — doubles as the LCP frame. Data lives in typed `src/content/career-graph.ts` (with unit tests). Dev FPS HUD via drei `<Stats>` (`NEXT_PUBLIC_PERF_HUD=1`). **Deltas from plan (see §5.2):** dropped `r3f-perf` (Turbopack incompatibility), dropped `leva` (no live param panel), dropped `@xyflow/react`/`d3-force` for the fallback in favor of deterministic SVG projection. Perf-budget validation against §5.4 still owed before declaring exit criteria fully met. |
 
 > Append entries as work progresses. Keep it terse — one row per real change.

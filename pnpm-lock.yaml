@@ -86,9 +86,6 @@ importers:
       react-dom:
         specifier: 19.2.6
         version: 19.2.6(react@19.2.6)
-      react-wrap-balancer:
-        specifier: ^1.1.1
-        version: 1.1.1(react@19.2.6)
       sharp:
         specifier: ^0.34.5
         version: 0.34.5
@@ -4446,11 +4443,6 @@ packages:
     peerDependenciesMeta:
       react-dom:
         optional: true
-
-  react-wrap-balancer@1.1.1:
-    resolution: {integrity: sha512-AB+l7FPRWl6uZ28VcJ8skkwLn2+UC62bjiw8tQUrZPlEWDVnR9MG0lghyn7EyxuJSsFEpht4G+yh2WikEqQ/5Q==}
-    peerDependencies:
-      react: '>=16.8.0 || ^17.0.0 || ^18'
 
   react@19.2.6:
     resolution: {integrity: sha512-sfWGGfavi0xr8Pg0sVsyHMAOziVYKgPLNrS7ig+ivMNb3wbCBw3KxtflsGBAwD3gYQlE/AEZsTLgToRrSCjb0Q==}
@@ -9386,10 +9378,6 @@ snapshots:
       react: 19.2.6
     optionalDependencies:
       react-dom: 19.2.6(react@19.2.6)
-
-  react-wrap-balancer@1.1.1(react@19.2.6):
-    dependencies:
-      react: 19.2.6
 
   react@19.2.6: {}
 
