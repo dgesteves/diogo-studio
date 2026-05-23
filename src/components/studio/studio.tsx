@@ -39,13 +39,41 @@ export function Studio({ className }: { className?: string }) {
   const isClient = useIsClient();
   const { reducedMotion } = useReducedMotionPreference();
 
+  // Prefetch the canvas chunk during browser idle so it's already in memory
+  // by the time the IntersectionObserver triggers the actual mount. Without
+  // this, the user stares at `<StudioFallback />` for the round-trip cost
+  // of downloading the chunk (and any drei/three modules it pulls in).
+  // Gated on reduced-motion: no canvas, no need to fetch its code.
+  useEffect(() => {
+    if (reducedMotion) return;
+    if (typeof window === "undefined") return;
+    const idle =
+      "requestIdleCallback" in window
+        ? window.requestIdleCallback
+        : (cb: () => void) => window.setTimeout(cb, 200);
+    const cancel =
+      "cancelIdleCallback" in window
+        ? window.cancelIdleCallback
+        : (id: number) => window.clearTimeout(id);
+    const handle = idle(() => {
+      // Fire-and-forget. If the import fails the IO-gated mount path will
+      // surface the same error; nothing here needs to await it.
+      void import("./studio-canvas");
+    });
+    return () => cancel(handle as number);
+  }, [reducedMotion]);
+
   // Pause when fully off-screen so we never burn frames on hidden content.
+  // Generous `rootMargin` so the canvas starts mounting well before the
+  // section enters the viewport — at typical scroll speeds this is enough
+  // for R3F's first frame to land *before* the section is actually on
+  // screen, so the user perceives the 3D scene as "already there."
   const [inView, setInView] = useState(false);
   useEffect(() => {
     const el = containerRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
     const obs = new IntersectionObserver(([entry]) => setInView(Boolean(entry?.isIntersecting)), {
-      rootMargin: "200px 0px",
+      rootMargin: "600px 0px",
       threshold: 0,
     });
     obs.observe(el);

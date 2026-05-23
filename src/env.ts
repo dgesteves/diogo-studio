@@ -20,6 +20,17 @@ export const env = createEnv({
     SENTRY_ORG: z.string().optional(),
     SENTRY_PROJECT: z.string().optional(),
     SENTRY_TRACES_SAMPLE_RATE: z.coerce.number().min(0).max(1).optional(),
+
+    /* --- Phase 4: agentic ⌘K Inspector ---
+     * All three blocks are optional. The Edge `/api/chat` route reports a
+     * structured 503 if `OPENAI_API_KEY` is missing, the build script
+     * degrades the index to keyword-only when it's missing, and the rate
+     * limiter falls back to an in-memory token bucket without Upstash. */
+    OPENAI_API_KEY: z.string().min(1).optional(),
+    OPENAI_CHAT_MODEL: z.string().default("gpt-4o-mini"),
+    OPENAI_EMBED_MODEL: z.string().default("text-embedding-3-small"),
+    UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+    UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
@@ -36,6 +47,11 @@ export const env = createEnv({
     SENTRY_TRACES_SAMPLE_RATE: process.env.SENTRY_TRACES_SAMPLE_RATE,
     NEXT_PUBLIC_SENTRY_DSN: process.env.NEXT_PUBLIC_SENTRY_DSN,
     NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE: process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE,
+    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+    OPENAI_CHAT_MODEL: process.env.OPENAI_CHAT_MODEL,
+    OPENAI_EMBED_MODEL: process.env.OPENAI_EMBED_MODEL,
+    UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+    UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "1",

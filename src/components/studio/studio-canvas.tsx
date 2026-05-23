@@ -11,6 +11,7 @@ import {
 } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { useCenterScreenTexture, useLeftScreenTexture, useRightScreenTexture } from "./screens";
 
 /**
@@ -52,6 +53,8 @@ export function StudioCanvas({
       style={{ background: "transparent" }}
       onCreated={() => onReady?.()}
     >
+      <WebGLContextGuard />
+
       <OrthographicCamera
         makeDefault
         // Closer + tighter zoom so the rig fills more of the frame.
@@ -518,5 +521,3 @@ function Monitor({
     </group>
   );
 }
-
-export default StudioCanvas;

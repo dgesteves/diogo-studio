@@ -30,9 +30,12 @@ describe("Home page", () => {
     expect(link).toHaveAttribute("href", "/work");
   });
 
-  it("exposes a ⌘K trigger CTA", () => {
+  it("exposes a ⌘K trigger CTA that opens the agent in Ask mode", () => {
     renderHome();
-    expect(screen.getByRole("button", { name: /press.*to ask/i })).toBeInTheDocument();
+    // The CTA's visible label says "Press ⌘ K to ask"; the accessible name
+    // is overridden by aria-label so the screen-reader announcement is
+    // pronounceable instead of "Press command k to ask".
+    expect(screen.getByRole("button", { name: /ask the agent about diogo/i })).toBeInTheDocument();
   });
 
   it("renders the availability status", () => {

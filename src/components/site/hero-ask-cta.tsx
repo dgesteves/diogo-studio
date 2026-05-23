@@ -6,13 +6,20 @@ import { Kbd } from "@/components/ui/kbd";
 import { useCommandMenu } from "./command-menu-context";
 
 /**
- * Secondary hero CTA — opens the ⌘K command menu so visitors can either
- * navigate or (Phase 4) ask the agent grounded on Diogo's resume + cases.
+ * Secondary hero CTA — opens the ⌘K command menu directly in Ask mode
+ * (Phase 4). Plain ⌘K still lands in Navigate mode; this button is the
+ * explicit "talk to the agent" entry point, matching its label.
  */
 export function HeroAskCta() {
-  const { setOpen } = useCommandMenu();
+  const { openWithMode } = useCommandMenu();
   return (
-    <Button type="button" variant="outline" size="lg" onClick={() => setOpen(true)}>
+    <Button
+      type="button"
+      variant="outline"
+      size="lg"
+      onClick={() => openWithMode("ask")}
+      aria-label="Ask the agent about Diogo's work"
+    >
       <Sparkles className="size-4" aria-hidden="true" />
       <span>Press</span>
       <Kbd>⌘</Kbd>

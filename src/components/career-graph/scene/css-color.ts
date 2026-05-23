@@ -28,9 +28,17 @@ function getProbeCtx(): CanvasRenderingContext2D | null {
   probeCanvas = document.createElement("canvas");
   probeCanvas.width = 1;
   probeCanvas.height = 1;
-  // Force the sRGB color space so getImageData below returns sRGB bytes
-  // even on wide-gamut displays.
-  probeCtx = probeCanvas.getContext("2d", { colorSpace: "srgb" });
+  // - `colorSpace: "srgb"` so getImageData() returns sRGB bytes even on
+  //   wide-gamut displays.
+  // - `willReadFrequently: true` is a hint to the browser that we do many
+  //   `getImageData()` reads against this context — without it Chromium
+  //   logs a Canvas2D perf warning on each invocation. We resolve one
+  //   color per CSS variable per scene mount, so the hint costs nothing
+  //   and silences the warning.
+  probeCtx = probeCanvas.getContext("2d", {
+    colorSpace: "srgb",
+    willReadFrequently: true,
+  });
   return probeCtx;
 }
 

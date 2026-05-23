@@ -1,0 +1,550 @@
+{
+  "generatedAt": "2026-05-23T07:06:16.832Z",
+  "embeddingModel": null,
+  "embeddingDim": null,
+  "chunkerVersion": 1,
+  "chunks": [
+    {
+      "id": "career:bmw#_#0",
+      "sourceId": "career:bmw",
+      "sourceKind": "career",
+      "sourceTitle": "BMW Group",
+      "permalink": "/work/bmw-innovation",
+      "heading": "Lead Frontend Engineer",
+      "tags": [
+        "enterprise"
+      ],
+      "content": "BMW Group (2018–2019) — Lead Frontend Engineer. Innovation platforms for the BMW Group — strategic R&D challenges across future mobility, sustainability, connected vehicles. Patterns: Enterprise scale.",
+      "contentHash": "5727f7d0dab28106"
+    },
+    {
+      "id": "career:deloitte#_#0",
+      "sourceId": "career:deloitte",
+      "sourceKind": "career",
+      "sourceTitle": "Deloitte",
+      "permalink": "/work",
+      "heading": "Software Engineer",
+      "tags": [
+        "enterprise"
+      ],
+      "content": "Deloitte (2016–2018) — Software Engineer. Enterprise data-visualization surfaces for clients in financial services and regulated industries. Patterns: Enterprise scale.",
+      "contentHash": "67d386cd5ef46905"
+    },
+    {
+      "id": "career:diligent#_#0",
+      "sourceId": "career:diligent",
+      "sourceKind": "career",
+      "sourceTitle": "Diligent",
+      "permalink": "/work/diligent-design-system",
+      "heading": "Lead Frontend Engineer",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "Diligent (2019–2020) — Lead Frontend Engineer. Authored the company-wide React + Angular enterprise design system serving Fortune-1000-class governance products. Patterns: Design-system infrastructure, Enterprise scale.",
+      "contentHash": "bea3a90dcb00d3c0"
+    },
+    {
+      "id": "career:eino#_#0",
+      "sourceId": "career:eino",
+      "sourceKind": "career",
+      "sourceTitle": "eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "heading": "Lead Frontend Engineer",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "eino.ai (2023–2025) — Lead Frontend Engineer. Agentic RF network planning, digital-twin maps, real-time heatmaps. Shipped agentic UX ahead of industry adoption. Patterns: AI-native platforms, Agentic UX.",
+      "contentHash": "5c24a7d96ddee142"
+    },
+    {
+      "id": "career:fueled#_#0",
+      "sourceId": "career:fueled",
+      "sourceKind": "career",
+      "sourceTitle": "Fueled",
+      "permalink": "/work",
+      "heading": "Lead Engineer, Web Applications",
+      "tags": [
+        "ai-native",
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "Fueled (2025+) — Lead Engineer, Web Applications. Frontend architecture for enterprise web platforms across AI, media, and digital-transformation engagements. Patterns: AI-native platforms, Design-system infrastructure, Enterprise scale.",
+      "contentHash": "bbfe8eca656ddc9c"
+    },
+    {
+      "id": "career:moment#_#0",
+      "sourceId": "career:moment",
+      "sourceKind": "career",
+      "sourceTitle": "Moment",
+      "permalink": "/work/moment-ai-platform",
+      "heading": "VP of Engineering",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "Moment (2025) — VP of Engineering. Took an AI-native knowledge platform from prototype velocity to production reliability. Owned hiring, leveling, RFCs, on-call. Patterns: AI-native platforms, Agentic UX.",
+      "contentHash": "222ebcddea0855df"
+    },
+    {
+      "id": "career:peacock#_#0",
+      "sourceId": "career:peacock",
+      "sourceKind": "career",
+      "sourceTitle": "Sky · NBCUniversal · Peacock",
+      "permalink": "/work/peacock-streaming",
+      "heading": "Senior Software Engineer",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "Sky · NBCUniversal · Peacock (2020–2022) — Senior Software Engineer. Tens-of-millions-of-viewers scale on streaming + commerce surfaces. Reliability, latency, release safety on the surfaces where regressions hit minutes after deploy. Patterns: Streaming-grade reliability, Enterprise scale.",
+      "contentHash": "88aa09c6c907b93c"
+    },
+    {
+      "id": "case-study:diligent-design-system#_#0",
+      "sourceId": "case-study:diligent-design-system",
+      "sourceKind": "case-study",
+      "sourceTitle": "An enterprise design system that survived two frameworks",
+      "permalink": "/work/diligent-design-system",
+      "heading": "Summary",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "An enterprise design system that survived two frameworks. Lead frontend engineer on Diligent's company-wide enterprise design system — multi-framework, governed, contributed-to by product teams, used across the company's governance suite serving Fortune-1000 customers.",
+      "contentHash": "29f231b790060fba"
+    },
+    {
+      "id": "case-study:diligent-design-system#_#1",
+      "sourceId": "case-study:diligent-design-system",
+      "sourceKind": "case-study",
+      "sourceTitle": "An enterprise design system that survived two frameworks",
+      "permalink": "/work/diligent-design-system",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "Diligent ships governance software to Fortune-1000-class boards,\nexecutives, and audit committees. The product surface is conservative,\nregulated, and serious — exactly the constituency that benefits from a\ndesign system, and exactly the constituency that punishes a bad one.\n\nI led the frontend side of Diligent's company-wide design system in\n2019–2020. The interesting parts of this case study are not \"we\nshipped Buttons and Modals.\" Every enterprise DS does. The interesting\nparts are how the system survived running on two frameworks, and how\ncontribution got federated without losing coherence.",
+      "contentHash": "e38a66e13b88bd14"
+    },
+    {
+      "id": "case-study:diligent-design-system#outcomes#4",
+      "sourceId": "case-study:diligent-design-system",
+      "sourceKind": "case-study",
+      "sourceTitle": "An enterprise design system that survived two frameworks",
+      "permalink": "/work/diligent-design-system",
+      "anchor": "outcomes",
+      "heading": "Outcomes",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## Outcomes\n\nTwo runtimes (React + Angular) operating on a single token + contract\nspine, with a federated contribution model the central team could\nsteward without becoming a bottleneck.\n\nThe system shipped across the company's governance product lines\nduring my tenure and continued to evolve after I rolled off.\n\nDiligent is where I learned that the design system is the\ncontribution model, not the components. That framing has shaped\nevery DS conversation I've had since.",
+      "contentHash": "6bcb27cbaf6b001c"
+    },
+    {
+      "id": "case-study:diligent-design-system#phases#3",
+      "sourceId": "case-study:diligent-design-system",
+      "sourceKind": "case-study",
+      "sourceTitle": "An enterprise design system that survived two frameworks",
+      "permalink": "/work/diligent-design-system",
+      "anchor": "phases",
+      "heading": "Phases",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## Phases\n\nDesign systems fail at federation, not at components. The work\nthat determines success is contribution + review, not Button +\nModal.",
+      "contentHash": "72d82d704e866238"
+    },
+    {
+      "id": "case-study:diligent-design-system#the-brief-in-one-paragraph#2",
+      "sourceId": "case-study:diligent-design-system",
+      "sourceKind": "case-study",
+      "sourceTitle": "An enterprise design system that survived two frameworks",
+      "permalink": "/work/diligent-design-system",
+      "anchor": "the-brief-in-one-paragraph",
+      "heading": "The brief, in one paragraph",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The brief, in one paragraph\n\nDiligent had bought and built product lines across years; the suite\nspoke with several mildly different voices. The new design system was\nasked to do three things at once: unify the voice without a rewrite,\nlet two framework communities consume it without forking, and create\na path for product teams to *contribute* components without breaking\nthe center.\n\nThat third one is the hard one. Most enterprise design systems die not\nfrom missing components but from a contribution model that can't keep\nup with product teams' velocity.",
+      "contentHash": "e7d7b46ced91d09e"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#_#0",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "heading": "Summary",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "Agentic RF network planning at eino.ai. Lead engineer on an agentic platform that compresses weeks of RF network planning into hours. Digital-twin maps, agent orchestration, human-in-the-loop review — production agentic UX before the category existed.",
+      "contentHash": "f4789fe6f62f8dc4"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#_#1",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "This is a case study about building agentic UX in production — not a demo,\nnot a hackathon. eino.ai's product compresses what a senior RF engineer\ndoes in a week into a working session: ingest a customer brief, draft\nsites, plan radio links, validate against terrain + line-of-sight, and\nhand the engineer a high-level design they can sign off on or revise.\n\nMy remit was the whole client side: an agent-aware React + GraphQL\nfoundation, a digital-twin map surface, the human-in-the-loop review\nloop that keeps the agent honest, and a contract with the backend\ncrisp enough to absorb model swaps without UI rewrites.",
+      "contentHash": "f5d70a35d0cc8353"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#architecture#3",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "anchor": "architecture",
+      "heading": "Architecture",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "## Architecture\n\nThe orchestrator is a thin GraphQL gateway in front of the agents. The\nfrontend treats every leg as a streamed mutation: the engineer triggers\na leg, the leg streams partial proposals, and the map renders them as\nthey arrive. The agents themselves are out of scope for this writeup\n— I owned the surface and the contract.",
+      "contentHash": "a45ce0ac8eadaef4"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#outcomes#5",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "anchor": "outcomes",
+      "heading": "Outcomes",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "## Outcomes\n\nSame-day workshops replaced multi-week consulting engagements for\nthe customer profile the product was designed for.\n\nThe contract held across three LLM provider swaps. The frontend\nshipped through them without a single visible regression to pilot\ncustomers — what the agent-orchestration team needed me to do.\n\nThis is the engagement I reference when people ask \"have you\nactually shipped agentic UX, or just talked about it?\"",
+      "contentHash": "b440d0d0b677f1d0"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#the-product-in-one-paragraph#2",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "anchor": "the-product-in-one-paragraph",
+      "heading": "The product, in one paragraph",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "## The product, in one paragraph\n\nCustomers come in with a vague brief: *\"connect these N rural\nclusters.\"* The agent reads the brief, drafts candidate radio sites on\na real-world map, runs line-of-sight against terrain, proposes\nbackhaul links, fits the radios, and hands the engineer a high-level\nnetwork design they can edit. Editing anywhere in that chain\nre-triggers the affected agents — the plan is a graph, not a wizard.\n\nWhat makes it agentic, not \"AI-flavored,\" is that every step is a\ndiscrete tool call the engineer can inspect, rerun, or override. The\nUI has to expose that without overwhelming the engineer with logs.",
+      "contentHash": "22e5d6bc405ed46e"
+    },
+    {
+      "id": "case-study:eino-ai-network-planning#what-this-looked-like-to-the-engineer#4",
+      "sourceId": "case-study:eino-ai-network-planning",
+      "sourceKind": "case-study",
+      "sourceTitle": "Agentic RF network planning at eino.ai",
+      "permalink": "/work/eino-ai-network-planning",
+      "anchor": "what-this-looked-like-to-the-engineer",
+      "heading": "What this looked like to the engineer",
+      "tags": [
+        "ai-native",
+        "agentic-ux"
+      ],
+      "content": "## What this looked like to the engineer\n\nThe hero of the product is the map. The agents are the supporting cast.\nThat distinction shaped every UI decision: the map was the surface that\nheld attention; agent panels were edges of the workspace that lit up\nwhen something needed acceptance.\n\nAnything an agent does has to be inspectable, rerunnable, and\nattributable. The UI can be magical; the contract underneath cannot.",
+      "contentHash": "f14b5e8909346176"
+    },
+    {
+      "id": "case-study:peacock-streaming#_#0",
+      "sourceId": "case-study:peacock-streaming",
+      "sourceKind": "case-study",
+      "sourceTitle": "Streaming-grade reliability at Peacock",
+      "permalink": "/work/peacock-streaming",
+      "heading": "Summary",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "Streaming-grade reliability at Peacock. Senior engineer on the Peacock web surfaces during launch and scale-up. The work was less about features and more about not breaking on a minute-by-minute basis — release safety, performance, and the discipline a global streaming surface demands.",
+      "contentHash": "e5d8e3f3258c8b17"
+    },
+    {
+      "id": "case-study:peacock-streaming#_#1",
+      "sourceId": "case-study:peacock-streaming",
+      "sourceKind": "case-study",
+      "sourceTitle": "Streaming-grade reliability at Peacock",
+      "permalink": "/work/peacock-streaming",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "The honest framing of this one: I was not a system architect at Peacock.\nI was a senior engineer on web surfaces during a period when \"don't be\nthe reason it broke\" mattered more than \"ship the clever idea.\" The\ncase study is about the working habits that produced quietly reliable\ncode at that scale.\n\nIf you're hiring me for streaming-grade work, this is the engagement\nwhere I learned what the words *streaming-grade* actually mean.",
+      "contentHash": "a0e9df16f025a065"
+    },
+    {
+      "id": "case-study:peacock-streaming#operating-habits-in-order-of-impact#3",
+      "sourceId": "case-study:peacock-streaming",
+      "sourceKind": "case-study",
+      "sourceTitle": "Streaming-grade reliability at Peacock",
+      "permalink": "/work/peacock-streaming",
+      "anchor": "operating-habits-in-order-of-impact",
+      "heading": "Operating habits, in order of impact",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "## Operating habits, in order of impact\n\nAt Peacock scale, the boring habits are the senior work. A staff\nengineer who can ship a feature is common; one who can ship through\na launch week without making the surface noticeably worse is rare.",
+      "contentHash": "f6053239cd3fa02d"
+    },
+    {
+      "id": "case-study:peacock-streaming#outcomes#4",
+      "sourceId": "case-study:peacock-streaming",
+      "sourceKind": "case-study",
+      "sourceTitle": "Streaming-grade reliability at Peacock",
+      "permalink": "/work/peacock-streaming",
+      "anchor": "outcomes",
+      "heading": "Outcomes",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "## Outcomes\n\nShipped through the high-growth phase of Peacock's web surface\nwithout my changes being the cause of a customer-visible incident\nduring my tenure.\n\nHelped install a release-safety culture (flags, canary, runbook\ndrills) the team kept maintaining after I rolled off.\n\nThe habits described above are the floor I bring to every senior\nrole since. They are *the* reason I trust myself with streaming or\nagentic-scale surfaces.",
+      "contentHash": "5cf601b113280f3c"
+    },
+    {
+      "id": "case-study:peacock-streaming#what-the-surface-actually-was#2",
+      "sourceId": "case-study:peacock-streaming",
+      "sourceKind": "case-study",
+      "sourceTitle": "Streaming-grade reliability at Peacock",
+      "permalink": "/work/peacock-streaming",
+      "anchor": "what-the-surface-actually-was",
+      "heading": "What the surface actually was",
+      "tags": [
+        "streaming",
+        "enterprise"
+      ],
+      "content": "## What the surface actually was\n\nPeacock's web property is the non-player half of the streaming\nexperience: auth, sign-up, billing, account, content browse, error\nrecovery, deep-linking from native apps. None of it is glamorous in\nisolation; in aggregate it's the surface that decides whether a viewer\never reaches the player on Sunday afternoon.\n\nThe work was less \"design a system\" and more \"operate a system that\nalready exists at scale, without making it worse.\" This was where I\ninternalized that for senior engineers in operating-scale companies,\nthe unsexy parts — release safety, observability, runbooks — *are* the\ncraft.",
+      "contentHash": "4b42cf767ff98fda"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#_#0",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "heading": "Summary",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "Agentic UX without the demo tax. Most AI-flavored interfaces are still demos. Production agentic UX is the discipline of treating LLMs like flaky tools the user can supervise — not magic the user has to trust.",
+      "contentHash": "e2ead7ee1fea10fb"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#_#1",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "Most \"AI\" interfaces I see in 2025 are demos with a router. They ship\na chat surface, attach a tool-use loop, and call it agentic. They\nlook impressive in a 90-second sales call. They become useless in\nhour two of the engineer's actual workday.\n\nThis is what I mean by **the demo tax**: the cost of building a\nproduct whose primary success metric is its ability to be demoed,\nrather than its ability to be lived in. You can ship a lot of demos\nbefore you notice you're not shipping a product.",
+      "contentHash": "785bb98ed67e43f0"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#the-framing-i-keep-coming-back-to#5",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "anchor": "the-framing-i-keep-coming-back-to",
+      "heading": "The framing I keep coming back to",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "## The framing I keep coming back to\n\n> *Anything an agent does has to be inspectable, rerunnable, and\n> attributable. The UI can be magical; the contract underneath cannot.*\n\nEvery agentic surface I've seen succeed in production has obeyed that\nrule. Most of the demos I see weekly are still operating on the\nopposite assumption — that the user will hand-wave at the agent's\noutput if the loading animation is sufficiently impressive.\n\nIf you're building one of these surfaces, the test is straightforward:\n**can a skeptical engineer use the product for a full day without\nlosing trust in it?** If yes, you have a product. If no, you have a\ndemo. There's no middle category, and there's no time-on-the-market\nshortcut around the difference.",
+      "contentHash": "28e87b312b18b286"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#what-production-agentic-ux-actually-requires#2",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "anchor": "what-production-agentic-ux-actually-requires",
+      "heading": "What production agentic UX actually requires",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "## What production agentic UX actually requires\n\nI've shipped one production agentic system at this point — eino.ai —\nand the lessons cluster into a small number of obvious-in-hindsight\nrules that almost no demo I've seen follows.\n\n### 1. Agents are streaming mutations, not chat turns\n\nIf you treat an agent run as a chat turn, the user sits on a spinner\nfor 30 seconds and then gets a wall of output. That's the demo\npattern. It's the same pattern as a slow API call with a personality.\n\nThe production pattern is to stream *partial proposals* back. The user\nsees the agent working — site by site, link by link, line by line —\nand the surface updates in place. By the time the agent finishes, the\nuser has been *with it* for the run, not waiting for it.\n\nThis isn't a UI flourish. It's a contract decision: every agent leg\nbecomes a streamed mutation with a stable ID and a sequence number,\nand the UI is built to reconcile partials. Doing this later, after the\ndemo ships, is a rewrite. Doing it first is a week.\n\n### 2. Every agent leg has to be inspectable\n\nThe product engineer's first question, when they sit down with an\nagent, is *what did it do and why*. If the answer is \"I'll trust it,\"\nyou've shipped a chatbot. If the answer is \"click into the leg, see\nthe inputs, see the outputs, see the model + prompt version, rerun\nwith different inputs,\" you've shipped an agent.",
+      "contentHash": "3f0ca54c76183e8c"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#what-production-agentic-ux-actually-requires#3",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "anchor": "what-production-agentic-ux-actually-requires",
+      "heading": "What production agentic UX actually requires",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "## What production agentic UX actually requires\n\nThe cost of building this is real and unavoidable. The cost of *not*\nbuilding it is that engineers stop using the product after their\nsecond false-positive.\n\n### 3. The user isn't the prompt; the user is the editor\n\nA persistent failure mode I see is treating the human as a prompt\ninput. They type something, the agent runs, output appears, repeat.\nThis is the chat metaphor. It scales to \"ask a vague question, get a\nvague answer.\"\n\nProduction agentic UX flips this. The human is the *editor* of the\nplan. The agent is one of several proposers. The plan is the durable\nartifact — not a transcript, not a chat history. The user edits the\nplan; the agent reproposes around the edits. The chat, if it exists\nat all, is a side channel.\n\nThis shift — from chat to editor — is the single biggest UX delta\nbetween the demos and the production systems I trust.\n\n### 4. The contract has to outlive the model\n\nLLMs change. Prompts change. Pipelines get rewritten. If your UI\nknows what model is running, what version of what prompt is firing,\nor how the agent steps are composed, your UI is a brittle dependency\nof the agent team.",
+      "contentHash": "d48b5872b07c7671"
+    },
+    {
+      "id": "essay:agentic-ux-without-the-demo-tax#what-production-agentic-ux-actually-requires#4",
+      "sourceId": "essay:agentic-ux-without-the-demo-tax",
+      "sourceKind": "essay",
+      "sourceTitle": "Agentic UX without the demo tax",
+      "permalink": "/writing/agentic-ux-without-the-demo-tax",
+      "anchor": "what-production-agentic-ux-actually-requires",
+      "heading": "What production agentic UX actually requires",
+      "tags": [
+        "agentic-ux",
+        "ai-native"
+      ],
+      "content": "## What production agentic UX actually requires\n\nThe contract that should be visible to the UI is *what the agent\nreturns* (a typed proposal, a typed diff, a typed cost estimate) — not\n*how it computed it*. We swapped LLM providers three times at eino.ai;\nthe UI shipped through every swap without a single visible regression\nto pilot customers. The contract was the spine; the model was an\nimplementation detail.\n\n### 5. Recovery is a feature, not an error state\n\nDemos elide failure. Production agentic surfaces have to elevate it.\nEvery leg must be:\n\n- **Rewindable**: if the proposal was wrong, the user can roll back\nto before it ran without losing other state.\n- **Rerunnable**: with the same inputs (for debugging) or with new\nones (for iteration).\n- **Diffable**: if the user reran a leg, they should be able to see\nwhat changed and choose which version to keep.\n\nIf failure recovery is \"click the back button and try again,\" you've\nbuilt a search engine, not an agent.\n\nFor most teams shipping agentic features in 2025, the question isn't\n\"can we get the LLM to do the thing.\" That part is solved. The\nquestion is whether the UI around it is honest enough about the\nLLM's failure modes that engineers stop dropping out after the demo.",
+      "contentHash": "e00d39b8d9f6b023"
+    },
+    {
+      "id": "essay:design-systems-that-survive#_#0",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "heading": "Summary",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "Design systems that survive multiple product lines. What separates a design system that survives a five-year, multi-product engagement from one that ships eight Buttons and dies. Hint: it isn't the components.",
+      "contentHash": "18a90613a39031af"
+    },
+    {
+      "id": "essay:design-systems-that-survive#_#1",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "I have been the lead frontend engineer on design systems at three\ncompanies. The first one outlived me. The second one is the one I\nthink about most when I write this. The third one is still in flight.\n\nHere's what I've learned about the systems that *survive* — not the\nones that launch with a fancy Storybook, but the ones that are still\nused three product cycles later — by separating the wheat from the\nchaff.",
+      "contentHash": "edc663003a9ee0de"
+    },
+    {
+      "id": "essay:design-systems-that-survive#a-note-on-metrics#6",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "a-note-on-metrics",
+      "heading": "A note on metrics",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## A note on metrics\n\nPeople love DS adoption metrics. \"70% of product surfaces use the\nModal component.\" Fine. They're not what a senior reviewer should be\nlooking at.\n\nThe metrics that matter are operational:\n\n- **Contribution velocity**: how often does someone outside the DS\nteam contribute back? Once a quarter is a warning. Once a sprint is\na healthy system.\n- **Token coverage** (not component coverage): how many non-library\nproducts are pulling the tokens? This shows the actual reach of\nthe design language.\n- **Contract churn**: how often does a component's contract change?\nFrequent churn means the contract was wrong; rare churn means it\nwas right.\n\nAdoption rate is a vanity metric. Contribution rate is the real one.",
+      "contentHash": "e3e0679921b8bac9"
+    },
+    {
+      "id": "essay:design-systems-that-survive#the-actual-work-in-order#3",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "the-actual-work-in-order",
+      "heading": "The actual work, in order",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The actual work, in order\n\n### 1. Tokens come first, and they are the product\n\nColors, type, spacing, motion, radius — declared once, in a\nruntime-agnostic format (JSON is fine; we don't need a magic format).\nThis is the *contract*. Components are one consumer of it; products\nthat won't adopt the component library can still consume the tokens\nand look like the rest of the suite.\n\nTokens being the product means a design language can spread further\nthan your library can. That's a feature.\n\n### 2. A contract is written before code\n\nFor every component, write a doc: props, slots, ARIA, focus behavior,\nmotion, edge cases. Both the React and the Angular team (or Vue, or\nwhatever) implement *that doc*. The doc, not either implementation, is\nthe canonical artifact.\n\nContract-first sounds slow. The first six weeks ship very few\ncomponents. After that it's faster than the alternative — and the\ndivergence problem doesn't exist.\n\n### 3. The contribution model is the system\n\nThis is the part teams miss. If a product team has a high-quality\nBanner they need next week, the system either lets them contribute it\nback or it loses adoption. Both options are choices; one is a\nstrategy and one is an accident.\n\nA working contribution model has, at minimum:",
+      "contentHash": "9f740551890d3e2c"
+    },
+    {
+      "id": "essay:design-systems-that-survive#the-actual-work-in-order#4",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "the-actual-work-in-order",
+      "heading": "The actual work, in order",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The actual work, in order\n\n- An RFC template. Two paragraphs is fine; the point is to think\nthrough it before code.\n- A design review with the design system's owners.\n- A code review focused on the *contract*, not the bikeshed.\n- An a11y review (if your products are regulated, this is the most\ncritical of the four).\n- A docs + Storybook entry.\n\nThe central team doesn't write the component. They review it. That's\nthe difference between gatekeeping and federation.\n\n### 4. Accessibility is in the contract, not in the docs\n\nA11y checklists in the docs are the design-system equivalent of\n\"please be safe out there.\" They are well-meaning, and they accomplish\nnothing.\n\nThe way a11y survives the lifecycle of a system is by being a\n*contract behavior*: a Button without an accessible label fails\nTypeScript. A Modal without focus management fails review. A toggle\nwithout proper roles isn't accepted into the system. The contract is\nthe enforcement.\n\n### 5. Tokens, components, contribution, adoption — in that order\n\nMost systems do this in reverse. They ship 30 components first, then\nwrite tokens, then try to set up contribution, then beg for adoption.\nBy the time they get to contribution, the system has accumulated\nenough opinions that no contribution can fit it.",
+      "contentHash": "cc57348292898d0d"
+    },
+    {
+      "id": "essay:design-systems-that-survive#the-actual-work-in-order#5",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "the-actual-work-in-order",
+      "heading": "The actual work, in order",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The actual work, in order\n\nA design system that ships fewer components and a better\ncontribution model will be the one that's still alive five years\nlater. The opposite never is.",
+      "contentHash": "cdb33539511f84ef"
+    },
+    {
+      "id": "essay:design-systems-that-survive#the-failure-mode-is-never-components#2",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "the-failure-mode-is-never-components",
+      "heading": "The failure mode is never components",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The failure mode is never components\n\nIf you go on the internet looking for advice about enterprise design\nsystems, almost all of it is about *components*: what variants the\nButton has, whether the Modal traps focus, whether the Tabs use\n`role=\"tablist\"`. This is fine, but it isn't the work. Every\nenterprise DS I've seen ships those.\n\nThe systems that **die** die at one of three places:\n\n\n\n\nIf you can name a design system that died, I can almost certainly\ntrace it back to one of these three.",
+      "contentHash": "c0670340968404c7"
+    },
+    {
+      "id": "essay:design-systems-that-survive#the-framing-i-keep-coming-back-to#7",
+      "sourceId": "essay:design-systems-that-survive",
+      "sourceKind": "essay",
+      "sourceTitle": "Design systems that survive multiple product lines",
+      "permalink": "/writing/design-systems-that-survive",
+      "anchor": "the-framing-i-keep-coming-back-to",
+      "heading": "The framing I keep coming back to",
+      "tags": [
+        "design-systems",
+        "enterprise"
+      ],
+      "content": "## The framing I keep coming back to\n\n> *A design system is not a component library. It's a contract for how\n> products in this organization speak to their users.*\n\nThat framing changes what work matters. Component sprints become a\nside-effect of contract sprints. Adoption strategy becomes \"make the\nsystem the obvious tool\" instead of \"mandate the system.\" And\ncontribution becomes the central activity, not an afterthought.\n\nIf you're hiring a Staff+ engineer to own a design system, the work\nthey should describe — when you ask them about their last DS\nengagement — is contribution, contract, and federation. If they\ndescribe Buttons and Modals, they are at a more junior altitude than\nthe role calls for. That's the test.",
+      "contentHash": "ebaa5c4373b7e042"
+    },
+    {
+      "id": "site:identity#_#0",
+      "sourceId": "site:identity",
+      "sourceKind": "site",
+      "sourceTitle": "Diogo Esteves",
+      "permalink": "/about",
+      "heading": "Identity",
+      "content": "Diogo Esteves — Staff / Principal Frontend & Platform Engineer. AI-native systems, enterprise UI infrastructure, scalable web architectures. Based in Lisbon, Portugal · Remote (US-aligned hours). Open to Staff+, Principal, Founding Engineer, and VP / Head of Engineering roles. Operating companies: Fueled, Moment, eino.ai, NBCUniversal · Peacock, Diligent, BMW Group, Deloitte.",
+      "contentHash": "dc6800da045e8b6d"
+    }
+  ]
+}

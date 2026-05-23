@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { useIsClient } from "@/lib/hooks/use-is-client";
-import { CareerGraphAccessibleDescription, CareerGraphSvg } from "./career-graph-svg";
 
 /**
  * Career Graph — composed of two siblings the home page can position
@@ -97,40 +96,6 @@ export function CareerGraphAtmosphere({
       {shouldMount ? (
         <CareerGraphCanvas containerRef={containerRef} onReady={() => setReady(true)} />
       ) : null}
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------------------
- * Combined (legacy) — atmosphere + SVG stacked in one container.
- * ------------------------------------------------------------------------- */
-
-/**
- * Stacks the atmosphere behind the SVG figure inside a single container.
- * Use this only when you want the old behavior; for the hero we now
- * render `<CareerGraphAtmosphere />` at section level and
- * `<CareerGraphFigure />` inside its column.
- */
-export function CareerGraph({
-  ariaLabelledBy,
-  ariaDescribedBy,
-}: {
-  ariaLabelledBy?: string;
-  ariaDescribedBy?: string;
-}) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  return (
-    <div
-      ref={containerRef}
-      className="relative isolate w-full"
-      style={{ aspectRatio: "5 / 3" }}
-      data-career-graph-root=""
-    >
-      {ariaDescribedBy ? <CareerGraphAccessibleDescription id={ariaDescribedBy} /> : null}
-
-      <CareerGraphAtmosphere containerRef={containerRef as React.RefObject<HTMLElement | null>} />
-      <CareerGraphSvg ariaLabelledBy={ariaLabelledBy} className="absolute inset-0 z-10" />
     </div>
   );
 }

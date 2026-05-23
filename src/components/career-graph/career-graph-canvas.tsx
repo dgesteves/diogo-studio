@@ -10,6 +10,7 @@ import { HeatmapField } from "./scene/heatmap-field";
 import { CareerParticles } from "./scene/particles";
 import { Postprocessing } from "./scene/postprocessing";
 import { RadarSweep } from "./scene/radar-sweep";
+import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 
 /**
  * R3F Canvas for the Career Graph hero — atmospheric layer.
@@ -62,6 +63,8 @@ export function CareerGraphCanvas({
       style={{ background: "transparent" }}
       onCreated={() => onReady?.()}
     >
+      <WebGLContextGuard />
+
       <PerspectiveCamera makeDefault fov={42} position={[0, 0, 4]} near={0.1} far={30} />
 
       {/* No physical lighting — the scene is shader-driven (heatmap, radar,
@@ -95,5 +98,3 @@ export function CareerGraphCanvas({
     </Canvas>
   );
 }
-
-export default CareerGraphCanvas;
