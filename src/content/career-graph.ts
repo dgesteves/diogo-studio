@@ -273,9 +273,24 @@ export function projectToSvg(
   return { x, y };
 }
 
-/** Resolve a node's deep-link target. Phase 3 will replace with real pages. */
+/** Set of case-study slugs whose `/work/[slug]` pages exist as of this build.
+ *  Updated each time a new case study is authored — keep in sync with
+ *  `src/content/case-studies/*.mdx`. The graph's `nodeHref()` reads this to
+ *  decide between a real `/work/[slug]` deep link and the `/work` index. */
+const PUBLISHED_CASE_STUDY_SLUGS = new Set<string>([
+  "eino-ai-network-planning",
+  "peacock-streaming",
+  "diligent-design-system",
+]);
+
+/** Resolve a node's deep-link target. Routes to the real `/work/[slug]` page
+ *  when the case study is published; otherwise falls back to the `/work`
+ *  index so unpublished engagements still land somewhere useful. */
 export function nodeHref(node: CareerNode): string {
-  return node.slug ? `/work#${node.slug}` : "/work";
+  if (node.slug && PUBLISHED_CASE_STUDY_SLUGS.has(node.slug)) {
+    return `/work/${node.slug}`;
+  }
+  return "/work";
 }
 
 /** Convenience lookup. */

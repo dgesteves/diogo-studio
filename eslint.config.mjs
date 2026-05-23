@@ -20,6 +20,8 @@ const eslintConfig = defineConfig([
     "playwright-report/**",
     "test-results/**",
     "playwright/.cache/**",
+    ".velite/**",
+    "public/static/**",
   ]),
 ]);
 

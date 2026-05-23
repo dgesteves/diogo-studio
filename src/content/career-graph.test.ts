@@ -66,10 +66,17 @@ describe("career-graph data integrity", () => {
     }
   });
 
-  it("nodeHref points to /work#slug for nodes with a slug, /work otherwise", () => {
+  it("nodeHref deep-links to /work/[slug] for published case studies, falls back to /work", () => {
+    // Published case studies in src/content/case-studies/*.mdx — keep this
+    // mirror in sync with PUBLISHED_CASE_STUDY_SLUGS in career-graph.ts.
+    const published = new Set([
+      "eino-ai-network-planning",
+      "peacock-streaming",
+      "diligent-design-system",
+    ]);
     for (const n of nodes) {
       const href = nodeHref(n);
-      if (n.slug) expect(href).toBe(`/work#${n.slug}`);
+      if (n.slug && published.has(n.slug)) expect(href).toBe(`/work/${n.slug}`);
       else expect(href).toBe("/work");
     }
   });

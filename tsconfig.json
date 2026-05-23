@@ -23,7 +23,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "#content": ["./.velite"]
     }
   },
   "include": [
@@ -32,6 +33,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
+    ".velite/*.d.ts",
     "**/*.mts"
   ],
   "exclude": ["node_modules"]

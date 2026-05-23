@@ -77,10 +77,16 @@ describe("Home page", () => {
         name: new RegExp(`^${escaped}\\s*[—-]`, "i"),
       });
       expect(link).toBeInTheDocument();
-      // Sanity-check the deep-link target — Phase 3 will replace `/work#slug`
-      // with real case-study routes, so guard against accidental regressions.
-      if (node.slug) {
-        expect(link).toHaveAttribute("href", `/work#${node.slug}`);
+      // Phase 3 wires real `/work/[slug]` deep-links for published case
+      // studies and falls back to `/work` for unpublished engagements.
+      // Mirror PUBLISHED_CASE_STUDY_SLUGS from career-graph.ts.
+      const published = new Set([
+        "eino-ai-network-planning",
+        "peacock-streaming",
+        "diligent-design-system",
+      ]);
+      if (node.slug && published.has(node.slug)) {
+        expect(link).toHaveAttribute("href", `/work/${node.slug}`);
       } else {
         expect(link).toHaveAttribute("href", "/work");
       }

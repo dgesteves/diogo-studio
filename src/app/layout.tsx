@@ -8,6 +8,7 @@ import { SiteNav } from "@/components/site/site-nav";
 import { env } from "@/env";
 import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
+import "./mdx.css";
 
 // Vercel Analytics + Speed Insights only resolve their script payloads on
 // Vercel-hosted deployments (`/_vercel/insights/script.js`). Outside Vercel

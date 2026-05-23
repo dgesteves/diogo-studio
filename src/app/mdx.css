@@ -1,0 +1,273 @@
+/*
+ * MDX prose layer — long-form typography for case studies + essays.
+ *
+ * Scoped to `.mdx-prose`. Custom MDX components (MetricTile, DecisionsLog,
+ * etc.) carry their own styles and opt out with `.not-prose` so this
+ * layer only touches raw markdown nodes.
+ *
+ * Visual grammar matches the rest of the site: console / cockpit, mono
+ * caps for metadata, generous leading on body copy, restrained accent.
+ */
+
+@layer components {
+  .mdx-prose {
+    color: var(--foreground);
+    max-width: 68ch;
+  }
+
+  /* Hairline between every direct child block — gives long-form articles
+     a natural pulse without explicit dividers. */
+  .mdx-prose > * + * {
+    margin-top: 1.4em;
+  }
+  .mdx-prose > h2 + *,
+  .mdx-prose > h3 + *,
+  .mdx-prose > h4 + * {
+    margin-top: 0.85em;
+  }
+
+  .mdx-prose p {
+    font-size: 1rem;
+    line-height: 1.75;
+    color: var(--foreground);
+  }
+  .mdx-prose p,
+  .mdx-prose li {
+    text-wrap: pretty;
+  }
+
+  /* Headings — h1 is the page header (rendered outside .mdx-prose),
+     so MDX only needs h2/h3/h4. */
+  .mdx-prose h2 {
+    margin-top: 2.6em;
+    font-size: 1.5rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+    color: var(--foreground);
+    scroll-margin-top: 6rem;
+  }
+  .mdx-prose h3 {
+    margin-top: 2em;
+    font-size: 1.15rem;
+    line-height: 1.3;
+    font-weight: 500;
+    color: var(--foreground);
+    scroll-margin-top: 6rem;
+  }
+  .mdx-prose h4 {
+    margin-top: 1.8em;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--foreground);
+    scroll-margin-top: 6rem;
+  }
+
+  .mdx-prose h2,
+  .mdx-prose h3,
+  .mdx-prose h4 {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  /* rehype-autolink-headings appends `<a class="mdx-anchor">#</a>` to each
+     heading. Visible on hover/focus only, but keyboard-focusable for a11y. */
+  .mdx-prose .mdx-anchor {
+    color: var(--subtle-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.75em;
+    font-weight: 400;
+    opacity: 0;
+    text-decoration: none;
+    transition: opacity 150ms ease-out;
+  }
+  .mdx-prose h2:hover .mdx-anchor,
+  .mdx-prose h3:hover .mdx-anchor,
+  .mdx-prose h4:hover .mdx-anchor,
+  .mdx-prose .mdx-anchor:focus-visible {
+    opacity: 1;
+  }
+
+  .mdx-prose a.mdx-link {
+    color: var(--foreground);
+    text-decoration: underline;
+    text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 150ms ease-out;
+  }
+  .mdx-prose a.mdx-link:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .mdx-prose strong {
+    color: var(--foreground);
+    font-weight: 500;
+  }
+
+  .mdx-prose blockquote {
+    border-left: 2px solid var(--accent);
+    padding-left: 1rem;
+    color: var(--muted-foreground);
+    font-style: normal;
+  }
+
+  .mdx-prose ul,
+  .mdx-prose ol {
+    padding-left: 1.25rem;
+    list-style-position: outside;
+  }
+  .mdx-prose ul {
+    list-style: disc;
+  }
+  .mdx-prose ol {
+    list-style: decimal;
+  }
+  .mdx-prose li {
+    line-height: 1.7;
+    margin-top: 0.4em;
+  }
+  .mdx-prose li::marker {
+    color: var(--subtle-foreground);
+  }
+
+  .mdx-prose hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 2.4em 0;
+  }
+
+  .mdx-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+  }
+  .mdx-prose th,
+  .mdx-prose td {
+    border-bottom: 1px solid var(--border);
+    padding: 0.6em 0.8em;
+    text-align: left;
+    vertical-align: top;
+  }
+  .mdx-prose th {
+    color: var(--subtle-foreground);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Inline code */
+  .mdx-prose :not(pre) > code {
+    font-family: var(--font-mono);
+    font-size: 0.85em;
+    background: var(--code-bg);
+    color: var(--code-foreground);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  /* Fenced code — rehype-pretty-code wraps each block in <figure>. */
+  .mdx-prose figure[data-rehype-pretty-code-figure] {
+    margin-top: 1.6em;
+    margin-bottom: 1.6em;
+  }
+  .mdx-prose figure[data-rehype-pretty-code-figure] [data-rehype-pretty-code-title] {
+    background: var(--surface-muted);
+    border: 1px solid var(--border);
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    color: var(--subtle-foreground);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    padding: 0.5rem 0.85rem;
+    text-transform: uppercase;
+  }
+  .mdx-prose figure[data-rehype-pretty-code-figure] pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--code-foreground);
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    padding: 1rem 0;
+  }
+  .mdx-prose figure[data-rehype-pretty-code-figure] [data-rehype-pretty-code-title] + pre {
+    border-radius: 0 0 8px 8px;
+    border-top: 0;
+  }
+  .mdx-prose figure[data-rehype-pretty-code-figure] pre code {
+    background: transparent;
+    border: 0;
+    color: inherit;
+    counter-reset: line;
+    display: grid;
+    padding: 0;
+  }
+  .mdx-prose figure[data-rehype-pretty-code-figure] pre code [data-line] {
+    padding: 0 1.15rem;
+    border-left: 2px solid transparent;
+  }
+  /* Highlighted lines — annotated in MDX with `// [!code highlight]` etc. */
+  .mdx-prose figure[data-rehype-pretty-code-figure] pre code [data-highlighted-line] {
+    background: color-mix(in srgb, var(--accent) 10%, transparent);
+    border-left-color: var(--accent);
+  }
+
+  /* Light/dark switching — rehype-pretty-code emits both themes inline. */
+  .mdx-prose figure[data-rehype-pretty-code-figure] pre code .word {
+    background: transparent;
+  }
+}
+
+/* Force the dark shiki tokens when our root is `.dark`, regardless of
+   `prefers-color-scheme`. rehype-pretty-code keys variants off CSS vars. */
+.dark .mdx-prose [data-rehype-pretty-code-figure] [data-theme="light"],
+.mdx-prose [data-rehype-pretty-code-figure] [data-theme="dark"] {
+  display: none;
+}
+.dark .mdx-prose [data-rehype-pretty-code-figure] [data-theme="dark"] {
+  display: inline;
+}
+.mdx-prose [data-rehype-pretty-code-figure] [data-theme="light"] {
+  display: inline;
+}
+
+/*
+ * @xyflow/react overrides — hide handles + attribution; restyle controls
+ * so they match the cockpit palette. xyflow ships its own CSS via the
+ * canvas component; these rules override what we need.
+ */
+.mdx-system-diagram-canvas .react-flow__handle {
+  display: none;
+}
+.mdx-system-diagram-canvas .react-flow__node {
+  /* Hide the default xyflow node body — we render our own card on top. */
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.mdx-system-diagram-canvas .react-flow__controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: none;
+}
+.mdx-system-diagram-canvas .react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+.mdx-system-diagram-canvas .react-flow__controls-button:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}

@@ -10,3 +10,5 @@ public
 playwright-report
 test-results
 CHANGELOG.md
+.velite
+src/content
