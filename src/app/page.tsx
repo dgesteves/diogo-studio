@@ -113,7 +113,7 @@ function HeroSection() {
       <CareerGraphAccessibleDescription id="career-graph-description" />
 
       <div className="relative z-10 mx-auto flex min-h-[inherit] max-w-6xl flex-col justify-center px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28 lg:px-8 lg:pt-28">
-        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)] lg:gap-10">
+        <div className="grid items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-10">
           <div className="flex max-w-3xl flex-col gap-8">
             <div className="border-border bg-surface/80 text-muted-foreground inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] font-medium tracking-wider uppercase backdrop-blur">
               <StatusDot tone="good" />

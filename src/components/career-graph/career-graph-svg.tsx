@@ -203,10 +203,10 @@ function Axis() {
           <g key={year} transform={`translate(${x} ${VIEWPORT.height - 36})`}>
             <line y2="6" stroke="var(--border-strong)" strokeOpacity="0.5" />
             <text
-              y="26"
+              y="28"
               textAnchor="middle"
               fontFamily="var(--font-mono)"
-              fontSize="14"
+              fontSize="17"
               letterSpacing="0.08em"
               fill="var(--subtle-foreground)"
             >
@@ -217,9 +217,9 @@ function Axis() {
       })}
       <text
         x={VIEWPORT.padding.x}
-        y={VIEWPORT.height - 8}
+        y={VIEWPORT.height - 6}
         fontFamily="var(--font-mono)"
-        fontSize="11"
+        fontSize="13"
         letterSpacing="0.14em"
         fill="var(--subtle-foreground)"
         opacity="0.7"
@@ -228,10 +228,10 @@ function Axis() {
       </text>
       <text
         x={VIEWPORT.width - VIEWPORT.padding.x}
-        y={VIEWPORT.height - 8}
+        y={VIEWPORT.height - 6}
         textAnchor="end"
         fontFamily="var(--font-mono)"
-        fontSize="11"
+        fontSize="13"
         letterSpacing="0.14em"
         fill="var(--subtle-foreground)"
         opacity="0.7"
@@ -243,11 +243,11 @@ function Axis() {
 }
 
 function Node({ node, position }: { node: CareerNode; position: { x: number; y: number } }) {
-  const r = 11 * node.weight;
-  const hitR = Math.max(r * 2.6, 32);
+  const r = 13 * node.weight;
+  const hitR = Math.max(r * 2.6, 36);
   const placement = labelPlacement(position);
-  const labelOffset = placement === "below" ? r + 22 : -r - 16;
-  const yearOffset = placement === "below" ? r + 40 : -r - 34;
+  const labelOffset = placement === "below" ? r + 26 : -r - 18;
+  const yearOffset = placement === "below" ? r + 48 : -r - 40;
   const dominantBaseline = placement === "below" ? "hanging" : "auto";
 
   return (
@@ -287,13 +287,13 @@ function Node({ node, position }: { node: CareerNode; position: { x: number; y: 
           textAnchor="middle"
           dominantBaseline={dominantBaseline}
           fontFamily="var(--font-mono)"
-          fontSize="15"
+          fontSize="19"
           letterSpacing="0.08em"
           fill="var(--foreground)"
           style={{
             paintOrder: "stroke",
             stroke: "var(--background)",
-            strokeWidth: 4,
+            strokeWidth: 5,
             fontWeight: 500,
           }}
         >
@@ -304,13 +304,13 @@ function Node({ node, position }: { node: CareerNode; position: { x: number; y: 
           textAnchor="middle"
           dominantBaseline={dominantBaseline}
           fontFamily="var(--font-mono)"
-          fontSize="12"
+          fontSize="15"
           letterSpacing="0.1em"
           fill="var(--subtle-foreground)"
           style={{
             paintOrder: "stroke",
             stroke: "var(--background)",
-            strokeWidth: 4,
+            strokeWidth: 5,
           }}
         >
           {node.years}
