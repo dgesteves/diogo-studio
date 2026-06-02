@@ -58,6 +58,24 @@ const ROOT = resolve(HERE, "..");
 const CONTENT_ROOT = join(ROOT, "src", "content");
 const INDEX_PATH = join(CONTENT_ROOT, "agent-index.json");
 
+function loadEnvFiles(): void {
+  for (const name of [".env.local", ".env"]) {
+    const file = join(ROOT, name);
+    if (!existsSync(file)) continue;
+    for (const line of readFileSync(file, "utf8").split(/\r?\n/)) {
+      const match = line.match(/^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$/);
+      if (!match) continue;
+      const key = match[1]!;
+      if (process.env[key] !== undefined) continue;
+      let value = (match[2] ?? "").trim();
+      const quoted = value.match(/^(['"])([\s\S]*)\1$/);
+      if (quoted) value = quoted[2]!;
+      else value = value.replace(/\s+#.*$/, "").trim();
+      process.env[key] = value;
+    }
+  }
+}
+
 /* ---------------------------------------------------------------------------
  * Types — mirror `src/lib/agent/types.ts` (kept duplicated so this script
  * has zero runtime deps on the app code beyond the typed content modules).
@@ -472,6 +490,7 @@ function serialize(idx: AgentIndex): string {
  * ------------------------------------------------------------------------- */
 
 async function main() {
+  loadEnvFiles();
   console.log("[agent:index] gathering source chunks…");
   const mdxCase = await readMdxCollection("case-studies", "case-study", "/work");
   const mdxEssay = await readMdxCollection("essays", "essay", "/writing");

@@ -48,10 +48,12 @@ export default sentryEnabled
       project: process.env.SENTRY_PROJECT,
       silent: !process.env.CI,
       widenClientFileUpload: true,
-      reactComponentAnnotation: { enabled: true },
       tunnelRoute: "/monitoring",
-      disableLogger: true,
-      automaticVercelMonitors: true,
+      webpack: {
+        reactComponentAnnotation: { enabled: true },
+        treeshake: { removeDebugLogging: true },
+        automaticVercelMonitors: true,
+      },
       // Source maps are uploaded only when SENTRY_AUTH_TOKEN is present.
       // We deliberately keep the `//# sourceMappingURL=` references in the
       // shipped JS (and the maps on disk) so Lighthouse's
