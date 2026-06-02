@@ -23,6 +23,13 @@ updates:
       prefix: chore
       prefix-development: chore
       include: scope
+    ignore:
+      # eslint-config-next pulls in eslint-plugin-react, whose latest release
+      # (7.37.5) does not support ESLint 10 (it uses the removed
+      # context.getFilename() API). Block ESLint major bumps until upstream
+      # adds ESLint 10 support.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
     groups:
       next:
         patterns:
