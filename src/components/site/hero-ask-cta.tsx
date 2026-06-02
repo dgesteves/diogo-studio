@@ -18,7 +18,7 @@ export function HeroAskCta() {
       variant="outline"
       size="lg"
       onClick={() => openWithMode("ask")}
-      aria-label="Ask the agent about Diogo's work"
+      aria-label="Press ⌘K to ask the agent about Diogo's work"
     >
       <Sparkles className="size-4" aria-hidden="true" />
       <span>Press</span>

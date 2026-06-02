@@ -62,7 +62,7 @@ export function CareerGraphSvg({
       <svg
         viewBox={`0 0 ${VIEWPORT.width} ${VIEWPORT.height}`}
         preserveAspectRatio="xMidYMid meet"
-        role="img"
+        role="group"
         aria-labelledby={ariaLabelledBy}
         aria-hidden={ariaHidden}
         className="block h-full w-full"

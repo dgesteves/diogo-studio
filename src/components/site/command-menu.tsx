@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 import { caseStudies, essays } from "#content";
+import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { primaryNav, siteConfig } from "@/lib/site-config";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ import { type CommandMenuMode, useCommandMenu } from "./command-menu-context";
 
 export function CommandMenu() {
   const { open, setOpen, mode, setMode } = useCommandMenu();
+  const { reducedMotion } = useReducedMotionPreference();
   // Bumped each time the dialog opens — child components key off it to
   // re-focus their inputs and reset any transient state. Driven from the
   // Radix `onOpenChange` event below so we don't sync state-from-state in
@@ -84,10 +86,20 @@ export function CommandMenu() {
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
-        <Dialog.Overlay className="bg-background/70 data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out fixed inset-0 z-50 backdrop-blur-sm" />
+        <Dialog.Overlay
+          className={cn(
+            "bg-background/70 fixed inset-0 z-50 backdrop-blur-sm",
+            !reducedMotion &&
+              "data-[state=open]:animate-in data-[state=open]:fade-in data-[state=closed]:animate-out data-[state=closed]:fade-out",
+          )}
+        />
         <Dialog.Content
           aria-describedby={undefined}
-          className="border-border-strong bg-surface data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95 fixed top-[18%] left-1/2 z-50 flex w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border shadow-2xl shadow-black/20"
+          className={cn(
+            "border-border-strong bg-surface fixed top-[18%] left-1/2 z-50 flex w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border shadow-2xl shadow-black/20",
+            !reducedMotion &&
+              "data-[state=open]:animate-in data-[state=open]:fade-in data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out data-[state=closed]:zoom-out-95",
+          )}
         >
           <VisuallyHidden>
             <Dialog.Title>
@@ -316,7 +328,7 @@ function ModeTab({
       onClick={onClick}
       className={cn(
         "focus-visible:ring-ring focus-visible:ring-offset-background flex items-center gap-1.5 rounded px-2 py-1 text-[10px] tracking-wider uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none",
-        active ? "bg-foreground text-background" : "text-subtle-foreground hover:text-foreground",
+        active ? "bg-foreground text-background" : "text-muted-foreground hover:text-foreground",
       )}
     >
       {icon}
@@ -324,7 +336,7 @@ function ModeTab({
       <span
         className={cn(
           "border-border ml-1 hidden rounded border px-1 sm:inline",
-          active ? "border-background/40 text-background/80" : "text-subtle-foreground",
+          active ? "border-background/40 text-background/80" : "text-muted-foreground",
         )}
         aria-hidden="true"
       >
