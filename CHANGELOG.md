@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.6](https://github.com/dgesteves/diogo-studio/compare/v1.1.5...v1.1.6) (2026-06-03)
+
+
+### Code Refactoring
+
+* migrate command-menu to features/ with shared provider pattern ([0ce080a](https://github.com/dgesteves/diogo-studio/commit/0ce080a6473bf8cf7d0d701ad7870ac26afa02e6))
+
 ## [1.1.5](https://github.com/dgesteves/diogo-studio/compare/v1.1.4...v1.1.5) (2026-06-03)
 
 
