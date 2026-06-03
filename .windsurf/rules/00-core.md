@@ -60,6 +60,9 @@ security by default. Prefer the smallest, clearest solution that ships.
   structure. Don't reformat or rewrite unrelated code.
 - Before declaring done: typecheck, lint, format, and run tests. Fix the root
   cause, not the symptom.
-- Follow **Conventional Commits** (`feat:`, `fix(scope):`, `chore:`).
+- Follow **Conventional Commits** with the **accurate type** so the changelog
+  stays complete: features are `feat:` (never `chore:`); also `fix:`, `perf:`,
+  `refactor:`, `docs:`, `test:`, `build:`, `ci:`, `chore:`. Keep commits granular
+  — one logical change each, not one squashed mega-commit.
 - Don't add a dependency for something the framework already solves. Justify new
   dependencies by need, maintenance, and bundle cost.
