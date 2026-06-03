@@ -5,7 +5,7 @@ import {
   CareerGraphAtmosphere,
   CareerGraphFigure,
 } from "@/features/career-graph";
-import { Studio } from "@/components/studio/studio";
+import { Studio } from "@/features/studio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";

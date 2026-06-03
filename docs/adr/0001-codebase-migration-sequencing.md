@@ -83,7 +83,7 @@ Bottom-up. Check items off as each slice merges (green `pnpm validate`).
 - [x] `components/career-graph/*` + `scene/` → `features/career-graph/` (curated `index.ts`)
 - [x] `content/career-graph.ts` (+ test) → `content/data/career-graph.ts` (kept whole as the shared source of truth — its pattern taxonomy is consumed by `/work`, `/writing`, cards, headers, and the agent script, so it stays out of the feature)
 - [x] `scene/perf-reporter.tsx` → `components/r3f/` (shared R3F util used by career-graph **and** studio canvases)
-- [ ] `components/studio/*` → `features/studio/`
+- [x] `components/studio/*` → `features/studio/` (curated `index.ts`; `Studio` is the only public export)
 - [ ] `components/site/*` (command menu) → `features/command-menu/`
 - [ ] `components/site/*` (contact) → `features/contact/` (+ `lib/contact-schema.ts` → `features/contact/schemas/`)
 - [ ] `components/site/*` (inspector) → `features/inspector/`
