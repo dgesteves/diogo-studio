@@ -1,8 +1,6 @@
 import { Toaster } from "sonner";
-import { CommandMenu } from "@/features/command-menu";
 import { CommandMenuProvider } from "./command-menu-context";
 import { EasterEgg } from "@/components/site/easter-egg";
-import { InspectorOverlay } from "@/features/inspector";
 import { InspectorOverlayProvider } from "./inspector-overlay-context";
 import { LenisProvider } from "./lenis-provider";
 import { MotionProvider } from "./motion-provider";
@@ -15,10 +13,11 @@ import { ThemeProvider } from "./theme-provider";
  * Order matters:
  * - ReducedMotion must wrap Motion (Motion reads from it).
  * - Lenis mounts inside ReducedMotion (it disables itself on reduce).
- * - CommandMenuProvider owns the ⌘K state and is shared by the nav and the
- *   palette overlay; both are rendered inside it.
+ * - CommandMenuProvider owns the ⌘K state, shared by the nav trigger and the
+ *   palette overlay (mounted app-level in the root layout, within `children`).
  * - InspectorOverlayProvider owns the S4 receipts HUD (Ctrl+`); the overlay
- *   reads the perf store + web-vitals only while open, so it's free by default.
+ *   (also mounted app-level) reads the perf store + web-vitals only while open,
+ *   so it's free by default.
  *
  * The Toaster is rendered at the bottom so toasts always overlay the app.
  */
@@ -29,11 +28,7 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <MotionProvider>
           <LenisProvider />
           <InspectorOverlayProvider>
-            <CommandMenuProvider>
-              {children}
-              <CommandMenu />
-            </CommandMenuProvider>
-            <InspectorOverlay />
+            <CommandMenuProvider>{children}</CommandMenuProvider>
           </InspectorOverlayProvider>
           <EasterEgg />
           <Toaster

@@ -6,6 +6,8 @@ import { AppProviders } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteNav } from "@/components/layout/site-nav";
 import { JsonLd } from "@/components/seo/json-ld";
+import { CommandMenu } from "@/features/command-menu";
+import { InspectorOverlay } from "@/features/inspector";
 import { env } from "@/env";
 import { siteConfig } from "@/config/site";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
@@ -118,6 +120,8 @@ export default function RootLayout({
             {children}
           </main>
           <SiteFooter />
+          <CommandMenu />
+          <InspectorOverlay />
         </AppProviders>
         {isVercel ? (
           <>
