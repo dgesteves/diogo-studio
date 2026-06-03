@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.3](https://github.com/dgesteves/diogo-studio/compare/v1.1.2...v1.1.3) (2026-06-03)
+
+
+### Code Refactoring
+
+* move AI agent code to server/ and types to types/ following architecture guidelines ([3ff7494](https://github.com/dgesteves/diogo-studio/commit/3ff74949d5672e33887e4de9781f229646ef310e))
+
+
+### Documentation
+
+* mark slice 2 (server/ai) complete in ADR 0001 and add vitest stub for server-only ([94b0767](https://github.com/dgesteves/diogo-studio/commit/94b0767c11e0a4feb904a584a4b379cb8cfe3069))
+
 ## [1.1.2](https://github.com/dgesteves/diogo-studio/compare/v1.1.1...v1.1.2) (2026-06-03)
 
 
