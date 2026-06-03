@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.4](https://github.com/dgesteves/diogo-studio/compare/v1.1.3...v1.1.4) (2026-06-03)
+
+
+### Code Refactoring
+
+* migrate career-graph to features/ and extract shared R3F util ([6f034ce](https://github.com/dgesteves/diogo-studio/commit/6f034ce9a6213d1277dd04ca4f7967d1255568cc))
+
 ## [1.1.3](https://github.com/dgesteves/diogo-studio/compare/v1.1.2...v1.1.3) (2026-06-03)
 
 
