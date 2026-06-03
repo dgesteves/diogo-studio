@@ -11,6 +11,7 @@ import {
 } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
+import { PerfReporter } from "@/components/career-graph/scene/perf-reporter";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { useCenterScreenTexture, useLeftScreenTexture, useRightScreenTexture } from "./screens";
 
@@ -54,6 +55,7 @@ export function StudioCanvas({
       onCreated={() => onReady?.()}
     >
       <WebGLContextGuard />
+      <PerfReporter />
 
       <OrthographicCamera
         makeDefault

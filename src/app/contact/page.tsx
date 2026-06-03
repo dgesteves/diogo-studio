@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Mail } from "lucide-react";
+import { ContactForm } from "@/components/site/contact-form";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
@@ -10,12 +11,13 @@ export const metadata: Metadata = {
   title: "Contact",
   description:
     "Reach out about Staff+, Principal, Founding Engineer, or VP / Head of Engineering roles.",
+  alternates: { canonical: "/contact" },
 };
 
 /**
- * Contact page — Phase 5 wires up the branded react-email + Resend form
- * with Upstash rate-limiting. For Phase 1 we ship the channels directly so
- * the route is fully functional, not a placeholder.
+ * Contact page — branded `react-hook-form` + Resend form with Upstash
+ * rate-limiting (Phase 5), plus the direct channels as a secondary strip so
+ * the route is useful even when email delivery isn't configured.
  */
 export default function ContactPage() {
   return (
@@ -38,10 +40,18 @@ export default function ContactPage() {
         </h1>
 
         <p className="text-muted-foreground max-w-2xl text-lg leading-relaxed text-balance">
-          Email gets the fastest response. Mention the role altitude (IC, Founding, VPE), the
-          company stage, and one decision you’re wrestling with. I’ll respond with how I’d approach
-          it.
+          Mention the role altitude (IC, Founding, VPE), the company stage, and one decision you’re
+          wrestling with. I’ll respond with how I’d approach it.
         </p>
+
+        <ContactForm />
+
+        <div className="flex items-center gap-3 pt-4">
+          <span className="text-subtle-foreground font-mono text-[10px] tracking-wider uppercase">
+            Or reach me directly
+          </span>
+          <span className="bg-border h-px flex-1" aria-hidden="true" />
+        </div>
 
         <ul className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-3">
           <ContactCard
@@ -65,10 +75,6 @@ export default function ContactPage() {
             icon={<GithubIcon className="size-4" />}
           />
         </ul>
-
-        <p className="text-subtle-foreground font-mono text-[10px] tracking-wider uppercase">
-          Branded react-email form + rate-limited intake lands in Phase 5.
-        </p>
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button asChild variant="outline" size="md">

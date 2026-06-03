@@ -18,6 +18,7 @@ export const metadata: Metadata = {
   title: "Case studies",
   description:
     "Telemetry-dashboard case studies on AI-native platforms, design-system infrastructure, streaming-grade reliability, and agentic UX.",
+  alternates: { canonical: "/work" },
 };
 
 const VALID_PATTERNS: readonly PatternId[] = [

@@ -8,6 +8,7 @@ import { CareerGraphDevHud } from "./scene/dev-hud";
 import { GridFloor } from "./scene/grid-floor";
 import { HeatmapField } from "./scene/heatmap-field";
 import { CareerParticles } from "./scene/particles";
+import { PerfReporter } from "./scene/perf-reporter";
 import { Postprocessing } from "./scene/postprocessing";
 import { RadarSweep } from "./scene/radar-sweep";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
@@ -64,6 +65,7 @@ export function CareerGraphCanvas({
       onCreated={() => onReady?.()}
     >
       <WebGLContextGuard />
+      <PerfReporter />
 
       <PerspectiveCamera makeDefault fov={42} position={[0, 0, 4]} near={0.1} far={30} />
 

@@ -31,6 +31,18 @@ export const env = createEnv({
     OPENAI_EMBED_MODEL: z.string().default("text-embedding-3-small"),
     UPSTASH_REDIS_REST_URL: z.string().url().optional(),
     UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
+
+    /* --- Phase 5: contact form (Resend) ---
+     * All optional. Without `RESEND_API_KEY` the `/api/contact` route
+     * validates + rate-limits as usual but returns a structured 503 instead
+     * of sending — the client shows a "email me directly" fallback, so the
+     * page is never broken. `CONTACT_TO_EMAIL` defaults to the public address
+     * in site-config; `RESEND_FROM_EMAIL` must be on a Resend-verified domain
+     * in production (the `onboarding@resend.dev` default only delivers to the
+     * account owner). */
+    RESEND_API_KEY: z.string().min(1).optional(),
+    CONTACT_TO_EMAIL: z.string().email().optional(),
+    RESEND_FROM_EMAIL: z.string().default("Diogo Studio <onboarding@resend.dev>"),
   },
   client: {
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
@@ -52,6 +64,9 @@ export const env = createEnv({
     OPENAI_EMBED_MODEL: process.env.OPENAI_EMBED_MODEL,
     UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
     UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL,
+    RESEND_FROM_EMAIL: process.env.RESEND_FROM_EMAIL,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "1",

@@ -19,6 +19,7 @@ import { patterns as patternMeta, type PatternId } from "@/content/career-graph"
 export const metadata: Metadata = {
   title: "Writing",
   description: "Essays on platform engineering, AI-native UX, and design-system infrastructure.",
+  alternates: { canonical: "/writing" },
 };
 
 const VALID_PATTERNS: readonly PatternId[] = [

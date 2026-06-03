@@ -7,7 +7,9 @@ import { ArticleHeader } from "@/components/site/article-header";
 import { MetricGrid, MetricTile } from "@/components/mdx/metric-tile";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { TableOfContents } from "@/components/mdx/toc";
+import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 
 /**
  * `/work/[slug]` — single case study, rendered as a telemetry-dashboard.
@@ -36,10 +38,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: study.title,
     description: study.description,
+    alternates: { canonical: study.permalink },
     openGraph: {
       title: study.title,
       description: study.description,
       type: "article",
+      url: study.permalink,
       authors: [siteConfig.name],
       publishedTime: study.publishedAt,
       modifiedTime: study.updatedAt ?? study.publishedAt,
@@ -70,6 +74,23 @@ export default async function CaseStudyPage({ params }: { params: Promise<Params
       itemType="https://schema.org/Article"
       className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
     >
+      <JsonLd
+        data={articleJsonLd({
+          title: study.title,
+          description: study.description,
+          path: study.permalink,
+          datePublished: study.publishedAt,
+          dateModified: study.updatedAt ?? study.publishedAt,
+          section: "Case study",
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Work", path: "/work" },
+          { name: study.title, path: study.permalink },
+        ])}
+      />
+
       <ArticleHeader
         eyebrow={`Case study · ${study.company}`}
         title={study.title}

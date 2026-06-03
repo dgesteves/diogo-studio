@@ -3,10 +3,12 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AppProviders } from "@/components/providers";
+import { JsonLd } from "@/components/seo/json-ld";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { env } from "@/env";
 import { siteConfig } from "@/lib/site-config";
+import { personJsonLd, websiteJsonLd } from "@/lib/structured-data";
 import "./globals.css";
 import "./mdx.css";
 
@@ -108,6 +110,8 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground flex min-h-full flex-col">
+        <JsonLd data={personJsonLd()} />
+        <JsonLd data={websiteJsonLd()} />
         <AppProviders>
           <SiteNav />
           <main id="main" className="flex flex-1 flex-col">

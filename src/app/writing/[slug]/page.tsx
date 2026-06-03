@@ -6,7 +6,9 @@ import { essays } from "#content";
 import { ArticleHeader } from "@/components/site/article-header";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { TableOfContents } from "@/components/mdx/toc";
+import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/lib/site-config";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 
 /**
  * `/writing/[slug]` — single essay.
@@ -28,10 +30,12 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   return {
     title: essay.title,
     description: essay.description,
+    alternates: { canonical: essay.permalink },
     openGraph: {
       title: essay.title,
       description: essay.description,
       type: "article",
+      url: essay.permalink,
       authors: [siteConfig.name],
       publishedTime: essay.publishedAt,
       modifiedTime: essay.updatedAt ?? essay.publishedAt,
@@ -61,6 +65,23 @@ export default async function EssayPage({ params }: { params: Promise<Params> })
       itemType="https://schema.org/Article"
       className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
     >
+      <JsonLd
+        data={articleJsonLd({
+          title: essay.title,
+          description: essay.description,
+          path: essay.permalink,
+          datePublished: essay.publishedAt,
+          dateModified: essay.updatedAt ?? essay.publishedAt,
+          section: "Essay",
+        })}
+      />
+      <JsonLd
+        data={breadcrumbJsonLd([
+          { name: "Writing", path: "/writing" },
+          { name: essay.title, path: essay.permalink },
+        ])}
+      />
+
       <ArticleHeader
         eyebrow="Essay"
         title={essay.title}
