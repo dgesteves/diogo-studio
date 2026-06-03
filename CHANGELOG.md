@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.1](https://github.com/dgesteves/diogo-studio/compare/v1.1.0...v1.1.1) (2026-06-03)
+
+
+### Documentation
+
+* add comprehensive architecture guide and scaffold target folder structure ([5ab93c9](https://github.com/dgesteves/diogo-studio/commit/5ab93c9fe8c75ae3034a7d9bb246cc024ab2ec24))
+
+
+### Miscellaneous Chores
+
+* add Windsurf AI rules for Next.js development standards ([8b37a34](https://github.com/dgesteves/diogo-studio/commit/8b37a34c22639ef89947cb840d0ebd49edb57d17))
+* configure changelog sections and update favicon styling ([62165b9](https://github.com/dgesteves/diogo-studio/commit/62165b944afa9186e7cfbb78cbdf3dbbaa9bf81d))
+* refine Windsurf rules for file size limits and app/ routing boundaries ([7e5b129](https://github.com/dgesteves/diogo-studio/commit/7e5b1290059b9bceb34dab5d6376f7fd7510e6ea))
+* switch release-please to config files and refine commit type guidelines ([d5d04cd](https://github.com/dgesteves/diogo-studio/commit/d5d04cd12ff234801deb0207b4c31be1709d3f53))
+
 ## [1.1.0](https://github.com/dgesteves/diogo-studio/compare/v1.0.1...v1.1.0) (2026-06-03)
 
 
