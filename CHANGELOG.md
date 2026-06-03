@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/dgesteves/diogo-studio/compare/v1.0.0...v1.0.1) (2026-06-02)
+
+
+### Bug Fixes
+
+* resolve e2e failures (a11y + command-menu dismiss) ([f0ed92a](https://github.com/dgesteves/diogo-studio/commit/f0ed92accc651aa5340222730133dd9cd085c572))
+
 ## 1.0.0 (2026-05-21)
 
 
