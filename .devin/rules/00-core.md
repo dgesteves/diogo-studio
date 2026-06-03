@@ -51,10 +51,13 @@ security by default. Prefer the smallest, clearest solution that ships.
 - **App Router only** — use `app/` as the routing layer; never reintroduce the
   legacy `pages/` router. Keep route files thin; non-routing code lives outside
   `app/` (see the project-structure rule).
-- **No comments.** Write self-documenting code — express intent through clear
-  names and small, focused functions, not prose. Don't add explanatory,
-  decorative, or `TODO` comments. Keep only required machine directives
-  (`"use client"`, `import "server-only"`) and license headers.
+- **No comments — code is self-explanatory.** Express intent through clear
+  names and small, focused functions, not prose. Don't add `what`-restating,
+  decorative, commented-out, or `TODO` comments. Rare exception: a short
+  comment for genuinely complex or non-obvious logic (a tricky algorithm,
+  workaround, or gotcha) that names alone can't convey. Always keep required
+  machine directives (`"use client"`, `import "server-only"`) and license
+  headers.
 
 ## Working agreement
 
