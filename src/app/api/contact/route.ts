@@ -20,8 +20,7 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { Resend } from "resend";
 
-import { ContactNotification } from "@/components/emails/contact-notification";
-import { contactSchema } from "@/lib/contact-schema";
+import { ContactNotification, contactSchema } from "@/features/contact";
 import { siteConfig } from "@/config/site";
 import { env } from "@/env";
 

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Mail } from "lucide-react";
-import { ContactForm } from "@/components/site/contact-form";
+import { ContactForm } from "@/features/contact";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";

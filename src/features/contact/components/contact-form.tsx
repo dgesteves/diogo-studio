@@ -12,7 +12,7 @@ import {
   contactSchema,
   ROLE_ALTITUDES,
   type ContactInput,
-} from "@/lib/contact-schema";
+} from "../schemas/contact";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
 

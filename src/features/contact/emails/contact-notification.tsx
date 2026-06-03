@@ -10,7 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { ContactInput } from "@/lib/contact-schema";
+import type { ContactInput } from "../schemas/contact";
 
 /**
  * Branded notification email sent to Diogo when the contact form is submitted.

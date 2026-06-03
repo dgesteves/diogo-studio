@@ -85,7 +85,7 @@ Bottom-up. Check items off as each slice merges (green `pnpm validate`).
 - [x] `scene/perf-reporter.tsx` → `components/r3f/` (shared R3F util used by career-graph **and** studio canvases)
 - [x] `components/studio/*` → `features/studio/` (curated `index.ts`; `Studio` is the only public export)
 - [ ] `components/site/*` (command menu) → `features/command-menu/`
-- [ ] `components/site/*` (contact) → `features/contact/` (+ `lib/contact-schema.ts` → `features/contact/schemas/`)
+- [x] `components/site/*` (contact) → `features/contact/` (+ `lib/contact-schema.ts` → `schemas/contact.ts`; `components/emails/contact-notification.tsx` → `features/contact/emails/` to avoid a `components → features` import; route imports via `index.ts`)
 - [ ] `components/site/*` (inspector) → `features/inspector/`
 - [ ] `components/site/*` (chrome: nav, footer, mobile-nav, theme-toggle) → `components/layout/`
 
