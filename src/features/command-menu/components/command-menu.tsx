@@ -29,7 +29,7 @@ import { primaryNav, siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
 
 import { CommandMenuAsk } from "./command-menu-ask";
-import { type CommandMenuMode, useCommandMenu } from "./command-menu-context";
+import { type CommandMenuMode, useCommandMenu } from "@/components/providers/command-menu-context";
 
 /**
  * Global ⌘K Command Menu — Phase 4 ships the Ask mode alongside Navigate.

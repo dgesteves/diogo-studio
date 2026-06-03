@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
-import { useCommandMenu } from "./command-menu-context";
+import { useCommandMenu } from "@/components/providers/command-menu-context";
 
 /**
  * Subtle search-style ⌘K trigger for the nav.

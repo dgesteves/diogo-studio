@@ -3,7 +3,7 @@
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { useCommandMenu } from "./command-menu-context";
+import { useCommandMenu } from "@/components/providers/command-menu-context";
 
 /**
  * Secondary hero CTA — opens the ⌘K command menu directly in Ask mode

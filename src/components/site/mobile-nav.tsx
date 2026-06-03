@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { primaryNav, siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
-import { useCommandMenu } from "./command-menu-context";
+import { useCommandMenu } from "@/components/providers/command-menu-context";
 import { ThemeToggle } from "./theme-toggle";
 
 /**

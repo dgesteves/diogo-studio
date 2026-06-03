@@ -1,6 +1,6 @@
 import { Toaster } from "sonner";
-import { CommandMenu } from "@/components/site/command-menu";
-import { CommandMenuProvider } from "@/components/site/command-menu-context";
+import { CommandMenu } from "@/features/command-menu";
+import { CommandMenuProvider } from "./command-menu-context";
 import { EasterEgg } from "@/components/site/easter-egg";
 import { InspectorOverlay } from "@/components/site/inspector-overlay";
 import { InspectorOverlayProvider } from "@/components/site/inspector-overlay-context";
