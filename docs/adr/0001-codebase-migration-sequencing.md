@@ -92,4 +92,6 @@ Bottom-up. Check items off as each slice merges (green `pnpm validate`).
 ### 4 — App routing layer
 
 - [ ] Root route pages → `app/(marketing)/` route group, thinned to composition
+  - [x] **4a — route groups:** `about`, `work`, `writing`, `uses`, `contact` → `app/(marketing)/`; `colophon` → `app/(legal)/`. Pure `git mv`, URLs unchanged (route groups don't affect routing), no logic touched. Home `page.tsx` left at root deliberately so it (and its test) move only once, in 4b. Note: a running Turbopack `next dev` must be restarted after the bulk dir renames — its watcher missed them, leaving a stale `.next/dev/types/validator.ts` + a `/uses` 404 until restart.
+  - [ ] **4b — thin the home page:** extract `page.tsx` sections (`HeroSection`, `OperatingSection`, `StudioSection`, `TrustSection`) into `features/home/`, reduce the route to pure composition, then move the thinned page into `app/(marketing)/page.tsx`.
 - [ ] `app/page.test.tsx` → relocated beside extracted units (keep `app/` route-only)

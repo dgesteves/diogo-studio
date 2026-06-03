@@ -155,6 +155,7 @@ Targeting Staff+, Principal, or Founding Engineer roles, or VP / Head of Enginee
 - CI/CD pipelines
 - Observability
 - Feature flags
+- GCP
 
 ## Testing & Quality
 
