@@ -5,6 +5,9 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 # Architecture & project structure
 
+Canonical, repo-specific layout lives in `docs/architecture.md` — consult it for
+folder placement. The principles below are the enforced defaults.
+
 ## `app/` is the routing layer only
 
 - `src/app/` contains **only** route segments and Next.js special files —
@@ -24,12 +27,19 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 ## Where everything else lives
 
-- `src/components/` — shared UI; `src/components/ui/` for primitives.
-- `src/lib/` — framework-agnostic logic, clients, helpers (`lib/utils.ts` → `cn`).
-- `src/lib/data/` or `src/server/` — the server-only Data Access Layer.
-- `src/hooks/` — shared client hooks. `src/types/` — shared types.
-- `src/config/` — constants/config. `src/features/<feature>/` — feature modules
-  (components + hooks + logic colocated, imported by the matching route).
+- `src/features/<feature>/` — vertical slices: `components/`, `hooks/`,
+  `actions/`, `server/`, `schemas/`, `types.ts`, plus a curated `index.ts` that
+  is the **only** import surface for the feature.
+- `src/components/` — shared presentational UI: `ui/` (primitives), `layout/`
+  (app shell), `common/` (composites), `mdx/`, `seo/`, `og/`, `providers/`.
+- `src/server/` — **server-only** core (`import "server-only"`): `data/` (DAL),
+  `services/`, `ai/`, `email/`, optional `db/` and `auth/`.
+- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/`, `api/`,
+  `validations/`, `seo/`, `analytics/`, `telemetry/`, `errors.ts`.
+- `src/config/` — site metadata, navigation, routes (single source of truth).
+- `src/content/` — MDX + structured data. `src/styles/` — global CSS + tokens.
+  `src/types/` — global types. `src/test/` — test utils/mocks/fixtures.
+- `src/hooks/` • `src/stores/` — global hooks / client state (app-wide only).
 
 ## Conventions
 
@@ -39,8 +49,9 @@ description: Apply when creating files or folders, organizing modules, naming th
   past that, split it into smaller sub-components, hooks, or helper files.
 - **Naming**: `kebab-case` files/dirs, `PascalCase` components, `useX` hooks,
   `is/has/can` booleans. One primary, **named** export per file.
-- Avoid wide barrel `index.ts` re-exports — they hurt tree-shaking and invite
-  circular imports.
+- A feature's `index.ts` exposes a **small, curated public API** (its only import
+  surface). Avoid wide barrels in `components/`/`lib/` that re-export everything —
+  they hurt tree-shaking and invite circular imports.
 - Centralize config/env/constants; never hardcode the same literal twice.
 - Mark server-only modules with `import "server-only"`; client-only files start
   with `"use client"`. Keep the boundary explicit.

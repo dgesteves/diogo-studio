@@ -31,9 +31,9 @@ globs: app/**, src/app/**, **/app/**
   `generateStaticParams` to statically generate known paths. Filter
   unpublished/draft content out of production.
 - **Keep `app/` to routing only** — route segments + Next.js special files.
-  Import components, hooks, and logic from outside `app/` (`src/components`,
-  `src/lib`, `src/features`); keep `page.tsx`/`layout.tsx` as thin composition
-  layers. (See the project-structure rule.)
+  Import UI/logic/data from outside `app/` (`src/features`, `src/components`,
+  `src/server`, `src/lib`); keep `page.tsx`/`layout.tsx` as thin composition
+  layers. (See the project-structure rule + `docs/architecture.md`.)
 
 ## Data fetching, caching & rendering
 
@@ -58,8 +58,9 @@ globs: app/**, src/app/**, **/app/**
 - Prefer **Server Actions** for mutations and forms. Validate input with a schema
   inside the action, and **authenticate + authorize inside every action** — never
   rely on middleware/layout/page checks alone.
-- Keep data access in a server-only Data Access Layer. After a mutation,
-  revalidate affected caches and return typed, `useActionState`-friendly results.
+- Keep data access in `src/server/` (a server-only Data Access Layer,
+  `import "server-only"`). After a mutation, revalidate affected caches and
+  return typed, `useActionState`-friendly results.
 
 ## Metadata & SEO
 
