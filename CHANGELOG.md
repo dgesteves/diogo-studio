@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/dgesteves/diogo-studio/compare/v1.1.4...v1.1.5) (2026-06-03)
+
+
+### Code Refactoring
+
+* migrate studio to features/ with curated index.ts ([19a87d1](https://github.com/dgesteves/diogo-studio/commit/19a87d1f1bd1f1f6777ea50d57bd4bebf5b487c4))
+
 ## [1.1.4](https://github.com/dgesteves/diogo-studio/compare/v1.1.3...v1.1.4) (2026-06-03)
 
 
