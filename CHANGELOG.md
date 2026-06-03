@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/dgesteves/diogo-studio/compare/v1.0.1...v1.1.0) (2026-06-03)
+
+
+### Features
+
+* add contact form, inspector overlay, OG images, and JSON-LD ([fd4e9f9](https://github.com/dgesteves/diogo-studio/commit/fd4e9f93feadce97914a091b2a58b7739ac45f32))
+
 ## [1.0.1](https://github.com/dgesteves/diogo-studio/compare/v1.0.0...v1.0.1) (2026-06-02)
 
 
