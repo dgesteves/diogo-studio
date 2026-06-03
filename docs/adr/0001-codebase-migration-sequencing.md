@@ -74,7 +74,9 @@ Bottom-up. Check items off as each slice merges (green `pnpm validate`).
 
 ### 2 — `server/` core
 
-- [ ] `lib/agent/*` → `server/ai/` (+ `import "server-only"`)
+- [x] `lib/agent/{retrieve,system-prompt}.ts` (+ test) → `server/ai/` (+ `import "server-only"`)
+- [x] `lib/agent/types.ts` → `src/types/agent.ts` (isomorphic contract — imported by the client, so kept out of `server/`)
+- [x] Installed `server-only`; `vitest.config.ts` stubs `server-only`/`client-only` to a no-op so jsdom tests pass
 
 ### 3 — Feature slices
 

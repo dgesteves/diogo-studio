@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { AgentChunk } from "./types";
+import type { AgentChunk } from "@/types/agent";
 import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieve";
 
 /** Fixture chunks — small, hand-picked so the assertions are obvious. */

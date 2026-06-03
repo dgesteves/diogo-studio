@@ -14,7 +14,7 @@ import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useStat
 
 import { Kbd } from "@/components/ui/kbd";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
-import type { AgentCitation, AgentSourcesPayload, AgentSourceKind } from "@/lib/agent/types";
+import type { AgentCitation, AgentSourcesPayload, AgentSourceKind } from "@/types/agent";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------------------------------------------------------------------------

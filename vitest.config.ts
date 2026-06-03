@@ -2,7 +2,25 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    {
+      name: "stub-server-client-only",
+      enforce: "pre",
+      resolveId(id) {
+        if (id === "server-only" || id === "client-only") {
+          return "\0virtual:server-client-only";
+        }
+        return null;
+      },
+      load(id) {
+        if (id === "\0virtual:server-client-only") {
+          return "export {};";
+        }
+        return null;
+      },
+    },
+  ],
   resolve: {
     tsconfigPaths: true,
   },

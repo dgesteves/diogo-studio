@@ -21,7 +21,9 @@
  *   in "state of the art."
  */
 
-import type { AgentChunk } from "./types";
+import "server-only";
+
+import type { AgentChunk } from "@/types/agent";
 
 /* ---------------------------------------------------------------------------
  * Tunables

@@ -23,9 +23,9 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { embed, streamText } from "ai";
 
 import { env } from "@/env";
-import { retrieve } from "@/lib/agent/retrieve";
-import { formatUserPrompt, SYSTEM_PROMPT } from "@/lib/agent/system-prompt";
-import type { AgentChunk, AgentCitation, AgentIndex, AgentSourcesPayload } from "@/lib/agent/types";
+import { retrieve } from "@/server/ai/retrieve";
+import { formatUserPrompt, SYSTEM_PROMPT } from "@/server/ai/system-prompt";
+import type { AgentChunk, AgentCitation, AgentIndex, AgentSourcesPayload } from "@/types/agent";
 
 import indexJson from "@/content/agent-index.json" with { type: "json" };
 

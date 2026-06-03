@@ -8,7 +8,9 @@
  * a portfolio is much higher than the cost of an honest "I don't know."
  */
 
-import type { AgentChunk } from "./types";
+import "server-only";
+
+import type { AgentChunk } from "@/types/agent";
 
 export const SYSTEM_PROMPT = `You are the Inspector agent on Diogo Esteves's portfolio (diogo-studio).
 You answer questions about Diogo — his career, case studies, essays, and
