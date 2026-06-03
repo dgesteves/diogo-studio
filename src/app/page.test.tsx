@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CommandMenuProvider } from "@/components/site/command-menu-context";
-import { nodes } from "@/content/career-graph";
+import { nodes } from "@/content/data/career-graph";
 import Home from "./page";
 
 function renderHome() {

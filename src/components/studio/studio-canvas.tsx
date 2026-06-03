@@ -11,7 +11,7 @@ import {
 } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import * as THREE from "three";
-import { PerfReporter } from "@/components/career-graph/scene/perf-reporter";
+import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { useCenterScreenTexture, useLeftScreenTexture, useRightScreenTexture } from "./screens";
 

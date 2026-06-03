@@ -3,7 +3,7 @@ import { caseStudies } from "#content";
 import { CaseStudyCard } from "@/components/site/case-study-card";
 import { PatternFilter } from "@/components/site/pattern-filter";
 import { StatusDot } from "@/components/ui/status-dot";
-import { type PatternId } from "@/content/career-graph";
+import { type PatternId } from "@/content/data/career-graph";
 
 /**
  * `/work` — telemetry-dashboard index of every published case study.

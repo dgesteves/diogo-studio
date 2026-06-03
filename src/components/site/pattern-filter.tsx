@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 import { Badge } from "@/components/ui/badge";
-import { patterns as patternMeta, type PatternId } from "@/content/career-graph";
+import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
 /**
  * Pattern filter strip for `/work` and `/writing`.

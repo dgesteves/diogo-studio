@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { nodeHref, nodes, patterns } from "@/content/career-graph";
+import { nodeHref, nodes, patterns } from "@/content/data/career-graph";
 import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {

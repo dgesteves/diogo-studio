@@ -8,7 +8,7 @@ import {
   projectToSvg,
   type CareerNode,
   type NodeId,
-} from "@/content/career-graph";
+} from "@/content/data/career-graph";
 
 /**
  * Career Graph — SVG canonical surface.

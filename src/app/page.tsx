@@ -4,7 +4,7 @@ import {
   CareerGraphAccessibleDescription,
   CareerGraphAtmosphere,
   CareerGraphFigure,
-} from "@/components/career-graph/career-graph";
+} from "@/features/career-graph";
 import { Studio } from "@/components/studio/studio";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

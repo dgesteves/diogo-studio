@@ -46,7 +46,7 @@ import { fileURLToPath } from "node:url";
 import { embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
-import { nodes as careerNodes, patterns as careerPatterns } from "../src/content/career-graph";
+import { nodes as careerNodes, patterns as careerPatterns } from "../src/content/data/career-graph";
 import { operatingCompanies, siteConfig } from "../src/config/site";
 
 /* ---------------------------------------------------------------------------

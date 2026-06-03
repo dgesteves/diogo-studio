@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { caseStudies } from "#content";
 import { Badge } from "@/components/ui/badge";
-import { patterns as patternMeta, type PatternId } from "@/content/career-graph";
+import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
 type CaseStudy = (typeof caseStudies)[number];
 

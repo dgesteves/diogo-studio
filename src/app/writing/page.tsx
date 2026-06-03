@@ -5,7 +5,7 @@ import { essays } from "#content";
 import { PatternFilter } from "@/components/site/pattern-filter";
 import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
-import { patterns as patternMeta, type PatternId } from "@/content/career-graph";
+import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
 /**
  * `/writing` — index of essays. Unlike `/work`, no metric tiles per

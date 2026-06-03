@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
-import { patterns as patternMeta, type PatternId } from "@/content/career-graph";
+import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
 /**
  * Shared header strip for `/work/[slug]` and `/writing/[slug]`.
