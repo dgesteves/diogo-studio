@@ -9,16 +9,18 @@ export default function Icon() {
       style={{
         width: "100%",
         height: "100%",
-        background: "linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%)",
-        color: "#0a0a0a",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        fontFamily: "system-ui, -apple-system, sans-serif",
+        backgroundColor: "#0b0d10",
+        backgroundImage: "radial-gradient(120% 120% at 50% 0%, #181c22 0%, #0b0d10 62%)",
+        color: "#22d3ee",
+        border: "1px solid #262b33",
+        borderRadius: "7px",
+        fontFamily: "system-ui, -apple-system, Segoe UI, sans-serif",
         fontWeight: 700,
-        fontSize: "18px",
-        letterSpacing: "-0.02em",
-        borderRadius: "6px",
+        fontSize: "16px",
+        letterSpacing: "-0.04em",
       }}
     >
       DE
