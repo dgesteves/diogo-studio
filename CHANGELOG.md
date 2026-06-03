@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.1.7](https://github.com/dgesteves/diogo-studio/compare/v1.1.6...v1.1.7) (2026-06-03)
+
+
+### Code Refactoring
+
+* clarify no-magic-values rule, promote colocation for tests ([837a351](https://github.com/dgesteves/diogo-studio/commit/837a351d57c43f62155fe0a9973e82b822ecac1c))
+* extract home page sections to features/home/, move to (marketing) group ([9180e73](https://github.com/dgesteves/diogo-studio/commit/9180e7306c254f8130d029d95156642697dc3cc0))
+* migrate chrome components to components/layout/ ([782628d](https://github.com/dgesteves/diogo-studio/commit/782628d7067125aa321b788362b3c3d593f9dddf))
+* migrate easter-egg to features/, move shared components to components/common/ ([f231fff](https://github.com/dgesteves/diogo-studio/commit/f231fff8e3defdadccee184f94e368941e07658d))
+* migrate inspector to features/ with shared provider pattern ([796abe7](https://github.com/dgesteves/diogo-studio/commit/796abe7d90427ecb67ff8be3480ba7d5977a32c3))
+* organize routes into (marketing) and (legal) groups, update ADR 4a ([2cce45d](https://github.com/dgesteves/diogo-studio/commit/2cce45d611dea6d49c6d2455e065d00ee5d5bc0e))
+* soften no-comments rule, move resume to docs/ ([32df411](https://github.com/dgesteves/diogo-studio/commit/32df4118f3130ef319f19d13977ef6b20989f7e3))
+
+
+### Documentation
+
+* update architecture.md to reflect completed migration, remove .gitkeep files ([ea639da](https://github.com/dgesteves/diogo-studio/commit/ea639dabf08c8ec9f2f706251f7ee57899af38d4))
+
+
+### Miscellaneous Chores
+
+* remove .gitkeep placeholders, update architecture.md to discourage empty folders ([a68dd80](https://github.com/dgesteves/diogo-studio/commit/a68dd80b0b19237f66e0cdd5e88aaf30cbdbc9d4))
+
 ## [1.1.6](https://github.com/dgesteves/diogo-studio/compare/v1.1.5...v1.1.6) (2026-06-03)
 
 
