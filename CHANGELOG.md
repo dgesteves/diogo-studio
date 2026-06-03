@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.1.2](https://github.com/dgesteves/diogo-studio/compare/v1.1.1...v1.1.2) (2026-06-03)
+
+
+### Code Refactoring
+
+* reorganize project structure to match architecture guidelines ([bc13e66](https://github.com/dgesteves/diogo-studio/commit/bc13e6661e808b945081317676f77c689d6dd87f))
+
+
+### Documentation
+
+* add ADR 0001 for bottom-up migration sequencing and update imports to new config/seo structure ([5014aed](https://github.com/dgesteves/diogo-studio/commit/5014aed0f7a1c4029b8ece378fd02f7396210306))
+
 ## [1.1.1](https://github.com/dgesteves/diogo-studio/compare/v1.1.0...v1.1.1) (2026-06-03)
 
 
