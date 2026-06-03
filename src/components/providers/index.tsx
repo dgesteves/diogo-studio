@@ -1,6 +1,5 @@
 import { Toaster } from "sonner";
 import { CommandMenuProvider } from "./command-menu-context";
-import { EasterEgg } from "@/components/site/easter-egg";
 import { InspectorOverlayProvider } from "./inspector-overlay-context";
 import { LenisProvider } from "./lenis-provider";
 import { MotionProvider } from "./motion-provider";
@@ -30,7 +29,6 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
           <InspectorOverlayProvider>
             <CommandMenuProvider>{children}</CommandMenuProvider>
           </InspectorOverlayProvider>
-          <EasterEgg />
           <Toaster
             position="bottom-right"
             theme="system"

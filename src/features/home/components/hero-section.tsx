@@ -5,11 +5,11 @@ import {
   CareerGraphAtmosphere,
   CareerGraphFigure,
 } from "@/features/career-graph";
-import { HeroAskCta } from "@/components/site/hero-ask-cta";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patterns, siteConfig } from "@/config/site";
+import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection() {
   return (

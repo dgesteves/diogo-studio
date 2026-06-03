@@ -2,7 +2,7 @@ import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { essays } from "#content";
-import { PatternFilter } from "@/components/site/pattern-filter";
+import { PatternFilter } from "@/components/common/pattern-filter";
 import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";

@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteNav } from "@/components/layout/site-nav";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CommandMenu } from "@/features/command-menu";
+import { EasterEgg } from "@/features/easter-egg";
 import { InspectorOverlay } from "@/features/inspector";
 import { env } from "@/env";
 import { siteConfig } from "@/config/site";
@@ -122,6 +123,7 @@ export default function RootLayout({
           <SiteFooter />
           <CommandMenu />
           <InspectorOverlay />
+          <EasterEgg />
         </AppProviders>
         {isVercel ? (
           <>

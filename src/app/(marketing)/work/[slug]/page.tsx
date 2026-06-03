@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { caseStudies } from "#content";
-import { ArticleHeader } from "@/components/site/article-header";
+import { ArticleHeader } from "@/components/common/article-header";
 import { MetricGrid, MetricTile } from "@/components/mdx/metric-tile";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { TableOfContents } from "@/components/mdx/toc";

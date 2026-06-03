@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { caseStudies } from "#content";
-import { CaseStudyCard } from "@/components/site/case-study-card";
-import { PatternFilter } from "@/components/site/pattern-filter";
+import { CaseStudyCard } from "@/components/common/case-study-card";
+import { PatternFilter } from "@/components/common/pattern-filter";
 import { StatusDot } from "@/components/ui/status-dot";
 import { type PatternId } from "@/content/data/career-graph";
 
