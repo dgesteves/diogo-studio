@@ -1,15 +1,16 @@
 # Architecture
 
 The **gold-standard, production-grade** structure for a modern Next.js (App
-Router) codebase, tailored to **diogo-studio**. It encodes `.windsurf/rules/` and
-is the target the codebase migrates toward. When in doubt, this document wins.
+Router) codebase, tailored to **diogo-studio**. It encodes `.devin/rules/` and
+is the structure the codebase follows. When in doubt, this document wins.
 
-This is the _target_ architecture, not a description of today's tree. Folders are
-marked **[present]**, **[new]** (introduce as code needs it), or **[optional]**
-(only when the relevant capability exists — auth, db, i18n, etc.). Empty target
-folders are scaffolded with a `.gitkeep`; replace it with the first real file.
-`[optional]` capability folders (auth, db, i18n) are added only when that
-capability lands.
+The codebase has **migrated onto this structure** — the tree below reflects today's
+realized layout. Folders are marked **[present]** (exists with real files today),
+**[new]** (folder scaffolded but still empty — add real files as code needs them),
+or **[optional]** (only when the relevant capability exists — auth, db, i18n, etc.).
+Empty scaffolded folders hold a `.gitkeep`; delete it when the first real file lands.
+`[optional]` capability folders (auth, db, i18n) are added only when that capability
+lands.
 
 ## Core ideas
 
@@ -75,18 +76,18 @@ app/  →  features/  →  components/ ─┐
 ├── next.config.ts • tsconfig.json • eslint.config.mjs • vitest.config.ts • …              [present]
 └── src/
     ├── app/                    ── ROUTING LAYER ONLY ──────────────────────────────────
-    │   ├── (marketing)/        public pages route group: /, about, work, writing, uses…    [new]
+    │   ├── (marketing)/        public pages route group: /, about, work, writing, uses…    [present]
     │   │   ├── layout.tsx       group-level chrome
     │   │   └── <segment>/page.tsx
-    │   ├── (legal)/            privacy, terms, colophon                                     [optional]
+    │   ├── (legal)/            colophon (privacy, terms when needed)                        [present]
     │   ├── api/                Route Handlers — <name>/route.ts                             [present]
     │   ├── layout.tsx           root layout (fonts, providers, <html>)                      [present]
     │   ├── error.tsx • global-error.tsx • not-found.tsx • loading.tsx                       [present]
     │   ├── opengraph-image.tsx • icon.tsx • apple-icon.tsx • favicon.ico                    [present]
     │   └── manifest.ts • robots.ts • sitemap.ts                                             [present]
     │
-    ├── features/               ── VERTICAL SLICES (one folder per capability) ───────────  [new]
-    │   └── <feature>/          e.g. career-graph, studio, command-menu, contact, agent
+    ├── features/               ── VERTICAL SLICES (one folder per capability) ───────────  [present]
+    │   └── <feature>/          e.g. career-graph, studio, command-menu, contact, inspector, home
     │       ├── components/      feature UI (server + client)
     │       ├── hooks/           feature-scoped hooks
     │       ├── actions/         Server Actions ("use server")
@@ -100,14 +101,15 @@ app/  →  features/  →  components/ ─┐
     │
     ├── components/              ── SHARED, REUSABLE UI (presentational) ──────────────────
     │   ├── ui/                  design-system primitives (button, badge, input, kbd…)      [present]
-    │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [new]
-    │   ├── common/              cross-feature composites (cards, empty/error states)        [new]
+    │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [present]
+    │   ├── common/              cross-feature composites (cards, empty/error states)        [present]
+    │   ├── r3f/                 shared React Three Fiber infra (perf reporter, ctx guard)  [present]
     │   ├── mdx/                 MDX component map + content blocks                          [present]
     │   ├── seo/                 json-ld / structured-data UI                               [present]
     │   ├── og/                  Open Graph image templates                                 [present]
     │   └── providers/           app-wide client providers (theme, motion, toaster)         [present]
     │
-    ├── server/                  ── SERVER-ONLY CORE (no JSX/UI) — import "server-only" ────  [new]
+    ├── server/                  ── SERVER-ONLY CORE (no JSX/UI) — import "server-only" ────  [present]
     │   ├── data/                Data Access Layer (repositories, queries)
     │   ├── services/            domain/business logic orchestration
     │   ├── ai/                  agent retrieval, prompts, embeddings
@@ -118,14 +120,14 @@ app/  →  features/  →  components/ ─┐
     ├── lib/                     ── ISOMORPHIC UTILITIES (client + server safe) ───────────
     │   ├── api/                 typed fetch client / API helpers                           [new]
     │   ├── analytics/           analytics + Web Vitals reporting                           [new]
-    │   ├── seo/                 metadata + structured-data builders                        [new]
+    │   ├── seo/                 metadata + structured-data builders                        [present]
     │   ├── validations/         cross-cutting zod schemas shared across boundaries         [new]
     │   ├── utils/               pure helpers (cn, format, slugify)                          [present]
     │   ├── telemetry/           perf + web-vitals stores                                   [present]
     │   ├── hooks/               generic isomorphic hooks (use-is-client)                   [present]
     │   └── errors.ts            typed error classes + Result helpers                        [new]
     │
-    ├── config/                  ── STATIC CONFIG (single source of truth) ────────────────  [new]
+    ├── config/                  ── STATIC CONFIG (single source of truth) ────────────────  [present]
     │   ├── site.ts              name, url, social, defaults
     │   ├── navigation.ts        nav/menu definitions
     │   ├── routes.ts            typed route map
@@ -133,12 +135,12 @@ app/  →  features/  →  components/ ─┐
     │
     ├── content/                 MDX sources + content data (Velite → #content)             [present]
     │   ├── case-studies/ • essays/
-    │   └── data/                structured content data (career-graph data, …)             [new]
+    │   └── data/                structured content data (career-graph data, …)             [present]
     │
     ├── hooks/                   GLOBAL shared client hooks (use-media-query, use-mounted)  [optional]
     ├── stores/                  GLOBAL client state (zustand) — app-wide only              [optional]
-    ├── styles/                  globals.css, mdx.css, tokens.css                           [new]
-    ├── types/                   global/ambient types (*.d.ts, shared domain types)         [new]
+    ├── styles/                  globals.css, mdx.css (tokens live in globals.css)           [present]
+    ├── types/                   global/ambient types (*.d.ts, shared domain types)         [present]
     ├── test/                    setup, render utils, mocks, fixtures, msw handlers         [new]
     ├── env.ts                   Zod-validated environment                                  [present]
     └── middleware.ts            edge middleware (headers, redirects, rate-limit gate)      [optional]
@@ -164,9 +166,10 @@ Keep each file small (~200 lines); split aggressively.
 ### `components/` — shared UI
 
 Presentational, reusable, mostly stateless. `ui/` = primitives (no app/domain
-imports); `layout/` = app shell; `common/` = shared composites; `mdx/`, `seo/`,
-`og/`, `providers/` as named. If a component grows domain logic/state, it belongs
-in a feature, not here.
+imports); `layout/` = app shell; `common/` = shared composites; `r3f/` = shared
+React Three Fiber infra (perf reporter, WebGL context guard) used by the 3D
+features; `mdx/`, `seo/`, `og/`, `providers/` as named. If a component grows
+domain logic/state, it belongs in a feature, not here.
 
 ### `server/` vs `lib/` — the critical split
 
@@ -190,19 +193,22 @@ in a feature, not here.
 ```
 features/contact/
 ├── components/
-│   ├── contact-form.tsx          "use client"  (RHF + zod resolver)
-│   └── contact-fields.tsx
-├── actions/
-│   └── submit-contact.ts         "use server"  (validate → rate-limit → send)
-├── server/
-│   └── send-contact-email.ts     import "server-only"  (Resend)
+│   └── contact-form.tsx          "use client"  (RHF + zod resolver; POSTs to the route)
+├── emails/
+│   └── contact-notification.tsx  React Email template (rendered server-side by Resend)
 ├── schemas/
-│   └── contact.ts                zod schema (shared by form + action)
-├── hooks/use-contact-form.ts
-├── types.ts
-├── __tests__/contact-form.test.tsx
-└── index.ts                      export { ContactForm }  // public surface
+│   └── contact.ts                zod schema (shared by the form AND the route handler)
+└── index.ts                      export { ContactForm, ContactNotification, contactSchema }
 ```
+
+Submission is handled by a thin **Route Handler** at `app/api/contact/route.ts`
+(Node runtime — Resend + react-email): validate → honeypot → rate-limit → send,
+degrading to `503 { fallback }` so the form can show a `mailto:` when email isn't
+configured. A feature that prefers progressive enhancement can instead expose a
+Server Action (`actions/`) + a server-only sender (`server/send-contact-email.ts`)
+— both shapes are valid; choose per endpoint. Shared cross-route concerns (e.g. the
+IP rate-limiter currently duplicated with `api/chat`) belong in `server/`, not the
+route file.
 
 ## Where does X go? (decision guide)
 
@@ -245,7 +251,10 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 `pnpm test` / `e2e` (Vitest + Playwright/axe), `pnpm size` (size-limit),
 `pnpm analyze` (bundle analyzer). Every structural PR must pass `pnpm validate`.
 
-## Migration map (current → target)
+## Migration map (complete — historical record)
+
+Every row below has shipped; the tree above is the realized result, not a future
+target. Kept as a record of the legacy → current move.
 
 | Today                                  | Target                                                         |
 | -------------------------------------- | -------------------------------------------------------------- |
@@ -263,8 +272,8 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 | `content/career-graph.ts`              | `content/data/` (data) or `features/career-graph/lib/` (logic) |
 | `lib/utils.ts`                         | `lib/utils/` (cn, formatters, …)                               |
 
-Execute as small, independently reviewable PRs, one slice at a time, running
-`pnpm validate` after each. Optional layers (`server/db`, `server/auth`,
+These slices shipped as small, independently reviewable PRs, each gated by
+`pnpm validate`. Remaining optional layers (`server/db`, `server/auth`,
 `messages/`, `stores/`) are added only when that capability lands.
 
 ## Architecture Decision Records
@@ -272,7 +281,3 @@ Execute as small, independently reviewable PRs, one slice at a time, running
 Record significant choices in `docs/adr/NNNN-title.md` (context → decision →
 consequences). First candidates: the `features/` slicing model, the `lib/` vs
 `server/` split, and content-as-Velite.
-
-```
-
-```

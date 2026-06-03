@@ -31,11 +31,13 @@ folder placement. The principles below are the enforced defaults.
   `actions/`, `server/`, `schemas/`, `types.ts`, plus a curated `index.ts` that
   is the **only** import surface for the feature.
 - `src/components/` — shared presentational UI: `ui/` (primitives), `layout/`
-  (app shell), `common/` (composites), `mdx/`, `seo/`, `og/`, `providers/`.
+  (app shell), `common/` (composites), `r3f/` (shared React Three Fiber infra),
+  `mdx/`, `seo/`, `og/`, `providers/`.
 - `src/server/` — **server-only** core (`import "server-only"`): `data/` (DAL),
   `services/`, `ai/`, `email/`, optional `db/` and `auth/`.
 - `src/lib/` — **isomorphic** utilities (client + server safe): `utils/`, `api/`,
-  `validations/`, `seo/`, `analytics/`, `telemetry/`, `errors.ts`.
+  `validations/`, `seo/`, `analytics/`, `telemetry/`, `hooks/` (isomorphic hooks,
+  distinct from app-wide `src/hooks/`), `errors.ts`.
 - `src/config/` — site metadata, navigation, routes (single source of truth).
 - `src/content/` — MDX + structured data. `src/styles/` — global CSS + tokens.
   `src/types/` — global types. `src/test/` — test utils/mocks/fixtures.
