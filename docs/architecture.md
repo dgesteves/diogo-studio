@@ -4,13 +4,12 @@ The **gold-standard, production-grade** structure for a modern Next.js (App
 Router) codebase, tailored to **diogo-studio**. It encodes `.devin/rules/` and
 is the structure the codebase follows. When in doubt, this document wins.
 
-The codebase has **migrated onto this structure** — the tree below reflects today's
-realized layout. Folders are marked **[present]** (exists with real files today),
-**[new]** (folder scaffolded but still empty — add real files as code needs them),
-or **[optional]** (only when the relevant capability exists — auth, db, i18n, etc.).
-Empty scaffolded folders hold a `.gitkeep`; delete it when the first real file lands.
-`[optional]` capability folders (auth, db, i18n) are added only when that capability
-lands.
+The codebase has **migrated onto this structure** — the tree below is the blueprint.
+**[present]** folders exist with real files today; **[new]** marks a planned home that
+isn't created yet (add the folder when its first real file lands); **[optional]** marks
+a capability folder (auth, db, i18n, etc.) added only when that capability exists. We
+**don't commit empty `.gitkeep` placeholders** — the on-disk tree shows only what's
+real, and this document is the source of truth for where new code belongs.
 
 ## Core ideas
 
