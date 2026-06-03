@@ -30,6 +30,10 @@ globs: app/**, src/app/**, **/app/**
 - Use route groups `(group)`, dynamic segments `[param]`, and
   `generateStaticParams` to statically generate known paths. Filter
   unpublished/draft content out of production.
+- **Keep `app/` to routing only** — route segments + Next.js special files.
+  Import components, hooks, and logic from outside `app/` (`src/components`,
+  `src/lib`, `src/features`); keep `page.tsx`/`layout.tsx` as thin composition
+  layers. (See the project-structure rule.)
 
 ## Data fetching, caching & rendering
 

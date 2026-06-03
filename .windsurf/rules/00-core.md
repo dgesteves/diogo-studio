@@ -38,13 +38,17 @@ security by default. Prefer the smallest, clearest solution that ships.
 
 - **Functional and declarative.** Prefer pure functions and composition; avoid
   classes. Iterate and modularize over copy-paste (DRY).
+- **Small, single-purpose files.** Keep every file focused and short — split when
+  one approaches **~200 lines** (or a function ~50). Extract sub-components,
+  hooks, and helpers into their own files instead of growing one big file.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
   booleans (`isLoading`, `hasError`, `canSubmit`).
 - **Imports**: use the absolute `@/…` alias from `tsconfig.json`; never deep
   relative paths (`../../../`).
-- **App Router only** — keep everything under `app/`; do not reintroduce the
-  legacy `pages/` router.
+- **App Router only** — use `app/` as the routing layer; never reintroduce the
+  legacy `pages/` router. Keep route files thin; non-routing code lives outside
+  `app/` (see the project-structure rule).
 - **No comments.** Write self-documenting code — express intent through clear
   names and small, focused functions, not prose. Don't add explanatory,
   decorative, or `TODO` comments. Keep only required machine directives
