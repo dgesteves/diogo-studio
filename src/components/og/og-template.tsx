@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 /**
  * Shared Open Graph image template — Phase 5.

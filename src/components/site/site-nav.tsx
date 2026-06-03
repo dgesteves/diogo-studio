@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { primaryNav, siteConfig } from "@/lib/site-config";
-import { cn } from "@/lib/utils";
+import { primaryNav, siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils/cn";
 import { CommandTrigger } from "./command-trigger";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";

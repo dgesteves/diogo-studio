@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { nodeHref, nodes, patterns } from "@/content/career-graph";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "About",

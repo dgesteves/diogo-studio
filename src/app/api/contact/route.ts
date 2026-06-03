@@ -22,7 +22,7 @@ import { Resend } from "resend";
 
 import { ContactNotification } from "@/components/emails/contact-notification";
 import { contactSchema } from "@/lib/contact-schema";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 import { env } from "@/env";
 
 export const runtime = "nodejs";

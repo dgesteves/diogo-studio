@@ -7,10 +7,10 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteNav } from "@/components/site/site-nav";
 import { env } from "@/env";
-import { siteConfig } from "@/lib/site-config";
-import { personJsonLd, websiteJsonLd } from "@/lib/structured-data";
-import "./globals.css";
-import "./mdx.css";
+import { siteConfig } from "@/config/site";
+import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
+import "@/styles/globals.css";
+import "@/styles/mdx.css";
 
 // Vercel Analytics + Speed Insights only resolve their script payloads on
 // Vercel-hosted deployments (`/_vercel/insights/script.js`). Outside Vercel

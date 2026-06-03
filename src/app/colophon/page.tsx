@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ArrowUpRight } from "lucide-react";
 import { StatusDot } from "@/components/ui/status-dot";
 import { InspectorTrigger } from "@/components/site/inspector-trigger";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Colophon",

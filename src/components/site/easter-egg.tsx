@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 /**
  * Easter egg: type `diogo` anywhere outside a text field to fire a one-shot

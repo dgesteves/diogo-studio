@@ -7,8 +7,8 @@ import { useState } from "react";
 import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { primaryNav, siteConfig } from "@/lib/site-config";
-import { cn } from "@/lib/utils";
+import { primaryNav, siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils/cn";
 import { useCommandMenu } from "./command-menu-context";
 import { ThemeToggle } from "./theme-toggle";
 

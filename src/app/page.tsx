@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { HeroAskCta } from "@/components/site/hero-ask-cta";
-import { operatingCompanies, patterns, siteConfig } from "@/lib/site-config";
+import { operatingCompanies, patterns, siteConfig } from "@/config/site";
 
 /**
  * Home page — Phase 2 introduces the 3D Career Graph as the signature hero

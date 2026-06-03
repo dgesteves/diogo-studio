@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 import {
   articleJsonLd,
   breadcrumbJsonLd,
   personJsonLd,
   websiteJsonLd,
-} from "@/lib/structured-data";
+} from "@/lib/seo/structured-data";
 
 type Json = Record<string, unknown>;
 

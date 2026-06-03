@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 /**
  * Footer is intentionally quiet — the work is the thing. Two columns:

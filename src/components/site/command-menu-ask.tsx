@@ -15,7 +15,7 @@ import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useStat
 import { Kbd } from "@/components/ui/kbd";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import type { AgentCitation, AgentSourcesPayload, AgentSourceKind } from "@/lib/agent/types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 
 /* ---------------------------------------------------------------------------
  * Pre-seeded queries — the blueprint S2 examples plus one per pattern theme.

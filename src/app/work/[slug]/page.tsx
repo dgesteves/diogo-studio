@@ -8,8 +8,8 @@ import { MetricGrid, MetricTile } from "@/components/mdx/metric-tile";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { TableOfContents } from "@/components/mdx/toc";
 import { JsonLd } from "@/components/seo/json-ld";
-import { siteConfig } from "@/lib/site-config";
-import { articleJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
+import { siteConfig } from "@/config/site";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/structured-data";
 
 /**
  * `/work/[slug]` — single case study, rendered as a telemetry-dashboard.

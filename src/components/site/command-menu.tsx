@@ -25,8 +25,8 @@ import { useCallback, useEffect, useState } from "react";
 import { caseStudies, essays } from "#content";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { primaryNav, siteConfig } from "@/lib/site-config";
-import { cn } from "@/lib/utils";
+import { primaryNav, siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils/cn";
 
 import { CommandMenuAsk } from "./command-menu-ask";
 import { type CommandMenuMode, useCommandMenu } from "./command-menu-context";

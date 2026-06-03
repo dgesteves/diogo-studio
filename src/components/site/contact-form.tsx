@@ -13,8 +13,8 @@ import {
   ROLE_ALTITUDES,
   type ContactInput,
 } from "@/lib/contact-schema";
-import { siteConfig } from "@/lib/site-config";
-import { cn } from "@/lib/utils";
+import { siteConfig } from "@/config/site";
+import { cn } from "@/lib/utils/cn";
 
 /**
  * Branded contact form — Phase 5.

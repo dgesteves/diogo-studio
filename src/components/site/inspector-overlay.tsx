@@ -14,7 +14,7 @@ import {
   type VitalRating,
   type VitalSample,
 } from "@/lib/telemetry/web-vitals-store";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils/cn";
 import { useInspectorOverlay } from "./inspector-overlay-context";
 
 /**

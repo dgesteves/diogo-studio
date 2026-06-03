@@ -7,8 +7,8 @@ import { ArticleHeader } from "@/components/site/article-header";
 import { MDXContent } from "@/components/mdx/mdx-content";
 import { TableOfContents } from "@/components/mdx/toc";
 import { JsonLd } from "@/components/seo/json-ld";
-import { siteConfig } from "@/lib/site-config";
-import { articleJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
+import { siteConfig } from "@/config/site";
+import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/structured-data";
 
 /**
  * `/writing/[slug]` — single essay.

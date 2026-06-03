@@ -47,7 +47,7 @@ import { embedMany } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 
 import { nodes as careerNodes, patterns as careerPatterns } from "../src/content/career-graph";
-import { operatingCompanies, siteConfig } from "../src/lib/site-config";
+import { operatingCompanies, siteConfig } from "../src/config/site";
 
 /* ---------------------------------------------------------------------------
  * Paths

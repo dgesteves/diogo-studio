@@ -1,6 +1,6 @@
 import type { Article, BreadcrumbList, Person, WebSite, WithContext } from "schema-dts";
 import { env } from "@/env";
-import { siteConfig } from "@/lib/site-config";
+import { siteConfig } from "@/config/site";
 
 /**
  * Typed JSON-LD builders (Phase 5).
