@@ -4,6 +4,7 @@ import { Activity, Gauge, Layers, X, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 
+import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { Kbd } from "@/components/ui/kbd";
 import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/lib/telemetry/perf-store";
@@ -15,7 +16,6 @@ import {
   type VitalSample,
 } from "@/lib/telemetry/web-vitals-store";
 import { cn } from "@/lib/utils/cn";
-import { useInspectorOverlay } from "./inspector-overlay-context";
 
 /**
  * Inspector Overlay — the S4 "receipts" surface.

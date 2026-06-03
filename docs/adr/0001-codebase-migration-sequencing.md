@@ -86,7 +86,7 @@ Bottom-up. Check items off as each slice merges (green `pnpm validate`).
 - [x] `components/studio/*` → `features/studio/` (curated `index.ts`; `Studio` is the only public export)
 - [x] `components/site/*` (command menu) → `features/command-menu/` (palette only: `command-menu` + `command-menu-ask`, public `CommandMenu`). `command-menu-context.tsx` → `components/providers/` (shared global UI-state + `useCommandMenu` hook) so chrome triggers the menu without a `components → features` edge. Triggers (`command-trigger`, `hero-ask-cta`) stay as shared chrome on the hook. Remaining edge: `providers/index.tsx` mounts `<CommandMenu />` — resolved in slice 4 when global feature-UI mounts move app-level. Same pattern to apply to `inspector`.
 - [x] `components/site/*` (contact) → `features/contact/` (+ `lib/contact-schema.ts` → `schemas/contact.ts`; `components/emails/contact-notification.tsx` → `features/contact/emails/` to avoid a `components → features` import; route imports via `index.ts`)
-- [ ] `components/site/*` (inspector) → `features/inspector/`
+- [x] `components/site/*` (inspector) → `features/inspector/` (curated `index.ts`, public `InspectorOverlay`). `inspector-overlay-context.tsx` → `components/providers/` (shared global UI-state + `useInspectorOverlay` hook) so chrome and server pages trigger the overlay without a `components → features` edge. `inspector-trigger.tsx` stays as shared chrome on the hook (consumed by `/colophon`). Same pattern as `command-menu`. Remaining edge: `providers/index.tsx` mounts `<InspectorOverlay />` — resolved in slice 4 when global feature-UI mounts move app-level.
 - [ ] `components/site/*` (chrome: nav, footer, mobile-nav, theme-toggle) → `components/layout/`
 
 ### 4 — App routing layer

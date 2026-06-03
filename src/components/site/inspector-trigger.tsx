@@ -1,9 +1,9 @@
 "use client";
 
 import { Activity } from "lucide-react";
+import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { useInspectorOverlay } from "./inspector-overlay-context";
 
 /**
  * Launches the Inspector Overlay (S4) from server-rendered pages like
