@@ -54,6 +54,13 @@ folder placement. The principles below are the enforced defaults.
 - A feature's `index.ts` exposes a **small, curated public API** (its only import
   surface). Avoid wide barrels in `components/`/`lib/` that re-export everything —
   they hurt tree-shaking and invite circular imports.
-- Centralize config/env/constants; never hardcode the same literal twice.
+- **No magic values — name them, then place them by scope.** Don't inline
+  unexplained numbers or meaningful/repeated strings; give them a named `const` /
+  `as const` (or a union). Place at the narrowest scope that removes the magic: a
+  top-of-file `const` for single-file use → a feature `constants.ts` when shared
+  across that feature → `src/config/` for site/config data (names, URLs, routes,
+  nav) → `src/content/` for copy. Promote outward only on reuse; never build a
+  global `constants.ts` dump. Trivial one-off literals (a unique label) may stay
+  inline.
 - Mark server-only modules with `import "server-only"`; client-only files start
   with `"use client"`. Keep the boundary explicit.

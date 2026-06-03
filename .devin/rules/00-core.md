@@ -31,8 +31,10 @@ security by default. Prefer the smallest, clearest solution that ships.
    (LCP, CLS, INP); avoid request waterfalls and unnecessary client JS.
 5. **Security by default.** Never leak secrets to the client, authorize every
    mutation, and validate every input.
-6. **Single source of truth.** Centralize config, env, and shared constants;
-   never hardcode duplicated values (names, URLs, routes).
+6. **Single source of truth, no magic values.** Centralize config, env, and
+   shared constants; name magic numbers and meaningful strings instead of
+   inlining them; never hardcode duplicated literals (names, URLs, routes). The
+   project-structure rule defines where each kind of constant lives.
 
 ## Code style & structure
 

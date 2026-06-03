@@ -95,7 +95,7 @@ app/  →  features/  →  components/ ─┐
     │       ├── stores/          client state (zustand) — only if needed
     │       ├── lib/             feature-private pure helpers
     │       ├── types.ts • constants.ts
-    │       ├── __tests__/       unit/component tests (or *.test.tsx beside files)
+    │       ├── *.test.tsx       unit/component tests colocated beside the file they test
     │       └── index.ts         ★ curated public API — the ONLY import surface
     │
     ├── components/              ── SHARED, REUSABLE UI (presentational) ──────────────────
