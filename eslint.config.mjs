@@ -18,7 +18,8 @@ const eslintConfig = defineConfig([
       "no-restricted-syntax": [
         "warn",
         {
-          selector: "MemberExpression[object.name='process'][property.name='env']",
+          selector:
+            "MemberExpression[object.object.name='process'][object.property.name='env']:not([property.name='NODE_ENV'])",
           message: "Read environment variables via src/env.ts, not process.env directly.",
         },
       ],

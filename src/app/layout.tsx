@@ -19,7 +19,7 @@ import "@/styles/mdx.css";
 // Vercel-hosted deployments (`/_vercel/insights/script.js`). Outside Vercel
 // they 404, polluting the console and dragging the Lighthouse "Best
 // practices" score for no functional benefit.
-const isVercel = process.env.VERCEL === "1";
+const isVercel = env.VERCEL === "1";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

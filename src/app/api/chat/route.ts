@@ -24,6 +24,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { embed, streamText } from "ai";
 
 import { env } from "@/env";
+import { agentIndexSchema, chatRequestSchema } from "@/lib/validations/agent";
 import { retrieve } from "@/server/ai/retrieve";
 import { formatUserPrompt, SYSTEM_PROMPT } from "@/server/ai/system-prompt";
 import type { AgentChunk, AgentCitation, AgentIndex, AgentSourcesPayload } from "@/types/agent";
@@ -37,7 +38,7 @@ export const maxDuration = 30;
  * Index — frozen at module load so subsequent requests don't re-parse.
  * ------------------------------------------------------------------------- */
 
-const INDEX = indexJson as unknown as AgentIndex;
+const INDEX: AgentIndex = agentIndexSchema.parse(indexJson);
 const CHUNKS: AgentChunk[] = INDEX.chunks;
 const CORPUS_HAS_EMBEDDINGS = CHUNKS.some(
   (c) => Array.isArray(c.embedding) && c.embedding.length > 0,
@@ -142,19 +143,14 @@ export async function POST(req: Request): Promise<Response> {
   } catch {
     return jsonResponse({ error: "Invalid JSON body." }, { status: 400 });
   }
-  const query =
-    typeof body === "object" &&
-    body &&
-    "query" in body &&
-    typeof (body as { query: unknown }).query === "string"
-      ? ((body as { query: string }).query as string).trim()
-      : "";
-  if (!query) {
-    return jsonResponse({ error: "Missing `query` string." }, { status: 400 });
+  const parsed = chatRequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return jsonResponse(
+      { error: parsed.error.issues[0]?.message ?? "Invalid request." },
+      { status: 400 },
+    );
   }
-  if (query.length > 600) {
-    return jsonResponse({ error: "Query too long (max 600 chars)." }, { status: 400 });
-  }
+  const query = parsed.data.query;
 
   // 2) Rate limit.
   if (!(await allow(req))) {

@@ -2,6 +2,8 @@
 
 import { Stats } from "@react-three/drei";
 
+import { env } from "@/env";
+
 /**
  * Dev-only inspector tooling, gated behind `NODE_ENV !== "production"`.
  *
@@ -20,7 +22,7 @@ const isDev = process.env.NODE_ENV !== "production";
 
 // Opt-in via env so the dev FPS panel doesn't clutter the visual review.
 // Set `NEXT_PUBLIC_PERF_HUD=1` (in `.env.local`) to enable.
-const enabled = isDev && process.env.NEXT_PUBLIC_PERF_HUD === "1";
+const enabled = isDev && env.NEXT_PUBLIC_PERF_HUD === "1";
 
 export function CareerGraphDevHud() {
   if (!enabled) return null;

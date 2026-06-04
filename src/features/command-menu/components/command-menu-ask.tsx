@@ -9,12 +9,14 @@ import {
   Square,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 
 import { Kbd } from "@/components/ui/kbd";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import type { AgentCitation, AgentSourcesPayload, AgentSourceKind } from "@/types/agent";
+import { agentSourcesPayloadSchema } from "@/lib/validations/agent";
 import { cn } from "@/lib/utils/cn";
 
 /* ---------------------------------------------------------------------------
@@ -111,13 +113,10 @@ export function CommandMenuAsk({ onNavigate, openTick }: Props) {
     const header = res.headers.get("x-agent-sources");
     let payload: AgentSourcesPayload | null = null;
     if (header) {
-      try {
-        const json = decodeURIComponent(escape(atob(header)));
-        payload = JSON.parse(json) as AgentSourcesPayload;
-        setCitations(payload.citations ?? []);
+      payload = decodeAgentSources(header);
+      if (payload) {
+        setCitations(payload.citations);
         setRetrieval(payload.retrieval);
-      } catch {
-        // Header missing or corrupted — we'll still show the answer text.
       }
     }
 
@@ -501,11 +500,30 @@ function renderFormatting(text: string, keyPrefix: string): ReactNode[] {
         </code>,
       );
     } else if (m[3] !== undefined && m[4] !== undefined) {
-      out.push(
-        <a key={`${keyPrefix}-l${idx++}`} href={m[4]} className="text-accent hover:underline">
-          {m[3]}
-        </a>,
-      );
+      const label = m[3];
+      const key = `${keyPrefix}-l${idx++}`;
+      const safeHref = sanitizeHref(m[4]);
+      if (!safeHref) {
+        out.push(label);
+      } else if (safeHref.startsWith("/") || safeHref.startsWith("#")) {
+        out.push(
+          <Link key={key} href={safeHref} className="text-accent hover:underline">
+            {label}
+          </Link>,
+        );
+      } else {
+        out.push(
+          <a
+            key={key}
+            href={safeHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-accent hover:underline"
+          >
+            {label}
+          </a>,
+        );
+      }
     }
     lastIndex = m.index + m[0].length;
   }
@@ -548,4 +566,27 @@ async function safeText(res: Response): Promise<string> {
   } catch {
     return "";
   }
+}
+
+function decodeAgentSources(header: string): AgentSourcesPayload | null {
+  try {
+    const bytes = Uint8Array.from(atob(header), (ch) => ch.charCodeAt(0));
+    const json = new TextDecoder().decode(bytes);
+    const result = agentSourcesPayloadSchema.safeParse(JSON.parse(json));
+    return result.success ? result.data : null;
+  } catch {
+    return null;
+  }
+}
+
+function sanitizeHref(href: string): string | null {
+  const trimmed = href.trim();
+  if (trimmed.startsWith("/") || trimmed.startsWith("#")) return trimmed;
+  try {
+    const { protocol } = new URL(trimmed);
+    if (protocol === "http:" || protocol === "https:" || protocol === "mailto:") return trimmed;
+  } catch {
+    return null;
+  }
+  return null;
 }
