@@ -6,6 +6,37 @@ import prettier from "eslint-config-prettier/flat";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    rules: {
+      "no-console": "warn",
+      "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/consistent-type-imports": "warn",
+      "@typescript-eslint/explicit-module-boundary-types": "warn",
+      "no-restricted-syntax": [
+        "warn",
+        {
+          selector: "MemberExpression[object.name='process'][property.name='env']",
+          message: "Read environment variables via src/env.ts, not process.env directly.",
+        },
+      ],
+    },
+  },
+  {
+    files: ["src/env.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
+  {
+    files: ["src/**/*.test.{ts,tsx}"],
+    rules: {
+      "max-lines": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
+    },
+  },
   prettier,
   // Override default ignores of eslint-config-next.
   globalIgnores([

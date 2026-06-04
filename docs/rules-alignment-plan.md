@@ -770,47 +770,56 @@ assertion for the one-shot auto-dismiss — not a fixed`waitForTimeout` sleep.
 
 ## Compliance scorecard
 
-| Area                                       | Rule file                        | Status          | Severity |
-| ------------------------------------------ | -------------------------------- | --------------- | -------- |
-| TypeScript strict config                   | `typescript.md`                  | Compliant       | —        |
-| `any` / `@ts-ignore` usage                 | `typescript.md`                  | Mostly OK       | Low      |
-| Double casts / unvalidated JSON            | `typescript.md`                  | Violations      | Medium   |
-| Explicit return types (exports)            | `typescript.md`                  | Violations      | Low      |
-| Comments policy (self-documenting)         | `00-core.md`                     | Widespread      | High     |
-| File size (~200 lines)                     | `00-core.md` / project-structure | Violations      | Medium   |
-| `console.*` in committed code              | `observability-and-errors.md`    | Violations      | Medium   |
-| `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Violations      | High     |
-| Scattered `process.env`                    | `security-and-env.md`            | Violations      | Medium   |
-| Feature state under `components/providers` | project-structure                | Violations      | Low      |
-| Manual memoization vs React Compiler       | react-components-styling         | Decision needed | Low      |
-| Lint enforcement of the rules              | tooling                          | Missing         | Medium   |
-| Security headers / CSP                     | `security-and-env.md`            | Missing CSP     | Medium   |
-| Stale tooling config paths                 | project-structure                | Violations      | Low      |
-| Route handler input validation (Zod)       | security / `typescript.md`       | Partial         | Medium   |
-| Duplicated logic (rate limiter, filters)   | `00-core.md` (DRY)               | Violations      | Medium   |
-| Route data/UI living in `app/`             | project-structure                | Violations      | Medium   |
-| Arbitrary hex vs design tokens             | react-components-styling         | Violations      | Medium   |
-| Conditional classes via `cn()`             | react-components-styling         | Violations      | Low      |
+| Area                                       | Rule file                        | Status                     | Severity |
+| ------------------------------------------ | -------------------------------- | -------------------------- | -------- |
+| TypeScript strict config                   | `typescript.md`                  | Compliant                  | —        |
+| `any` / `@ts-ignore` usage                 | `typescript.md`                  | Mostly OK                  | Low      |
+| Double casts / unvalidated JSON            | `typescript.md`                  | Violations                 | Medium   |
+| Explicit return types (exports)            | `typescript.md`                  | Violations                 | Low      |
+| Comments policy (self-documenting)         | `00-core.md`                     | Widespread                 | High     |
+| File size (~200 lines)                     | `00-core.md` / project-structure | Violations                 | Medium   |
+| `console.*` in committed code              | `observability-and-errors.md`    | Violations                 | Medium   |
+| `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Violations                 | High     |
+| Scattered `process.env`                    | `security-and-env.md`            | Violations                 | Medium   |
+| Feature state under `components/providers` | project-structure                | Violations                 | Low      |
+| Manual memoization vs React Compiler       | react-components-styling         | Compiler on (P0); strip P5 | Low      |
+| Lint enforcement of the rules              | tooling                          | Warnings added (P0)        | Medium   |
+| Security headers / CSP                     | `security-and-env.md`            | Missing CSP                | Medium   |
+| Stale tooling config paths                 | project-structure                | Violations                 | Low      |
+| Route handler input validation (Zod)       | security / `typescript.md`       | Partial                    | Medium   |
+| Duplicated logic (rate limiter, filters)   | `00-core.md` (DRY)               | Violations                 | Medium   |
+| Route data/UI living in `app/`             | project-structure                | Violations                 | Medium   |
+| Arbitrary hex vs design tokens             | react-components-styling         | Violations                 | Medium   |
+| Conditional classes via `cn()`             | react-components-styling         | Violations                 | Low      |
 
 ---
 
-## Phase 0 — Decisions & guardrails (do first)
+## Phase 0 — Decisions & guardrails (do first) `[x]`
 
 These unblock the rest and prevent regressions.
 
-- [ ] **Decide on React Compiler.** It is **not** currently enabled in
-      `next.config.ts`, yet 13 files use `useMemo`/`useCallback`/`memo`
-      (~49 call sites). Either: (a) enable React Compiler and remove
-      "just-in-case" memoization per `react-components-styling.md`, or (b) keep
-      manual memoization and mark this row `[-]`. Don't strip memoization while
-      the compiler is off.
-- [ ] **Decide comment policy enforcement.** `00-core.md` mandates
-      self-documenting code with comments only for genuinely non-obvious logic.
-      Agree what stays (machine directives, the rare gotcha) vs. what goes
-      (JSDoc narration, decorative `/* --- */` dividers, restating comments)
-      before mass edits. ~1,550 comment lines exist today.
-- [ ] **Add lint guardrails** so fixed rules can't regress (see Phase 6). Land
-      these early but as **warnings** first to avoid blocking unrelated work.
+- [x] **Decide on React Compiler — ENABLE.** Installed
+      `babel-plugin-react-compiler@1.0.0` (dev) and set `reactCompiler: true` in
+      `next.config.ts` (stable in Next 16). `pnpm build` verified green with the
+      compiler on. The codebase was already authored against the compiler's
+      ESLint rules (`react-hooks/immutability`, `react-hooks/static-components`).
+      "Just-in-case" `useMemo`/`useCallback`/`memo` stripping is deferred to
+      **Phase 5**; keep memo only where genuinely needed (stable R3F uniforms,
+      the studio `CanvasTexture`s).
+- [x] **Decide comment policy — STRICT (rule-default).** Per `00-core.md`:
+      remove all JSDoc-as-prose, decorative `/* --- */` dividers, restating /
+      `TODO` comments, and commented-out code. Keep only machine directives
+      (`"use client"`, `import "server-only"`, `eslint-disable` with a reason)
+      and the specific genuine gotchas the Part 1 audit flagged per file.
+      Applied in **Phase 4**.
+- [x] **Add lint guardrails (as warnings).** Added to `eslint.config.mjs`,
+      scoped to `src/**` (tests and `src/env.ts` exempted where appropriate):
+      `no-console`, `max-lines` (200, skip blank/comments),
+      `@typescript-eslint/no-explicit-any`, `no-non-null-assertion`,
+      `consistent-type-imports`, `explicit-module-boundary-types`, and a
+      `no-restricted-syntax` selector flagging raw `process.env`. Surfaces 151
+      warnings today; CI stays green (`pnpm lint` runs without `--max-warnings`).
+      Promoted to `error` in **Phase 6** once the backlog clears.
 
 ---
 

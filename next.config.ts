@@ -24,6 +24,7 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  reactCompiler: true,
   poweredByHeader: false,
   // Allow HMR through the IDE's browser-preview proxy (127.0.0.1) and the LAN
   // IP next prints on `pnpm dev`. Has no effect on production.
