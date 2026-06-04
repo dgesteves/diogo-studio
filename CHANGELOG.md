@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.2](https://github.com/dgesteves/diogo-studio/compare/v1.2.1...v1.2.2) (2026-06-04)
+
+
+### Code Refactoring
+
+* decompose career-graph SVG into defs/axis/node modules (rules-alignment Phase 3/4) ([ef8684c](https://github.com/dgesteves/diogo-studio/commit/ef8684c3e1bb3cc59d07f866fc49e07b4f6e191d))
+* decompose inspector overlay into atoms/format/motion-panel (rules-alignment Phase 3/4) ([e6e6844](https://github.com/dgesteves/diogo-studio/commit/e6e68443fa78ef3980b73c3efe23ec65aaddbb89))
+
+
+### Documentation
+
+* mark file-size rule complete and document Phase 3 decomposition pass ([3e5e670](https://github.com/dgesteves/diogo-studio/commit/3e5e670bca845cb7fe6c09e775a28d58ca182827))
+
 ## [1.2.1](https://github.com/dgesteves/diogo-studio/compare/v1.2.0...v1.2.1) (2026-06-04)
 
 
