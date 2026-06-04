@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, CheckCircle2, Loader2, Mail } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useState, type ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -16,20 +16,11 @@ import {
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
 
-/**
- * Branded contact form — Phase 5.
- *
- * Client-side validation via `react-hook-form` + the shared `contactSchema`
- * (same schema the API route enforces). On submit it POSTs JSON to
- * `/api/contact`. The route degrades gracefully: a 503 `{ fallback: true }`
- * (no Resend key) flips the form into a "email me directly" state instead of
- * showing an error, so the surface is always useful.
- */
+import { Field, fieldBase } from "./contact-field";
+import { ContactHoneypot } from "./contact-honeypot";
+import { ContactFallback, ContactSuccess } from "./contact-states";
 
 type FormState = { kind: "idle" } | { kind: "success" } | { kind: "fallback"; email: string };
-
-const fieldBase =
-  "w-full rounded-md border bg-surface-inset px-3.5 py-2.5 text-sm text-foreground placeholder:text-subtle-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
 export function ContactForm(): ReactElement {
   const [state, setState] = useState<FormState>({ kind: "idle" });
@@ -64,7 +55,7 @@ export function ContactForm(): ReactElement {
       try {
         body = await res.json();
       } catch {
-        /* non-JSON error body — fall through to generic copy */
+        // Non-JSON error body — fall through to generic copy.
       }
 
       if (res.status === 503 && body.fallback) {
@@ -79,66 +70,16 @@ export function ContactForm(): ReactElement {
   }
 
   if (state.kind === "success") {
-    return (
-      <div
-        role="status"
-        className="border-signal-good/40 bg-signal-good/5 flex flex-col items-start gap-3 rounded-lg border p-6"
-      >
-        <div className="text-signal-good inline-flex items-center gap-2">
-          <CheckCircle2 className="size-5" aria-hidden="true" />
-          <span className="text-sm font-medium">Message received.</span>
-        </div>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          Thanks — it landed in my inbox and I&rsquo;ll reply directly. If it&rsquo;s urgent,{" "}
-          <a
-            href={`mailto:${siteConfig.email}`}
-            className="text-accent underline-offset-4 hover:underline"
-          >
-            email me
-          </a>
-          .
-        </p>
-        <Button variant="outline" size="sm" onClick={() => setState({ kind: "idle" })}>
-          Send another
-        </Button>
-      </div>
-    );
+    return <ContactSuccess onReset={() => setState({ kind: "idle" })} />;
   }
 
   if (state.kind === "fallback") {
-    return (
-      <div
-        role="status"
-        className="border-signal-warn/40 bg-signal-warn/5 flex flex-col items-start gap-3 rounded-lg border p-6"
-      >
-        <p className="text-foreground text-sm font-medium">Email delivery isn&rsquo;t live here.</p>
-        <p className="text-muted-foreground text-sm leading-relaxed">
-          This deployment doesn&rsquo;t have email configured. Reach me directly — fastest path
-          anyway.
-        </p>
-        <Button asChild variant="accent" size="md">
-          <a href={`mailto:${state.email}`}>
-            <Mail className="size-4" aria-hidden="true" />
-            <span>{state.email}</span>
-          </a>
-        </Button>
-      </div>
-    );
+    return <ContactFallback email={state.email} />;
   }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      {/* Honeypot — hidden from humans, catnip for bots. */}
-      <div aria-hidden="true" className="sr-only">
-        <label htmlFor="company_url">Leave this field empty</label>
-        <input
-          id="company_url"
-          type="text"
-          tabIndex={-1}
-          autoComplete="off"
-          {...register("company_url")}
-        />
-      </div>
+      <ContactHoneypot register={register} />
 
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Name" htmlFor="name" error={errors.name?.message} required>
@@ -230,41 +171,5 @@ export function ContactForm(): ReactElement {
         </span>
       </div>
     </form>
-  );
-}
-
-function Field({
-  label,
-  htmlFor,
-  error,
-  required,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  required?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label
-        htmlFor={htmlFor}
-        className="text-muted-foreground inline-flex items-center gap-1 font-mono text-[10px] font-medium tracking-wider uppercase"
-      >
-        {label}
-        {required ? (
-          <span className="text-signal-hot" aria-hidden="true">
-            *
-          </span>
-        ) : null}
-      </label>
-      {children}
-      {error ? (
-        <p role="alert" className="text-signal-hot text-xs">
-          {error}
-        </p>
-      ) : null}
-    </div>
   );
 }

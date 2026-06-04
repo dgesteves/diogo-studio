@@ -777,7 +777,7 @@ assertion for the one-shot auto-dismiss — not a fixed`waitForTimeout` sleep.
 | Double casts / unvalidated JSON            | `typescript.md`                  | Fixed in `src/` (P2)       | Medium   |
 | Explicit return types (exports)            | `typescript.md`                  | Violations                 | Low      |
 | Comments policy (self-documenting)         | `00-core.md`                     | Widespread                 | High     |
-| File size (~200 lines)                     | `00-core.md` / project-structure | Violations                 | Medium   |
+| File size (~200 lines)                     | `00-core.md` / project-structure | Fixed (P3) — 0 flagged     | Medium   |
 | `console.*` in committed code              | `observability-and-errors.md`    | Fixed in `src/` (P1)       | Medium   |
 | `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Fixed (P1)                 | High     |
 | Scattered `process.env`                    | `security-and-env.md`            | Fixed (P2)                 | Medium   |
@@ -923,7 +923,7 @@ de-commented in the same pass (Phase 4).**
 
 > **Authoritative counts come from the `max-lines` lint warning (code-only —
 > skips blanks/comments), not raw `wc -l`.** After the Phase 0–2 touches + the
-> lint-cleanup commit, the remaining flagged offenders are: `studio-canvas.tsx`
+> lint-cleanup commit, the remaining flagged offenders were: `studio-canvas.tsx`
 > (was 432), `screens.tsx` (was 347), `command-menu.tsx` (329),
 > `career-graph-svg.tsx` (291), `about/page.tsx` (271), `inspector-overlay.tsx`
 > (266), `contact-form.tsx` (238), `career-graph.ts` (218), `retrieve.ts` (206).
@@ -931,6 +931,11 @@ de-commented in the same pass (Phase 4).**
 > flagged — `heatmap-field.tsx`, `system-diagram-fallback.tsx`,
 > `reduced-motion-provider.tsx`, `colophon/page.tsx`, `api/chat/route.ts` — meet
 > the size rule; any "thin the route / move data" note on them carries to Phase 5.
+>
+> **As of the latest pass, `pnpm lint` reports ZERO `max-lines` warnings across
+> `src/**`** — every runtime offender above has been decomposed. The only Phase 3
+item left is the build-only `scripts/build-agent-index.ts`(638), which is
+outside the`src/\*\*` `max-lines` scope and explicitly lower priority.
 
 - [x] `src/features/command-menu/components/command-menu-ask.tsx` (552 → ~116) —
       extracted `hooks/use-ask-agent.ts` (fetch/stream lifecycle + decode helper),
@@ -970,22 +975,54 @@ de-commented in the same pass (Phase 4).**
       and `inspector-motion-panel.tsx` (`MotionPanel`). De-commented in the same
       pass (kept the mount-on-open + deferred-measure gotchas). Verified:
       typecheck + lint + the 3 `inspector-overlay.spec.ts` e2e tests green.
-- [ ] `src/content/data/career-graph.ts` (311)
-- [ ] `src/server/ai/retrieve.ts` (289)
-- [ ] `src/app/(marketing)/about/page.tsx` (288) — also thin the route; move UI
-      into a `features`/`components` slice per app-router rule.
-- [ ] `src/app/api/chat/route.ts` (273)
-- [ ] `src/features/contact/components/contact-form.tsx` (271) — extract `Field`,
-      the success/fallback states, and the honeypot.
-- [ ] `src/features/career-graph/components/scene/heatmap-field.tsx` (258) —
-      move the GLSL vertex/fragment shader strings to a co-located module.
-- [ ] `src/components/mdx/system-diagram-fallback.tsx` (220)
-- [ ] `src/components/providers/reduced-motion-provider.tsx` (212)
-- [ ] `src/app/(legal)/colophon/page.tsx` (209) — also thin the route.
-- [ ] `scripts/build-agent-index.ts` (638) — **build-only (not shipped);**
-      **lower priority than the runtime files above.** Split into the
-      frontmatter parser, the MDX-strip + chunker, the virtual-chunk builder,
-      and the embed/diff/CLI `main`.
+- [x] `src/content/data/career-graph.ts` (218 → barrel) — split into
+      `career-graph-patterns.ts`, `career-graph-nodes.ts`, `career-graph-edges.ts`,
+      and `career-graph-projection.ts`; `career-graph.ts` is now a thin re-export
+      barrel so every `@/content/data/career-graph` consumer is unchanged.
+      De-commented in the same pass (kept the coordinate-system doc + the
+      edge-derivation gotcha; named the `0.04` z-perspective nudge). Verified:
+      typecheck + the 10 `career-graph.test.ts` cases green.
+- [x] `src/server/ai/retrieve.ts` (206 → 25) — split into `retrieve-tunables.ts`,
+      `retrieve-types.ts`, `retrieve-cosine.ts`, and `retrieve-keyword.ts`;
+      `retrieve.ts` keeps the `retrieve` dispatcher + re-exports the public API
+      (`cosine`/`retrieveByCosine`/`retrieveByKeyword`/`TOP_K`/types). `server-only`
+      preserved on the logic modules. De-commented (kept the cosine/BM25
+      relevance-floor + stopwords gotchas). Verified: the 17 `retrieve.test.ts`
+      cases green.
+- [x] `src/app/(marketing)/about/page.tsx` (271 → 13) — moved the content arrays
+      to `src/content/data/about.ts` and the UI to a new `features/about` slice
+      (`about.tsx` + `about-experience.tsx` + `about-section.tsx`, barrel
+      `index.ts`); the route now just sets `metadata` and renders `<About />`.
+      De-commented (dropped the JSX section dividers). Verified: typecheck + lint +
+      `content-pages.spec.ts` axe/heading on `/about` green.
+- [-] `src/app/api/chat/route.ts` (269 raw) — already ≤200 **code-lines** (no
+  longer `max-lines`-flagged); size satisfied. Comment cleanup carries to
+  Phase 4; the rate-limiter extraction carries to Phase 5.
+- [x] `src/features/contact/components/contact-form.tsx` (238 → 174) — extracted
+      `contact-field.tsx` (`Field` + `fieldBase`), `contact-states.tsx`
+      (`ContactSuccess`/`ContactFallback`), and `contact-honeypot.tsx`. De-commented
+      (dropped the JSDoc header; kept the non-JSON-error-body gotcha). Verified:
+      typecheck + lint + `/contact` axe + the easter-egg `/contact` field test green.
+- [-] `src/features/career-graph/components/scene/heatmap-field.tsx` (258) —
+  already ≤200 code-lines; no longer `max-lines`-flagged. Size satisfied.
+- [-] `src/components/mdx/system-diagram-fallback.tsx` (220) — already ≤200
+  code-lines; no longer flagged. Size satisfied.
+- [-] `src/components/providers/reduced-motion-provider.tsx` (212) — already ≤200
+  code-lines; no longer flagged. Size satisfied.
+- [-] `src/app/(legal)/colophon/page.tsx` (209) — already ≤200 code-lines; no
+  longer flagged. Size satisfied; "thin the route" note carries to Phase 5.
+- [x] `scripts/build-agent-index.ts` (637 → 105) — split into 10 focused,
+      alias-free modules under `scripts/agent-index/`: `types.ts` (+ constants,
+      stale type-mirror path fixed to `src/types/agent.ts`), `frontmatter.ts`
+      (bespoke regex parser), `chunker.ts` (MDX-strip + section/long-section
+      split + `buildMdxChunks`), `entry.ts` (`finalizeEntry` + `sha256`),
+      `virtual-chunks.ts` (career + identity), `sources.ts` (MDX walker),
+      `store.ts` (index IO), `paths.ts` (paths + env bootstrap), `embed.ts`
+      (batched embedding), `check.ts` (the `--check` CI guard); `build-agent-index.ts`
+      is now a thin CLI orchestrator. De-commented in the same pass (kept the
+      regex-frontmatter / `stripMdxJsx` / Matryoshka-512d / `--check` gotchas).
+      **Verified byte-identical:** `pnpm agent:index:check` → 38 chunks,
+      `reused=38`, `--check passed`; full `pnpm validate` green.
 
 ---
 
@@ -996,8 +1033,11 @@ JSDoc-as-prose, decorative dividers, and commented-out/`TODO` notes; keep only
 machine directives (`"use client"`, `import "server-only"`) and the rare comment
 for genuinely non-obvious logic. Heaviest files (comment-line count):
 
-- [ ] `src/content/data/career-graph.ts` (71)
-- [ ] `src/server/ai/retrieve.ts` (62)
+- [x] `src/content/data/career-graph.ts` (71) — de-commented in the Phase 3 split
+      (kept the coordinate-system doc + edge-derivation gotcha; named the magic
+      `0.04` nudge instead of commenting it).
+- [x] `src/server/ai/retrieve.ts` (62) — de-commented in the Phase 3 split (kept
+      the relevance-floor + stopwords gotchas across the new modules).
 - [ ] `src/features/career-graph/components/scene/heatmap-field.tsx` (60)
 - [ ] `src/app/api/chat/route.ts` (53)
 - [x] `src/features/studio/components/studio-canvas.tsx` (50) — de-commented in
@@ -1054,13 +1094,13 @@ for genuinely non-obvious logic. Heaviest files (comment-line count):
       "types duplicated so the build script stays alias-free" gotcha). CSS
       comments in `styles/globals.css` + `styles/mdx.css` are explanatory and
       accepted.
-- [ ] Scripts: heavy JSDoc + `/* --- */` dividers in `scripts/build-agent-index.ts`.
-      Keep the genuine gotchas (the bespoke regex-frontmatter rationale, the
-      `stripMdxJsx` best-effort note, the Matryoshka-512d rationale, the
-      `--check` CI-guard semantics) and fix the stale type-mirror path comment
-      (`:80` references `src/lib/agent/types.ts`; now `src/types/agent.ts`). The
-      e2e specs' JSDoc headers are largely justified test-context gotchas — keep
-      them; trim only decorative narration.
+- [~] Scripts: `scripts/build-agent-index.ts` de-commented **during the Phase 3
+  split** — dropped the heavy JSDoc + `/* --- */` dividers, kept the genuine
+  gotchas (bespoke regex-frontmatter, `stripMdxJsx` best-effort, Matryoshka-512d,
+  `--check` CI-guard semantics) distributed across the new `agent-index/*`
+  modules, and fixed the stale type-mirror path (now `src/types/agent.ts` in
+  `agent-index/types.ts`). Still TODO: the e2e specs' JSDoc headers are largely
+  justified test-context gotchas — keep them; trim only decorative narration.
 - [ ] Remaining files with >5 comment lines (sweep after the above).
 
 > Best done **together with Phase 3** per file (decompose + de-comment in one
@@ -1098,9 +1138,11 @@ Rule: `project-structure.md`, `typescript.md`, `react-components-styling.md`.
 - [ ] **Extract the per-IP rate limiter** duplicated by `api/chat` and
       `api/contact` (Upstash + in-memory bucket + `allow`/`clientIp`) into
       `src/server/` (called out in `docs/architecture.md`).
-- [ ] **Move route data/UI out of `app/`** — `about`, `uses`, `colophon` embed
-      content arrays + local helper components; relocate data to
-      `content/`/`config/` and components to a feature/`components`.
+- [~] **Move route data/UI out of `app/`** — `about` is **done** (data →
+  `src/content/data/about.ts`, UI → `features/about`, route thinned, in the
+  Phase 3 pass). `uses` and `colophon` still embed content arrays + local
+  helper components; relocate their data to `content/`/`config/` and
+  components to a feature/`components`.
 - [ ] **Centralize the `http://localhost:3000` fallback** duplicated in
       `layout.tsx`, `robots.ts`, `sitemap.ts`, and `lib/seo/structured-data.ts`
       (`baseUrl()`) — one `env`/`config` default.
