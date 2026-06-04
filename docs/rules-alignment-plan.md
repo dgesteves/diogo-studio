@@ -957,8 +957,13 @@ de-commented in the same pass (Phase 4).**
       (`Item`/`iconForPage`). De-commented in the same pass (kept only the
       cmdk-governs-Navigate-not-Ask gotcha as code structure). Verified:
       typecheck + lint + the 4 `command-menu.spec.ts` e2e tests green.
-- [ ] `src/features/career-graph/components/career-graph-svg.tsx` (347) —
-      extract `Axis`, `Node`, and the `<defs>` block into sub-components.
+- [x] `src/features/career-graph/components/career-graph-svg.tsx` (291 → 122) —
+      extracted `career-graph-defs.tsx` (`CareerGraphDefs`), `career-graph-axis.tsx`
+      (`Axis`), `career-graph-node.tsx` (`Node` + `labelPlacement`), and a shared
+      `career-graph-svg-viewport.ts` (`VIEWPORT`). Stays a Server Component (no
+      `"use client"`); both barrel exports preserved. De-commented in the same
+      pass (kept the tracer-period + paint-order gotchas). Verified: typecheck +
+      lint + full 26-test e2e suite green.
 - [ ] `src/features/inspector/components/inspector-overlay.tsx` (321) — extract
       `MotionPanel`, the presentational atoms, and the format helpers.
 - [ ] `src/content/data/career-graph.ts` (311)
