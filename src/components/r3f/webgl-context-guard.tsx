@@ -22,7 +22,7 @@ import { useEffect } from "react";
  * We deliberately do nothing else (no toast, no error overlay). Context
  * loss in our scenes is recoverable and usually invisible to the user.
  */
-export function WebGLContextGuard() {
+export function WebGLContextGuard(): null {
   const gl = useThree((state) => state.gl);
 
   useEffect(() => {

@@ -1,6 +1,7 @@
 "use client";
 
 import { Stats } from "@react-three/drei";
+import type { ReactElement } from "react";
 
 import { env } from "@/env";
 
@@ -24,7 +25,7 @@ const isDev = process.env.NODE_ENV !== "production";
 // Set `NEXT_PUBLIC_PERF_HUD=1` (in `.env.local`) to enable.
 const enabled = isDev && env.NEXT_PUBLIC_PERF_HUD === "1";
 
-export function CareerGraphDevHud() {
+export function CareerGraphDevHud(): ReactElement | null {
   if (!enabled) return null;
   // drei <Stats> mounts a fixed-position panel via a portal; safe outside Canvas.
   return <Stats showPanel={0} />;

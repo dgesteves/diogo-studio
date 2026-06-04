@@ -11,7 +11,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { type FormEvent, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type FormEvent,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 import { Kbd } from "@/components/ui/kbd";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
@@ -56,7 +64,7 @@ type Props = {
  * Component
  * ------------------------------------------------------------------------- */
 
-export function CommandMenuAsk({ onNavigate, openTick }: Props) {
+export function CommandMenuAsk({ onNavigate, openTick }: Props): ReactElement {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
