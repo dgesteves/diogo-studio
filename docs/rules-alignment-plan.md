@@ -778,8 +778,8 @@ assertion for the one-shot auto-dismiss — not a fixed`waitForTimeout` sleep.
 | Explicit return types (exports)            | `typescript.md`                  | Violations                 | Low      |
 | Comments policy (self-documenting)         | `00-core.md`                     | Widespread                 | High     |
 | File size (~200 lines)                     | `00-core.md` / project-structure | Violations                 | Medium   |
-| `console.*` in committed code              | `observability-and-errors.md`    | Violations                 | Medium   |
-| `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Violations                 | High     |
+| `console.*` in committed code              | `observability-and-errors.md`    | Fixed in `src/` (P1)       | Medium   |
+| `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Fixed (P1)                 | High     |
 | Scattered `process.env`                    | `security-and-env.md`            | Violations                 | Medium   |
 | Feature state under `components/providers` | project-structure                | Violations                 | Low      |
 | Manual memoization vs React Compiler       | react-components-styling         | Compiler on (P0); strip P5 | Low      |
@@ -823,29 +823,44 @@ These unblock the rest and prevent regressions.
 
 ---
 
-## Phase 1 — Error handling & observability (high)
+## Phase 1 — Error handling & observability (high) `[x]`
 
 Rule: `observability-and-errors.md`, `nextjs-app-router.md`.
 
-- [ ] **Add `src/app/global-error.tsx`** — currently missing. Required top-level
-      boundary for uncaught errors; render accessible, recoverable fallback UI.
-- [ ] **Wire `src/app/error.tsx` to Sentry.** Replace `console.error` +
-      `// TODO` (`src/app/error.tsx:13-14`) with `Sentry.captureException(error)`.
-      `@sentry/nextjs` is already a dependency.
-- [ ] **Remove stray `console.*`** from committed code, routing through a
-      structured logger / Sentry instead:
-  - [ ] `src/app/api/chat/route.ts` (`console.warn`, `console.error`)
-  - [ ] `src/components/r3f/webgl-context-guard.tsx` (`console.info`, dev-gated —
-        decide keep vs. logger)
-- [ ] **Confirm async state matrix** (loading/empty/error/success) on data-driven
-      UI; add missing states where only the happy path ships.
-- [ ] **De-duplicate `instrumentation.ts`** — the `nodejs` and `edge`
-      `Sentry.init` blocks are identical; collapse to one. Extract the default
-      traces sample rate (`0.1`, also in `instrumentation-client.ts`) to a named
-      const.
-- [ ] **Confirm/wire Web Vitals** in `instrumentation-client.ts` (errors + Web
-      Vitals per the observability rule); today it only initialises Sentry.
-      Cross-check `layout.tsx` + `lib/telemetry`.
+- [x] **Add `src/app/global-error.tsx`** — added. `"use client"` top-level
+      boundary that renders its own `<html>`/`<body>` (imports `globals.css` for
+      tokens), captures via `Sentry.captureException`, and offers an accessible
+      recoverable fallback with `reset()`.
+- [x] **Wire `src/app/error.tsx` to Sentry.** Replaced the `console.error` +
+      `// TODO` with `Sentry.captureException(error)`; renamed the export to
+      `RouteError` (it is the route boundary, not the global one) and added an
+      explicit `ReactElement` return type.
+- [x] **Remove stray `console.*`** from committed code:
+  - [x] `src/app/api/chat/route.ts` — both the embed-fallback `console.warn` and
+        the stream `console.error` now call `Sentry.captureException(err, { tags })`,
+        preserving graceful keyword-fallback / stream-close degradation.
+  - [x] `src/components/r3f/webgl-context-guard.tsx` — removed the dev-only
+        `console.info` breadcrumbs and the now-redundant `onRestored` no-op
+        listener; kept the critical `event.preventDefault()`. Also drops the raw
+        `NODE_ENV` reads (clears the Phase 2 item for this file).
+- [x] **Confirm async state matrix** — confirmed from the Batch H/I audit:
+      `command-menu-ask.tsx` ships the full idle/streaming/done/refused/
+      rate-limited/error/unconfigured union and `contact-form.tsx` ships
+      loading/error/success + a 503 fallback. No happy-path-only UI found. No
+      code change.
+- [x] **De-duplicate `instrumentation.ts`** — collapsed the identical `nodejs` /
+      `edge` `Sentry.init` blocks into one guarded branch. Extracted the default
+      traces sample rate to `DEFAULT_TRACES_SAMPLE_RATE` in
+      `src/lib/telemetry/constants.ts`, now shared by both `instrumentation.ts`
+      and `instrumentation-client.ts`.
+- [x] **Confirm Web Vitals** — confirmed already tracked in production via
+      `@vercel/speed-insights` (mounted in `layout.tsx`, Vercel-only) and
+      surfaced in-app through `lib/telemetry/web-vitals-store.ts` (lazy
+      `web-vitals`). `instrumentation-client.ts` owns client **error** capture
+      (Sentry). Deliberately **did not** add Sentry `browserTracingIntegration`
+      to avoid loading the tracing bundle against the 1.25 MB `pnpm size` budget;
+      Speed Insights is the right tool for CWV here. Revisit if Sentry becomes
+      the single CWV sink.
 
 ---
 

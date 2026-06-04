@@ -1,11 +1,15 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { DEFAULT_TRACES_SAMPLE_RATE } from "@/lib/telemetry/constants";
+
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 
 if (dsn) {
   Sentry.init({
     dsn,
-    tracesSampleRate: Number(process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE ?? 0.1),
+    tracesSampleRate: Number(
+      process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE ?? DEFAULT_TRACES_SAMPLE_RATE,
+    ),
     // Session Replay is part of the production observability story this
     // portfolio is meant to demonstrate. We record only on error (zero
     // ongoing-session sampling) and mask text + media so it's privacy-safe.

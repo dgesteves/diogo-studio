@@ -30,24 +30,12 @@ export function WebGLContextGuard() {
 
     function onLost(event: Event) {
       event.preventDefault();
-      // Dev-only breadcrumb. In production we trust three's restore path.
-      if (process.env.NODE_ENV !== "production") {
-        console.info("[webgl] context lost — awaiting restore (dev HMR is the usual cause).");
-      }
-    }
-
-    function onRestored() {
-      if (process.env.NODE_ENV !== "production") {
-        console.info("[webgl] context restored.");
-      }
     }
 
     canvas.addEventListener("webglcontextlost", onLost, false);
-    canvas.addEventListener("webglcontextrestored", onRestored, false);
 
     return () => {
       canvas.removeEventListener("webglcontextlost", onLost, false);
-      canvas.removeEventListener("webglcontextrestored", onRestored, false);
     };
   }, [gl]);
 

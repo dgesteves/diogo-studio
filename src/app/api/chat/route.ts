@@ -17,6 +17,7 @@
  *    will still degrade gracefully on the client; the route refuses cleanly).
  */
 
+import * as Sentry from "@sentry/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -176,8 +177,7 @@ export async function POST(req: Request): Promise<Response> {
       });
       queryEmbedding = result.embedding;
     } catch (err) {
-      // Embedding failure is recoverable — fall through to keyword retrieval.
-      console.warn("[/api/chat] embed failed, falling back to keyword:", err);
+      Sentry.captureException(err, { tags: { route: "/api/chat", stage: "embed" } });
     }
   }
 
@@ -255,7 +255,7 @@ export async function POST(req: Request): Promise<Response> {
         }
         controller.close();
       } catch (err) {
-        console.error("[/api/chat] stream error:", err);
+        Sentry.captureException(err, { tags: { route: "/api/chat", stage: "stream" } });
         controller.enqueue(encoder.encode("\n\n[The model stream ended unexpectedly. Try again.]"));
         controller.close();
       }

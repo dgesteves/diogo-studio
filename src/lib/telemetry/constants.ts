@@ -1,0 +1,1 @@
+export const DEFAULT_TRACES_SAMPLE_RATE = 0.1;

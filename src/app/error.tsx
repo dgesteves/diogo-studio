@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
+import { useEffect, type ReactElement } from "react";
 
-export default function GlobalError({
+export default function RouteError({
   error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
-}) {
+}): ReactElement {
   useEffect(() => {
-    // TODO: forward to your observability platform (Sentry, Datadog, etc.)
-    console.error(error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
