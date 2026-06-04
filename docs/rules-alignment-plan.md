@@ -918,11 +918,16 @@ Rule: `security-and-env.md`, `typescript.md`.
 ## Phase 3 — File size & decomposition (medium)
 
 Rule: `00-core.md`, `project-structure.md` (~200 lines max). Split into
-sub-components/hooks/helpers. Largest offenders first:
+sub-components/hooks/helpers. Largest offenders first. **Each file is also
+de-commented in the same pass (Phase 4).**
 
-- [ ] `src/features/command-menu/components/command-menu-ask.tsx` (552) — extract
-      `Suggestions`/`AnswerSurface`/`CitationList`/`CitationChip`, the answer
-      renderer, and a `use-ask-agent` hook for the fetch/stream logic.
+- [x] `src/features/command-menu/components/command-menu-ask.tsx` (552 → ~116) —
+      extracted `hooks/use-ask-agent.ts` (fetch/stream lifecycle + decode helper),
+      `components/ask-suggestions.tsx`, `components/ask-answer-surface.tsx`,
+      `components/ask-answer.tsx` (the `[N]`/bold/code/link renderer + `CitationChip` + `sanitizeHref`), `components/ask-citation-list.tsx`, and a shared
+      `types.ts` (`AskStatus`/`RetrievalMode`). De-commented in the same pass.
+      Verified: typecheck + 26-test e2e suite green; behavior unchanged
+      (memoization left for Phase 5).
 - [ ] `src/features/studio/components/studio-canvas.tsx` (526) — split each
       scene object (`Lighting`/`CameraIdle`/`GridFloor`/`Desk`/`Chair`/
       `DeskProps`/`Speakers`/`MonitorRig`) into its own module.
