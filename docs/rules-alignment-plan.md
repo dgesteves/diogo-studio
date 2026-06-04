@@ -964,8 +964,12 @@ de-commented in the same pass (Phase 4).**
       `"use client"`); both barrel exports preserved. De-commented in the same
       pass (kept the tracer-period + paint-order gotchas). Verified: typecheck +
       lint + full 26-test e2e suite green.
-- [ ] `src/features/inspector/components/inspector-overlay.tsx` (321) — extract
-      `MotionPanel`, the presentational atoms, and the format helpers.
+- [x] `src/features/inspector/components/inspector-overlay.tsx` (266 → 155) —
+      extracted `inspector-format.ts` (`ratingTone`/`formatVital`/`fpsTone`/
+      `formatCount`), `inspector-atoms.tsx` (`Panel`/`Vital`/`Stat`/`Signal`),
+      and `inspector-motion-panel.tsx` (`MotionPanel`). De-commented in the same
+      pass (kept the mount-on-open + deferred-measure gotchas). Verified:
+      typecheck + lint + the 3 `inspector-overlay.spec.ts` e2e tests green.
 - [ ] `src/content/data/career-graph.ts` (311)
 - [ ] `src/server/ai/retrieve.ts` (289)
 - [ ] `src/app/(marketing)/about/page.tsx` (288) — also thin the route; move UI

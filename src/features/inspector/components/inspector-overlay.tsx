@@ -2,7 +2,7 @@
 
 import { Activity, Gauge, Layers, X, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
 import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
@@ -12,40 +12,12 @@ import {
   getVitalsServerSnapshot,
   getVitalsSnapshot,
   subscribeVitals,
-  type VitalRating,
-  type VitalSample,
 } from "@/lib/telemetry/web-vitals-store";
 import { cn } from "@/lib/utils/cn";
 
-/**
- * Inspector Overlay — the S4 "receipts" surface.
- *
- * The CV claims streaming-grade performance; this proves it on the surface
- * itself. Toggle with `Ctrl` + `` ` ``. Four panels:
- *
- *  1. Web Vitals (LCP / INP / CLS / TTFB / FCP) via the `web-vitals` package,
- *     dynamically imported on first open so it never touches the initial
- *     bundle (keeping the first-route JS budget intact).
- *  2. 3D scene telemetry (FPS, frame time, draw calls, triangles, GPU
- *     objects) sampled from `WebGLRenderer.info` via the perf store.
- *  3. Route JS actually transferred, measured from the Resource Timing API.
- *  4. Motion mode — system / low-power / override signals, with a live
- *     toggle so visitors can experience the reduced-motion story on demand.
- *
- * Off by default. Non-modal (doesn't trap focus or block the page).
- */
-
-const ratingTone: Record<VitalRating, string> = {
-  good: "text-signal-good",
-  "needs-improvement": "text-signal-warn",
-  poor: "text-signal-hot",
-};
-
-function formatVital(name: string, value: number): string {
-  if (name === "CLS") return value.toFixed(3);
-  if (value >= 1000) return `${(value / 1000).toFixed(2)}s`;
-  return `${Math.round(value)}ms`;
-}
+import { Panel, Stat, Vital } from "./inspector-atoms";
+import { fpsTone, formatCount } from "./inspector-format";
+import { MotionPanel } from "./inspector-motion-panel";
 
 function measureRouteJs(): { kb: number; count: number } {
   if (typeof performance === "undefined" || !performance.getEntriesByType) {
@@ -71,12 +43,18 @@ export function InspectorOverlay(): ReactElement | null {
   const { reducedMotion } = useReducedMotionPreference();
 
   if (!open) return null;
-  // Subtree is only mounted while open, so the web-vitals import and the
-  // perf-store subscription cost nothing until the visitor opts in.
+  // Subtree only mounts while open, so the web-vitals import and the perf-store
+  // subscription cost nothing until the visitor opts in.
   return <OverlayPanel onClose={() => setOpen(false)} reducedMotion={reducedMotion} />;
 }
 
-function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reducedMotion: boolean }) {
+function OverlayPanel({
+  onClose,
+  reducedMotion,
+}: {
+  onClose: () => void;
+  reducedMotion: boolean;
+}): ReactElement {
   const perf = useSyncExternalStore(subscribePerf, getPerfSnapshot, getPerfServerSnapshot);
   const vitals = useSyncExternalStore(subscribeVitals, getVitalsSnapshot, getVitalsServerSnapshot);
   const pathname = usePathname();
@@ -115,7 +93,6 @@ function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reduced
       </header>
 
       <div className="flex max-h-[70vh] flex-col gap-3 overflow-y-auto p-3">
-        {/* Web Vitals */}
         <Panel icon={<Zap className="size-3" />} title="Web Vitals">
           <div className="grid grid-cols-3 gap-2">
             {(["LCP", "INP", "CLS"] as const).map((name) => (
@@ -127,7 +104,6 @@ function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reduced
           </div>
         </Panel>
 
-        {/* 3D scene */}
         <Panel icon={<Gauge className="size-3" />} title="3D scene">
           {perf.active ? (
             <div className="grid grid-cols-3 gap-2">
@@ -146,7 +122,6 @@ function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reduced
           )}
         </Panel>
 
-        {/* Route JS */}
         <Panel icon={<Layers className="size-3" />} title="Route JS">
           <div className="flex items-end justify-between gap-2">
             <div>
@@ -165,7 +140,6 @@ function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reduced
           </p>
         </Panel>
 
-        {/* Motion mode */}
         <MotionPanel />
       </div>
 
@@ -178,143 +152,4 @@ function OverlayPanel({ onClose, reducedMotion }: { onClose: () => void; reduced
       </footer>
     </aside>
   );
-}
-
-/* ---------------------------------------------------------------------------
- * Motion panel — reads the global motion preference and lets the visitor flip
- * it live, so the reduced-motion story is experienceable from the receipts.
- * ------------------------------------------------------------------------- */
-
-function MotionPanel() {
-  const { reducedMotion, systemReducedMotion, lowPower, override, setOverride } =
-    useReducedMotionPreference();
-
-  const current: "auto" | "on" | "off" = override === null ? "auto" : override ? "on" : "off";
-  const set = useCallback(
-    (mode: "auto" | "on" | "off") => setOverride(mode === "auto" ? null : mode === "on"),
-    [setOverride],
-  );
-
-  return (
-    <Panel icon={<Activity className="size-3" />} title="Motion mode">
-      <div className="flex flex-col gap-2">
-        <div
-          role="group"
-          aria-label="Reduced-motion override"
-          className="border-border bg-surface-inset grid grid-cols-3 gap-0.5 rounded-md border p-0.5"
-        >
-          {(["auto", "on", "off"] as const).map((mode) => (
-            <button
-              key={mode}
-              type="button"
-              onClick={() => set(mode)}
-              aria-pressed={current === mode}
-              className={cn(
-                "focus-visible:ring-ring rounded px-2 py-1 font-mono text-[10px] tracking-wider uppercase transition-colors focus-visible:ring-2 focus-visible:outline-none",
-                current === mode
-                  ? "bg-foreground text-background"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-            >
-              {mode}
-            </button>
-          ))}
-        </div>
-        <dl className="grid grid-cols-2 gap-x-3 gap-y-1 text-[11px]">
-          <Signal label="Effective" on={reducedMotion} onLabel="reduced" offLabel="full" />
-          <Signal label="System" on={systemReducedMotion} onLabel="reduce" offLabel="no-pref" />
-          <Signal label="Low-power" on={lowPower} onLabel="yes" offLabel="no" />
-          <Signal label="Override" on={override !== null} onLabel={current} offLabel="auto" />
-        </dl>
-      </div>
-    </Panel>
-  );
-}
-
-/* ---------------------------------------------------------------------------
- * Presentational atoms
- * ------------------------------------------------------------------------- */
-
-function Panel({
-  icon,
-  title,
-  children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="border-border bg-surface-inset/60 rounded-md border p-2.5">
-      <div className="text-subtle-foreground mb-2 flex items-center gap-1.5 font-mono text-[10px] font-medium tracking-wider uppercase">
-        {icon}
-        {title}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-function Vital({ name, sample }: { name: string; sample?: VitalSample }) {
-  return (
-    <div className="border-border bg-surface flex flex-col gap-0.5 rounded border px-2 py-1.5">
-      <span className="text-subtle-foreground font-mono text-[9px] tracking-wider uppercase">
-        {name}
-      </span>
-      <span
-        className={cn(
-          "tabular text-sm font-medium",
-          sample ? ratingTone[sample.rating] : "text-subtle-foreground",
-        )}
-      >
-        {sample ? formatVital(name, sample.value) : "—"}
-      </span>
-    </div>
-  );
-}
-
-function Stat({ label, value, tone }: { label: string; value: string; tone?: string }) {
-  return (
-    <div className="border-border bg-surface flex flex-col gap-0.5 rounded border px-2 py-1.5">
-      <span className="text-subtle-foreground font-mono text-[9px] tracking-wider uppercase">
-        {label}
-      </span>
-      <span className={cn("tabular text-sm font-medium", tone ?? "text-foreground")}>{value}</span>
-    </div>
-  );
-}
-
-function Signal({
-  label,
-  on,
-  onLabel,
-  offLabel,
-}: {
-  label: string;
-  on: boolean;
-  onLabel: string;
-  offLabel: string;
-}) {
-  return (
-    <div className="flex items-center justify-between gap-2">
-      <dt className="text-subtle-foreground font-mono text-[9px] tracking-wider uppercase">
-        {label}
-      </dt>
-      <dd className={cn("font-mono text-[10px]", on ? "text-accent" : "text-muted-foreground")}>
-        {on ? onLabel : offLabel}
-      </dd>
-    </div>
-  );
-}
-
-function fpsTone(fps: number): string {
-  if (fps >= 55) return "text-signal-good";
-  if (fps >= 30) return "text-signal-warn";
-  return "text-signal-hot";
-}
-
-function formatCount(n: number): string {
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
-  return String(n);
 }
