@@ -58,8 +58,6 @@ export function CareerGraphSvg({
             const toNew = a.x <= b.x ? b : a;
             const len = Math.hypot(toNew.x - fromOld.x, toNew.y - fromOld.y);
             const tracer = Math.max(18, len * 0.14);
-            // Stagger tracer phase per edge so they don't pulse in lockstep —
-            // multiples of 0.6s wrapped within the 3.6s `cg-edge-tracer` period.
             const delay = -(idx * 0.6) % 3.6;
             return (
               <g key={edge.id}>

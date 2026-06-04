@@ -7,14 +7,6 @@ import { patterns as patternMeta, type PatternId } from "@/content/data/career-g
 
 type CaseStudy = (typeof caseStudies)[number];
 
-/**
- * `<CaseStudyCard />` — list-row representation of a case study on `/work`.
- *
- * Console-grade: company / years on the eyebrow, big title, two top
- * metrics summarized, patterns as colored chips, and a hover affordance.
- * No floating cards or image-led tiles — these are postmortems, not
- * marketing assets, and the visual grammar matches that.
- */
 export function CaseStudyCard({ study }: { study: CaseStudy }): ReactElement {
   const topMetrics = study.metrics.slice(0, 2);
 

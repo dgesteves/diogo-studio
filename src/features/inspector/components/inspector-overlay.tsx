@@ -43,8 +43,6 @@ export function InspectorOverlay(): ReactElement | null {
   const { reducedMotion } = useReducedMotionPreference();
 
   if (!open) return null;
-  // Subtree only mounts while open, so the web-vitals import and the perf-store
-  // subscription cost nothing until the visitor opts in.
   return <OverlayPanel onClose={() => setOpen(false)} reducedMotion={reducedMotion} />;
 }
 
@@ -61,7 +59,6 @@ function OverlayPanel({
 
   const [routeJs, setRouteJs] = useState<{ kb: number; count: number }>({ kb: 0, count: 0 });
   useEffect(() => {
-    // Defer a beat so late-arriving chunks for this route are counted.
     const id = window.setTimeout(() => setRouteJs(measureRouteJs()), 600);
     return () => window.clearTimeout(id);
   }, [pathname]);

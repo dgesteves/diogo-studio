@@ -55,7 +55,7 @@ export function ContactForm(): ReactElement {
       try {
         body = await res.json();
       } catch {
-        // Non-JSON error body — fall through to generic copy.
+        body = {};
       }
 
       if (res.status === 503 && body.fallback) {

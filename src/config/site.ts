@@ -1,8 +1,3 @@
-/**
- * Single source of truth for site-wide identity, navigation, and metadata.
- * Anything user-visible that is not page-specific should live here.
- */
-
 export const siteConfig = {
   name: "Diogo Esteves",
   shortName: "Diogo Esteves",
@@ -36,10 +31,6 @@ export const primaryNav: NavItem[] = [
   { label: "Contact", href: "/contact", description: "Reach out about Staff+ or VP roles." },
 ];
 
-/**
- * Operating companies referenced in the hero trust strip and Phase 2 graph.
- * Order matters — most recent / highest-leverage first.
- */
 export const operatingCompanies = [
   "Fueled",
   "Moment",
@@ -50,10 +41,6 @@ export const operatingCompanies = [
   "Deloitte",
 ] as const;
 
-/**
- * Patterns that connect the operating companies. These will become edges in
- * the Phase 2 career graph and pattern filters on `/work`.
- */
 export const patterns = [
   "AI-native platforms",
   "Design-system infrastructure",

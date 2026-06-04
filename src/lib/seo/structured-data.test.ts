@@ -9,11 +9,6 @@ import {
 
 type Json = Record<string, unknown>;
 
-/**
- * `schema-dts` types are deep unions that resist direct indexing. We assert
- * against the serialized payload instead — which is exactly what `<JsonLd>`
- * emits via `JSON.stringify`, so the test mirrors production output.
- */
 function asJson(value: unknown): Json {
   return JSON.parse(JSON.stringify(value)) as Json;
 }

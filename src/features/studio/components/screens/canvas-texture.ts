@@ -1,9 +1,5 @@
 import * as THREE from "three";
 
-// Screens render into an offscreen <canvas> wrapped in a CanvasTexture (used as
-// map + emissiveMap) rather than drei's <Html transform>, which is unreliable
-// behind the bloom pass and across browsers.
-
 export const MONO = `"Geist Mono", ui-monospace, Menlo, Consolas, monospace`;
 
 export function createCanvasTexture(

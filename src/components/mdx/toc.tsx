@@ -2,20 +2,9 @@
 
 import { useEffect, useState, type ReactElement } from "react";
 
-/**
- * Table of contents — sticky companion column on `/work/[slug]` and
- * `/writing/[slug]`. Driven by the velite-generated `toc` array on each
- * document, scrollspied with `IntersectionObserver`.
- *
- * Client component because it tracks the active heading. The list
- * itself is server-renderable too — we ship both: the SSR version lays
- * the prose out, the client one upgrades the active state.
- */
-
 export type TocItem = {
   title: string;
   url: string;
-  /** Optional nested items. Velite emits this as a tree when `original` is on. */
   items?: TocItem[];
 };
 
@@ -45,8 +34,6 @@ export function TableOfContents({ items }: { items: TocItem[] }): ReactElement |
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Pick the entry closest to the top of the viewport that's still
-        // visible — keeps the active marker stable while scrolling.
         const visible = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);

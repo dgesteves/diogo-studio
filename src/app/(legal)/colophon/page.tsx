@@ -118,7 +118,6 @@ export default function ColophonPage(): ReactElement {
         className="console-grid mask-fade-edges pointer-events-none absolute inset-0 opacity-40 dark:opacity-25"
       />
       <div className="relative mx-auto flex max-w-3xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
-        {/* Header */}
         <div className="flex flex-col gap-6">
           <div className="text-muted-foreground border-border bg-surface inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] font-medium tracking-wider uppercase">
             <StatusDot tone="good" />
@@ -139,7 +138,6 @@ export default function ColophonPage(): ReactElement {
           </p>
         </div>
 
-        {/* Verify it yourself */}
         <div className="border-accent/30 bg-accent-soft/40 flex flex-col gap-4 rounded-lg border p-6">
           <h2 className="text-foreground text-base font-medium tracking-tight">
             Verify the claims, live
@@ -155,7 +153,6 @@ export default function ColophonPage(): ReactElement {
           <InspectorTrigger />
         </div>
 
-        {/* Stack */}
         <div className="flex flex-col gap-8">
           {stack.map((group) => (
             <div key={group.category} className="flex flex-col gap-4">
@@ -176,7 +173,6 @@ export default function ColophonPage(): ReactElement {
           ))}
         </div>
 
-        {/* Principles */}
         <div className="flex flex-col gap-4">
           <h2 className="text-subtle-foreground border-border border-b pb-3 font-mono text-[11px] font-medium tracking-wider uppercase">
             Operating principles
@@ -194,7 +190,6 @@ export default function ColophonPage(): ReactElement {
           </ul>
         </div>
 
-        {/* Source */}
         <a
           href={`${siteConfig.links.github}/diogo-studio`}
           target="_blank"

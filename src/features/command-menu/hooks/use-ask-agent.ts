@@ -62,8 +62,6 @@ export function useAskAgent(): UseAskAgent {
       return;
     }
 
-    // Read the sources header before the body so citation chips appear before
-    // the first token streams in.
     const header = res.headers.get("x-agent-sources");
     let payload: AgentSourcesPayload | null = null;
     if (header) {

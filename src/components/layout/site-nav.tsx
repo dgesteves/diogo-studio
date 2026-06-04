@@ -9,10 +9,6 @@ import { CommandTrigger } from "./command-trigger";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";
 
-/**
- * Sticky site nav. Hairline border, subtle backdrop blur, console grammar.
- * Mono initials wordmark on the left, primary routes center, ⌘K + theme right.
- */
 export function SiteNav(): ReactElement {
   const pathname = usePathname();
 
@@ -21,10 +17,6 @@ export function SiteNav(): ReactElement {
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          // WCAG 2.5.3 — accessible name must include the visible text. We
-          // build a label that contains both the visible "DE" badge and the
-          // wordmark text, so screen readers hear the same content sighted
-          // users see.
           aria-label={`${siteConfig.initials} — ${siteConfig.name}, home`}
           className="group text-foreground inline-flex items-center gap-2 font-mono text-sm font-medium tracking-tight"
         >

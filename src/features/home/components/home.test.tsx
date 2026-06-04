@@ -32,9 +32,6 @@ describe("Home page", () => {
 
   it("exposes a ⌘K trigger CTA that opens the agent in Ask mode", () => {
     renderHome();
-    // The CTA's visible label says "Press ⌘ K to ask"; the accessible name
-    // is overridden by aria-label so the screen-reader announcement is
-    // pronounceable instead of "Press command k to ask".
     expect(screen.getByRole("button", { name: /ask the agent about diogo/i })).toBeInTheDocument();
   });
 
@@ -45,8 +42,6 @@ describe("Home page", () => {
 
   it("renders all pattern labels at least once on the page", () => {
     renderHome();
-    // Some pattern names ("Design-system infrastructure") also appear in the
-    // hero copy, so we allow duplicates here and just assert presence.
     for (const pattern of [
       /ai-native platforms/i,
       /design-system infrastructure/i,
@@ -70,19 +65,12 @@ describe("Home page", () => {
 
   it("renders the SVG career-graph LCP frame with a focusable anchor per node", () => {
     renderHome();
-    // The career-graph SVG fallback must be in the SSR markup so it can drive
-    // LCP and the canvas crossfade has something to layer over.
     for (const node of nodes) {
-      // Match by fullName which is unique per node, anchored at the start
-      // of the accessible label to avoid colliding with the SR description.
       const escaped = node.fullName.replace(/[/\\^$*+?.()|[\]{}]/g, "\\$&");
       const link = screen.getByRole("link", {
         name: new RegExp(`^${escaped}\\s*[—-]`, "i"),
       });
       expect(link).toBeInTheDocument();
-      // Phase 3 wires real `/work/[slug]` deep-links for published case
-      // studies and falls back to `/work` for unpublished engagements.
-      // Mirror PUBLISHED_CASE_STUDY_SLUGS from career-graph.ts.
       const published = new Set([
         "eino-ai-network-planning",
         "peacock-streaming",
@@ -98,8 +86,6 @@ describe("Home page", () => {
 
   it("includes a screen-reader description summarizing the career graph", () => {
     renderHome();
-    // The hidden description is part of the figure's accessible name chain
-    // and lists every engagement.
     expect(screen.getByText(/career graph of \d+ engagements/i)).toBeInTheDocument();
   });
 });

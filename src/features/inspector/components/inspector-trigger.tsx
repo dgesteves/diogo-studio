@@ -6,11 +6,6 @@ import { useInspectorOverlay } from "@/components/providers/inspector-overlay-co
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 
-/**
- * Launches the Inspector Overlay (S4) from server-rendered pages like
- * `/colophon`. Thin client wrapper so the page itself stays a server
- * component. Also surfaces the keyboard shortcut for discoverability.
- */
 export function InspectorTrigger(): ReactElement {
   const { toggle } = useInspectorOverlay();
   return (

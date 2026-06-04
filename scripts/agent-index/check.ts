@@ -8,8 +8,6 @@ type CheckArgs = {
   strict: boolean;
 };
 
-// CI guard: never calls the API and never writes the file. Returns false when
-// the committed index would change so the caller can exit non-zero.
 export function runCheck({ chunks, existing, previous, strict }: CheckArgs): boolean {
   if (!existing) {
     console.error(

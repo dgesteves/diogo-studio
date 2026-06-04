@@ -7,9 +7,6 @@ import {
 } from "../../src/content/data/career-graph";
 import { operatingCompanies, siteConfig } from "../../src/config/site";
 
-// Reuse the typed career-graph data so the agent answers "tell me about Diogo at
-// Peacock" from the same source of truth that renders the hero graph node — no
-// parallel resume file to drift.
 export function buildCareerChunks(): IndexEntry[] {
   const out: IndexEntry[] = [];
   out.push(

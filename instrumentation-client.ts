@@ -10,11 +10,6 @@ if (dsn) {
     tracesSampleRate: Number(
       process.env.NEXT_PUBLIC_SENTRY_TRACES_SAMPLE_RATE ?? DEFAULT_TRACES_SAMPLE_RATE,
     ),
-    // Session Replay is part of the production observability story this
-    // portfolio is meant to demonstrate. We record only on error (zero
-    // ongoing-session sampling) and mask text + media so it's privacy-safe.
-    // The ~70 KB client cost is the price of being able to debug what a
-    // hiring manager actually did when something broke.
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 1.0,
     sendDefaultPii: false,

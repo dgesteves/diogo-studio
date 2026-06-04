@@ -15,11 +15,6 @@ export const metadata: Metadata = {
   alternates: { canonical: "/contact" },
 };
 
-/**
- * Contact page — branded `react-hook-form` + Resend form with Upstash
- * rate-limiting (Phase 5), plus the direct channels as a secondary strip so
- * the route is useful even when email delivery isn't configured.
- */
 export default function ContactPage(): ReactElement {
   return (
     <section role="region" aria-labelledby="contact-heading" className="relative overflow-hidden">

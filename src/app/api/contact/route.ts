@@ -1,19 +1,3 @@
-/**
- * Phase 5 — contact intake endpoint.
- *
- * Node runtime (Resend + react-email render need a Node-ish environment).
- * Validates with the shared `contactSchema`, rate-limits per-IP (Upstash when
- * configured, in-memory token bucket otherwise — same shape as `/api/chat`),
- * and sends a branded react-email via Resend.
- *
- * Graceful degradation is the contract:
- *  - Missing `RESEND_API_KEY` → structured 503 `{ fallback: true }`. The form
- *    catches this and points the visitor at the direct mailto link, so the
- *    page is never broken in an unconfigured environment.
- *  - Honeypot hit → silent 200 (we don't tell bots they failed).
- *  - Send failure → reported to Sentry, 502 to the client.
- */
-
 import { createElement } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Ratelimit } from "@upstash/ratelimit";
@@ -26,11 +10,6 @@ import { env } from "@/env";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
-
-/* ---------------------------------------------------------------------------
- * Rate limiting — 5 submissions per hour per IP. Contact abuse is rarer than
- * chat spam but costlier (it lands in a human inbox), so the window is tight.
- * ------------------------------------------------------------------------- */
 
 const upstashLimiter =
   env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
@@ -47,7 +26,7 @@ const upstashLimiter =
 
 const localBuckets = new Map<string, { tokens: number; updatedAt: number }>();
 const LOCAL_CAPACITY = 5;
-const LOCAL_REFILL_PER_MS = LOCAL_CAPACITY / 3_600_000; // 5 tokens / hour
+const LOCAL_REFILL_PER_MS = LOCAL_CAPACITY / 3_600_000;
 
 function allowLocal(key: string): boolean {
   const now = Date.now();
@@ -88,12 +67,7 @@ function json(body: unknown, init?: ResponseInit): Response {
   });
 }
 
-/* ---------------------------------------------------------------------------
- * Route
- * ------------------------------------------------------------------------- */
-
 export async function POST(req: Request): Promise<Response> {
-  // 1) Parse + validate against the shared schema.
   let raw: unknown;
   try {
     raw = await req.json();
@@ -110,12 +84,10 @@ export async function POST(req: Request): Promise<Response> {
   }
   const { name, email, company, roleAltitude, message, company_url } = parsed.data;
 
-  // 2) Honeypot — a filled hidden field means a bot. 200 so it never retries.
   if (company_url) {
     return json({ ok: true });
   }
 
-  // 3) Rate limit.
   if (!(await allow(req))) {
     return json(
       { error: "Too many submissions. Try again in a bit, or email me directly." },
@@ -123,7 +95,6 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // 4) Not configured → graceful 503 so the client shows the mailto fallback.
   if (!env.RESEND_API_KEY) {
     return json(
       {
@@ -135,7 +106,6 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  // 5) Send.
   const to = env.CONTACT_TO_EMAIL ?? siteConfig.email;
   const resend = new Resend(env.RESEND_API_KEY);
 

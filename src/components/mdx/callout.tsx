@@ -1,14 +1,6 @@
 import { CircleAlert, Info, Lightbulb, ShieldAlert } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<Callout />` — neutral note block, used sparingly for "context" or
- * "warning" asides inside long-form prose.
- *
- * Authors should reach for this only when the surrounding prose can't
- * carry the same emphasis. Overuse turns the page into a forum thread.
- */
-
 type CalloutTone = "info" | "warn" | "danger" | "tip";
 
 const toneConfig: Record<CalloutTone, { Icon: typeof Info; ring: string; text: string }> = {

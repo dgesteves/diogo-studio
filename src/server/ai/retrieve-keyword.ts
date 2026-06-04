@@ -5,8 +5,6 @@ import type { AgentChunk } from "@/types/agent";
 import { BM25_B, BM25_K1, MIN_KEYWORD_SCORE, TOP_K } from "./retrieve-tunables";
 import type { RetrievalHit, RetrievalResult } from "./retrieve-types";
 
-// Kept short on purpose: this is technical prose, and over-aggressive stopword
-// removal degrades recall on terms like "of" in "state of the art".
 const STOPWORDS = new Set([
   "a",
   "an",

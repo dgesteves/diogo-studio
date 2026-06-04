@@ -12,20 +12,6 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config/site";
 import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/structured-data";
 
-/**
- * `/work/[slug]` — single case study, rendered as a telemetry-dashboard.
- *
- * Layout:
- * 1. Article header (eyebrow, title, dek, fact grid, patterns, links).
- * 2. Header MetricGrid auto-generated from the schema's `metrics` field.
- * 3. MDX body — long-form prose + custom telemetry components.
- * 4. Outcomes block — closing summary of impact.
- * 5. Cross-link footer to next case study.
- *
- * The TOC sticks to the right column on desktop; on mobile it collapses
- * and the article fills the column.
- */
-
 type Params = { slug: string };
 
 export async function generateStaticParams(): Promise<Params[]> {
@@ -66,7 +52,6 @@ export default async function CaseStudyPage({
   const study = caseStudies.find((s) => s.slug === slug);
   if (!study || study.draft) notFound();
 
-  // Build the next-up cross-link by `order`. Wraps to the first if at the end.
   const ordered = [...caseStudies]
     .filter((s) => !s.draft)
     .sort((a, b) => a.order - b.order || b.publishedAt.localeCompare(a.publishedAt));
@@ -113,7 +98,6 @@ export default async function CaseStudyPage({
         backLabel="All case studies"
       />
 
-      {/* Headline metrics — schema enforces 2–4. */}
       <section aria-label="Headline metrics">
         <MetricGrid>
           {study.metrics.map((metric) => (
@@ -129,7 +113,6 @@ export default async function CaseStudyPage({
         </MetricGrid>
       </section>
 
-      {/* Body + sticky TOC. */}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_220px]">
         <div className="mdx-prose max-w-none lg:max-w-[68ch]">
           <MDXContent code={study.body} />
@@ -141,7 +124,6 @@ export default async function CaseStudyPage({
         </aside>
       </div>
 
-      {/* Outcomes — closing block. */}
       {study.outcomes.length > 0 ? (
         <section
           aria-label="Outcomes"
@@ -163,7 +145,6 @@ export default async function CaseStudyPage({
         </section>
       ) : null}
 
-      {/* Next case study */}
       {next && next.slug !== study.slug ? (
         <Link
           href={next.permalink}

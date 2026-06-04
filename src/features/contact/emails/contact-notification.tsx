@@ -13,21 +13,10 @@ import {
 import type { ReactElement } from "react";
 import type { ContactInput } from "../schemas/contact";
 
-/**
- * Branded notification email sent to Diogo when the contact form is submitted.
- *
- * Email clients ignore most modern CSS, so everything is inline styles with
- * web-safe fallbacks. The palette mirrors the site's deep-space console:
- * near-black surface, hairline borders, signal-cyan accent, mono labels.
- *
- * Rendered server-side by Resend (`emails.send({ react })`).
- */
-
 type ContactNotificationProps = Pick<
   ContactInput,
   "name" | "email" | "company" | "roleAltitude" | "message"
 > & {
-  /** ISO timestamp of receipt — rendered for the audit trail. */
   receivedAt: string;
 };
 

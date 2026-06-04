@@ -15,10 +15,6 @@ import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
 import "@/styles/globals.css";
 import "@/styles/mdx.css";
 
-// Vercel Analytics + Speed Insights only resolve their script payloads on
-// Vercel-hosted deployments (`/_vercel/insights/script.js`). Outside Vercel
-// they 404, polluting the console and dragging the Lighthouse "Best
-// practices" score for no functional benefit.
 const isVercel = env.VERCEL === "1";
 
 const geistSans = Geist({
@@ -106,8 +102,6 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      // Next 16 honors `data-scroll-behavior="smooth"` to preserve our CSS
-      // `scroll-behavior: smooth` during App-Router transitions.
       data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning

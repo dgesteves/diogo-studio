@@ -1,7 +1,5 @@
 import type { Frontmatter } from "./types";
 
-// Bespoke regex parser: we only need a handful of scalar fields here, so we
-// avoid dragging a YAML library into the build (the full YAML lives in velite).
 export function parseFrontmatter(raw: string): { data: Frontmatter; body: string } {
   const match = raw.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n([\s\S]*)$/);
   if (!match) return { data: {}, body: raw };

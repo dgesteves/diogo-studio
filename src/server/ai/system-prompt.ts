@@ -1,13 +1,3 @@
-/**
- * System prompt + user-prompt formatter for the Phase 4 ⌘K Inspector.
- *
- * The agent is intentionally narrow: it answers questions about Diogo's
- * career, case studies, and writing using ONLY the retrieved chunks. The
- * prompt repeatedly anchors the model on three rules — grounding,
- * citations, refusal — because the cost of a hallucinated career fact on
- * a portfolio is much higher than the cost of an honest "I don't know."
- */
-
 import "server-only";
 
 import type { AgentChunk } from "@/types/agent";
@@ -49,10 +39,6 @@ operating style — and nothing else.
 direct answer is via /contact — Diogo replies."
 `;
 
-/**
- * Format the retrieved chunks as a SOURCES block the model can cite by
- * index. The order here defines the `[N]` numbering.
- */
 export function formatUserPrompt(query: string, chunks: AgentChunk[]): string {
   const sources = chunks
     .map((c, i) => {

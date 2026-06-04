@@ -1,19 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<Outcome />` — single-sentence outcome callout, bottom of a case study.
- *
- * Frames the metric / impact in plain language — pairs with the
- * `outcomes` array in the case-study frontmatter (schema-required) so
- * every case study closes on a concrete statement, not adjectives.
- *
- * Implementation note: the outer wrapper is a `<div>` (not `<p>`)
- * because MDX wraps the `children` text in its own `<p>` automatically,
- * and `<p><p>` is invalid HTML — React would emit a hydration error.
- * The inner content area is the one styled like a paragraph; its
- * `[&>p]:my-0` rule strips MDX's default paragraph spacing so the block
- * still reads as a single line.
- */
 export function Outcome({ tag, children }: { tag?: string; children: ReactNode }): ReactElement {
   return (
     <div

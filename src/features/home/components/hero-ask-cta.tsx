@@ -6,11 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 import { useCommandMenu } from "@/components/providers/command-menu-context";
 
-/**
- * Secondary hero CTA — opens the ⌘K command menu directly in Ask mode
- * (Phase 4). Plain ⌘K still lands in Navigate mode; this button is the
- * explicit "talk to the agent" entry point, matching its label.
- */
 export function HeroAskCta(): ReactElement {
   const { openWithMode } = useCommandMenu();
   return (

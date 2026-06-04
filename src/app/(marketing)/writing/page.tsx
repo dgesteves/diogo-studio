@@ -8,15 +8,6 @@ import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
-/**
- * `/writing` — index of essays. Unlike `/work`, no metric tiles per
- * row — essays earn attention from the title + dek + reading time, the
- * way long-form writing should.
- *
- * Same URL-driven pattern filter so a reader who clicked "agentic-ux"
- * on `/work` can carry it over.
- */
-
 export const metadata: Metadata = {
   title: "Writing",
   description: "Essays on platform engineering, AI-native UX, and design-system infrastructure.",

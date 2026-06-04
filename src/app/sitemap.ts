@@ -2,13 +2,6 @@ import type { MetadataRoute } from "next";
 import { caseStudies, essays } from "#content";
 import { env } from "@/env";
 
-/**
- * Sitemap — static IA pages + every published case study + every essay.
- *
- * Drafts are filtered out so unfinished MDX never bleeds into search.
- * `lastModified` prefers `updatedAt`, falling back to `publishedAt`, so
- * search engines see honest freshness signals.
- */
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 

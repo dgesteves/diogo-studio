@@ -1,17 +1,6 @@
 import { ImageResponse } from "next/og";
 import { siteConfig } from "@/config/site";
 
-/**
- * Shared Open Graph image template — Phase 5.
- *
- * One renderer drives every route's social card so they read as a single
- * system: deep-space console surface, hairline grid, a single signal-cyan
- * glow, mono eyebrow, display title. Rendered by `next/og` (Satori) at the
- * Edge, so styles are inline-only and the font stack is system (Satori would
- * otherwise need the raw Geist binary fetched per-request — not worth the
- * cold-start cost for a static-ish card).
- */
-
 export const OG_SIZE = { width: 1200, height: 630 } as const;
 export const OG_CONTENT_TYPE = "image/png";
 
@@ -46,7 +35,6 @@ export function renderOgImage({
         fontFamily: "system-ui, -apple-system, Segoe UI, sans-serif",
       }}
     >
-      {/* Top row — identity + eyebrow */}
       <div
         style={{
           display: "flex",
@@ -91,7 +79,6 @@ export function renderOgImage({
         </span>
       </div>
 
-      {/* Title block */}
       <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
         <h1
           style={{
@@ -120,7 +107,6 @@ export function renderOgImage({
         ) : null}
       </div>
 
-      {/* Bottom strip */}
       <div
         style={{
           display: "flex",

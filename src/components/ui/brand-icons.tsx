@@ -1,14 +1,5 @@
 import * as React from "react";
 
-/**
- * Brand icons. Lucide removed first-party brand icons in v1; we keep a tiny
- * inline-SVG set here so we don't pull in another icon package for two glyphs.
- *
- * Conventions:
- * - 24×24 viewBox, currentColor fills/strokes.
- * - Sized via `className` (default `size-4` to match Lucide presets).
- */
-
 type IconProps = React.SVGProps<SVGSVGElement>;
 
 function Svg({ className, children, ...props }: IconProps) {

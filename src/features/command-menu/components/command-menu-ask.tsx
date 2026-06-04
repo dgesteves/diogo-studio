@@ -49,7 +49,6 @@ export function CommandMenuAsk({ onNavigate, openTick }: Props): ReactElement {
   const onCitationClick = useCallback(
     (href: string) => {
       onNavigate();
-      // Defer routing one frame so the dialog closes before navigating.
       requestAnimationFrame(() => router.push(href));
     },
     [onNavigate, router],

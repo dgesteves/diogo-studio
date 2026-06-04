@@ -1,20 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<MetricTile />` — header-of-dashboard metric.
- *
- * Console-grade: small mono caps label, large tabular figure, optional
- * unit + hint, optional sparkline. Used in case-study headers to put the
- * scale numbers above the fold ("show, don't claim").
- *
- * No animations on entry — the metrics are the load-in, not a
- * count-up gimmick. Numbers are static across SSR + hydration so they
- * hit LCP correctly.
- *
- * Substitute for the planned `@tremor/react` widgets — see blueprint §5.2
- * Phase 3 deltas. Zero-dependency, tabular-friendly, dark-mode-correct.
- */
-
 type MetricTone = "default" | "good" | "warn" | "hot" | "accent";
 
 const toneClasses: Record<MetricTone, { ring: string; value: string }> = {
@@ -38,7 +23,6 @@ export function MetricTile({
   unit?: string;
   hint?: string;
   tone?: MetricTone;
-  /** Optional inline content — usually a `<Sparkline />`. */
   children?: ReactNode;
 }): ReactElement {
   const t = toneClasses[tone];
@@ -67,11 +51,6 @@ export function MetricTile({
   );
 }
 
-/**
- * Convenience wrapper — lays out 2–4 `<MetricTile />` children in a grid
- * that adapts from 1 col on mobile to N on desktop. Authored at the top
- * of every case study to anchor the dashboard look.
- */
 export function MetricGrid({ children }: { children: ReactNode }): ReactElement {
   return (
     <div

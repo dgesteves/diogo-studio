@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils/cn";
 
 const buttonVariants = cva(
   [
-    // Base — console primitive: precise, telemetry-flavored
     "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium",
     "tracking-tight transition-colors duration-150",
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",

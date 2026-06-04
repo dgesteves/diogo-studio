@@ -6,15 +6,6 @@ import { PatternFilter } from "@/components/common/pattern-filter";
 import { StatusDot } from "@/components/ui/status-dot";
 import { type PatternId } from "@/content/data/career-graph";
 
-/**
- * `/work` — telemetry-dashboard index of every published case study.
- *
- * Server-rendered list, ordered by the schema's `order` field (so we can
- * promote flagship engagements without depending on dates). A pattern
- * filter strip pushes selections into the URL (`?p=ai-native`) which
- * we read here on the server — no client-side filtering / state.
- */
-
 export const metadata: Metadata = {
   title: "Case studies",
   description:
@@ -43,7 +34,6 @@ export default async function WorkPage({
   const { p } = await searchParams;
   const selected = parsePatternsFromQuery(p);
 
-  // Sort by `order` ascending; ties broken by date desc (most recent first).
   const ordered = [...caseStudies]
     .filter((study) => !study.draft)
     .sort((a, b) => {
@@ -56,8 +46,6 @@ export default async function WorkPage({
       ? ordered
       : ordered.filter((study) => selected.some((p) => study.patterns.includes(p as PatternId)));
 
-  // Patterns that show up in *any* of the case studies — drives the filter
-  // strip's available chips (so we don't show patterns with zero results).
   const availablePatterns = Array.from(
     new Set(ordered.flatMap((study) => study.patterns)),
   ) as PatternId[];

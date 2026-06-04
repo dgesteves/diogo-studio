@@ -9,27 +9,10 @@ import {
   type ReactElement,
 } from "react";
 
-/* ---------------------------------------------------------------------------
- * Public types
- * ------------------------------------------------------------------------- */
-
 type ReducedMotionContextValue = {
-  /**
-   * The single, app-wide answer: should this surface reduce motion?
-   *
-   * True if ANY of the following hold:
-   * - User override is `true`.
-   * - OS-level `prefers-reduced-motion: reduce` is on.
-   * - Device reports a low-power signal (Save-Data or 2G/slow-2G connection).
-   *
-   * Override `false` takes precedence over both system signals.
-   */
   reducedMotion: boolean;
-  /** OS-level `prefers-reduced-motion: reduce`. */
   systemReducedMotion: boolean;
-  /** Save-Data or slow connection signal. */
   lowPower: boolean;
-  /** Manual override. `null` means "follow the signals above". */
   override: boolean | null;
   setOverride: (value: boolean | null) => void;
 };
@@ -37,11 +20,6 @@ type ReducedMotionContextValue = {
 const ReducedMotionContext = createContext<ReducedMotionContextValue | null>(null);
 
 const STORAGE_KEY = "diogo-studio.reduced-motion";
-
-/* ---------------------------------------------------------------------------
- * Minimal typings for the Network Information API
- * (Not in TS DOM lib by default; we treat it as best-effort.)
- * ------------------------------------------------------------------------- */
 
 type NetworkConnection = {
   saveData?: boolean;
@@ -55,10 +33,6 @@ function getConnection(): NetworkConnection | null {
   const nav = navigator as Navigator & { connection?: NetworkConnection };
   return nav.connection ?? null;
 }
-
-/* ---------------------------------------------------------------------------
- * System reduced-motion store
- * ------------------------------------------------------------------------- */
 
 function subscribeSystem(callback: () => void): () => void {
   if (typeof window === "undefined") return () => {};
@@ -75,10 +49,6 @@ function getSystemSnapshot(): boolean {
 function getSystemServerSnapshot(): boolean {
   return false;
 }
-
-/* ---------------------------------------------------------------------------
- * Low-power store (Save-Data / effective-type)
- * ------------------------------------------------------------------------- */
 
 function subscribeLowPower(callback: () => void): () => void {
   const conn = getConnection();
@@ -98,12 +68,6 @@ function getLowPowerSnapshot(): boolean {
 function getLowPowerServerSnapshot(): boolean {
   return false;
 }
-
-/* ---------------------------------------------------------------------------
- * User override store — module-level so updates fan out to every subscriber
- * in the same tab. (We deliberately don't react to cross-tab `storage`
- * events; the UX value is low and it keeps the implementation small.)
- * ------------------------------------------------------------------------- */
 
 const overrideListeners = new Set<() => void>();
 let overrideCache: boolean | null = null;
@@ -144,26 +108,12 @@ function persistOverride(value: boolean | null): void {
       if (value === null) window.localStorage.removeItem(STORAGE_KEY);
       else window.localStorage.setItem(STORAGE_KEY, value ? "true" : "false");
     } catch {
-      // Storage may be blocked (incognito, sandboxed). Best-effort.
+      void 0;
     }
   }
   overrideListeners.forEach((listener) => listener());
 }
 
-/* ---------------------------------------------------------------------------
- * Provider + hook
- * ------------------------------------------------------------------------- */
-
-/**
- * App-wide motion-preference source of truth.
- *
- * Three signals fold into one boolean (`reducedMotion`):
- * - System `prefers-reduced-motion`.
- * - Low-power (Save-Data, slow-2g, 2g).
- * - User override (persisted in localStorage).
- *
- * Every animation/3D surface gates on this before kicking off motion.
- */
 export function ReducedMotionProvider({ children }: { children: React.ReactNode }): ReactElement {
   const systemReducedMotion = useSyncExternalStore(
     subscribeSystem,
@@ -189,7 +139,6 @@ export function ReducedMotionProvider({ children }: { children: React.ReactNode 
 
   const value = useMemo<ReducedMotionContextValue>(
     () => ({
-      // Override wins; otherwise OR the system signals.
       reducedMotion: override ?? (systemReducedMotion || lowPower),
       systemReducedMotion,
       lowPower,
@@ -202,11 +151,9 @@ export function ReducedMotionProvider({ children }: { children: React.ReactNode 
   return <ReducedMotionContext.Provider value={value}>{children}</ReducedMotionContext.Provider>;
 }
 
-/** Hook for components that need to gate animation/3D work. */
 export function useReducedMotionPreference(): ReducedMotionContextValue {
   const ctx = useContext(ReducedMotionContext);
   if (!ctx) {
-    // Fallback for tests / Storybook contexts that don't wrap with the provider.
     return {
       reducedMotion: false,
       systemReducedMotion: false,

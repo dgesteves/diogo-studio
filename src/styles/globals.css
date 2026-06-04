@@ -1,65 +1,42 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-/* Enable class-based dark mode: <html class="dark"> */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/*
- * Design tokens — console / cockpit grammar.
- *
- * Light mode reads like ink-on-paper. Dark mode reads like a deep-space
- * telemetry console. One signal-cyan accent reserved for active state,
- * edges, and live telemetry — never decoration.
- *
- * All color tokens are OKLCH so contrast and perceived brightness stay
- * predictable across themes.
- */
 :root {
-  /* Surface stack (lowest → highest elevation) */
   --background: oklch(0.985 0.001 100);
   --surface-inset: oklch(0.955 0.003 100);
   --surface-muted: oklch(0.97 0.002 100);
   --surface: oklch(1 0 0);
 
-  /* Text tiers — all must clear WCAG 2.2 AA 4.5:1 on `--background`. */
   --foreground: oklch(0.2 0.005 250);
   --muted-foreground: oklch(0.45 0.008 250);
   --subtle-foreground: oklch(0.5 0.008 250);
 
-  /* Borders */
   --border: oklch(0.91 0.004 250);
   --border-strong: oklch(0.82 0.006 250);
 
-  /* Focus ring + interactive */
   --ring: oklch(0.55 0.16 200);
 
-  /* Signal accent (telemetry cyan).
-   * Tuned so `text-accent` clears AA on `--surface`; the same token doubles
-   * as a button background where the contrast direction reverses. */
   --accent: oklch(0.5 0.13 200);
   --accent-foreground: oklch(0.99 0 0);
   --accent-soft: oklch(0.94 0.04 200);
 
-  /* Signal scales for telemetry and case-study dashboards.
-   * Foreground-usable variants are darker; background variants stay bright. */
   --signal-edge: oklch(0.55 0.15 200);
   --signal-active: oklch(0.5 0.18 200);
   --signal-hot: oklch(0.52 0.2 25);
   --signal-good: oklch(0.5 0.16 150);
   --signal-warn: oklch(0.6 0.16 80);
 
-  /* Code blocks */
   --code-bg: oklch(0.96 0.002 100);
   --code-foreground: oklch(0.25 0.005 250);
 
-  /* Geometry */
   --radius: 0.75rem;
 
   color-scheme: light;
 }
 
 .dark {
-  /* Deep-space surface stack */
   --background: oklch(0.135 0.008 250);
   --surface-inset: oklch(0.115 0.008 250);
   --surface-muted: oklch(0.165 0.009 250);
@@ -91,7 +68,6 @@
 }
 
 @theme inline {
-  /* Colors → Tailwind utilities (bg-background, text-foreground, etc.) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
@@ -113,11 +89,9 @@
   --color-code-bg: var(--code-bg);
   --color-code-foreground: var(--code-foreground);
 
-  /* Fonts (variables declared in layout.tsx via next/font) */
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Radii */
   --radius-xs: calc(var(--radius) - 0.5rem);
   --radius-sm: calc(var(--radius) - 0.25rem);
   --radius-md: var(--radius);
@@ -133,7 +107,6 @@
   }
 
   html {
-    /* Lenis attaches to html; keep native fallback sane. */
     scroll-behavior: smooth;
   }
 
@@ -141,7 +114,6 @@
     background: var(--background);
     color: var(--foreground);
     font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-    /* Geist stylistic alternates: refined `a`, italic `i`, etc. */
     font-feature-settings: "ss01", "cv11";
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
@@ -167,10 +139,6 @@
   }
 }
 
-/*
- * Command menu styling — applied via attribute selectors so we don't drag
- * a verbose `[&_...]` chain through every <Command.Group> in TSX.
- */
 [cmdk-group-heading] {
   padding: 0.5rem 0.75rem;
   font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -182,12 +150,10 @@
 }
 
 @layer utilities {
-  /* Numeric values feel like telemetry */
   .tabular {
     font-variant-numeric: tabular-nums;
   }
 
-  /* Subtle, console-grade grid background — used selectively */
   .console-grid {
     background-image:
       linear-gradient(to right, var(--border) 1px, transparent 1px),
@@ -196,28 +162,15 @@
     background-position: -1px -1px;
   }
 
-  /* Radial fade mask for fading edges of large surfaces */
   .mask-fade-edges {
     mask-image: radial-gradient(ellipse at center, black 55%, transparent 100%);
   }
 
-  /* Hairline divider used by the console UI */
   .hairline {
     border-color: var(--border);
   }
 }
 
-/*
- * Career Graph SVG — node hover/focus styles.
- *
- * Pure CSS, no JS state. `.cg-node-link` is the next/link anchor wrapping
- * each node's SVG group. Hover and focus brighten the ring and halo so the
- * active node is unmistakeable.
- *
- * We deliberately don't ship a popup/tooltip layer — the SVG `<title>`
- * element inside each node gives browsers their default tooltip and screen
- * readers the full description, with zero risk of layout collisions.
- */
 .cg-node-link {
   outline: none;
 }
@@ -245,10 +198,6 @@
   r: 6;
 }
 
-/* Career-graph edge tracers — a short dashed segment that travels along
-   each edge from older engagement to newer. The total animation period is
-   3.6s; per-edge `animation-delay` (set inline via React) staggers them so
-   the cohort pulses in waves rather than in lockstep. */
 @keyframes cg-edge-tracer-flow {
   from {
     stroke-dashoffset: 0;
@@ -258,9 +207,6 @@
     opacity: 0.85;
   }
   to {
-    /* Negative offset travels the dash forward along the path. The
-       magnitude must exceed the longest edge length in viewBox units
-       so the bright segment always exits the end. */
     stroke-dashoffset: -1200;
     opacity: 0;
   }
@@ -278,11 +224,6 @@
   }
 }
 
-/*
- * Honor reduced-motion globally as a safety net.
- * Component-level animations should still gate on `useReducedMotion()` —
- * this catches anything that slips through.
- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

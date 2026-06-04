@@ -1,15 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<Tradeoff />` — explicit "we gained X, we paid Y" block.
- *
- * Forces the author to name the cost of a decision next to its benefit.
- * The pattern competing case studies on the web almost never include and
- * the one a senior reviewer pattern-matches on instantly.
- *
- * Two side-by-side panels — `gained` (signal-good rail) and `paid`
- * (signal-warn rail). On mobile they stack.
- */
 export function Tradeoff({
   title,
   gained,

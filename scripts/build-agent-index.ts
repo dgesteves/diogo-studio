@@ -1,10 +1,4 @@
 #!/usr/bin/env tsx
-// Builds the grounded retrieval index behind `/api/chat`. Output lives in
-// src/content/agent-index.json and is committed to git (with a content-hash
-// `--check` guard on PRs). Pipeline: read MDX → strip frontmatter/JSX → chunk →
-// add career/identity virtual chunks → reuse embeddings by content hash → embed
-// only deltas → write.
-
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative } from "node:path";
 
@@ -19,10 +13,6 @@ import { buildCareerChunks } from "./agent-index/virtual-chunks";
 
 const DEFAULT_EMBED_MODEL = "text-embedding-3-small";
 
-// Modes: `--check` recomputes chunks + hashes and exits non-zero if the committed
-// index would change (CI guard — no API calls, no writes); `--no-embed` skips the
-// API even with a key set (fast chunker iteration); `--strict` (with `--check`)
-// also requires every chunk to carry an embedding.
 const flags = {
   check: process.argv.includes("--check"),
   noEmbed: process.argv.includes("--no-embed"),

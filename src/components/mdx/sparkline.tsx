@@ -1,17 +1,5 @@
 import type { ReactElement } from "react";
 
-/**
- * `<Sparkline />` — pure SVG, server-rendered, zero deps.
- *
- * Used inside `<MetricTile />` to give a metric a directional shape
- * without bringing in a charting library. The path is built from the
- * `values` array; an end-cap dot marks the latest reading. Honors our
- * signal tokens for stroke color.
- *
- * Substitute for the planned `@tremor/react` widgets — see blueprint §5.2
- * Phase 3 deltas.
- */
-
 type SparklineTone = "accent" | "good" | "warn" | "hot" | "muted";
 
 const toneClasses: Record<SparklineTone, string> = {
@@ -27,7 +15,6 @@ export function Sparkline({
   tone = "accent",
   ariaLabel,
 }: {
-  /** Series of numeric readings (≥ 2 required). */
   values: readonly number[];
   tone?: SparklineTone;
   ariaLabel?: string;

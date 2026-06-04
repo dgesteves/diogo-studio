@@ -5,28 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
-/**
- * Shared header strip for `/work/[slug]` and `/writing/[slug]`.
- *
- * Console-grade metadata: eyebrow status pill, title, dek, then a
- * 4-column meta grid (date, length / company, role / years, patterns).
- * Patterns reuse the same color tokens the career graph assigns, so a
- * reader who saw "agentic-ux" in cyan on the home page sees the same
- * cyan here.
- */
-
 export type ArticleHeaderMeta = {
-  /** Short eyebrow tag, e.g. "Case study · Phase 3" or "Essay". */
   eyebrow: string;
-  /** Top-line page title. */
   title: string;
-  /** Optional 1-line dek under the title. Falls back to description. */
   dek?: string;
   description: string;
-  /** Right-aligned metadata cells. Order matters; first 4 render. */
   facts: { label: string; value: string }[];
   patterns: PatternId[];
-  /** Optional inline links — companion deep-links surfaced as small chips. */
   links?: { label: string; href: string }[];
   backHref: string;
   backLabel: string;

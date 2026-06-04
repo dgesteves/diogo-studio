@@ -12,15 +12,6 @@ import { cn } from "@/lib/utils/cn";
 import { useCommandMenu } from "@/components/providers/command-menu-context";
 import { ThemeToggle } from "./theme-toggle";
 
-/**
- * Mobile-only navigation drawer. Hidden ≥ md.
- *
- * - Bottom-sheet via `vaul` — feels native on touch and avoids fighting the
- *   on-screen keyboard if we add search later.
- * - Closes immediately on link click (more responsive than waiting for the
- *   route transition, and keeps state updates on the user-event boundary).
- * - Re-uses the same nav model as desktop so the two stay in sync.
- */
 export function MobileNav(): ReactElement {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
@@ -47,7 +38,6 @@ export function MobileNav(): ReactElement {
           className="border-border-strong bg-surface fixed inset-x-0 bottom-0 z-50 mt-24 flex max-h-[88vh] flex-col rounded-t-2xl border focus:outline-none"
         >
           <Drawer.Title className="sr-only">{siteConfig.name} — navigation</Drawer.Title>
-          {/* Drag handle */}
           <div
             aria-hidden="true"
             className="bg-border-strong mx-auto mt-2 mb-4 h-1.5 w-12 rounded-full"
@@ -75,7 +65,6 @@ export function MobileNav(): ReactElement {
               type="button"
               onClick={() => {
                 setOpen(false);
-                // Defer so the drawer closes before the dialog opens.
                 requestAnimationFrame(() => setCommandOpen(true));
               }}
               className="border-border bg-surface-inset text-muted-foreground hover:border-border-strong hover:text-foreground inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors"

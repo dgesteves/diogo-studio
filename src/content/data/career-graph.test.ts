@@ -30,9 +30,7 @@ describe("career-graph data integrity", () => {
         (a, i) => [a, n.position[i]!] as const,
       )) {
         expect(Math.abs(v)).toBeLessThanOrEqual(1.001);
-        // Sanity: positions are deterministic numbers (not NaN).
         expect(Number.isFinite(v)).toBe(true);
-        // Reads better in the assertion log:
         expect({ id: n.id, axis, v }).toBeDefined();
       }
     }
@@ -67,8 +65,6 @@ describe("career-graph data integrity", () => {
   });
 
   it("nodeHref deep-links to /work/[slug] for published case studies, falls back to /work", () => {
-    // Published case studies in src/content/case-studies/*.mdx — keep this
-    // mirror in sync with PUBLISHED_CASE_STUDY_SLUGS in career-graph.ts.
     const published = new Set([
       "eino-ai-network-planning",
       "peacock-streaming",

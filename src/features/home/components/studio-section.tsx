@@ -19,7 +19,6 @@ export function StudioSection(): ReactElement {
 
         <Studio />
 
-        {/* Caption strip — names what each monitor is showing. Mono caps. */}
         <ul className="text-subtle-foreground mt-6 grid grid-cols-1 gap-3 font-mono text-[10px] tracking-wider uppercase sm:grid-cols-3 sm:gap-8">
           <li className="flex items-center gap-2">
             <span aria-hidden="true" className="text-accent">

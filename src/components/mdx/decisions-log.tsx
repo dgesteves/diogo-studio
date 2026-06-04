@@ -1,17 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<DecisionsLog />` — RFC-flavored decision blocks.
- *
- * Each `<Decision />` block reads as `constraint → options → choice →
- * outcome`. This is the heart of the case-study aesthetic — the part
- * that distinguishes a postmortem from a marketing page.
- *
- * Pattern enforced by structure, not by prose discipline. The schema in
- * the parent is "here are 4 fields, fill them in." This pushes the
- * author to think in tradeoffs.
- */
-
 export function DecisionsLog({ children }: { children: ReactNode }): ReactElement {
   return (
     <ol className="not-prose mdx-decisions-log flex flex-col gap-4" data-mdx-block="decisions">
@@ -28,7 +16,6 @@ export function Decision({
   choice,
   outcome,
 }: {
-  /** Optional 1-based numeric — defaults to autoincrement via CSS counter. */
   index?: string | number;
   title: string;
   constraint: ReactNode;

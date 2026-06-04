@@ -1,15 +1,5 @@
 import { z } from "zod";
 
-/**
- * Single source of truth for the contact form contract.
- *
- * Imported by both the client form (`react-hook-form` + `@hookform/resolvers`)
- * and the server route (`/api/contact`), so validation can never drift between
- * the two sides. Keep this file dependency-free beyond `zod` so it stays
- * importable from any runtime.
- */
-
-/** Role altitudes the visitor can self-select — mirrors the home/contact copy. */
 export const ROLE_ALTITUDES = [
   "Staff / Principal IC",
   "Founding Engineer",
@@ -38,17 +28,11 @@ export const contactSchema = z.object({
     .trim()
     .min(20, "A little more context helps — 20+ characters.")
     .max(4000, "That's a lot — keep it under 4000 characters."),
-  /**
-   * Honeypot. Hidden from humans via CSS + aria-hidden; bots fill every field
-   * they can see in the DOM. A non-empty value means "almost certainly a bot",
-   * and the route silently 200s without sending.
-   */
   company_url: z.string().max(0).optional().or(z.literal("")),
 });
 
 export type ContactInput = z.infer<typeof contactSchema>;
 
-/** The empty form state — keeps `react-hook-form` defaultValues honest. */
 export const contactDefaults: ContactInput = {
   name: "",
   email: "",

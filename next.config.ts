@@ -11,9 +11,6 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const isDev = process.env.NODE_ENV !== "production";
 
-// `'unsafe-eval'` + `ws:` are dev-only (React Refresh + HMR socket).
-// `upgrade-insecure-requests` is gated on Vercel (real https) so it can't break
-// http://localhost prod testing (e.g. `pnpm start` in CI e2e).
 const cspDirectives = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
@@ -47,8 +44,6 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   reactCompiler: true,
   poweredByHeader: false,
-  // Allow HMR through the IDE's browser-preview proxy (127.0.0.1) and the LAN
-  // IP next prints on `pnpm dev`. Has no effect on production.
   allowedDevOrigins: ["127.0.0.1", "localhost"],
   async headers() {
     return [
@@ -76,12 +71,6 @@ export default sentryEnabled
         treeshake: { removeDebugLogging: true },
         automaticVercelMonitors: true,
       },
-      // Source maps are uploaded only when SENTRY_AUTH_TOKEN is present.
-      // We deliberately keep the `//# sourceMappingURL=` references in the
-      // shipped JS (and the maps on disk) so Lighthouse's
-      // `valid-source-maps` audit passes and debugging is easy in browser
-      // devtools. For a portfolio, exposing maps is a net positive
-      // (transparency); for a security-sensitive app this should flip.
       sourcemaps: {
         disable: !process.env.SENTRY_AUTH_TOKEN,
         deleteSourcemapsAfterUpload: false,

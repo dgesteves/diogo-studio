@@ -16,12 +16,6 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
-    // Emulate `prefers-reduced-motion: reduce` so Radix mounts/unmounts the
-    // command menu synchronously instead of waiting on `animate-out` exit
-    // animations to fire `animationend` — the headless CI runner never
-    // resolves those reliably, which left the dialog stuck `visible` after
-    // Escape and made the open/focus assertions flaky. This is a real,
-    // supported user mode (the app gates all motion on `reducedMotion`).
     contextOptions: { reducedMotion: "reduce" },
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],

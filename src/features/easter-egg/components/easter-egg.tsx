@@ -4,14 +4,6 @@ import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { siteConfig } from "@/config/site";
 
-/**
- * Easter egg: type `diogo` anywhere outside a text field to fire a one-shot
- * signal-cyan sweep — a small reward for the curious that reuses the site's
- * telemetry grammar. Honors reduced-motion (renders a static greeting pill
- * instead of the animated burst). Always `pointer-events-none` so it never
- * blocks interaction.
- */
-
 const SEQUENCE = "diogo";
 
 function isEditableTarget(target: EventTarget | null): boolean {
@@ -61,8 +53,6 @@ export function EasterEgg(): ReactElement | null {
       setActive(false);
       return;
     }
-    // Fade in fast, hold at full opacity long enough to actually read the
-    // greeting, then ease out.
     const animation = el.animate(
       [
         { opacity: 0, transform: "scale(0.4)" },

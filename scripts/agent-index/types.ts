@@ -1,7 +1,5 @@
 export type SourceKind = "case-study" | "essay" | "career" | "site";
 
-// Duplicated from src/types/agent.ts so this build script stays alias-free —
-// it runs via tsx, outside the @/ path-alias runtime.
 export type IndexEntry = {
   id: string;
   sourceId: string;
@@ -20,7 +18,6 @@ export type AgentIndex = {
   generatedAt: string;
   embeddingModel: string | null;
   embeddingDim: number | null;
-  // Bump when chunking semantics change so `--check` surfaces a needed rebuild.
   chunkerVersion: number;
   chunks: IndexEntry[];
 };

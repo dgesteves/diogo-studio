@@ -51,17 +51,14 @@ test.describe("⌘K Command Menu", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    // Default is Navigate; the footer exposes both as tabs.
     const navigateTab = dialog.getByRole("tab", { name: /navigate/i });
     const askTab = dialog.getByRole("tab", { name: /ask/i });
     await expect(navigateTab).toHaveAttribute("aria-selected", "true");
     await expect(askTab).toHaveAttribute("aria-selected", "false");
 
-    // ⌘2 switches to Ask mode (the shortcut hint is in the footer).
     await page.keyboard.press(`${modifier}+Digit2`);
     await expect(askTab).toHaveAttribute("aria-selected", "true");
 
-    // Ask input takes focus and the pre-seeded suggestions render.
     await expect(dialog.getByLabel(/question for the agent/i)).toBeFocused();
     await expect(dialog.getByText(/design-system thesis/i)).toBeVisible();
     await expect(dialog.getByText(/agentic ux work/i)).toBeVisible();

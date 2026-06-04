@@ -13,8 +13,6 @@ test.describe("Accessibility", () => {
   });
 
   test("home page in dark mode has no detectable WCAG 2.1 A/AA violations", async ({ page }) => {
-    // Honor system preference so next-themes resolves to dark on first paint
-    // (matches the contrast surface we'd ship to the majority of senior devs).
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
 

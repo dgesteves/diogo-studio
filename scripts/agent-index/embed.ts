@@ -4,8 +4,6 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { EMBED_DIMENSIONS } from "./types";
 import type { IndexEntry } from "./types";
 
-// Matryoshka truncation to 512d — ~3× smaller JSON at no quality cost for this
-// corpus. Batches of 64 keep request sizes well under provider caps.
 const BATCH = 64;
 
 export async function embedMissingChunks(

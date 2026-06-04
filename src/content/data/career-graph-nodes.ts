@@ -2,11 +2,6 @@ import type { PatternId } from "./career-graph-patterns";
 
 export type NodeId = "fueled" | "moment" | "eino" | "peacock" | "diligent" | "bmw" | "deloitte";
 
-// Hand-tuned coordinate cube (not force-directed), each axis in [-1, 1]:
-// x = time (-1 oldest, +1 newest), y = altitude (-1 IC depth, +1 leadership),
-// z = pattern (-1 streaming/enterprise, +1 AI-native). The SVG fallback projects
-// x/y; the 3D scene uses all three. Positions are deterministic so both surfaces
-// match at first paint and the canvas crossfade has no visible jump.
 export type CareerNode = {
   id: NodeId;
   label: string;

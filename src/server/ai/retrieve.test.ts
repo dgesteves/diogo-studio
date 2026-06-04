@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import type { AgentChunk } from "@/types/agent";
 import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieve";
 
-/** Fixture chunks — small, hand-picked so the assertions are obvious. */
 function makeChunk(
   overrides: Partial<AgentChunk> & Pick<AgentChunk, "id" | "content">,
 ): AgentChunk {
@@ -34,7 +33,6 @@ describe("cosine()", () => {
   });
 
   it("clamps to the shorter dimension (cheap robustness for mixed-dim corpora)", () => {
-    // [1, 1, 999] vs [1, 1] — only first two coords contribute.
     expect(cosine([1, 1, 999], [1, 1])).toBeCloseTo(1, 6);
   });
 });
@@ -44,7 +42,6 @@ describe("retrieveByCosine()", () => {
     makeChunk({ id: "a", content: "alpha", embedding: [1, 0, 0] }),
     makeChunk({ id: "b", content: "beta", embedding: [0, 1, 0] }),
     makeChunk({ id: "c", content: "gamma", embedding: [0, 0, 1] }),
-    // No embedding — must be silently skipped.
     makeChunk({ id: "d", content: "delta" }),
   ];
 
@@ -57,7 +54,6 @@ describe("retrieveByCosine()", () => {
   });
 
   it("refuses when no chunk crosses the relevance floor", () => {
-    // Orthogonal to all embedded chunks → all scores ≈ 0.
     const result = retrieveByCosine(chunks, [0, 0, 0, 1]);
     expect(result.refused).toBe(true);
     expect(result.hits).toHaveLength(0);
@@ -75,8 +71,6 @@ describe("retrieveByCosine()", () => {
 });
 
 describe("retrieveByKeyword()", () => {
-  // Realistic-ish corpus — small enough to reason about, big enough to
-  // exercise IDF.
   const chunks: AgentChunk[] = [
     makeChunk({
       id: "eino",

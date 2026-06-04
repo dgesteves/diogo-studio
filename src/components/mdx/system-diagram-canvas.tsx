@@ -13,18 +13,6 @@ import { useReducedMotionPreference } from "@/components/providers/reduced-motio
 import type { SystemDiagramData, SystemNode, SystemNodeKind } from "./system-diagram-types";
 import "@xyflow/react/dist/style.css";
 
-/**
- * `<SystemDiagramCanvas />` — the interactive xyflow surface that hydrates
- * on top of `<SystemDiagramFallback />`. Reduced-motion + low-power users
- * never see this (the wrapper returns early) so the fallback stays
- * authoritative.
- *
- * Keep this small: xyflow is already heavy (~80 KB gz), so we
- * deliberately don't bring in node types, mini-map, layout helpers, or
- * other extras. A single custom node renderer + dashed edges is enough
- * to convey "this is a real architecture diagram."
- */
-
 const kindClass: Record<SystemNodeKind, string> = {
   client: "border-accent/60 text-accent",
   service: "border-signal-edge/60 text-signal-edge",
@@ -45,9 +33,6 @@ const NODE_W = 156;
 const NODE_H = 72;
 
 function mapNodes(nodes: readonly SystemNode[]): Node[] {
-  // xyflow's grid is in pixels; we lay them out using the same projection
-  // the SVG fallback uses, so hydration is "snap-into-place" rather than a
-  // visible relayout. The 800×360 viewport mirrors the fallback's viewBox.
   return nodes.map((n) => ({
     id: n.id,
     type: "default",
@@ -96,7 +81,6 @@ export function SystemDiagramCanvas({
   const nodes = useMemo(() => mapNodes(data.nodes), [data.nodes]);
   const edges = useMemo(() => mapEdges(data.edges), [data.edges]);
 
-  // Respect reduced-motion + low-power: keep the SVG fallback authoritative.
   if (reducedMotion) return null;
 
   return (
@@ -118,17 +102,12 @@ export function SystemDiagramCanvas({
         fitView
         fitViewOptions={{ padding: 0.1 }}
         proOptions={{ hideAttribution: true }}
-        // Render custom node bodies — xyflow's defaults look like a flowchart;
-        // we want them to look like the same cards the fallback drew.
         nodeTypes={{}}
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
         <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" />
         <Controls position="bottom-right" showInteractive={false} className="mdx-flow-controls" />
       </ReactFlow>
-      {/* Render node bodies on top of xyflow's default boxes so they pick
-          up our typography + tokens. xyflow draws connection handles which
-          we hide entirely via mdx.css. */}
       <div className="pointer-events-none absolute inset-0">
         {data.nodes.map((n) => {
           const left = 32 + (n.x / 100) * (800 - 64) - NODE_W / 2;

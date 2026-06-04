@@ -1,15 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
-/**
- * Phase 5 content surfaces — /about, /colophon, /uses, /contact.
- *
- * Each route must render a single level-1 heading and carry no detectable
- * WCAG 2.1 A/AA violations. These pages reuse the same design tokens proven
- * accessible on the home page; this guards against regressions as the copy
- * and structure evolve.
- */
-
 const routes = [
   { path: "/about", heading: /engineering systems behind ambitious products/i },
   { path: "/colophon", heading: /how this site is built/i },

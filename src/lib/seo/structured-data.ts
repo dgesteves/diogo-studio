@@ -2,15 +2,6 @@ import type { Article, BreadcrumbList, Person, WebSite, WithContext } from "sche
 import { env } from "@/env";
 import { siteConfig } from "@/config/site";
 
-/**
- * Typed JSON-LD builders (Phase 5).
- *
- * `Person` + `WebSite` are emitted once from the root layout and cross-linked
- * by stable `@id`s so the graph resolves to a single entity. `Article` and
- * `BreadcrumbList` are emitted per case-study / essay. Everything traces back
- * to verifiable facts from the resume — no invented credentials.
- */
-
 function baseUrl(): string {
   return env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 }

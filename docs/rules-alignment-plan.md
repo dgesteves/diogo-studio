@@ -776,7 +776,7 @@ assertion for the one-shot auto-dismiss — not a fixed`waitForTimeout` sleep.
 | `any` / `@ts-ignore` usage                 | `typescript.md`                  | Mostly OK                  | Low      |
 | Double casts / unvalidated JSON            | `typescript.md`                  | Fixed in `src/` (P2)       | Medium   |
 | Explicit return types (exports)            | `typescript.md`                  | Violations                 | Low      |
-| Comments policy (self-documenting)         | `00-core.md`                     | Widespread                 | High     |
+| Comments policy (self-documenting)         | `00-core.md`                     | Fixed (P4) — zero comments | High     |
 | File size (~200 lines)                     | `00-core.md` / project-structure | Fixed (P3) — 0 flagged     | Medium   |
 | `console.*` in committed code              | `observability-and-errors.md`    | Fixed in `src/` (P1)       | Medium   |
 | `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Fixed (P1)                 | High     |
@@ -1026,85 +1026,55 @@ outside the`src/\*\*` `max-lines` scope and explicitly lower priority.
 
 ---
 
-## Phase 4 — Comments cleanup (high volume)
+## Phase 4 — Comments cleanup (high volume) `[x]`
 
-Rule: `00-core.md` ("No comments — code is self-explanatory"). Remove narration,
-JSDoc-as-prose, decorative dividers, and commented-out/`TODO` notes; keep only
-machine directives (`"use client"`, `import "server-only"`) and the rare comment
-for genuinely non-obvious logic. Heaviest files (comment-line count):
+Rule: `00-core.md` ("No comments — code is self-explanatory").
 
-- [x] `src/content/data/career-graph.ts` (71) — de-commented in the Phase 3 split
-      (kept the coordinate-system doc + edge-derivation gotcha; named the magic
-      `0.04` nudge instead of commenting it).
-- [x] `src/server/ai/retrieve.ts` (62) — de-commented in the Phase 3 split (kept
-      the relevance-floor + stopwords gotchas across the new modules).
-- [ ] `src/features/career-graph/components/scene/heatmap-field.tsx` (60)
-- [ ] `src/app/api/chat/route.ts` (53)
-- [x] `src/features/studio/components/studio-canvas.tsx` (50) — de-commented in
-      the Phase 3 split.
-- [x] `src/features/studio/components/screens.tsx` (49) — de-commented in the
-      Phase 3 split (now `screens/*`).
-- [ ] Studio: JSDoc + JSX dividers in `studio.tsx` and `studio-fallback.tsx`.
-- [ ] `src/components/providers/reduced-motion-provider.tsx` (48)
-- [ ] `src/features/command-menu/components/command-menu-ask.tsx` (37)
-- [ ] `src/features/career-graph/components/career-graph.tsx` (37)
-- [ ] Config files: `src/env.ts`, `velite.config.ts`, `instrumentation-client.ts`,
+> **Policy override (mid-phase, user-directed): ZERO comments.** The user
+> explicitly rejected even the "rare genuine-gotcha" carve-out — _every_
+> explanatory comment, JSDoc, divider, narration, restating, and `TODO` was
+> removed. The **only** comments that remain are functional **machine
+> directives** (`"use client"`, `import "server-only"`, `#!/usr/bin/env tsx`
+> shebang, and `eslint-disable` lines, including the reason-bearing
+> `/* eslint-disable react-hooks/immutability -- … */` blocks). Empty `catch`
+> blocks that previously relied on an explanatory comment to satisfy `no-empty`
+> were converted to a real no-op statement (`body = {}` / `void 0;`).
+
+**Out of scope (left intact):**
+
+- **GLSL comments inside shader template strings** (`radar-sweep`, `grid-floor`,
+  `heatmap-field`) — they're shader _source_, not JS comments.
+- **CSS comments in `styles/globals.css` + `styles/mdx.css`** — the audit
+  accepted these as explanatory styling comments; not part of the code-comment
+  policy. _Flagged for the user: strip on request._
+
+**Swept clean (verified `pnpm validate` green — lint + typecheck + prettier +
+44 tests + knip — and `pnpm agent:index:check` byte-identical):**
+
+- [x] **Config**: `src/env.ts`, `velite.config.ts`, `instrumentation-client.ts`,
       `next.config.ts`, `playwright.config.ts`, `commitlint.config.mjs`.
-- [ ] App routes (JSDoc/dividers): `layout.tsx`, `sitemap.ts`,
-      `api/chat/route.ts`, `api/contact/route.ts`, `(marketing)/work` +
-      `writing` pages, and JSX section dividers in `about`/`uses`/`colophon`/
-      `contact`.
-- [ ] UI/layout components: JSDoc in `brand-icons.tsx`, `kbd.tsx`,
-      `status-dot.tsx`, `button.tsx`, `command-trigger.tsx`, `mobile-nav.tsx`,
-      `site-footer.tsx`, `site-nav.tsx`, `theme-toggle.tsx`.
-- [ ] MDX components: JSDoc across all of `components/mdx/*` (keep only the
-      genuine gotchas in `outcome.tsx`, `mdx-content.tsx`,
-      `system-diagram-mount.tsx`).
-- [ ] Common/SEO/OG/r3f/providers: JSDoc narration across all of
-      `components/{common,seo,og,r3f,providers}/*` plus the decorative
-      `/* --- */` dividers in `reduced-motion-provider.tsx`. Keep only the
-      trimmed `preventDefault` gotcha in `webgl-context-guard.tsx`; drop the
-      stale `@/lib/structured-data` path note in `json-ld.tsx`.
-- [ ] Command-menu/inspector/easter-egg: JSDoc + `/* --- */` dividers in
-      `command-menu.tsx`, `command-menu-ask.tsx`, `inspector-overlay.tsx`,
-      `inspector-trigger.tsx`, `easter-egg.tsx`.
-- [ ] Home/contact: JSDoc/JSX narration in `home.tsx`, `hero-section.tsx`,
-      `hero-ask-cta.tsx`, `studio-section.tsx`, `contact-form.tsx`,
-      `contact-notification.tsx`, `schemas/contact.ts`, `home.test.tsx` (keep
-      the honeypot gotcha in the schema).
-- [ ] Career-graph: JSDoc narration across all of `features/career-graph/*`
-      (`career-graph.tsx`, `career-graph-canvas.tsx`, `career-graph-svg.tsx`,
-      and every `scene/*` file). Keep the trimmed perf/format gotchas (DPR cap + `frameloop` in the canvas, `getBoundingClientRect` rAF-coalescing in
-      `camera-dolly.tsx`/`heatmap-field.tsx`, OKLCH-rasterize in `css-color.ts`)
-      and the justified `eslint-disable` in `camera-dolly.tsx`. GLSL comments
-      inside shader strings are out of scope.
-- [ ] Server/lib: JSDoc narration in `server/ai/retrieve.ts` (already counted,
-      62), `server/ai/system-prompt.ts`, `lib/seo/structured-data.ts`,
-      `lib/telemetry/perf-store.ts`, `lib/telemetry/web-vitals-store.ts`,
-      `lib/utils/cn.ts`, and `lib/hooks/use-is-client.ts`. Keep the genuine
-      gotchas (the `reactStrictMode` double-invoke race in `web-vitals-store.ts`,
-      the `r3f-perf`-dropped + stable-SSR-snapshot notes in the telemetry stores,
-      the `useSyncExternalStore`-vs-`mounted` rationale in `use-is-client.ts`,
-      the cosine/BM25 relevance-floor design notes in `retrieve.ts`, and the
-      `schema-dts`-cast note in `structured-data.test.ts`).
-- [ ] Content/config/types: trim the decorative `/* --- */` dividers in
-      `content/data/career-graph.ts` (already counted, 71 — keep the
-      coordinate-system doc + edge-derivation gotcha), the stale "Phase 2 graph"
-      narration in `config/site.ts`, and the JSDoc in `types/agent.ts` (keep the
-      "types duplicated so the build script stays alias-free" gotcha). CSS
-      comments in `styles/globals.css` + `styles/mdx.css` are explanatory and
-      accepted.
-- [~] Scripts: `scripts/build-agent-index.ts` de-commented **during the Phase 3
-  split** — dropped the heavy JSDoc + `/* --- */` dividers, kept the genuine
-  gotchas (bespoke regex-frontmatter, `stripMdxJsx` best-effort, Matryoshka-512d,
-  `--check` CI-guard semantics) distributed across the new `agent-index/*`
-  modules, and fixed the stale type-mirror path (now `src/types/agent.ts` in
-  `agent-index/types.ts`). Still TODO: the e2e specs' JSDoc headers are largely
-  justified test-context gotchas — keep them; trim only decorative narration.
-- [ ] Remaining files with >5 comment lines (sweep after the above).
-
-> Best done **together with Phase 3** per file (decompose + de-comment in one
-> pass) to avoid churn. Keep the diff to comment removal + extraction only.
+- [x] **App routes**: `layout.tsx`, `sitemap.ts`, `api/chat/route.ts`,
+      `api/contact/route.ts`, `work`/`writing` index + `[slug]` pages, and the
+      JSX section dividers in `about`/`uses`/`colophon`/`contact`.
+- [x] **UI/layout**: `brand-icons`, `kbd`, `status-dot`, `button`,
+      `command-trigger`, `mobile-nav`, `site-footer`, `site-nav`, `theme-toggle`.
+- [x] **MDX components**: all of `components/mdx/*` (incl. the `<p><p>`,
+      `new Function`, and `dynamic({ ssr: false })` notes — all removed).
+- [x] **common/seo/og/r3f/providers**: all of
+      `components/{common,seo,og,r3f,providers}/*`, incl. the dividers in
+      `reduced-motion-provider.tsx` and the stale `json-ld.tsx` path note.
+- [x] **command-menu/inspector/easter-egg**: all files.
+- [x] **home/contact**: `home`, `hero-section`, `hero-ask-cta`, `studio-section`,
+      `contact-form`, `contact-notification`, `schemas/contact`, `home.test`.
+- [x] **career-graph**: `career-graph`, `career-graph-canvas`, `career-graph-svg` + sub-components, and every `scene/*` file (JS comments only; GLSL kept).
+- [x] **studio**: `studio`, `studio-fallback`, `screens/canvas-texture` (the
+      eslint-disable blocks in the screen modules kept).
+- [x] **server/lib**: `system-prompt`, `structured-data`(+test), `perf-store`,
+      `web-vitals-store`, `cn`, `use-is-client`, `retrieve-*`(+test).
+- [x] **content/config/types**: `config/site.ts`, `content/data/career-graph-*`
+      (+test). `types/agent.ts` was already comment-free.
+- [x] **e2e**: all seven specs.
+- [x] **scripts**: `build-agent-index.ts` + every `agent-index/*` module.
 
 ---
 

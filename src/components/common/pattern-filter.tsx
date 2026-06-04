@@ -5,21 +5,11 @@ import { useCallback, type ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
-/**
- * Pattern filter strip for `/work` and `/writing`.
- *
- * Multi-select via `?p=ai-native&p=design-systems`. Renders as the same
- * pattern chips used in the article header — clicking toggles the
- * selection, "All" clears. Server reads `searchParams.p` and filters
- * the collection; this component just owns the URL.
- */
 export function PatternFilter({
   available,
   selected,
 }: {
-  /** Patterns that are present in the current collection — others hide. */
   available: readonly PatternId[];
-  /** Currently selected pattern IDs from the URL. */
   selected: readonly PatternId[];
 }): ReactElement {
   const router = useRouter();

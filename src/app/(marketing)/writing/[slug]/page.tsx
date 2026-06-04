@@ -11,13 +11,6 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { siteConfig } from "@/config/site";
 import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/structured-data";
 
-/**
- * `/writing/[slug]` — single essay.
- *
- * Layout mirrors `/work/[slug]`, minus the MetricGrid + Outcomes
- * blocks. Reading time and last-updated stamp anchor the meta strip.
- */
-
 type Params = { slug: string };
 
 export async function generateStaticParams(): Promise<Params[]> {

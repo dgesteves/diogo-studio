@@ -5,27 +5,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
 
-/**
- * Volumetric heatmap field — raymarched 3D FBM noise on a fullscreen quad.
- *
- * The earlier version of this component drew 2D Perlin clouds on a plane.
- * It read as "atmospheric" but flat. This version actually marches a ray
- * through a 3D noise volume per pixel, so the field has real depth: the
- * eye reads multiple "altitudes" of density at once, and the field
- * reorganizes itself naturally as the camera dollies.
- *
- * The shader is intentionally cheap (24 raymarch steps, low-octave FBM)
- * so it stays well within budget on integrated GPUs. The earlier 2D
- * shader was ~8 texture-equivalent ops per pixel; this is ~120, still
- * comfortably under 1ms per frame on the small hero canvas at 1.75x DPR.
- *
- * Three uniforms feed visual richness:
- *   - `uTime` drifts the noise field on z-axis (slow, ~0.04/sec)
- *   - `uMouse` displaces the field laterally — gives a parallax response
- *   - `uPulse` periodically lights a soft radial wavefront emanating from
- *     the origin — the "scan ping" telemetry beat.
- */
-
 const vertexShader = /* glsl */ `
 varying vec2 vUv;
 void main() {
@@ -173,8 +152,6 @@ export function HeatmapField({ intensity = 1 }: { intensity?: number }): ReactEl
     [accent, accentDeep, intensity],
   );
 
-  // Mouse parallax: track normalized cursor position relative to the
-  // canvas container so the value lives in roughly [-1, 1].
   const mouseTarget = useRef(new THREE.Vector2(0, 0));
   const mouseCurrent = useRef(new THREE.Vector2(0, 0));
   useFrame(({ clock }, delta) => {
@@ -183,25 +160,13 @@ export function HeatmapField({ intensity = 1 }: { intensity?: number }): ReactEl
     u.uTime.value = clock.elapsedTime;
     u.uAspect.value = size.width / Math.max(size.height, 1);
 
-    // Lerp toward the latest cursor position to soften jittery moves.
     mouseCurrent.current.lerp(mouseTarget.current, Math.min(1, delta * 4));
     u.uMouse.value.copy(mouseCurrent.current);
 
-    // Scan ping: 8s period, ease-out wavefront travelling outward.
     const phase = (clock.elapsedTime % 8) / 8;
     u.uPulse.value = Math.pow(phase, 0.6);
   });
 
-  // Bind a passive pointermove listener to update `mouseTarget` (read in
-  // useFrame above). The canvas has `pointer-events: none` set by its
-  // wrapper so we listen on `window`, mapping coordinates against the
-  // canvas's parent element.
-  //
-  // PERF: pointermove can fire at 1000+ Hz on high-refresh displays.
-  // `getBoundingClientRect()` forces a layout flush, so calling it on
-  // every event was the largest source of jank in the hero. We rAF-
-  // throttle the handler: store the latest event coords, then process
-  // them at most once per animation frame.
   const gl = useThree((s) => s.gl);
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -237,8 +202,6 @@ export function HeatmapField({ intensity = 1 }: { intensity?: number }): ReactEl
     };
   }, [gl]);
 
-  // Fullscreen-quad trick: a plane drawn directly in NDC, no camera projection.
-  // We disable depth so it sits comfortably behind everything else.
   return (
     <mesh frustumCulled={false} renderOrder={-3}>
       <planeGeometry args={[2, 2]} />

@@ -44,8 +44,6 @@ export function Node({
         />
         <circle r={r * 0.45} fill="var(--accent)" className="cg-node-dot" />
 
-        {/* paint-order stroke draws a background halo behind the text so labels
-            stay legible when an edge or the heatmap field crosses behind them. */}
         <text
           y={labelOffset}
           textAnchor="middle"

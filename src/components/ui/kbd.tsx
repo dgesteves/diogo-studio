@@ -1,10 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils/cn";
 
-/**
- * Keyboard-hint primitive. Mono, hairline border, subtle surface.
- * Used in the nav, command palette triggers, and inspector overlay.
- */
 export const Kbd = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, children, ...props }, ref) => {
     return (

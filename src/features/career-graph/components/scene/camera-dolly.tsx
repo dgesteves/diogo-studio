@@ -10,23 +10,6 @@
 import { useEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 
-/**
- * Scroll- and mouse-driven camera dolly + subtle idle orbit.
- *
- * Three signals feed the camera target each frame:
- *   1. **Scroll progress** — zooms the camera in slightly and drifts it
- *      laterally as the hero scrolls out of view, giving the scene a sense
- *      of "the user is moving through space."
- *   2. **Mouse parallax** — the cursor position inside the hero biases the
- *      camera by ±0.15 units on x/y. This is what makes the scene feel
- *      "reactive" without any explicit interaction.
- *   3. **Idle orbit** — a very slow figure-eight so the scene breathes
- *      even when the user is perfectly still.
- *
- * All three sources are smoothed via a critically-damped lerp so input
- * feels inertial, never twitchy. Reduced-motion never mounts the canvas,
- * so this component is always allowed to animate when present.
- */
 export function CameraDolly({
   containerRef,
 }: {
@@ -34,18 +17,12 @@ export function CameraDolly({
 }): null {
   const { camera } = useThree();
 
-  // Cached state read in useFrame — refs to avoid React re-renders.
   const scrollProgress = useRef(0);
   const targetProgress = useRef(0);
   const mouseTarget = useRef({ x: 0, y: 0 });
   const mouseCurrent = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    // PERF: both `scroll` and `pointermove` can fire 1000+ times per second
-    // on high-refresh displays, and both handlers below call
-    // `getBoundingClientRect()` which forces a layout flush. Coalesce all
-    // updates through a single requestAnimationFrame tick so we do at most
-    // one layout read per frame regardless of input rate.
     let rafId = 0;
     let pendingScroll = false;
     let pendingMouse = false;
@@ -56,7 +33,7 @@ export function CameraDolly({
       rafId = 0;
       const el = containerRef.current;
       if (!el) return;
-      const rect = el.getBoundingClientRect(); // a single layout flush
+      const rect = el.getBoundingClientRect();
 
       if (pendingScroll) {
         pendingScroll = false;
@@ -89,7 +66,6 @@ export function CameraDolly({
       mouseTarget.current = { x: 0, y: 0 };
     };
 
-    // Initial read so the first frame doesn't have to wait for an event.
     pendingScroll = true;
     schedule();
 

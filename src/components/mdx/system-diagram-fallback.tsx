@@ -1,22 +1,6 @@
 import type { ReactElement } from "react";
 import type { SystemDiagramData, SystemNodeKind } from "./system-diagram-types";
 
-/**
- * Server-rendered SVG fallback for `<SystemDiagram />`.
- *
- * Projects the local 0..100 grid onto the figure's pixel viewport, draws
- * orthogonal-ish edges with optional labels, and stacks node "cards"
- * that mirror the look of the xyflow nodes. Designed to be:
- *
- * - **LCP-safe** (server-rendered, ships zero JS for the diagram path).
- * - **Reduced-motion correct** (no animation, ever).
- * - **Screen-reader complete** (figure caption + `<title>`/`<desc>` +
- *   per-node text — readable as a narrative without sight).
- *
- * The interactive xyflow canvas hydrates *on top* of this surface for
- * sighted users with JS; the fallback simply stays underneath.
- */
-
 const nodeKindStyles: Record<SystemNodeKind, { ring: string; tag: string; tagText: string }> = {
   client: { ring: "stroke-accent", tag: "fill-accent/15", tagText: "fill-accent" },
   service: {
@@ -66,7 +50,6 @@ function project(x: number, y: number) {
 }
 
 function edgeAnchor(from: { cx: number; cy: number }, to: { cx: number; cy: number }) {
-  // Anchor edges to the box-edge nearest the target.
   const dx = to.cx - from.cx;
   const dy = to.cy - from.cy;
   const horizontal = Math.abs(dx) > Math.abs(dy);
@@ -105,7 +88,6 @@ export function SystemDiagramFallback({
       <title>{title}</title>
       {description ? <desc>{description}</desc> : null}
 
-      {/* Edges */}
       <g>
         {data.edges.map((edge) => {
           const from = projected.get(edge.from);
@@ -155,7 +137,6 @@ export function SystemDiagramFallback({
         })}
       </g>
 
-      {/* Nodes */}
       <g>
         {data.nodes.map((node) => {
           const p = projected.get(node.id);
@@ -174,7 +155,6 @@ export function SystemDiagramFallback({
                 className={`fill-surface ${style.ring}`}
                 strokeWidth={1.25}
               />
-              {/* Kind tag */}
               <rect x={x + 8} y={y + 8} width={56} height={14} rx={3} className={style.tag} />
               <text
                 x={x + 36}
@@ -190,7 +170,6 @@ export function SystemDiagramFallback({
               >
                 {kindLabels[node.kind]}
               </text>
-              {/* Label */}
               <text
                 x={x + 12}
                 y={y + 40}
@@ -200,7 +179,6 @@ export function SystemDiagramFallback({
               >
                 {node.label}
               </text>
-              {/* Detail */}
               {node.detail ? (
                 <text
                   x={x + 12}

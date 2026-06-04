@@ -1,14 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
 
-/**
- * `<Timeline />` — phased project narrative.
- *
- * Each `<Phase />` represents a chunk of the engagement: a tag (e.g.
- * "Phase 01"), a title, dates, and a body. Renders as a vertical rail
- * with a 1px hairline; the dots align on the rail so reading is
- * top-to-bottom and effortless.
- */
-
 export function Timeline({ children }: { children: ReactNode }): ReactElement {
   return (
     <ol

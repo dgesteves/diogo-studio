@@ -4,21 +4,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import { markPerfInactive, publishPerf } from "@/lib/telemetry/perf-store";
 
-/**
- * In-Canvas perf sampler for the Inspector Overlay (S4).
- *
- * Reads `WebGLRenderer.info` and computes FPS over a ~250ms window, then
- * publishes to the module-level perf store ~4×/sec (not per-frame) so the
- * overlay can subscribe without re-rendering 60 times a second.
- *
- * Renders nothing. Mounted unconditionally inside the Canvas; since the
- * Canvas itself only mounts when motion is allowed and in-view, the store's
- * `active` flag naturally reflects whether a live scene exists.
- *
- * `info.render.*` reflects the previously rendered frame here (R3F runs
- * `useFrame` callbacks before its own `gl.render`), which is exactly what we
- * want to display — the cost of the last completed frame.
- */
 export function PerfReporter(): null {
   const gl = useThree((state) => state.gl);
   const frames = useRef(0);

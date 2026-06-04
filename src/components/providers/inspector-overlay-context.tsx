@@ -11,16 +11,6 @@ import {
   type ReactElement,
 } from "react";
 
-/**
- * Owns the open/closed state of the Inspector Overlay (S4 — the "receipts"
- * HUD) and binds its keyboard shortcut once at the app root.
- *
- * Toggle: `Ctrl` + `` ` `` (backtick). Cmd+backtick is a macOS window
- * shortcut, so we deliberately bind Ctrl only — it's free in the browser on
- * every platform. `Escape` closes. Off by default; nothing renders until the
- * visitor opts in (or the /colophon page calls `toggle()`).
- */
-
 type InspectorOverlayContextValue = {
   open: boolean;
   setOpen: (value: boolean) => void;

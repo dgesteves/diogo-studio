@@ -5,20 +5,6 @@ import { useFrame, useThree } from "@react-three/fiber";
 import type * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
 
-/**
- * Radar sweep — a thin cyan arc rotating around the origin, leaving a
- * decaying angular trail behind it.
- *
- * It's a single fullscreen quad with a tiny GLSL shader. Implementing it
- * as a fullscreen pass means the sweep scales to any aspect, never clips
- * at the corners, and stays cheap (just a polar coordinate transform).
- *
- * The blueprint asks for "subtle / RF-heatmap-inspired telemetry." A radar
- * sweep is the most literal expression of that vocabulary; we keep the
- * radius below the visible canvas so the leading edge is always on screen
- * but never punches out of the field.
- */
-
 const vertexShader = /* glsl */ `
 varying vec2 vUv;
 void main() {

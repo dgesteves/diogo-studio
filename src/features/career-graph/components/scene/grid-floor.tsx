@@ -5,19 +5,6 @@ import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
 
-/**
- * Wireframe perspective grid — a thin cyan grid receding into depth.
- *
- * The plane is tilted ~80° away from camera so it reads as a floor. Lines
- * are drawn by a shader (no geometry-instanced lines) so the grid stays
- * crisp at any DPR and we can apply a per-pixel fog/horizon fade.
- *
- * This is the single most "3D-feeling" element of the scene: a perspective
- * cue that anchors the otherwise floating volumetric field. We keep it
- * very faint by default so it reads as ambient infrastructure, not as
- * decoration.
- */
-
 const vertexShader = /* glsl */ `
 varying vec2 vUv;
 varying float vDepth;
@@ -104,8 +91,6 @@ export function GridFloor({ intensity = 1 }: { intensity?: number }): ReactEleme
     uTime.value = clock.elapsedTime;
   });
 
-  // Tilt + translation: floor sits below the camera, recedes into +z.
-  // Sized big so we never see its far edge — only the horizon fade.
   return (
     <mesh
       position={[0, -1.4, -3]}

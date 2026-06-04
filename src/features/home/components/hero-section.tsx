@@ -17,30 +17,16 @@ export function HeroSection(): ReactElement {
     <section
       role="region"
       aria-labelledby="hero-heading"
-      // `isolate` creates a stacking context so the absolute atmosphere
-      // layer (z-0) sits *behind* the content (z-10) but in front of the
-      // page background.
       className="border-border relative isolate overflow-hidden border-b"
-      // Generous min-height so the full-bleed atmosphere has real estate
-      // to breathe across the viewport — sized so the heatmap + radar +
-      // grid floor read as a panoramic field, not a thin strip.
       style={{ minHeight: "min(820px, 92vh)" }}
     >
-      {/* Console grid backdrop — sits just above the page background but
-          BELOW the atmosphere canvas so the grid remains visible only
-          along the edges where the atmosphere's vignette has faded out. */}
       <div
         aria-hidden="true"
         className="console-grid mask-fade-edges pointer-events-none absolute inset-0 z-0 opacity-50 dark:opacity-30"
       />
 
-      {/* Full-bleed R3F atmosphere — spans the entire hero section,
-          extending well past the centered content column on wide screens
-          to deliver the cinematic background the blueprint asked for. */}
       <CareerGraphAtmosphere className="z-0" />
 
-      {/* Long-form description for screen readers — outside the visual
-          layout but inside the same section so it groups with the hero. */}
       <CareerGraphAccessibleDescription id="career-graph-description" />
 
       <div className="relative z-10 mx-auto flex min-h-[inherit] max-w-6xl flex-col justify-center px-4 pt-16 pb-20 sm:px-6 sm:pt-24 sm:pb-28 lg:px-8 lg:pt-28">
@@ -96,9 +82,6 @@ export function HeroSection(): ReactElement {
             <span id="career-graph-caption" className="sr-only">
               Career graph — engagements connected by pattern themes
             </span>
-            {/* SVG figure — bounded in its column with a generous aspect
-                ratio. Sits ABOVE the atmosphere thanks to the section's
-                z-10 content wrapper. */}
             <div
               className="border-border/40 bg-surface/20 relative rounded-xl border backdrop-blur-[2px]"
               style={{ aspectRatio: "5 / 3" }}

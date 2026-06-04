@@ -21,9 +21,6 @@ function pickPrimaryPattern(shared: PatternId[]): PatternId {
   return shared.reduce((best, p) => (patternPriority[p] < patternPriority[best] ? p : best));
 }
 
-// Connect every pair of nodes that share a pattern, deduped to one edge per
-// pair. The rendered color is the shared pattern with the highest visual
-// weight — earlier entries in `patternPriority` win.
 export const edges: readonly CareerEdge[] = (() => {
   const out: CareerEdge[] = [];
   for (let i = 0; i < nodes.length; i += 1) {

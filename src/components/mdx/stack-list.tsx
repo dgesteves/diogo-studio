@@ -1,13 +1,6 @@
 import type { ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 
-/**
- * `<StackList />` — compact tag-strip for tech stack / surfaces / scope.
- *
- * Used in case-study headers under the metrics block to declare the
- * surface area and the toolchain. Reads as console-grade metadata, not
- * a "skills bar" (explicit anti-pattern in §2.3).
- */
 export function StackList({
   label,
   items,

@@ -4,9 +4,6 @@ import type { IndexEntry, RawSection, SourceKind } from "./types";
 const MAX_CHUNK_CHARS = 1400;
 const MIN_CHUNK_CHARS = 120;
 
-// Best-effort MDX→text: this is a portfolio corpus, not a general renderer.
-// Custom components are dropped wholesale — their human-readable signal lives in
-// the surrounding markdown headings + the frontmatter captured by virtual chunks.
 export function stripMdxJsx(md: string): string {
   let s = md;
   s = s.replace(/```[\s\S]*?```/g, "");
@@ -40,7 +37,6 @@ function splitIntoSections(body: string): RawSection[] {
       current = { heading, anchor: slugifyHeading(heading), body: "" };
       continue;
     }
-    // Skip h1 — case studies use the frontmatter `title` for the page title.
     if (/^#\s/.test(line)) continue;
     current.body += `${line}\n`;
   }
@@ -80,8 +76,6 @@ export function buildMdxChunks(opts: {
   const sourceId = `${kind}:${slug}`;
   const entries: IndexEntry[] = [];
 
-  // Lead chunk = the description: a canonical one-paragraph summary and a strong
-  // retrieval target for high-level questions ("what is the eino.ai work about?").
   if (description) {
     entries.push(
       finalizeEntry({
@@ -105,8 +99,6 @@ export function buildMdxChunks(opts: {
     for (const piece of split) {
       const trimmed = piece.body.trim();
       if (trimmed.length < MIN_CHUNK_CHARS) continue;
-      // Prepend the heading inside the chunk so the embedding sees the structural
-      // context and ranks heading-relevant matches higher.
       const headed = piece.heading ? `## ${piece.heading}\n\n${trimmed}` : trimmed;
       entries.push(
         finalizeEntry({

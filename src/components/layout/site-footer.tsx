@@ -4,10 +4,6 @@ import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
 import { siteConfig } from "@/config/site";
 
-/**
- * Footer is intentionally quiet — the work is the thing. Two columns:
- * (1) availability + meta; (2) the smallest set of useful links.
- */
 export function SiteFooter(): ReactElement {
   const year = new Date().getFullYear();
 

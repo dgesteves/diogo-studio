@@ -10,11 +10,6 @@ const toneToClasses: Record<StatusTone, { bg: string; ring: string }> = {
   neutral: { bg: "bg-muted-foreground", ring: "bg-muted-foreground/20" },
 };
 
-/**
- * Pulsing telemetry dot. Used for availability badges, live indicators, etc.
- * The outer ring uses a CSS animation; honors `prefers-reduced-motion` via the
- * global safety net in `globals.css`.
- */
 export function StatusDot({
   tone = "good",
   className,
