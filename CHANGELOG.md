@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/dgesteves/diogo-studio/compare/v1.1.8...v1.2.0) (2026-06-04)
+
+
+### Features
+
+* wire error boundaries to Sentry and harden observability (rules-alignment Phase 1) ([0fdebf0](https://github.com/dgesteves/diogo-studio/commit/0fdebf0dba1a4f3be07a5bcf4bee1b8a8322ef81))
+
 ## [1.1.8](https://github.com/dgesteves/diogo-studio/compare/v1.1.7...v1.1.8) (2026-06-04)
 
 
