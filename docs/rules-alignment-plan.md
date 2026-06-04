@@ -951,8 +951,12 @@ de-commented in the same pass (Phase 4).**
       `terminal-screen.ts`, `code-screen.ts`, `metrics-screen.ts`, `index.ts`
       barrel). `interface LogLine` → `type`; kept the one genuine "why not drei
       `<Html>`" gotcha. Verified: typecheck + lint + `pnpm build` green.
-- [ ] `src/features/command-menu/components/command-menu.tsx` (388) — extract
-      `NavigateView`, `Footer`/`ModeTab`, `Item`/`iconForPage`.
+- [x] `src/features/command-menu/components/command-menu.tsx` (329 → 81) —
+      extracted `command-menu-navigate.tsx` (`NavigateView`),
+      `command-menu-footer.tsx` (`Footer`/`ModeTab`), and `command-menu-item.tsx`
+      (`Item`/`iconForPage`). De-commented in the same pass (kept only the
+      cmdk-governs-Navigate-not-Ask gotcha as code structure). Verified:
+      typecheck + lint + the 4 `command-menu.spec.ts` e2e tests green.
 - [ ] `src/features/career-graph/components/career-graph-svg.tsx` (347) —
       extract `Axis`, `Node`, and the `<defs>` block into sub-components.
 - [ ] `src/features/inspector/components/inspector-overlay.tsx` (321) — extract
