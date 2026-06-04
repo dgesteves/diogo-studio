@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.3](https://github.com/dgesteves/diogo-studio/compare/v1.2.2...v1.2.3) (2026-06-04)
+
+
+### Miscellaneous Chores
+
+* remove all explanatory comments across codebase (rules-alignment Phase 4/4) ([594935e](https://github.com/dgesteves/diogo-studio/commit/594935e5b295f8a821114a3f52d17504c913d188))
+
 ## [1.2.2](https://github.com/dgesteves/diogo-studio/compare/v1.2.1...v1.2.2) (2026-06-04)
 
 
