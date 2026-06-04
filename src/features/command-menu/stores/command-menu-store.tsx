@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactElement,
-} from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactElement } from "react";
 
 export type CommandMenuMode = "navigate" | "ask";
 
@@ -29,23 +20,20 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
   const [mode, setMode] = useState<CommandMenuMode>("navigate");
   const openRef = useRef(false);
 
-  const setOpen = useCallback((next: boolean) => {
+  function setOpen(next: boolean): void {
     openRef.current = next;
     setOpenState(next);
     if (!next) setMode("navigate");
-  }, []);
+  }
 
-  const toggle = useCallback(() => {
+  function toggle(): void {
     setOpen(!openRef.current);
-  }, [setOpen]);
+  }
 
-  const openWithMode = useCallback(
-    (next: CommandMenuMode) => {
-      setMode(next);
-      setOpen(true);
-    },
-    [setOpen],
-  );
+  function openWithMode(next: CommandMenuMode): void {
+    setMode(next);
+    setOpen(true);
+  }
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -53,16 +41,16 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
       const isModK = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
       if (!isModK) return;
       event.preventDefault();
-      setOpen(!openRef.current);
+      const next = !openRef.current;
+      openRef.current = next;
+      setOpenState(next);
+      if (!next) setMode("navigate");
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [setOpen]);
+  }, []);
 
-  const value = useMemo<CommandMenuContextValue>(
-    () => ({ open, setOpen, toggle, mode, setMode, openWithMode }),
-    [open, setOpen, toggle, mode, openWithMode],
-  );
+  const value: CommandMenuContextValue = { open, setOpen, toggle, mode, setMode, openWithMode };
 
   return <CommandMenuContext.Provider value={value}>{children}</CommandMenuContext.Provider>;
 }

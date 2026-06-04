@@ -8,8 +8,9 @@ import {
   type Edge,
   type Node,
 } from "@xyflow/react";
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { cn } from "@/lib/utils/cn";
 import type { SystemDiagramData, SystemNode, SystemNodeKind } from "./system-diagram-types";
 import "@xyflow/react/dist/style.css";
 
@@ -78,8 +79,8 @@ export function SystemDiagramCanvas({
 }): ReactElement | null {
   const { reducedMotion } = useReducedMotionPreference();
 
-  const nodes = useMemo(() => mapNodes(data.nodes), [data.nodes]);
-  const edges = useMemo(() => mapEdges(data.edges), [data.edges]);
+  const nodes = mapNodes(data.nodes);
+  const edges = mapEdges(data.edges);
 
   if (reducedMotion) return null;
 
@@ -115,12 +116,18 @@ export function SystemDiagramCanvas({
           return (
             <div
               key={n.id}
-              className={`bg-surface absolute flex flex-col gap-1 rounded-lg border ${kindClass[n.kind]} p-3`}
+              className={cn(
+                "bg-surface absolute flex flex-col gap-1 rounded-lg border p-3",
+                kindClass[n.kind],
+              )}
               style={{ left, top, width: NODE_W, height: NODE_H }}
               aria-hidden="true"
             >
               <span
-                className={`font-mono text-[9px] font-medium tracking-wider uppercase ${kindClass[n.kind]}`}
+                className={cn(
+                  "font-mono text-[9px] font-medium tracking-wider uppercase",
+                  kindClass[n.kind],
+                )}
               >
                 {kindLabel[n.kind]}
               </span>

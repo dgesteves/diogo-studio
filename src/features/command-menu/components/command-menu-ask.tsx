@@ -2,7 +2,7 @@
 
 import { Network, Square } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { type FormEvent, type ReactElement, useCallback, useEffect, useRef } from "react";
+import { type ReactElement, type SyntheticEvent, useEffect, useRef } from "react";
 
 import { Kbd } from "@/components/ui/kbd";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
@@ -28,31 +28,22 @@ export function CommandMenuAsk({ onNavigate, openTick }: Props): ReactElement {
     return () => cancelAnimationFrame(id);
   }, [openTick]);
 
-  const onSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-      const trimmed = query.trim();
-      if (!trimmed) return;
-      void ask(trimmed);
-    },
-    [ask, query],
-  );
+  function onSubmit(e: SyntheticEvent<HTMLFormElement>): void {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    void ask(trimmed);
+  }
 
-  const onSuggest = useCallback(
-    (s: string) => {
-      setQuery(s);
-      void ask(s);
-    },
-    [ask, setQuery],
-  );
+  function onSuggest(s: string): void {
+    setQuery(s);
+    void ask(s);
+  }
 
-  const onCitationClick = useCallback(
-    (href: string) => {
-      onNavigate();
-      requestAnimationFrame(() => router.push(href));
-    },
-    [onNavigate, router],
-  );
+  function onCitationClick(href: string): void {
+    onNavigate();
+    requestAnimationFrame(() => router.push(href));
+  }
 
   const isStreaming = status === "streaming";
   const showSuggestions = status === "idle";

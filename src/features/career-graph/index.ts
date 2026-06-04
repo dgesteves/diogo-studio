@@ -1,5 +1,5 @@
+export { CareerGraphAtmosphere } from "./components/career-graph";
 export {
-  CareerGraphAtmosphere,
-  CareerGraphFigure,
+  CareerGraphSvg as CareerGraphFigure,
   CareerGraphAccessibleDescription,
-} from "./components/career-graph";
+} from "./components/career-graph-svg";

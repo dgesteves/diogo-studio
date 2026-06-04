@@ -31,6 +31,12 @@
   --code-bg: oklch(0.96 0.002 100);
   --code-foreground: oklch(0.25 0.005 250);
 
+  --brand-cyan: #22d3ee;
+  --brand-cyan-bright: #67e8f9;
+  --brand-ink: #0d0f12;
+  --brand-ink-raised: #181c22;
+  --brand-edge: #262b33;
+
   --radius: 0.75rem;
 
   color-scheme: light;
@@ -88,6 +94,12 @@
   --color-signal-warn: var(--signal-warn);
   --color-code-bg: var(--code-bg);
   --color-code-foreground: var(--code-foreground);
+
+  --color-brand-cyan: var(--brand-cyan);
+  --color-brand-cyan-bright: var(--brand-cyan-bright);
+  --color-brand-ink: var(--brand-ink);
+  --color-brand-ink-raised: var(--brand-ink-raised);
+  --color-brand-edge: var(--brand-edge);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

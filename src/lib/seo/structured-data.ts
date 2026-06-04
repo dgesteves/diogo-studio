@@ -1,16 +1,11 @@
 import type { Article, BreadcrumbList, Person, WebSite, WithContext } from "schema-dts";
-import { env } from "@/env";
-import { siteConfig } from "@/config/site";
-
-function baseUrl(): string {
-  return env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-}
+import { getSiteUrl, siteConfig } from "@/config/site";
 
 const PERSON_ID = "#person";
 const WEBSITE_ID = "#website";
 
 export function personJsonLd(): WithContext<Person> {
-  const url = baseUrl();
+  const url = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "Person",
@@ -22,34 +17,21 @@ export function personJsonLd(): WithContext<Person> {
     email: `mailto:${siteConfig.email}`,
     address: {
       "@type": "PostalAddress",
-      addressLocality: "Lisbon",
-      addressCountry: "PT",
+      addressLocality: siteConfig.address.locality,
+      addressCountry: siteConfig.address.country,
     },
     sameAs: [siteConfig.links.github, siteConfig.links.linkedin],
-    knowsAbout: [
-      "Frontend platform engineering",
-      "AI-native product engineering",
-      "Design systems",
-      "Web performance",
-      "Streaming reliability",
-      "Engineering leadership",
-    ],
-    alumniOf: [
-      {
-        "@type": "CollegeOrUniversity",
-        name: "ISEL — Instituto Superior de Engenharia de Lisboa",
-      },
-      {
-        "@type": "CollegeOrUniversity",
-        name: "Universidade Lusófona",
-      },
-    ],
-    knowsLanguage: ["pt", "en"],
+    knowsAbout: [...siteConfig.knowsAbout],
+    alumniOf: siteConfig.alumniOf.map((name) => ({
+      "@type": "CollegeOrUniversity",
+      name,
+    })),
+    knowsLanguage: [...siteConfig.knowsLanguage],
   };
 }
 
 export function websiteJsonLd(): WithContext<WebSite> {
-  const url = baseUrl();
+  const url = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -71,7 +53,7 @@ export function articleJsonLd(input: {
   dateModified?: string;
   section?: string;
 }): WithContext<Article> {
-  const url = baseUrl();
+  const url = getSiteUrl();
   const canonical = `${url}${input.path}`;
   return {
     "@context": "https://schema.org",
@@ -92,7 +74,7 @@ export function articleJsonLd(input: {
 export function breadcrumbJsonLd(
   items: { name: string; path: string }[],
 ): WithContext<BreadcrumbList> {
-  const url = baseUrl();
+  const url = getSiteUrl();
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",

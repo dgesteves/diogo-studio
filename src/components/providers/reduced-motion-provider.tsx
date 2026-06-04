@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useSyncExternalStore,
-  type ReactElement,
-} from "react";
+import { createContext, useContext, useSyncExternalStore, type ReactElement } from "react";
 
 type ReducedMotionContextValue = {
   reducedMotion: boolean;
@@ -133,20 +126,17 @@ export function ReducedMotionProvider({ children }: { children: React.ReactNode 
     getOverrideServerSnapshot,
   );
 
-  const setOverride = useCallback((value: boolean | null) => {
+  function setOverride(value: boolean | null): void {
     persistOverride(value);
-  }, []);
+  }
 
-  const value = useMemo<ReducedMotionContextValue>(
-    () => ({
-      reducedMotion: override ?? (systemReducedMotion || lowPower),
-      systemReducedMotion,
-      lowPower,
-      override,
-      setOverride,
-    }),
-    [override, systemReducedMotion, lowPower, setOverride],
-  );
+  const value: ReducedMotionContextValue = {
+    reducedMotion: override ?? (systemReducedMotion || lowPower),
+    systemReducedMotion,
+    lowPower,
+    override,
+    setOverride,
+  };
 
   return <ReducedMotionContext.Provider value={value}>{children}</ReducedMotionContext.Provider>;
 }

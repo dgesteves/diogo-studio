@@ -1,5 +1,6 @@
 import { CircleAlert, Info, Lightbulb, ShieldAlert } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 
 type CalloutTone = "info" | "warn" | "danger" | "tip";
 
@@ -30,13 +31,13 @@ export function Callout({
   const { Icon, ring, text } = toneConfig[tone];
   return (
     <aside
-      className={`not-prose mdx-callout flex gap-3 rounded-md border ${ring} px-4 py-3`}
+      className={cn("not-prose mdx-callout flex gap-3 rounded-md border px-4 py-3", ring)}
       data-mdx-block="callout"
     >
-      <Icon className={`${text} mt-0.5 size-4 shrink-0`} aria-hidden="true" />
+      <Icon className={cn("mt-0.5 size-4 shrink-0", text)} aria-hidden="true" />
       <div className="flex flex-1 flex-col gap-1.5 text-sm leading-relaxed">
         {title ? (
-          <p className={`font-mono text-[10px] font-medium tracking-wider uppercase ${text}`}>
+          <p className={cn("font-mono text-[10px] font-medium tracking-wider uppercase", text)}>
             {title}
           </p>
         ) : null}

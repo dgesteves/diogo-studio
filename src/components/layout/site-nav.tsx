@@ -22,7 +22,7 @@ export function SiteNav(): ReactElement {
         >
           <span
             aria-hidden="true"
-            className="grid size-7 place-items-center rounded-[7px] border border-[#262b33] bg-[#0d0f12] bg-[radial-gradient(120%_120%_at_50%_0%,#181c22_0%,#0d0f12_62%)] text-[11px] font-semibold tracking-wider text-[#22d3ee] shadow-[0_1px_2px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 group-hover:border-[#22d3ee]/50 group-hover:text-[#67e8f9] group-hover:shadow-[0_0_0_1px_rgba(34,211,238,0.2),0_0_14px_-2px_rgba(34,211,238,0.5)]"
+            className="border-brand-edge bg-brand-ink text-brand-cyan group-hover:border-brand-cyan/50 group-hover:text-brand-cyan-bright grid size-7 place-items-center rounded-[7px] border bg-[radial-gradient(120%_120%_at_50%_0%,var(--brand-ink-raised)_0%,var(--brand-ink)_62%)] text-[11px] font-semibold tracking-wider shadow-[0_1px_2px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.05)] transition-all duration-200 group-hover:shadow-[0_0_0_1px_color-mix(in_srgb,var(--brand-cyan)_20%,transparent),0_0_14px_-2px_color-mix(in_srgb,var(--brand-cyan)_50%,transparent)]"
           >
             {siteConfig.initials}
           </span>

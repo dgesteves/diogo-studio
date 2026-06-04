@@ -2,6 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
+import { brandColors } from "@/config/brand";
 
 import { DESK_TOP_Y } from "./constants";
 
@@ -38,7 +39,7 @@ function Speaker({ position }: { position: [number, number, number] }): ReactEle
       </mesh>
       <mesh position={[0.045, -0.14, 0.072]}>
         <sphereGeometry args={[0.0035, 8, 8]} />
-        <meshBasicMaterial color="#22d3ee" toneMapped={false} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
     </group>
   );

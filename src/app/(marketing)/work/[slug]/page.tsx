@@ -133,9 +133,9 @@ export default async function CaseStudyPage({
             Outcomes
           </p>
           <ul className="flex flex-col gap-2.5">
-            {study.outcomes.map((outcome, i) => (
+            {study.outcomes.map((outcome) => (
               <li
-                key={i}
+                key={outcome}
                 className="text-foreground/90 border-signal-good/40 bg-signal-good/5 rounded-md border-l-2 px-4 py-3 text-sm leading-relaxed"
               >
                 {outcome}

@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 
 type MetricTone = "default" | "good" | "warn" | "hot" | "accent";
 
@@ -28,7 +29,7 @@ export function MetricTile({
   const t = toneClasses[tone];
   return (
     <div
-      className={`bg-surface flex flex-col gap-3 border ${t.ring} rounded-lg p-5`}
+      className={cn("bg-surface flex flex-col gap-3 rounded-lg border p-5", t.ring)}
       role="group"
       aria-label={`${label}: ${value}${unit ? ` ${unit}` : ""}`}
     >
@@ -37,7 +38,10 @@ export function MetricTile({
       </p>
       <div className="flex items-baseline gap-2">
         <span
-          className={`tabular text-[clamp(1.75rem,3vw,2.5rem)] leading-none font-medium tracking-tight ${t.value}`}
+          className={cn(
+            "tabular text-[clamp(1.75rem,3vw,2.5rem)] leading-none font-medium tracking-tight",
+            t.value,
+          )}
         >
           {value}
         </span>

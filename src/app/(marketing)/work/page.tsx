@@ -4,7 +4,7 @@ import { caseStudies } from "#content";
 import { CaseStudyCard } from "@/components/common/case-study-card";
 import { PatternFilter } from "@/components/common/pattern-filter";
 import { StatusDot } from "@/components/ui/status-dot";
-import { type PatternId } from "@/content/data/career-graph";
+import { parsePatternIds, type PatternId } from "@/content/data/career-graph";
 
 export const metadata: Metadata = {
   title: "Case studies",
@@ -13,26 +13,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/work" },
 };
 
-const VALID_PATTERNS: readonly PatternId[] = [
-  "ai-native",
-  "design-systems",
-  "streaming",
-  "agentic-ux",
-  "enterprise",
-];
-
-function parsePatternsFromQuery(value: string | string[] | undefined): PatternId[] {
-  const raw = Array.isArray(value) ? value : value ? [value] : [];
-  return raw.filter((p): p is PatternId => VALID_PATTERNS.includes(p as PatternId));
-}
-
 export default async function WorkPage({
   searchParams,
 }: {
   searchParams: Promise<{ p?: string | string[] }>;
 }): Promise<ReactElement> {
   const { p } = await searchParams;
-  const selected = parsePatternsFromQuery(p);
+  const selected = parsePatternIds(p);
 
   const ordered = [...caseStudies]
     .filter((study) => !study.draft)

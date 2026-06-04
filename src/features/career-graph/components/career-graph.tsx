@@ -4,11 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { useIsClient } from "@/lib/hooks/use-is-client";
-
-export {
-  CareerGraphSvg as CareerGraphFigure,
-  CareerGraphAccessibleDescription,
-} from "./career-graph-svg";
+import { cn } from "@/lib/utils/cn";
 
 const CareerGraphCanvas = dynamic(
   () => import("./career-graph-canvas").then((m) => m.CareerGraphCanvas),
@@ -48,11 +44,11 @@ export function CareerGraphAtmosphere({
       ref={internalRef}
       aria-hidden="true"
       data-career-graph-atmosphere=""
-      className={[
+      className={cn(
         "pointer-events-none absolute inset-0 transition-opacity duration-1000 ease-out",
         ready ? "opacity-100" : "opacity-0",
-        className ?? "",
-      ].join(" ")}
+        className,
+      )}
     >
       {shouldMount ? (
         <CareerGraphCanvas containerRef={containerRef} onReady={() => setReady(true)} />

@@ -4,7 +4,7 @@ import { Activity, Gauge, Layers, X, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
-import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
+import { useInspectorOverlay } from "../stores/inspector-overlay-store";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { Kbd } from "@/components/ui/kbd";
 import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/lib/telemetry/perf-store";

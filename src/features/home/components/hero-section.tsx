@@ -9,7 +9,8 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
-import { patterns, siteConfig } from "@/config/site";
+import { siteConfig } from "@/config/site";
+import { patternList } from "@/content/data/career-graph";
 import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection(): ReactElement {
@@ -66,9 +67,9 @@ export function HeroSection(): ReactElement {
             </div>
 
             <ul className="flex flex-wrap items-center gap-2 pt-4">
-              {patterns.map((pattern) => (
-                <li key={pattern}>
-                  <Badge tone="outline">{pattern}</Badge>
+              {patternList.map((pattern) => (
+                <li key={pattern.id}>
+                  <Badge tone="outline">{pattern.label}</Badge>
                 </li>
               ))}
             </ul>

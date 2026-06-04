@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
 import { caseStudies, essays } from "#content";
-import { env } from "@/env";
+import { getSiteUrl } from "@/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+  const baseUrl = getSiteUrl();
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },

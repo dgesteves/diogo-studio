@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
+import { cn } from "@/lib/utils/cn";
 
 export function StudioFallback({ className }: { className?: string }): ReactElement {
   return (
-    <div className={["relative h-full w-full overflow-hidden", className ?? ""].join(" ")}>
+    <div className={cn("relative h-full w-full overflow-hidden", className)}>
       <div
         aria-hidden="true"
         className="console-grid mask-fade-edges pointer-events-none absolute inset-0 opacity-40 dark:opacity-25"

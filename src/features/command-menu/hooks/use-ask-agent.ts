@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { AgentCitation, AgentSourcesPayload } from "@/types/agent";
 import { agentSourcesPayloadSchema } from "@/lib/validations/agent";
@@ -35,7 +35,7 @@ export function useAskAgent(): UseAskAgent {
     return () => abortRef.current?.abort();
   }, []);
 
-  const ask = useCallback(async (q: string) => {
+  async function ask(q: string): Promise<void> {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -116,12 +116,12 @@ export function useAskAgent(): UseAskAgent {
     }
 
     setStatus(payload?.refused ? "refused" : "done");
-  }, []);
+  }
 
-  const stop = useCallback(() => {
+  function stop(): void {
     abortRef.current?.abort();
     setStatus(answer.length > 0 ? "done" : "idle");
-  }, [answer.length]);
+  }
 
   return {
     query,

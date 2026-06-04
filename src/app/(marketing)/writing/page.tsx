@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import Link from "next/link";
 import { essays } from "#content";
+import { PatternBadge } from "@/components/common/pattern-badge";
 import { PatternFilter } from "@/components/common/pattern-filter";
-import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
-import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
+import { parsePatternIds, type PatternId } from "@/content/data/career-graph";
 
 export const metadata: Metadata = {
   title: "Writing",
@@ -14,26 +14,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/writing" },
 };
 
-const VALID_PATTERNS: readonly PatternId[] = [
-  "ai-native",
-  "design-systems",
-  "streaming",
-  "agentic-ux",
-  "enterprise",
-];
-
-function parsePatternsFromQuery(value: string | string[] | undefined): PatternId[] {
-  const raw = Array.isArray(value) ? value : value ? [value] : [];
-  return raw.filter((p): p is PatternId => VALID_PATTERNS.includes(p as PatternId));
-}
-
 export default async function WritingPage({
   searchParams,
 }: {
   searchParams: Promise<{ p?: string | string[] }>;
 }): Promise<ReactElement> {
   const { p } = await searchParams;
-  const selected = parsePatternsFromQuery(p);
+  const selected = parsePatternIds(p);
 
   const ordered = [...essays]
     .filter((e) => !e.draft)
@@ -106,25 +93,9 @@ export default async function WritingPage({
                     {essay.dek ?? essay.description}
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                    {essay.patterns.map((id: PatternId) => {
-                      const pat = patternMeta[id];
-                      return (
-                        <Badge
-                          key={id}
-                          tone="outline"
-                          style={{
-                            borderColor: `color-mix(in srgb, var(--${pat.colorVar}) 40%, transparent)`,
-                          }}
-                        >
-                          <span
-                            aria-hidden="true"
-                            className="inline-block size-1.5 rounded-full"
-                            style={{ backgroundColor: `var(--${pat.colorVar})` }}
-                          />
-                          {pat.label}
-                        </Badge>
-                      );
-                    })}
+                    {essay.patterns.map((id: PatternId) => (
+                      <PatternBadge key={id} id={id} />
+                    ))}
                   </div>
                 </div>
               </Link>

@@ -107,7 +107,7 @@ export const nodes: readonly CareerNode[] = [
   },
 ] as const;
 
-const PUBLISHED_CASE_STUDY_SLUGS = new Set<string>([
+export const PUBLISHED_CASE_STUDY_SLUGS = new Set<string>([
   "eino-ai-network-planning",
   "peacock-streaming",
   "diligent-design-system",

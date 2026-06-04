@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CanvasTexture } from "three";
 
+import { brandColors } from "@/config/brand";
 import { MONO, createCanvasTexture } from "./canvas-texture";
 
 const CODE_TOKENS = {
@@ -96,7 +97,7 @@ function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void {
   for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#7dd3fc";
+  ctx.fillStyle = brandColors.accentSoft;
   ctx.font = `bold 20px ${MONO}`;
   ctx.fillText("● src/lib/agents/runtime.ts", 30, 30);
 
@@ -136,7 +137,7 @@ function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void {
     }
 
     if (i === 5 && caretOn) {
-      ctx.fillStyle = "#7dd3fc";
+      ctx.fillStyle = brandColors.accentSoft;
       ctx.fillRect(x + 2, y, 2, 22);
     }
   }

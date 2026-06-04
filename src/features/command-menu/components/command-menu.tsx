@@ -2,10 +2,10 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useCallback, useEffect, useState, type ReactElement } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
-import { useCommandMenu } from "@/components/providers/command-menu-context";
+import { useCommandMenu } from "../stores/command-menu-store";
 import { cn } from "@/lib/utils/cn";
 
 import { CommandMenuAsk } from "./command-menu-ask";
@@ -17,13 +17,10 @@ export function CommandMenu(): ReactElement {
   const { reducedMotion } = useReducedMotionPreference();
   const [openTick, setOpenTick] = useState(0);
 
-  const handleOpenChange = useCallback(
-    (next: boolean) => {
-      if (next) setOpenTick((n) => n + 1);
-      setOpen(next);
-    },
-    [setOpen],
-  );
+  function handleOpenChange(next: boolean): void {
+    if (next) setOpenTick((n) => n + 1);
+    setOpen(next);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -41,7 +38,9 @@ export function CommandMenu(): ReactElement {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, setMode]);
 
-  const close = useCallback(() => setOpen(false), [setOpen]);
+  function close(): void {
+    setOpen(false);
+  }
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>

@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CanvasTexture } from "three";
 
+import { brandColors } from "@/config/brand";
 import { MONO, createCanvasTexture } from "./canvas-texture";
 
 type LogTone = "ok" | "info" | "warn";
@@ -45,7 +46,7 @@ function drawTerminal(ctx: CanvasRenderingContext2D, lines: LogLine[]): void {
   for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#22d3ee";
+  ctx.fillStyle = brandColors.accent;
   ctx.font = `bold 22px ${MONO}`;
   ctx.fillText("● OPS.LIVE · PRODUCTION", 30, 30);
 

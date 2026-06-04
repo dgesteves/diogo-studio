@@ -1,7 +1,7 @@
 "use client";
 
 import { Activity } from "lucide-react";
-import { useCallback, type ReactElement } from "react";
+import { type ReactElement } from "react";
 
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { cn } from "@/lib/utils/cn";
@@ -13,10 +13,9 @@ export function MotionPanel(): ReactElement {
     useReducedMotionPreference();
 
   const current: "auto" | "on" | "off" = override === null ? "auto" : override ? "on" : "off";
-  const set = useCallback(
-    (mode: "auto" | "on" | "off") => setOverride(mode === "auto" ? null : mode === "on"),
-    [setOverride],
-  );
+  function set(mode: "auto" | "on" | "off"): void {
+    setOverride(mode === "auto" ? null : mode === "on");
+  }
 
   return (
     <Panel icon={<Activity className="size-3" />} title="Motion mode">

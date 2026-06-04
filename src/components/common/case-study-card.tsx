@@ -2,8 +2,8 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { caseStudies } from "#content";
-import { Badge } from "@/components/ui/badge";
-import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
+import { PatternBadge } from "@/components/common/pattern-badge";
+import { type PatternId } from "@/content/data/career-graph";
 
 type CaseStudy = (typeof caseStudies)[number];
 
@@ -63,25 +63,9 @@ export function CaseStudyCard({ study }: { study: CaseStudy }): ReactElement {
           ) : null}
 
           <div className="flex flex-wrap items-center gap-1.5">
-            {study.patterns.map((id: PatternId) => {
-              const p = patternMeta[id];
-              return (
-                <Badge
-                  key={id}
-                  tone="outline"
-                  style={{
-                    borderColor: `color-mix(in srgb, var(--${p.colorVar}) 40%, transparent)`,
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="inline-block size-1.5 rounded-full"
-                    style={{ backgroundColor: `var(--${p.colorVar})` }}
-                  />
-                  {p.label}
-                </Badge>
-              );
-            })}
+            {study.patterns.map((id: PatternId) => (
+              <PatternBadge key={id} id={id} />
+            ))}
           </div>
         </div>
       </Link>

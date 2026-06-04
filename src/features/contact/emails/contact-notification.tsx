@@ -11,6 +11,7 @@ import {
   Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
+import { brandColors } from "@/config/brand";
 import type { ContactInput } from "../schemas/contact";
 
 type ContactNotificationProps = Pick<
@@ -25,7 +26,7 @@ const SURFACE = "#141414";
 const BORDER = "#2a2a2a";
 const TEXT = "#ededed";
 const MUTED = "#a1a1aa";
-const ACCENT = "#22d3ee";
+const ACCENT = brandColors.accent;
 
 const labelStyle: React.CSSProperties = {
   fontFamily: "'SF Mono', ui-monospace, Menlo, monospace",

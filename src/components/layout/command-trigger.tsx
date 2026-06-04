@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import { Search } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
-import { useCommandMenu } from "@/components/providers/command-menu-context";
+import { useCommandMenu } from "@/features/command-menu";
 
 export function CommandTrigger(): ReactElement {
   const { setOpen } = useCommandMenu();

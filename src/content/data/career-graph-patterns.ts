@@ -44,6 +44,19 @@ export const patterns = {
 
 export const patternList: PatternMeta[] = Object.values(patterns);
 
+export const patternIds: readonly PatternId[] = patternList.map((p) => p.id);
+
+const patternIdSet = new Set<string>(patternIds);
+
+export function isPatternId(value: string): value is PatternId {
+  return patternIdSet.has(value);
+}
+
+export function parsePatternIds(value: string | string[] | undefined): PatternId[] {
+  const raw = Array.isArray(value) ? value : value ? [value] : [];
+  return raw.filter(isPatternId);
+}
+
 export function patternColorVar(pattern: PatternId): string {
   return `var(--${patterns[pattern].colorVar})`;
 }

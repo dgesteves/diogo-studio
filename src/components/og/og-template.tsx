@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { brandColors } from "@/config/brand";
 import { siteConfig } from "@/config/site";
 
 export const OG_SIZE = { width: 1200, height: 630 } as const;
@@ -6,10 +7,10 @@ export const OG_CONTENT_TYPE = "image/png";
 
 const INK = "#0a0a0a";
 const SURFACE = "#111317";
-const BORDER = "#262b33";
+const BORDER = brandColors.edge;
 const TEXT = "#f4f4f5";
 const MUTED = "#9ca3af";
-const ACCENT = "#22d3ee";
+const ACCENT = brandColors.accent;
 
 export function renderOgImage({
   eyebrow,
@@ -50,7 +51,7 @@ export function renderOgImage({
               height: "56px",
               borderRadius: "14px",
               border: `1px solid ${BORDER}`,
-              backgroundColor: "#0d0f12",
+              backgroundColor: brandColors.ink,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

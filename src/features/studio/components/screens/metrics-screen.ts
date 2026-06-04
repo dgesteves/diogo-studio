@@ -8,6 +8,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CanvasTexture } from "three";
 
+import { brandColors } from "@/config/brand";
 import { MONO, createCanvasTexture } from "./canvas-texture";
 
 const SPARK_LEN = 22;
@@ -26,7 +27,7 @@ function drawMetrics(
   for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = "#22d3ee";
+  ctx.fillStyle = brandColors.accent;
   ctx.font = `bold 22px ${MONO}`;
   ctx.fillText("● SIGNALS · LAST 30M", 30, 30);
 
@@ -42,13 +43,13 @@ function drawMetrics(
     {
       label: "REQ/MIN",
       value: String(Math.round(620 + latest(series.req) * 280)),
-      color: "#22d3ee",
+      color: brandColors.accent,
       data: series.req,
     },
     {
       label: "P95 ms",
       value: String(Math.round(110 + latest(series.lat) * 40)),
-      color: "#7dd3fc",
+      color: brandColors.accentSoft,
       data: series.lat,
     },
     {

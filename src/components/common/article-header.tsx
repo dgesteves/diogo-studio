@@ -1,9 +1,9 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { PatternBadge } from "@/components/common/pattern-badge";
 import { StatusDot } from "@/components/ui/status-dot";
-import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
+import { type PatternId } from "@/content/data/career-graph";
 
 export type ArticleHeaderMeta = {
   eyebrow: string;
@@ -77,25 +77,9 @@ export function ArticleHeader({
           <span className="text-subtle-foreground font-mono text-[10px] font-medium tracking-wider uppercase">
             Patterns
           </span>
-          {patterns.map((id) => {
-            const p = patternMeta[id];
-            return (
-              <Badge
-                key={id}
-                tone="outline"
-                style={{
-                  borderColor: `color-mix(in srgb, var(--${p.colorVar}) 40%, transparent)`,
-                }}
-              >
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-1.5 rounded-full"
-                  style={{ backgroundColor: `var(--${p.colorVar})` }}
-                />
-                {p.label}
-              </Badge>
-            );
-          })}
+          {patterns.map((id) => (
+            <PatternBadge key={id} id={id} />
+          ))}
         </div>
         {links && links.length > 0 ? (
           <div className="flex flex-wrap items-center gap-2">

@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, type ReactElement } from "react";
-import { Badge } from "@/components/ui/badge";
-import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
+import { type ReactElement } from "react";
+import { PatternBadge } from "@/components/common/pattern-badge";
+import { type PatternId } from "@/content/data/career-graph";
+import { cn } from "@/lib/utils/cn";
 
 export function PatternFilter({
   available,
@@ -16,26 +17,23 @@ export function PatternFilter({
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const toggle = useCallback(
-    (id: PatternId) => {
-      const next = new URLSearchParams(searchParams.toString());
-      const current = next.getAll("p");
-      next.delete("p");
-      const wasSelected = current.includes(id);
-      const after = wasSelected ? current.filter((p) => p !== id) : [...current, id];
-      for (const p of after) next.append("p", p);
-      const qs = next.toString();
-      router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-    },
-    [router, pathname, searchParams],
-  );
+  function toggle(id: PatternId): void {
+    const next = new URLSearchParams(searchParams.toString());
+    const current = next.getAll("p");
+    next.delete("p");
+    const wasSelected = current.includes(id);
+    const after = wasSelected ? current.filter((p) => p !== id) : [...current, id];
+    for (const p of after) next.append("p", p);
+    const qs = next.toString();
+    router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
 
-  const clear = useCallback(() => {
+  function clear(): void {
     const next = new URLSearchParams(searchParams.toString());
     next.delete("p");
     const qs = next.toString();
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
-  }, [router, pathname, searchParams]);
+  }
 
   const allActive = selected.length === 0;
 
@@ -48,16 +46,16 @@ export function PatternFilter({
         type="button"
         onClick={clear}
         aria-pressed={allActive}
-        className={
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase transition-colors",
           allActive
-            ? "border-accent/60 bg-accent-soft text-accent inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase transition-colors"
-            : "border-border bg-surface text-muted-foreground hover:border-border-strong inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 font-mono text-[10px] font-medium tracking-wider uppercase transition-colors"
-        }
+            ? "border-accent/60 bg-accent-soft text-accent"
+            : "border-border bg-surface text-muted-foreground hover:border-border-strong",
+        )}
       >
         All
       </button>
       {available.map((id) => {
-        const p = patternMeta[id];
         const isSelected = selected.includes(id);
         return (
           <button
@@ -67,27 +65,7 @@ export function PatternFilter({
             aria-pressed={isSelected}
             className="inline-flex"
           >
-            <Badge
-              tone="outline"
-              style={
-                isSelected
-                  ? {
-                      borderColor: `var(--${p.colorVar})`,
-                      backgroundColor: `color-mix(in srgb, var(--${p.colorVar}) 12%, transparent)`,
-                      color: `var(--${p.colorVar})`,
-                    }
-                  : {
-                      borderColor: `color-mix(in srgb, var(--${p.colorVar}) 40%, transparent)`,
-                    }
-              }
-            >
-              <span
-                aria-hidden="true"
-                className="inline-block size-1.5 rounded-full"
-                style={{ backgroundColor: `var(--${p.colorVar})` }}
-              />
-              {p.label}
-            </Badge>
+            <PatternBadge id={id} selected={isSelected} />
           </button>
         );
       })}

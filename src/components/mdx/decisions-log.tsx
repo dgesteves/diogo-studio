@@ -1,4 +1,5 @@
 import type { ReactElement, ReactNode } from "react";
+import { cn } from "@/lib/utils/cn";
 
 export function DecisionsLog({ children }: { children: ReactNode }): ReactElement {
   return (
@@ -72,7 +73,10 @@ function DecisionField({
   return (
     <div className="bg-surface-muted flex flex-col gap-1.5 p-4">
       <dt
-        className={`font-mono text-[10px] font-medium tracking-wider uppercase ${fieldToneClasses[tone]}`}
+        className={cn(
+          "font-mono text-[10px] font-medium tracking-wider uppercase",
+          fieldToneClasses[tone],
+        )}
       >
         {label}
       </dt>

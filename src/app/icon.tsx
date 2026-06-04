@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+import { brandColors } from "@/config/brand";
 
 export const size = { width: 32, height: 32 };
 export const contentType = "image/png";
@@ -14,8 +15,8 @@ export default function Icon(): ImageResponse {
         justifyContent: "center",
         backgroundColor: "#0b0d10",
         backgroundImage: "radial-gradient(120% 120% at 50% 0%, #181c22 0%, #0b0d10 62%)",
-        color: "#22d3ee",
-        border: "1px solid #262b33",
+        color: brandColors.accent,
+        border: `1px solid ${brandColors.edge}`,
         borderRadius: "7px",
         fontFamily: "system-ui, -apple-system, Segoe UI, sans-serif",
         fontWeight: 700,

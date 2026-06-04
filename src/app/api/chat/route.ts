@@ -1,6 +1,4 @@
 import * as Sentry from "@sentry/nextjs";
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
 import { createOpenAI } from "@ai-sdk/openai";
 import { embed, streamText } from "ai";
 
@@ -8,6 +6,7 @@ import { env } from "@/env";
 import { agentIndexSchema, chatRequestSchema } from "@/lib/validations/agent";
 import { retrieve } from "@/server/ai/retrieve";
 import { formatUserPrompt, SYSTEM_PROMPT } from "@/server/ai/system-prompt";
+import { createRateLimiter } from "@/server/rate-limit";
 import type { AgentChunk, AgentCitation, AgentIndex, AgentSourcesPayload } from "@/types/agent";
 
 import indexJson from "@/content/agent-index.json" with { type: "json" };
@@ -21,49 +20,7 @@ const CORPUS_HAS_EMBEDDINGS = CHUNKS.some(
   (c) => Array.isArray(c.embedding) && c.embedding.length > 0,
 );
 
-const upstashLimiter =
-  env.UPSTASH_REDIS_REST_URL && env.UPSTASH_REDIS_REST_TOKEN
-    ? new Ratelimit({
-        redis: new Redis({
-          url: env.UPSTASH_REDIS_REST_URL,
-          token: env.UPSTASH_REDIS_REST_TOKEN,
-        }),
-        limiter: Ratelimit.slidingWindow(10, "1 m"),
-        analytics: false,
-        prefix: "agent-chat",
-      })
-    : null;
-
-const localBuckets = new Map<string, { tokens: number; updatedAt: number }>();
-const LOCAL_CAPACITY = 10;
-const LOCAL_REFILL_PER_MS = LOCAL_CAPACITY / 60_000;
-
-function allowLocal(key: string): boolean {
-  const now = Date.now();
-  const bucket = localBuckets.get(key) ?? { tokens: LOCAL_CAPACITY, updatedAt: now };
-  const elapsed = now - bucket.updatedAt;
-  bucket.tokens = Math.min(LOCAL_CAPACITY, bucket.tokens + elapsed * LOCAL_REFILL_PER_MS);
-  bucket.updatedAt = now;
-  if (bucket.tokens < 1) {
-    localBuckets.set(key, bucket);
-    return false;
-  }
-  bucket.tokens -= 1;
-  localBuckets.set(key, bucket);
-  return true;
-}
-
-async function allow(req: Request): Promise<boolean> {
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-    req.headers.get("x-real-ip") ||
-    "anonymous";
-  if (upstashLimiter) {
-    const result = await upstashLimiter.limit(ip);
-    return result.success;
-  }
-  return allowLocal(ip);
-}
+const allow = createRateLimiter({ prefix: "agent-chat", limit: 10, windowMs: 60_000 });
 
 function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {

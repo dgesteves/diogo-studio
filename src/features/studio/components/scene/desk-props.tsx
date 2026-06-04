@@ -2,6 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
+import { brandColors } from "@/config/brand";
 
 import { DESK_TOP_Y } from "./constants";
 
@@ -37,7 +38,7 @@ function Keyboard(): ReactElement {
       ))}
       <mesh position={[0, 0.0155, -0.13]}>
         <boxGeometry args={[0.92, 0.001, 0.005]} />
-        <meshBasicMaterial color="#22d3ee" toneMapped={false} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0.0146, 0.105]}>
         <boxGeometry args={[0.36, 0.002, 0.026]} />
@@ -59,7 +60,7 @@ function Mouse(): ReactElement {
       </mesh>
       <mesh position={[0, -0.012, 0.0]}>
         <sphereGeometry args={[0.005, 8, 8]} />
-        <meshBasicMaterial color="#22d3ee" toneMapped={false} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -127,7 +128,7 @@ function Notebook(): ReactElement {
       </RoundedBox>
       <mesh position={[0, 0.007, -0.12]}>
         <boxGeometry args={[0.05, 0.001, 0.026]} />
-        <meshBasicMaterial color="#22d3ee" toneMapped={false} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0.011, 0.05]} rotation={[0, 0.4, Math.PI / 2]}>
         <cylinderGeometry args={[0.005, 0.005, 0.16, 10]} />

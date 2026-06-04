@@ -4,7 +4,7 @@ import { Command } from "cmdk";
 import { Briefcase, Home, Mail, Monitor, MoonStar, Notebook, Sparkles, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useCallback, type ReactElement } from "react";
+import { type ReactElement } from "react";
 
 import { caseStudies, essays } from "#content";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
@@ -16,13 +16,10 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
   const router = useRouter();
   const { setTheme } = useTheme();
 
-  const runAndClose = useCallback(
-    (action: () => void) => {
-      onClose();
-      requestAnimationFrame(action);
-    },
-    [onClose],
-  );
+  function runAndClose(action: () => void): void {
+    onClose();
+    requestAnimationFrame(action);
+  }
 
   return (
     <Command label="Site command menu" className="flex flex-col">

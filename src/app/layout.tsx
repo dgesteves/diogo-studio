@@ -6,12 +6,13 @@ import { AppProviders } from "@/components/providers";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteNav } from "@/components/layout/site-nav";
 import { JsonLd } from "@/components/seo/json-ld";
-import { CommandMenu } from "@/features/command-menu";
+import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { EasterEgg } from "@/features/easter-egg";
-import { InspectorOverlay } from "@/features/inspector";
+import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
 import { env } from "@/env";
-import { siteConfig } from "@/config/site";
+import { getSiteUrl, siteConfig } from "@/config/site";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
+import { cn } from "@/lib/utils/cn";
 import "@/styles/globals.css";
 import "@/styles/mdx.css";
 
@@ -27,7 +28,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
 const siteName = siteConfig.name;
 const siteTitle = `${siteConfig.name} — ${siteConfig.role}`;
 const siteDescription = siteConfig.tagline;
@@ -103,21 +104,25 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={cn(geistSans.variable, geistMono.variable, "h-full antialiased")}
       suppressHydrationWarning
     >
       <body className="bg-background text-foreground flex min-h-full flex-col">
         <JsonLd data={personJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
         <AppProviders>
-          <SiteNav />
-          <main id="main" className="flex flex-1 flex-col">
-            {children}
-          </main>
-          <SiteFooter />
-          <CommandMenu />
-          <InspectorOverlay />
-          <EasterEgg />
+          <InspectorOverlayProvider>
+            <CommandMenuProvider>
+              <SiteNav />
+              <main id="main" className="flex flex-1 flex-col">
+                {children}
+              </main>
+              <SiteFooter />
+              <CommandMenu />
+              <InspectorOverlay />
+              <EasterEgg />
+            </CommandMenuProvider>
+          </InspectorOverlayProvider>
         </AppProviders>
         {isVercel ? (
           <>

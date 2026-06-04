@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Activity } from "lucide-react";
-import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
+import { useInspectorOverlay } from "../stores/inspector-overlay-store";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
 

@@ -1,6 +1,9 @@
 export {
   patterns,
   patternList,
+  patternIds,
+  isPatternId,
+  parsePatternIds,
   patternColorVar,
   patternColorStyle,
   type PatternId,
@@ -11,6 +14,7 @@ export {
   nodes,
   nodeHref,
   getNode,
+  PUBLISHED_CASE_STUDY_SLUGS,
   type NodeId,
   type CareerNode,
 } from "./career-graph-nodes";

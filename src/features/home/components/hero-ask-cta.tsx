@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
-import { useCommandMenu } from "@/components/providers/command-menu-context";
+import { useCommandMenu } from "@/features/command-menu";
 
 export function HeroAskCta(): ReactElement {
   const { openWithMode } = useCommandMenu();

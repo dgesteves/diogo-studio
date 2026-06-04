@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { useIsClient } from "@/lib/hooks/use-is-client";
+import { cn } from "@/lib/utils/cn";
 import { StudioFallback } from "./studio-fallback";
 
 const StudioCanvas = dynamic(() => import("./studio-canvas").then((m) => m.StudioCanvas), {
@@ -51,10 +52,10 @@ export function Studio({ className }: { className?: string }): ReactElement {
   return (
     <div
       ref={containerRef}
-      className={[
+      className={cn(
         "border-border/60 bg-surface/40 relative isolate w-full overflow-hidden rounded-2xl border",
-        className ?? "",
-      ].join(" ")}
+        className,
+      )}
       style={{ aspectRatio: "16 / 9" }}
       data-studio-root=""
     >
@@ -63,10 +64,10 @@ export function Studio({ className }: { className?: string }): ReactElement {
       {shouldMount ? (
         <div
           aria-hidden="true"
-          className={[
+          className={cn(
             "pointer-events-none absolute inset-0 z-10 transition-opacity duration-1000 ease-out",
             ready ? "opacity-100" : "opacity-0",
-          ].join(" ")}
+          )}
           data-studio-canvas=""
         >
           <StudioCanvas containerRef={containerRef} onReady={() => setReady(true)} />

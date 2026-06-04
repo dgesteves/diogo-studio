@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { cn } from "@/lib/utils/cn";
 import type { SystemDiagramData, SystemNodeKind } from "./system-diagram-types";
 
 const nodeKindStyles: Record<SystemNodeKind, { ring: string; tag: string; tagText: string }> = {
@@ -152,7 +153,7 @@ export function SystemDiagramFallback({
                 width={NODE_W}
                 height={NODE_H}
                 rx={8}
-                className={`fill-surface ${style.ring}`}
+                className={cn("fill-surface", style.ring)}
                 strokeWidth={1.25}
               />
               <rect x={x + 8} y={y + 8} width={56} height={14} rx={3} className={style.tag} />

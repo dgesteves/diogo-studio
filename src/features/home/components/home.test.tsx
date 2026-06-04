@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { CommandMenuProvider } from "@/components/providers/command-menu-context";
-import { nodes } from "@/content/data/career-graph";
+import { CommandMenuProvider } from "@/features/command-menu";
+import { nodes, PUBLISHED_CASE_STUDY_SLUGS } from "@/content/data/career-graph";
 import { Home } from "./home";
 
 function renderHome() {
@@ -71,12 +71,7 @@ describe("Home page", () => {
         name: new RegExp(`^${escaped}\\s*[—-]`, "i"),
       });
       expect(link).toBeInTheDocument();
-      const published = new Set([
-        "eino-ai-network-planning",
-        "peacock-streaming",
-        "diligent-design-system",
-      ]);
-      if (node.slug && published.has(node.slug)) {
+      if (node.slug && PUBLISHED_CASE_STUDY_SLUGS.has(node.slug)) {
         expect(link).toHaveAttribute("href", `/work/${node.slug}`);
       } else {
         expect(link).toHaveAttribute("href", "/work");

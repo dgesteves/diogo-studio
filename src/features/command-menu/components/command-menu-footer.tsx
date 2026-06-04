@@ -3,7 +3,7 @@
 import { Network, Sparkles } from "lucide-react";
 import { type ReactElement, type ReactNode } from "react";
 
-import { type CommandMenuMode } from "@/components/providers/command-menu-context";
+import { type CommandMenuMode } from "../stores/command-menu-store";
 import { cn } from "@/lib/utils/cn";
 
 export function Footer({

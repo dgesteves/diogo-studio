@@ -9,14 +9,14 @@ const eslintConfig = defineConfig([
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {
-      "no-console": "warn",
-      "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-non-null-assertion": "warn",
-      "@typescript-eslint/consistent-type-imports": "warn",
-      "@typescript-eslint/explicit-module-boundary-types": "warn",
+      "no-console": "error",
+      "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
+      "@typescript-eslint/consistent-type-imports": "error",
+      "@typescript-eslint/explicit-module-boundary-types": "error",
       "no-restricted-syntax": [
-        "warn",
+        "error",
         {
           selector:
             "MemberExpression[object.object.name='process'][object.property.name='env']:not([property.name='NODE_ENV'])",
@@ -39,14 +39,11 @@ const eslintConfig = defineConfig([
     },
   },
   prettier,
-  // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // Project-specific ignores:
     "coverage/**",
     "node_modules/**",
     "playwright-report/**",

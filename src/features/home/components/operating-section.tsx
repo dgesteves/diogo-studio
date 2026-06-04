@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { operatingAltitudes, type OperatingAltitude } from "@/content/data/operating";
 
 export function OperatingSection(): ReactElement {
   return (
@@ -18,41 +19,16 @@ export function OperatingSection(): ReactElement {
         </div>
 
         <ol className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-3">
-          <OperatingCard
-            tag="01 — Staff IC"
-            title="Lead, frontend platform"
-            org="Fueled · current"
-            copy="Architecting AI-augmented web platforms for enterprise clients across media, technology, and digital-transformation programs."
-          />
-          <OperatingCard
-            tag="02 — VP Engineering"
-            title="Built the operating model"
-            org="Moment · 2025"
-            copy="Took an AI-native platform from prototype velocity to production reliability. Hiring bar, leveling, RFCs, observability, on-call."
-          />
-          <OperatingCard
-            tag="03 — Founding-engineer"
-            title="Shipped agentic UX in production"
-            org="eino.ai · 2023–2025"
-            copy="Owned the React + GraphQL foundation for agentic RF planning. Digital-twin maps, agent orchestration, proposal generation."
-          />
+          {operatingAltitudes.map((altitude) => (
+            <OperatingCard key={altitude.tag} {...altitude} />
+          ))}
         </ol>
       </div>
     </section>
   );
 }
 
-function OperatingCard({
-  tag,
-  title,
-  org,
-  copy,
-}: {
-  tag: string;
-  title: string;
-  org: string;
-  copy: string;
-}) {
+function OperatingCard({ tag, title, org, copy }: OperatingAltitude): ReactElement {
   return (
     <li className="bg-surface hover:bg-surface-muted flex flex-col gap-3 p-6 transition-colors">
       <span className="text-accent font-mono text-[10px] font-medium tracking-wider uppercase">

@@ -1,4 +1,5 @@
 import type { ReactElement } from "react";
+import { cn } from "@/lib/utils/cn";
 
 type SparklineTone = "accent" | "good" | "warn" | "hot" | "muted";
 
@@ -49,7 +50,7 @@ export function Sparkline({
       aria-label={ariaLabel ?? "Sparkline trend"}
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
-      className={`h-full w-full ${toneClasses[tone]}`}
+      className={cn("h-full w-full", toneClasses[tone])}
     >
       <path d={area} fill="currentColor" fillOpacity={0.12} />
       <path
