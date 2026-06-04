@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.4](https://github.com/dgesteves/diogo-studio/compare/v1.2.3...v1.2.4) (2026-06-04)
+
+
+### Code Refactoring
+
+* fix smooth scroll conflicts between Lenis and ReactFlow ([2879ffc](https://github.com/dgesteves/diogo-studio/commit/2879ffcfc39502cb3d8757fd328bb0ed28327224))
+
+
+### Miscellaneous Chores
+
+* update components.json CSS path and remove completed rules-alignment-plan.md ([d19c3d5](https://github.com/dgesteves/diogo-studio/commit/d19c3d56663ac8906ba06b3e884ea6427982f6f2))
+
 ## [1.2.3](https://github.com/dgesteves/diogo-studio/compare/v1.2.2...v1.2.3) (2026-06-04)
 
 
