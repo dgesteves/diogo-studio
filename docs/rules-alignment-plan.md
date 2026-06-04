@@ -921,18 +921,36 @@ Rule: `00-core.md`, `project-structure.md` (~200 lines max). Split into
 sub-components/hooks/helpers. Largest offenders first. **Each file is also
 de-commented in the same pass (Phase 4).**
 
+> **Authoritative counts come from the `max-lines` lint warning (code-only —
+> skips blanks/comments), not raw `wc -l`.** After the Phase 0–2 touches + the
+> lint-cleanup commit, the remaining flagged offenders are: `studio-canvas.tsx`
+> (was 432), `screens.tsx` (was 347), `command-menu.tsx` (329),
+> `career-graph-svg.tsx` (291), `about/page.tsx` (271), `inspector-overlay.tsx`
+> (266), `contact-form.tsx` (238), `career-graph.ts` (218), `retrieve.ts` (206).
+> Files previously listed that are **already under 200 code-lines** and no longer
+> flagged — `heatmap-field.tsx`, `system-diagram-fallback.tsx`,
+> `reduced-motion-provider.tsx`, `colophon/page.tsx`, `api/chat/route.ts` — meet
+> the size rule; any "thin the route / move data" note on them carries to Phase 5.
+
 - [x] `src/features/command-menu/components/command-menu-ask.tsx` (552 → ~116) —
       extracted `hooks/use-ask-agent.ts` (fetch/stream lifecycle + decode helper),
       `components/ask-suggestions.tsx`, `components/ask-answer-surface.tsx`,
       `components/ask-answer.tsx` (the `[N]`/bold/code/link renderer + `CitationChip` + `sanitizeHref`), `components/ask-citation-list.tsx`, and a shared
       `types.ts` (`AskStatus`/`RetrievalMode`). De-commented in the same pass.
       Verified: typecheck + 26-test e2e suite green; behavior unchanged
-      (memoization left for Phase 5).
-- [ ] `src/features/studio/components/studio-canvas.tsx` (526) — split each
-      scene object (`Lighting`/`CameraIdle`/`GridFloor`/`Desk`/`Chair`/
-      `DeskProps`/`Speakers`/`MonitorRig`) into its own module.
-- [ ] `src/features/studio/components/screens.tsx` (447) — split the three
-      screens (terminal/code/metrics) + shared `createCanvasTexture` helper.
+      (memoization left for Phase 5). **Re-confirmed:** 116 lines, no longer in
+      the `max-lines` warning list after the lint-cleanup commit.
+- [x] `src/features/studio/components/studio-canvas.tsx` (432 → 66) — split each
+      scene object into `components/scene/*` (`lighting`, `camera-idle`,
+      `grid-floor`, `desk`, `chair`, `desk-props`, `speakers`, `monitor-rig`)
+      with a shared `scene/constants.ts` (`DESK_TOP_Y`). De-commented in the same
+      pass (kept the canvas-texture/bloom + desk-top derivation as code, not
+      prose). Verified: typecheck + lint + `pnpm build` green.
+- [x] `src/features/studio/components/screens.tsx` (347 → removed) — split into
+      `components/screens/` (`canvas-texture.ts` shared helper + `MONO`,
+      `terminal-screen.ts`, `code-screen.ts`, `metrics-screen.ts`, `index.ts`
+      barrel). `interface LogLine` → `type`; kept the one genuine "why not drei
+      `<Html>`" gotcha. Verified: typecheck + lint + `pnpm build` green.
 - [ ] `src/features/command-menu/components/command-menu.tsx` (388) — extract
       `NavigateView`, `Footer`/`ModeTab`, `Item`/`iconForPage`.
 - [ ] `src/features/career-graph/components/career-graph-svg.tsx` (347) —
@@ -969,8 +987,10 @@ for genuinely non-obvious logic. Heaviest files (comment-line count):
 - [ ] `src/server/ai/retrieve.ts` (62)
 - [ ] `src/features/career-graph/components/scene/heatmap-field.tsx` (60)
 - [ ] `src/app/api/chat/route.ts` (53)
-- [ ] `src/features/studio/components/studio-canvas.tsx` (50)
-- [ ] `src/features/studio/components/screens.tsx` (49)
+- [x] `src/features/studio/components/studio-canvas.tsx` (50) — de-commented in
+      the Phase 3 split.
+- [x] `src/features/studio/components/screens.tsx` (49) — de-commented in the
+      Phase 3 split (now `screens/*`).
 - [ ] Studio: JSDoc + JSX dividers in `studio.tsx` and `studio-fallback.tsx`.
 - [ ] `src/components/providers/reduced-motion-provider.tsx` (48)
 - [ ] `src/features/command-menu/components/command-menu-ask.tsx` (37)
@@ -1083,11 +1103,12 @@ Rule: `project-structure.md`, `typescript.md`, `react-components-styling.md`.
       acceptable inside `ImageResponse` and `@react-email`). Define tokens once;
       dedupe the OG/icon/email copies to shared consts.
 - [ ] **Props typing nits** — use `type` over `interface` for `BadgeProps`
-      (`badge.tsx`), `ButtonProps` (`button.tsx`), and `LogLine`
-      (`studio/components/screens.tsx`); verify `button.tsx` `"use client"` is
-      actually needed (Slot + forwardRef have no hooks).
-- [ ] **Resolve studio scene colors via `css-color.ts`** — `studio-canvas.tsx`
-      and `screens.tsx` hardcode brand cyans (`#22d3ee`, `#7dd3fc`) that
+      (`badge.tsx`) and `ButtonProps` (`button.tsx`); verify `button.tsx`
+      `"use client"` is actually needed (Slot + forwardRef have no hooks).
+      (`LogLine` was already converted to `type` during the Phase 3 screens split.)
+- [ ] **Resolve studio scene colors via `css-color.ts`** — the `scene/*` meshes
+      (`desk`, `desk-props`, `speakers`, `monitor-rig`, `lighting`) and the
+      `screens/*` draw modules hardcode brand cyans (`#22d3ee`, `#7dd3fc`) that
       duplicate design tokens; route them through `resolveCssVarColor` like the
       career-graph scene. Other scene-specific material/paint shades have no
       token equivalent and stay as literals.
