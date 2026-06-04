@@ -17,6 +17,7 @@ export function LenisProvider(): null {
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 1.2,
+      anchors: true,
     });
 
     let rafId = 0;

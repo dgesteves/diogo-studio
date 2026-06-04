@@ -104,10 +104,10 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={cn(geistSans.variable, geistMono.variable, "h-full antialiased")}
+      className={cn(geistSans.variable, geistMono.variable, "antialiased")}
       suppressHydrationWarning
     >
-      <body className="bg-background text-foreground flex min-h-full flex-col">
+      <body className="bg-background text-foreground flex min-h-dvh flex-col">
         <JsonLd data={personJsonLd()} />
         <JsonLd data={websiteJsonLd()} />
         <AppProviders>

@@ -100,6 +100,7 @@ export function SystemDiagramCanvas({
         zoomOnPinch={false}
         panOnScroll={false}
         panOnDrag
+        preventScrolling={false}
         fitView
         fitViewOptions={{ padding: 0.1 }}
         proOptions={{ hideAttribution: true }}
