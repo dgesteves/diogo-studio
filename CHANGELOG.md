@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.8](https://github.com/dgesteves/diogo-studio/compare/v1.1.7...v1.1.8) (2026-06-04)
+
+
+### Documentation
+
+* add rules-alignment-plan.md — complete codebase audit against .devin/rules/ ([979e577](https://github.com/dgesteves/diogo-studio/commit/979e577fa4c610e5ea7864353c8deb9633b5d513))
+
 ## [1.1.7](https://github.com/dgesteves/diogo-studio/compare/v1.1.6...v1.1.7) (2026-06-03)
 
 
