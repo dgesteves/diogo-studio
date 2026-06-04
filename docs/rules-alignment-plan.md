@@ -774,19 +774,19 @@ assertion for the one-shot auto-dismiss — not a fixed`waitForTimeout` sleep.
 | ------------------------------------------ | -------------------------------- | -------------------------- | -------- |
 | TypeScript strict config                   | `typescript.md`                  | Compliant                  | —        |
 | `any` / `@ts-ignore` usage                 | `typescript.md`                  | Mostly OK                  | Low      |
-| Double casts / unvalidated JSON            | `typescript.md`                  | Violations                 | Medium   |
+| Double casts / unvalidated JSON            | `typescript.md`                  | Fixed in `src/` (P2)       | Medium   |
 | Explicit return types (exports)            | `typescript.md`                  | Violations                 | Low      |
 | Comments policy (self-documenting)         | `00-core.md`                     | Widespread                 | High     |
 | File size (~200 lines)                     | `00-core.md` / project-structure | Violations                 | Medium   |
 | `console.*` in committed code              | `observability-and-errors.md`    | Fixed in `src/` (P1)       | Medium   |
 | `error.tsx` / `global-error.tsx` wiring    | observability/app-router         | Fixed (P1)                 | High     |
-| Scattered `process.env`                    | `security-and-env.md`            | Violations                 | Medium   |
+| Scattered `process.env`                    | `security-and-env.md`            | Fixed (P2)                 | Medium   |
 | Feature state under `components/providers` | project-structure                | Violations                 | Low      |
 | Manual memoization vs React Compiler       | react-components-styling         | Compiler on (P0); strip P5 | Low      |
 | Lint enforcement of the rules              | tooling                          | Warnings added (P0)        | Medium   |
-| Security headers / CSP                     | `security-and-env.md`            | Missing CSP                | Medium   |
+| Security headers / CSP                     | `security-and-env.md`            | Static CSP added (P2)      | Medium   |
 | Stale tooling config paths                 | project-structure                | Violations                 | Low      |
-| Route handler input validation (Zod)       | security / `typescript.md`       | Partial                    | Medium   |
+| Route handler input validation (Zod)       | security / `typescript.md`       | Fixed (P2)                 | Medium   |
 | Duplicated logic (rate limiter, filters)   | `00-core.md` (DRY)               | Violations                 | Medium   |
 | Route data/UI living in `app/`             | project-structure                | Violations                 | Medium   |
 | Arbitrary hex vs design tokens             | react-components-styling         | Violations                 | Medium   |
@@ -864,46 +864,54 @@ Rule: `observability-and-errors.md`, `nextjs-app-router.md`.
 
 ---
 
-## Phase 2 — Security & environment (medium)
+## Phase 2 — Security & environment (medium) `[x]`
 
 Rule: `security-and-env.md`, `typescript.md`.
 
-- [ ] **Centralize `process.env`** reads through `src/env.ts`. Off-module raw
-      access to migrate:
-  - [ ] `src/features/career-graph/components/scene/dev-hud.tsx`
-        (`NEXT_PUBLIC_PERF_HUD`) → add to `env.ts` client schema.
-  - [ ] `src/app/layout.tsx` (`VERCEL`) → add to `env.ts` (or document as an
-        accepted framework var).
-  - [ ] `src/components/r3f/webgl-context-guard.tsx` (`NODE_ENV` — standard;
-        likely acceptable, confirm).
-  - Note: bootstrap `process.env` reads in `next.config.ts`, `instrumentation.ts`,
-    `instrumentation-client.ts`, and `playwright.config.ts` run before/outside the
-    validated module and are acceptable.
-- [ ] **Add a Content-Security-Policy** to `securityHeaders` in `next.config.ts`
-      (nonce-based where possible); the current headers omit CSP.
-- [ ] **Validate `agent-index.json` with Zod** instead of the double cast at
-      `src/app/api/chat/route.ts:39` (`indexJson as unknown as AgentIndex`).
-      Parse once at module load against a schema and derive the type via
-      `z.infer`. Then re-derive the hand-declared `AgentChunk`/`AgentIndex` in
-      `src/types/agent.ts` from that schema rather than re-declaring the shape.
-      Reuse the same schema in `scripts/build-agent-index.ts:469`
-      (`loadExistingIndex()` currently does an unvalidated `JSON.parse(...) as
-AgentIndex`).
-- [ ] **Validate the `/api/chat` body with Zod** — `src/app/api/chat/route.ts`
-      hand-rolls `typeof` checks (lines 137-156); replace with a schema +
-      `safeParse` like `/api/contact` already does.
-- [ ] **Validate the agent sources payload (client)** — `command-menu-ask.tsx:116`
-      casts the decoded `x-agent-sources` header (`JSON.parse(json) as
-AgentSourcesPayload`); validate with a Zod schema + `safeParse` and derive
-      the type via `z.infer`. Also replace the deprecated `escape()` in the
-      base64 decode (`:115`) with a `TextDecoder`-based UTF-8 decode.
-- [ ] **Sanitize agent-rendered link hrefs** — `renderFormatting` in
-      `command-menu-ask.tsx:505` renders `[text](url)` from streamed model
-      output via a raw `<a href={…}>`. Restrict hrefs to `http(s)`/relative
-      (drop `javascript:` etc.) and route internal links through `next/link`.
-- [ ] **Audit Route Handlers** (`api/chat`, `api/contact`, `api/health`) for
-      input validation at the boundary and rate-limiting on expensive/unauth
-      endpoints (Upstash is already a dependency).
+- [x] **Centralize `process.env`** reads through `src/env.ts`:
+  - [x] `dev-hud.tsx` (`NEXT_PUBLIC_PERF_HUD`) → added to the `env.ts` client
+        schema (`z.enum(["0","1"])`) and read via `env`.
+  - [x] `layout.tsx` (`VERCEL`) → added to the `env.ts` server schema and read
+        via `env`; documented in `.env.example` as an auto-set framework var.
+  - [x] `webgl-context-guard.tsx` (`NODE_ENV`) → the reads were removed entirely
+        in Phase 1. The remaining `process.env.NODE_ENV` in `dev-hud.tsx` is the
+        accepted Next special (dead-code-eliminated) and is exempted from the
+        `no-restricted-syntax` lint guard.
+  - Bootstrap reads in `next.config.ts`, `instrumentation*.ts`,
+    `playwright.config.ts` remain accepted (run before/outside the validated
+    module).
+- [x] **Add a Content-Security-Policy** — added a **static** CSP to
+      `securityHeaders` in `next.config.ts` (Phase 0 decision: keep SSG, so no
+      per-request nonce). `default-src 'self'`; `script-src`/`style-src` allow
+      `'unsafe-inline'` (Next hydration + inline styles; the MDX `new Function`
+      eval is **server-only**, so no `'unsafe-eval'` in prod); tight
+      `img/font/connect/worker-src`; `frame-ancestors 'none'`, `base-uri 'self'`,
+      `form-action 'self'`, `object-src 'none'`. `'unsafe-eval'`+`ws:` are
+      dev-only; `upgrade-insecure-requests` is gated on `VERCEL` so it can't
+      break http://localhost prod testing. **Verified**: full 26-test Playwright
+      suite (incl. axe a11y) passes against `pnpm start` with the CSP enforced.
+- [x] **Validate `agent-index.json` with Zod** — `/api/chat` now parses the
+      index via `agentIndexSchema.parse(indexJson)` (no more double cast).
+      Schemas live in `src/lib/validations/agent.ts`; `src/types/agent.ts`
+      re-exports the `z.infer` types. (The build-script reuse at
+      `build-agent-index.ts:469` is deferred — see Phase 3/4 notes; it stays
+      alias-free and is build-only/try-caught.)
+- [x] **Validate the `/api/chat` body with Zod** — replaced the hand-rolled
+      `typeof` checks with `chatRequestSchema.safeParse` (also removes the
+      `as { query: … }` casts).
+- [x] **Validate the agent sources payload (client)** — `command-menu-ask.tsx`
+      now decodes the `x-agent-sources` header via a `TextDecoder` UTF-8 decode
+      (no deprecated `escape()`) and validates with
+      `agentSourcesPayloadSchema.safeParse`.
+- [x] **Sanitize agent-rendered link hrefs** — `renderFormatting` routes
+      internal links through `next/link`, allows only `http(s)`/`mailto`
+      external hrefs (via a `sanitizeHref` helper), and renders anything else
+      (e.g. `javascript:`) as plain text.
+- [x] **Audit Route Handlers** — confirmed: `/api/chat` (Zod body + index,
+      per-IP rate limit, graceful 503/refusal) and `/api/contact` (Zod, honeypot,
+      rate limit, 503 fallback) validate + rate-limit at the boundary;
+      `/api/health` is a read-only liveness probe (no input). All are public
+      read/contact endpoints (no auth surface to authorize).
 
 ---
 

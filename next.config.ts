@@ -9,7 +9,28 @@ const withBundleAnalyzer = bundleAnalyzer({
   openAnalyzer: false,
 });
 
+const isDev = process.env.NODE_ENV !== "production";
+
+// `'unsafe-eval'` + `ws:` are dev-only (React Refresh + HMR socket).
+// `upgrade-insecure-requests` is gated on Vercel (real https) so it can't break
+// http://localhost prod testing (e.g. `pnpm start` in CI e2e).
+const cspDirectives = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  `connect-src 'self'${isDev ? " ws:" : ""}`,
+  "worker-src 'self' blob:",
+  "frame-ancestors 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "object-src 'none'",
+  ...(process.env.VERCEL === "1" ? ["upgrade-insecure-requests"] : []),
+];
+
 const securityHeaders = [
+  { key: "Content-Security-Policy", value: cspDirectives.join("; ") },
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
