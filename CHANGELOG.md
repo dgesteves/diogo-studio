@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.1](https://github.com/dgesteves/diogo-studio/compare/v1.2.0...v1.2.1) (2026-06-04)
+
+
+### Code Refactoring
+
+* add explicit return types and drop non-null assertions for lint cleanup ([31cbf3b](https://github.com/dgesteves/diogo-studio/commit/31cbf3b59e58bbfd70eaf2cc677b96f37a41d57a))
+
+
+### Miscellaneous Chores
+
+* remove unused Next.js default assets ([ccb035a](https://github.com/dgesteves/diogo-studio/commit/ccb035aa3727ea2b173d26dae923d524bebf1d30))
+
 ## [1.2.0](https://github.com/dgesteves/diogo-studio/compare/v1.1.8...v1.2.0) (2026-06-04)
 
 
