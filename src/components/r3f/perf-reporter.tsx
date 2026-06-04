@@ -19,7 +19,7 @@ import { markPerfInactive, publishPerf } from "@/lib/telemetry/perf-store";
  * `useFrame` callbacks before its own `gl.render`), which is exactly what we
  * want to display — the cost of the last completed frame.
  */
-export function PerfReporter() {
+export function PerfReporter(): null {
   const gl = useThree((state) => state.gl);
   const frames = useRef(0);
   const windowStart = useRef(0);

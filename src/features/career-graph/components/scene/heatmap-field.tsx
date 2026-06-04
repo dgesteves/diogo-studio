@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type ReactElement } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
@@ -149,7 +149,7 @@ void main() {
 }
 `;
 
-export function HeatmapField({ intensity = 1 }: { intensity?: number }) {
+export function HeatmapField({ intensity = 1 }: { intensity?: number }): ReactElement {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { size } = useThree();
 
@@ -179,17 +179,17 @@ export function HeatmapField({ intensity = 1 }: { intensity?: number }) {
   const mouseCurrent = useRef(new THREE.Vector2(0, 0));
   useFrame(({ clock }, delta) => {
     const u = matRef.current?.uniforms;
-    if (!u) return;
-    u.uTime!.value = clock.elapsedTime;
-    u.uAspect!.value = size.width / Math.max(size.height, 1);
+    if (!u?.uTime || !u.uAspect || !u.uMouse || !u.uPulse) return;
+    u.uTime.value = clock.elapsedTime;
+    u.uAspect.value = size.width / Math.max(size.height, 1);
 
     // Lerp toward the latest cursor position to soften jittery moves.
     mouseCurrent.current.lerp(mouseTarget.current, Math.min(1, delta * 4));
-    u.uMouse!.value.copy(mouseCurrent.current);
+    u.uMouse.value.copy(mouseCurrent.current);
 
     // Scan ping: 8s period, ease-out wavefront travelling outward.
     const phase = (clock.elapsedTime % 8) / 8;
-    u.uPulse!.value = Math.pow(phase, 0.6);
+    u.uPulse.value = Math.pow(phase, 0.6);
   });
 
   // Bind a passive pointermove listener to update `mouseTarget` (read in

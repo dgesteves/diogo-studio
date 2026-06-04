@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { useIsClient } from "@/lib/hooks/use-is-client";
 
@@ -58,7 +58,7 @@ export function CareerGraphAtmosphere({
 }: {
   containerRef?: React.RefObject<HTMLElement | null>;
   className?: string;
-}) {
+}): ReactElement {
   const internalRef = useRef<HTMLDivElement>(null);
   const containerRef = externalRef ?? (internalRef as React.RefObject<HTMLElement | null>);
 

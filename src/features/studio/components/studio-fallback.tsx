@@ -15,7 +15,9 @@
  * fill — matches the console-grade aesthetic.
  */
 
-export function StudioFallback({ className }: { className?: string }) {
+import type { ReactElement } from "react";
+
+export function StudioFallback({ className }: { className?: string }): ReactElement {
   return (
     <div className={["relative h-full w-full overflow-hidden", className ?? ""].join(" ")}>
       {/* Console grid backdrop, faded to soft edges. */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, type ReactElement } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDpr, AdaptiveEvents, PerspectiveCamera, Preload } from "@react-three/drei";
 import { CameraDolly } from "./scene/camera-dolly";
@@ -42,7 +42,7 @@ export function CareerGraphCanvas({
 }: {
   containerRef: React.RefObject<HTMLElement | null>;
   onReady?: () => void;
-}) {
+}): ReactElement {
   return (
     <Canvas
       // DPR cap: at full-bleed hero width, anything above ~1.25 measurably

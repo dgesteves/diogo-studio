@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import * as runtime from "react/jsx-runtime";
 import { mdxComponents, type MdxComponents } from "./components";
 
@@ -26,7 +27,7 @@ type MDXModule = {
 function getMDXComponent(code: string): MDXModule["default"] {
   const cached = compiledCache.get(code);
   if (cached) return cached.default;
-  const factory = new Function(code) as (runtime: typeof import("react/jsx-runtime")) => MDXModule;
+  const factory = new Function(code) as (jsxRuntime: typeof runtime) => MDXModule;
   const mod = factory({ ...runtime });
   compiledCache.set(code, mod);
   return mod.default;
@@ -39,7 +40,7 @@ export function MDXContent({
   code: string;
   /** Per-document overrides — merged over the shared `mdxComponents` map. */
   components?: Partial<MdxComponents>;
-}) {
+}): ReactElement {
   // The React Compiler `static-components` rule fires because `Component`
   // comes out of `new Function`. The factory is memoised by `code` string,
   // and this renders inside a Server Component (no client state to lose),

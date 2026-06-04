@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
+import { useCallback, type ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
@@ -21,7 +21,7 @@ export function PatternFilter({
   available: readonly PatternId[];
   /** Currently selected pattern IDs from the URL. */
   selected: readonly PatternId[];
-}) {
+}): ReactElement {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

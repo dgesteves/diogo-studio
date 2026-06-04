@@ -8,7 +8,7 @@ import {
   type Edge,
   type Node,
 } from "@xyflow/react";
-import { useMemo } from "react";
+import { useMemo, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import type { SystemDiagramData, SystemNode, SystemNodeKind } from "./system-diagram-types";
 import "@xyflow/react/dist/style.css";
@@ -84,7 +84,13 @@ function mapEdges(edges: SystemDiagramData["edges"]): Edge[] {
   }));
 }
 
-export function SystemDiagramCanvas({ data, title }: { data: SystemDiagramData; title: string }) {
+export function SystemDiagramCanvas({
+  data,
+  title,
+}: {
+  data: SystemDiagramData;
+  title: string;
+}): ReactElement | null {
   const { reducedMotion } = useReducedMotionPreference();
 
   const nodes = useMemo(() => mapNodes(data.nodes), [data.nodes]);

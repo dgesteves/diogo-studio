@@ -12,7 +12,7 @@ import { useReducedMotionPreference } from "./reduced-motion-provider";
  * - Disabled on touch devices (`smoothTouch: false`) and on reduced-motion.
  * - Cleaned up on unmount so HMR / route changes don't leak rAF loops.
  */
-export function LenisProvider() {
+export function LenisProvider(): null {
   const { reducedMotion } = useReducedMotionPreference();
 
   useEffect(() => {

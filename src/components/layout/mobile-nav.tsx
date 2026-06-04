@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { Drawer } from "vaul";
 import { Button } from "@/components/ui/button";
 import { Kbd } from "@/components/ui/kbd";
@@ -21,7 +21,7 @@ import { ThemeToggle } from "./theme-toggle";
  *   route transition, and keeps state updates on the user-event boundary).
  * - Re-uses the same nav model as desktop so the two stay in sync.
  */
-export function MobileNav() {
+export function MobileNav(): ReactElement {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { setOpen: setCommandOpen } = useCommandMenu();

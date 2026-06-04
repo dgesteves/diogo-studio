@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, CheckCircle2, Loader2, Mail } from "lucide-react";
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -31,7 +31,7 @@ type FormState = { kind: "idle" } | { kind: "success" } | { kind: "fallback"; em
 const fieldBase =
   "w-full rounded-md border bg-surface-inset px-3.5 py-2.5 text-sm text-foreground placeholder:text-subtle-foreground transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background";
 
-export function ContactForm() {
+export function ContactForm(): ReactElement {
   const [state, setState] = useState<FormState>({ kind: "idle" });
 
   const {

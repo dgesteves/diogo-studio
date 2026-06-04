@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { useIsClient } from "@/lib/hooks/use-is-client";
 import { StudioFallback } from "./studio-fallback";
@@ -34,7 +34,7 @@ const StudioCanvas = dynamic(() => import("./studio-canvas").then((m) => m.Studi
   loading: () => null,
 });
 
-export function Studio({ className }: { className?: string }) {
+export function Studio({ className }: { className?: string }): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const isClient = useIsClient();
   const { reducedMotion } = useReducedMotionPreference();

@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactElement } from "react";
 
 import { caseStudies, essays } from "#content";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
@@ -47,7 +47,7 @@ import { type CommandMenuMode, useCommandMenu } from "@/components/providers/com
  * text field (no arrow-key list nav, no fuzzy filtering).
  */
 
-export function CommandMenu() {
+export function CommandMenu(): ReactElement {
   const { open, setOpen, mode, setMode } = useCommandMenu();
   const { reducedMotion } = useReducedMotionPreference();
   // Bumped each time the dialog opens — child components key off it to

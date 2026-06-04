@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
 import { siteConfig } from "@/config/site";
 
@@ -26,7 +26,7 @@ function isEditableTarget(target: EventTarget | null): boolean {
   );
 }
 
-export function EasterEgg() {
+export function EasterEgg(): ReactElement | null {
   const { reducedMotion } = useReducedMotionPreference();
   const [active, setActive] = useState(false);
   const bufferRef = useRef("");

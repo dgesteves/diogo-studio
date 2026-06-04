@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { StatusDot } from "@/components/ui/status-dot";
 import { InspectorTrigger } from "@/features/inspector";
@@ -109,7 +110,7 @@ const principles = [
   "Graceful degradation everywhere — missing API keys downgrade features, they never break pages.",
 ];
 
-export default function ColophonPage() {
+export default function ColophonPage(): ReactElement {
   return (
     <section role="region" aria-labelledby="colophon-heading" className="relative overflow-hidden">
       <div

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<DecisionsLog />` — RFC-flavored decision blocks.
@@ -12,7 +12,7 @@ import type { ReactNode } from "react";
  * author to think in tradeoffs.
  */
 
-export function DecisionsLog({ children }: { children: ReactNode }) {
+export function DecisionsLog({ children }: { children: ReactNode }): ReactElement {
   return (
     <ol className="not-prose mdx-decisions-log flex flex-col gap-4" data-mdx-block="decisions">
       {children}
@@ -35,7 +35,7 @@ export function Decision({
   options: ReactNode;
   choice: ReactNode;
   outcome: ReactNode;
-}) {
+}): ReactElement {
   return (
     <li className="border-border bg-surface relative flex flex-col gap-3 rounded-lg border p-5">
       <div className="flex items-baseline justify-between gap-4">

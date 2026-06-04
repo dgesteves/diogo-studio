@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<Outcome />` — single-sentence outcome callout, bottom of a case study.
@@ -14,7 +14,7 @@ import type { ReactNode } from "react";
  * `[&>p]:my-0` rule strips MDX's default paragraph spacing so the block
  * still reads as a single line.
  */
-export function Outcome({ tag, children }: { tag?: string; children: ReactNode }) {
+export function Outcome({ tag, children }: { tag?: string; children: ReactNode }): ReactElement {
   return (
     <div
       className="not-prose border-signal-good/40 bg-signal-good/5 text-foreground flex items-baseline gap-3 rounded-md border-l-2 px-4 py-3 text-sm leading-relaxed"

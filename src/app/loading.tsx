@@ -1,4 +1,6 @@
-export default function Loading() {
+import type { ReactElement } from "react";
+
+export default function Loading(): ReactElement {
   return (
     <main className="flex flex-1 items-center justify-center" aria-label="Loading">
       <div

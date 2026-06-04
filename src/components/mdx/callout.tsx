@@ -1,5 +1,5 @@
 import { CircleAlert, Info, Lightbulb, ShieldAlert } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<Callout />` — neutral note block, used sparingly for "context" or
@@ -34,7 +34,7 @@ export function Callout({
   tone?: CalloutTone;
   title?: string;
   children: ReactNode;
-}) {
+}): ReactElement {
   const { Icon, ring, text } = toneConfig[tone];
   return (
     <aside

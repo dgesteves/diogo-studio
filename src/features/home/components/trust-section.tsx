@@ -1,6 +1,7 @@
+import type { ReactElement } from "react";
 import { operatingCompanies } from "@/config/site";
 
-export function TrustSection() {
+export function TrustSection(): ReactElement {
   return (
     <section role="region" aria-labelledby="trust-heading" className="border-border border-b">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">

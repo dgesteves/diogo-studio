@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef } from "react";
+import { Suspense, useRef, type ReactElement } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import {
   AdaptiveDpr,
@@ -41,7 +41,7 @@ export function StudioCanvas({
 }: {
   containerRef: React.RefObject<HTMLDivElement | null>;
   onReady?: () => void;
-}) {
+}): ReactElement {
   return (
     <Canvas
       dpr={[1, 1.25]}

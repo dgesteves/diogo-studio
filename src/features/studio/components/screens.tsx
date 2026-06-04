@@ -110,7 +110,8 @@ function drawTerminal(ctx: CanvasRenderingContext2D, lines: LogLine[]) {
   const lineH = 32;
   const visible = lines.slice(-8);
   for (let i = 0; i < visible.length; i += 1) {
-    const line = visible[i]!;
+    const line = visible[i];
+    if (!line) continue;
     const opacity = 0.4 + (i / Math.max(visible.length - 1, 1)) * 0.6;
     ctx.fillStyle = toneRGBA(line.tone, opacity);
     ctx.fillText(line.text, 30, startY + i * lineH);
@@ -126,7 +127,8 @@ export function useCenterScreenTexture(): THREE.CanvasTexture {
     const id = window.setInterval(() => {
       setLines((prev) => {
         const next = prev.slice(1);
-        next.push(LOG_POOL[i % LOG_POOL.length]!);
+        const line = LOG_POOL[i % LOG_POOL.length];
+        if (line) next.push(line);
         i += 1;
         return next;
       });
@@ -259,7 +261,8 @@ function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean) {
   ctx.font = `20px ${MONO}`;
 
   for (let i = 0; i < CODE_LINES.length; i += 1) {
-    const line = CODE_LINES[i]!;
+    const line = CODE_LINES[i];
+    if (!line) continue;
     const y = startY + i * lineH;
 
     // Gutter line number.
@@ -361,7 +364,8 @@ function drawMetrics(
   ];
 
   for (let r = 0; r < rows.length; r += 1) {
-    const row = rows[r]!;
+    const row = rows[r];
+    if (!row) continue;
     const y = 96 + r * 96;
 
     // Label.
@@ -383,15 +387,18 @@ function drawMetrics(
     ctx.lineWidth = 2.4;
     ctx.beginPath();
     for (let i = 0; i < row.data.length; i += 1) {
+      const value = row.data[i];
+      if (value === undefined) continue;
       const x = sparkX + (i / Math.max(row.data.length - 1, 1)) * sparkW;
-      const dy = sparkY + (1 - Math.max(0, Math.min(1, row.data[i]!))) * sparkH;
+      const dy = sparkY + (1 - Math.max(0, Math.min(1, value))) * sparkH;
       if (i === 0) ctx.moveTo(x, dy);
       else ctx.lineTo(x, dy);
     }
     ctx.stroke();
 
     // End dot — sells "live signal".
-    const lastY = sparkY + (1 - Math.max(0, Math.min(1, row.data[row.data.length - 1]!))) * sparkH;
+    const lastValue = row.data[row.data.length - 1] ?? 0;
+    const lastY = sparkY + (1 - Math.max(0, Math.min(1, lastValue))) * sparkH;
     ctx.fillStyle = row.color;
     ctx.beginPath();
     ctx.arc(sparkX + sparkW, lastY, 4, 0, Math.PI * 2);

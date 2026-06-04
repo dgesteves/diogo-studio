@@ -1,6 +1,7 @@
+import type { ReactElement } from "react";
 import Link from "next/link";
 
-export default function NotFound() {
+export default function NotFound(): ReactElement {
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-4 px-6 py-24 text-center">
       <p className="text-sm font-medium tracking-widest text-zinc-500 uppercase">404</p>

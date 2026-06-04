@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<MetricTile />` — header-of-dashboard metric.
@@ -40,7 +40,7 @@ export function MetricTile({
   tone?: MetricTone;
   /** Optional inline content — usually a `<Sparkline />`. */
   children?: ReactNode;
-}) {
+}): ReactElement {
   const t = toneClasses[tone];
   return (
     <div
@@ -72,7 +72,7 @@ export function MetricTile({
  * that adapts from 1 col on mobile to N on desktop. Authored at the top
  * of every case study to anchor the dashboard look.
  */
-export function MetricGrid({ children }: { children: ReactNode }) {
+export function MetricGrid({ children }: { children: ReactNode }): ReactElement {
   return (
     <div
       className="not-prose mdx-metric-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]"

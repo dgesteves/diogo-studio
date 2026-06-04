@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type ReactElement } from "react";
 import { useFrame } from "@react-three/fiber";
-import * as THREE from "three";
+import type * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
 
 /**
@@ -25,23 +25,31 @@ const BOUND_X = 3.4;
 const BOUND_Y = 2.2;
 const BOUND_Z = 1.6;
 
-export function CareerParticles() {
+// Seed the field once at module load — `Math.random` must not run during
+// render (React purity). Each mount clones `positions` so its per-frame
+// drift never mutates the shared seed; `velocities` stays read-only.
+function createParticleField(): { positions: Float32Array; velocities: Float32Array } {
+  const positions = new Float32Array(COUNT * 3);
+  const velocities = new Float32Array(COUNT * 3);
+  for (let i = 0; i < COUNT; i += 1) {
+    positions[i * 3 + 0] = (Math.random() * 2 - 1) * BOUND_X;
+    positions[i * 3 + 1] = (Math.random() * 2 - 1) * BOUND_Y;
+    positions[i * 3 + 2] = (Math.random() * 2 - 1) * BOUND_Z;
+    velocities[i * 3 + 0] = (Math.random() * 2 - 1) * 0.015;
+    velocities[i * 3 + 1] = (Math.random() * 2 - 1) * 0.01;
+    velocities[i * 3 + 2] = (Math.random() * 2 - 1) * 0.008;
+  }
+  return { positions, velocities };
+}
+
+const PARTICLE_FIELD = createParticleField();
+
+export function CareerParticles(): ReactElement {
   const pointsRef = useRef<THREE.Points>(null);
   const accent = useMemo(() => resolveCssVarColor("--accent"), []);
 
-  const { positions, velocities } = useMemo(() => {
-    const positions = new Float32Array(COUNT * 3);
-    const velocities = new Float32Array(COUNT * 3);
-    for (let i = 0; i < COUNT; i += 1) {
-      positions[i * 3 + 0] = (Math.random() * 2 - 1) * BOUND_X;
-      positions[i * 3 + 1] = (Math.random() * 2 - 1) * BOUND_Y;
-      positions[i * 3 + 2] = (Math.random() * 2 - 1) * BOUND_Z;
-      velocities[i * 3 + 0] = (Math.random() * 2 - 1) * 0.015;
-      velocities[i * 3 + 1] = (Math.random() * 2 - 1) * 0.01;
-      velocities[i * 3 + 2] = (Math.random() * 2 - 1) * 0.008;
-    }
-    return { positions, velocities };
-  }, []);
+  const positions = useMemo(() => PARTICLE_FIELD.positions.slice(), []);
+  const velocities = PARTICLE_FIELD.velocities;
 
   useFrame((_, delta) => {
     const pts = pointsRef.current;
@@ -53,16 +61,19 @@ export function CareerParticles() {
 
     for (let i = 0; i < COUNT; i += 1) {
       const idx = i * 3;
-      arr[idx + 0]! += velocities[idx + 0]! * step * 60;
-      arr[idx + 1]! += velocities[idx + 1]! * step * 60;
-      arr[idx + 2]! += velocities[idx + 2]! * step * 60;
+      let x = (arr[idx + 0] ?? 0) + (velocities[idx + 0] ?? 0) * step * 60;
+      let y = (arr[idx + 1] ?? 0) + (velocities[idx + 1] ?? 0) * step * 60;
+      let z = (arr[idx + 2] ?? 0) + (velocities[idx + 2] ?? 0) * step * 60;
       // Wrap-around so the field is self-replenishing.
-      if (arr[idx]! > BOUND_X) arr[idx]! = -BOUND_X;
-      else if (arr[idx]! < -BOUND_X) arr[idx]! = BOUND_X;
-      if (arr[idx + 1]! > BOUND_Y) arr[idx + 1]! = -BOUND_Y;
-      else if (arr[idx + 1]! < -BOUND_Y) arr[idx + 1]! = BOUND_Y;
-      if (arr[idx + 2]! > BOUND_Z) arr[idx + 2]! = -BOUND_Z;
-      else if (arr[idx + 2]! < -BOUND_Z) arr[idx + 2]! = BOUND_Z;
+      if (x > BOUND_X) x = -BOUND_X;
+      else if (x < -BOUND_X) x = BOUND_X;
+      if (y > BOUND_Y) y = -BOUND_Y;
+      else if (y < -BOUND_Y) y = BOUND_Y;
+      if (z > BOUND_Z) z = -BOUND_Z;
+      else if (z < -BOUND_Z) z = BOUND_Z;
+      arr[idx + 0] = x;
+      arr[idx + 1] = y;
+      arr[idx + 2] = z;
     }
     attr.needsUpdate = true;
   });

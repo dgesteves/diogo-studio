@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import { StatusDot } from "@/components/ui/status-dot";
 
 export const metadata: Metadata = {
@@ -70,7 +71,7 @@ const groups: UseGroup[] = [
   },
 ];
 
-export default function UsesPage() {
+export default function UsesPage(): ReactElement {
   return (
     <section role="region" aria-labelledby="uses-heading" className="relative overflow-hidden">
       <div

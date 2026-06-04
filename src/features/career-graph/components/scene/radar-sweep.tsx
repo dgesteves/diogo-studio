@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type ReactElement } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
-import * as THREE from "three";
+import type * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
 
 /**
@@ -76,7 +76,7 @@ void main() {
 }
 `;
 
-export function RadarSweep({ intensity = 1 }: { intensity?: number }) {
+export function RadarSweep({ intensity = 1 }: { intensity?: number }): ReactElement {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const { size } = useThree();
   const accent = useMemo(() => resolveCssVarColor("--accent"), []);
@@ -93,9 +93,9 @@ export function RadarSweep({ intensity = 1 }: { intensity?: number }) {
 
   useFrame(({ clock }) => {
     const u = matRef.current?.uniforms;
-    if (!u) return;
-    u.uTime!.value = clock.elapsedTime;
-    u.uAspect!.value = size.width / Math.max(size.height, 1);
+    if (!u?.uTime || !u.uAspect) return;
+    u.uTime.value = clock.elapsedTime;
+    u.uAspect.value = size.width / Math.max(size.height, 1);
   });
 
   return (

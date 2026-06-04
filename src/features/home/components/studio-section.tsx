@@ -1,6 +1,7 @@
+import type { ReactElement } from "react";
 import { Studio } from "@/features/studio";
 
-export function StudioSection() {
+export function StudioSection(): ReactElement {
   return (
     <section role="region" aria-labelledby="studio-heading" className="border-border border-b">
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24 lg:px-8">

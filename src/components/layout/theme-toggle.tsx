@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { MoonStar, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
@@ -15,7 +16,7 @@ import { useIsClient } from "@/lib/hooks/use-is-client";
  * `useIsClient` (built on `useSyncExternalStore`) defers the icon branch
  * to the post-hydration render with no lint trip-wires.
  */
-export function ThemeToggle() {
+export function ThemeToggle(): ReactElement {
   const { resolvedTheme, setTheme } = useTheme();
   const isClient = useIsClient();
   const isDark = isClient && resolvedTheme === "dark";

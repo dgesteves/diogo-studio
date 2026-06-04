@@ -2,7 +2,7 @@
 
 import { Activity, Gauge, Layers, X, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
 import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
@@ -66,7 +66,7 @@ function measureRouteJs(): { kb: number; count: number } {
   return { kb: Math.round(bytes / 1024), count };
 }
 
-export function InspectorOverlay() {
+export function InspectorOverlay(): ReactElement | null {
   const { open, setOpen } = useInspectorOverlay();
   const { reducedMotion } = useReducedMotionPreference();
 

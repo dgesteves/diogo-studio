@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +42,7 @@ export function ArticleHeader({
   links,
   backHref,
   backLabel,
-}: ArticleHeaderMeta) {
+}: ArticleHeaderMeta): ReactElement {
   return (
     <header className="relative flex flex-col gap-7">
       <div className="flex items-center gap-3">

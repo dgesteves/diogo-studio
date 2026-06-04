@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import {
@@ -11,7 +12,7 @@ import { StatusDot } from "@/components/ui/status-dot";
 import { patterns, siteConfig } from "@/config/site";
 import { HeroAskCta } from "./hero-ask-cta";
 
-export function HeroSection() {
+export function HeroSection(): ReactElement {
   return (
     <section
       role="region"

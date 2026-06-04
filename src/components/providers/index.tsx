@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Toaster } from "sonner";
 import { CommandMenuProvider } from "./command-menu-context";
 import { InspectorOverlayProvider } from "./inspector-overlay-context";
@@ -20,7 +21,7 @@ import { ThemeProvider } from "./theme-provider";
  *
  * The Toaster is rendered at the bottom so toasts always overlay the app.
  */
-export function AppProviders({ children }: { children: React.ReactNode }) {
+export function AppProviders({ children }: { children: React.ReactNode }): ReactElement {
   return (
     <ThemeProvider>
       <ReducedMotionProvider>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -69,7 +70,7 @@ const education = [
   },
 ];
 
-export default function AboutPage() {
+export default function AboutPage(): ReactElement {
   return (
     <section role="region" aria-labelledby="about-heading" className="relative overflow-hidden">
       <div

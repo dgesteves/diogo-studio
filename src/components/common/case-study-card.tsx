@@ -1,6 +1,7 @@
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { caseStudies } from "#content";
+import type { caseStudies } from "#content";
 import { Badge } from "@/components/ui/badge";
 import { patterns as patternMeta, type PatternId } from "@/content/data/career-graph";
 
@@ -14,7 +15,7 @@ type CaseStudy = (typeof caseStudies)[number];
  * No floating cards or image-led tiles — these are postmortems, not
  * marketing assets, and the visual grammar matches that.
  */
-export function CaseStudyCard({ study }: { study: CaseStudy }) {
+export function CaseStudyCard({ study }: { study: CaseStudy }): ReactElement {
   const topMetrics = study.metrics.slice(0, 2);
 
   return (

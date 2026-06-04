@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactElement,
 } from "react";
 
 export type CommandMenuMode = "navigate" | "ask";
@@ -37,7 +38,7 @@ const CommandMenuContext = createContext<CommandMenuContextValue | null>(null);
  * through the wrapper via a ref so it sees the live `open` value without
  * re-binding the listener on every render.
  */
-export function CommandMenuProvider({ children }: { children: React.ReactNode }) {
+export function CommandMenuProvider({ children }: { children: React.ReactNode }): ReactElement {
   const [open, setOpenState] = useState(false);
   const [mode, setMode] = useState<CommandMenuMode>("navigate");
   const openRef = useRef(false);

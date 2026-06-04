@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import type { SystemDiagramData, SystemNodeKind } from "./system-diagram-types";
 
 /**
@@ -88,7 +89,7 @@ export function SystemDiagramFallback({
   description?: string;
   data: SystemDiagramData;
   height: number;
-}) {
+}): ReactElement {
   const projected = new Map(data.nodes.map((n) => [n.id, project(n.x, n.y)]));
 
   return (

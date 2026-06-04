@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { Search } from "lucide-react";
 import { Kbd } from "@/components/ui/kbd";
 import { useCommandMenu } from "@/components/providers/command-menu-context";
@@ -8,7 +9,7 @@ import { useCommandMenu } from "@/components/providers/command-menu-context";
  * Subtle search-style ⌘K trigger for the nav.
  * Looks like a console input, not a button — invites the visitor to use it.
  */
-export function CommandTrigger() {
+export function CommandTrigger(): ReactElement {
   const { setOpen } = useCommandMenu();
 
   return (

@@ -219,15 +219,16 @@ const patternPriority: Record<PatternId, number> = {
 };
 
 function pickPrimaryPattern(shared: PatternId[]): PatternId {
-  return [...shared].sort((a, b) => patternPriority[a] - patternPriority[b])[0]!;
+  return shared.reduce((best, p) => (patternPriority[p] < patternPriority[best] ? p : best));
 }
 
 export const edges: readonly CareerEdge[] = (() => {
   const out: CareerEdge[] = [];
   for (let i = 0; i < nodes.length; i += 1) {
     for (let j = i + 1; j < nodes.length; j += 1) {
-      const a = nodes[i]!;
-      const b = nodes[j]!;
+      const a = nodes[i];
+      const b = nodes[j];
+      if (!a || !b) continue;
       const shared = a.patterns.filter((p) => b.patterns.includes(p));
       if (shared.length === 0) continue;
       out.push({

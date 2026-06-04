@@ -30,7 +30,7 @@ export function renderOgImage({
   eyebrow: string;
   title: string;
   subtitle?: string;
-}) {
+}): ImageResponse {
   return new ImageResponse(
     <div
       style={{

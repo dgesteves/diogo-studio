@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { essays } from "#content";
@@ -19,7 +20,7 @@ import { articleJsonLd, breadcrumbJsonLd } from "@/lib/seo/structured-data";
 
 type Params = { slug: string };
 
-export async function generateStaticParams() {
+export async function generateStaticParams(): Promise<Params[]> {
   return essays.map((essay) => ({ slug: essay.slug }));
 }
 
@@ -48,7 +49,11 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
   };
 }
 
-export default async function EssayPage({ params }: { params: Promise<Params> }) {
+export default async function EssayPage({
+  params,
+}: {
+  params: Promise<Params>;
+}): Promise<ReactElement> {
   const { slug } = await params;
   const essay = essays.find((e) => e.slug === slug);
   if (!essay || essay.draft) notFound();

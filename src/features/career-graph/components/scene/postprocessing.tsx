@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { Bloom, ChromaticAberration, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { Vector2 } from "three";
 
@@ -23,7 +24,7 @@ import { Vector2 } from "three";
  *   - **Noise (film grain)** — added a full-screen blit (~0.3ms) for a
  *     barely-perceptible texture. Not worth the cost at this canvas size.
  */
-export function Postprocessing() {
+export function Postprocessing(): ReactElement {
   return (
     <EffectComposer enableNormalPass={false} multisampling={0}>
       <Bloom

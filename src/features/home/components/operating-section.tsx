@@ -1,4 +1,6 @@
-export function OperatingSection() {
+import type { ReactElement } from "react";
+
+export function OperatingSection(): ReactElement {
   return (
     <section role="region" aria-labelledby="operating-heading" className="border-border border-b">
       <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-20 lg:px-8">

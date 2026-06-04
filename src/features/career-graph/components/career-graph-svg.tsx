@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import Link from "next/link";
 import {
   edges,
@@ -52,7 +53,7 @@ export function CareerGraphSvg({
   className?: string;
   ariaLabelledBy?: string;
   ariaHidden?: boolean;
-}) {
+}): ReactElement {
   const positions = Object.fromEntries(
     nodes.map((n) => [n.id, projectToSvg(n.position, VIEWPORT)] as const),
   ) as Record<NodeId, { x: number; y: number }>;
@@ -172,7 +173,8 @@ export function CareerGraphSvg({
         {/* Nodes — each is a Link-wrapped <g>, generous hit area, native
             <title> for browser + a11y tooltips. */}
         {sortedNodes.map((node) => {
-          const p = positions[node.id]!;
+          const p = positions[node.id];
+          if (!p) return null;
           return <Node key={node.id} node={node} position={p} />;
         })}
       </svg>
@@ -323,7 +325,7 @@ function Node({ node, position }: { node: CareerNode; position: { x: number; y: 
 /**
  * Hidden long-form description used by screen readers and search engines.
  */
-export function CareerGraphAccessibleDescription({ id }: { id: string }) {
+export function CareerGraphAccessibleDescription({ id }: { id: string }): ReactElement {
   return (
     <p id={id} className="sr-only">
       A career graph of {nodes.length} engagements connected by {edges.length} pattern

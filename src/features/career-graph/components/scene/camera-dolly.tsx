@@ -31,7 +31,7 @@ export function CameraDolly({
   containerRef,
 }: {
   containerRef: React.RefObject<HTMLElement | null>;
-}) {
+}): null {
   const { camera } = useThree();
 
   // Cached state read in useFrame — refs to avoid React re-renders.

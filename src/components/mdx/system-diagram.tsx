@@ -1,4 +1,4 @@
-import type { ComponentProps } from "react";
+import type { ComponentProps, ReactElement } from "react";
 import { SystemDiagramFallback } from "./system-diagram-fallback";
 import { SystemDiagramMount } from "./system-diagram-mount";
 import type { SystemDiagramData } from "./system-diagram-types";
@@ -33,7 +33,7 @@ export function SystemDiagram({
   data,
   caption,
   height = 360,
-}: SystemDiagramProps) {
+}: SystemDiagramProps): ReactElement {
   return (
     <figure
       className="not-prose border-border bg-surface mdx-system-diagram flex flex-col gap-2 overflow-hidden rounded-lg border"

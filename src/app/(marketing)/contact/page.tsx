@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowLeft, Mail } from "lucide-react";
 import { ContactForm } from "@/features/contact";
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
  * rate-limiting (Phase 5), plus the direct channels as a secondary strip so
  * the route is useful even when email delivery isn't configured.
  */
-export default function ContactPage() {
+export default function ContactPage(): ReactElement {
   return (
     <section role="region" aria-labelledby="contact-heading" className="relative overflow-hidden">
       <div

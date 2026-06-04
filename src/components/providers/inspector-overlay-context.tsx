@@ -8,6 +8,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type ReactElement,
 } from "react";
 
 /**
@@ -28,7 +29,11 @@ type InspectorOverlayContextValue = {
 
 const InspectorOverlayContext = createContext<InspectorOverlayContextValue | null>(null);
 
-export function InspectorOverlayProvider({ children }: { children: React.ReactNode }) {
+export function InspectorOverlayProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}): ReactElement {
   const [open, setOpenState] = useState(false);
   const openRef = useRef(false);
 

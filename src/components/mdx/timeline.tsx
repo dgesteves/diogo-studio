@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<Timeline />` — phased project narrative.
@@ -9,7 +9,7 @@ import type { ReactNode } from "react";
  * top-to-bottom and effortless.
  */
 
-export function Timeline({ children }: { children: ReactNode }) {
+export function Timeline({ children }: { children: ReactNode }): ReactElement {
   return (
     <ol
       className="not-prose mdx-timeline border-border-strong relative flex flex-col gap-6 border-l border-dashed pl-6"
@@ -30,7 +30,7 @@ export function Phase({
   title: string;
   dates?: string;
   children: ReactNode;
-}) {
+}): ReactElement {
   return (
     <li className="relative">
       <span

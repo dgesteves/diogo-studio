@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useMemo, useRef, type ReactElement } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { resolveCssVarColor } from "./css-color";
@@ -85,7 +85,7 @@ void main() {
 }
 `;
 
-export function GridFloor({ intensity = 1 }: { intensity?: number }) {
+export function GridFloor({ intensity = 1 }: { intensity?: number }): ReactElement {
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const accent = useMemo(() => resolveCssVarColor("--accent"), []);
 
@@ -99,9 +99,9 @@ export function GridFloor({ intensity = 1 }: { intensity?: number }) {
   );
 
   useFrame(({ clock }) => {
-    const u = matRef.current?.uniforms;
-    if (!u) return;
-    u.uTime!.value = clock.elapsedTime;
+    const uTime = matRef.current?.uniforms.uTime;
+    if (!uTime) return;
+    uTime.value = clock.elapsedTime;
   });
 
   // Tilt + translation: floor sits below the camera, recedes into +z.

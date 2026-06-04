@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 /**
  * `<Tradeoff />` — explicit "we gained X, we paid Y" block.
@@ -18,7 +18,7 @@ export function Tradeoff({
   title?: string;
   gained: ReactNode;
   paid: ReactNode;
-}) {
+}): ReactElement {
   return (
     <aside
       className="not-prose border-border bg-surface flex flex-col gap-4 rounded-lg border p-5"

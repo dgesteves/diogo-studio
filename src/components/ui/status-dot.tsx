@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { cn } from "@/lib/utils/cn";
 
 type StatusTone = "good" | "warn" | "hot" | "neutral";
@@ -14,7 +15,13 @@ const toneToClasses: Record<StatusTone, { bg: string; ring: string }> = {
  * The outer ring uses a CSS animation; honors `prefers-reduced-motion` via the
  * global safety net in `globals.css`.
  */
-export function StatusDot({ tone = "good", className }: { tone?: StatusTone; className?: string }) {
+export function StatusDot({
+  tone = "good",
+  className,
+}: {
+  tone?: StatusTone;
+  className?: string;
+}): ReactElement {
   const { bg, ring } = toneToClasses[tone];
   return (
     <span className={cn("relative inline-flex h-2 w-2", className)} aria-hidden="true">

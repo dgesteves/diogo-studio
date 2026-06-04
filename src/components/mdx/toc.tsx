@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactElement } from "react";
 
 /**
  * Table of contents — sticky companion column on `/work/[slug]` and
@@ -32,7 +32,7 @@ function flatten(items: TocItem[], depth = 0, acc: FlatItem[] = []): FlatItem[] 
   return acc;
 }
 
-export function TableOfContents({ items }: { items: TocItem[] }) {
+export function TableOfContents({ items }: { items: TocItem[] }): ReactElement | null {
   const flat = flatten(items);
   const [activeId, setActiveId] = useState<string | null>(flat[0]?.id ?? null);
 

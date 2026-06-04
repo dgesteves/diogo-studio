@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { Activity } from "lucide-react";
 import { useInspectorOverlay } from "@/components/providers/inspector-overlay-context";
 import { Button } from "@/components/ui/button";
@@ -10,7 +11,7 @@ import { Kbd } from "@/components/ui/kbd";
  * `/colophon`. Thin client wrapper so the page itself stays a server
  * component. Also surfaces the keyboard shortcut for discoverability.
  */
-export function InspectorTrigger() {
+export function InspectorTrigger(): ReactElement {
   const { toggle } = useInspectorOverlay();
   return (
     <div className="flex flex-wrap items-center gap-3">

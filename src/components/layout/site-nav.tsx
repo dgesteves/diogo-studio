@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { primaryNav, siteConfig } from "@/config/site";
@@ -12,7 +13,7 @@ import { ThemeToggle } from "./theme-toggle";
  * Sticky site nav. Hairline border, subtle backdrop blur, console grammar.
  * Mono initials wordmark on the left, primary routes center, ⌘K + theme right.
  */
-export function SiteNav() {
+export function SiteNav(): ReactElement {
   const pathname = usePathname();
 
   return (

@@ -10,6 +10,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
+import type { ReactElement } from "react";
 import type { ContactInput } from "../schemas/contact";
 
 /**
@@ -61,7 +62,7 @@ export function ContactNotification({
   roleAltitude,
   message,
   receivedAt,
-}: ContactNotificationProps) {
+}: ContactNotificationProps): ReactElement {
   return (
     <Html lang="en">
       <Head />

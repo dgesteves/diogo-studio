@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import { caseStudies } from "#content";
 import { CaseStudyCard } from "@/components/common/case-study-card";
 import { PatternFilter } from "@/components/common/pattern-filter";
@@ -38,7 +39,7 @@ export default async function WorkPage({
   searchParams,
 }: {
   searchParams: Promise<{ p?: string | string[] }>;
-}) {
+}): Promise<ReactElement> {
   const { p } = await searchParams;
   const selected = parsePatternsFromQuery(p);
 

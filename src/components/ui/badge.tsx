@@ -24,7 +24,7 @@ const badgeVariants = cva(
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement>, VariantProps<typeof badgeVariants> {}
 
-export function Badge({ className, tone, ...props }: BadgeProps) {
+export function Badge({ className, tone, ...props }: BadgeProps): React.ReactElement {
   return <span className={cn(badgeVariants({ tone }), className)} {...props} />;
 }
 

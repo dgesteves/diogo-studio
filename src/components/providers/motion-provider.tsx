@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { MotionConfig } from "motion/react";
 import { useReducedMotionPreference } from "./reduced-motion-provider";
 
@@ -12,7 +13,7 @@ import { useReducedMotionPreference } from "./reduced-motion-provider";
  *   slightly-overshoot springs for interactive elements; ease-out curves for
  *   layout changes.
  */
-export function MotionProvider({ children }: { children: React.ReactNode }) {
+export function MotionProvider({ children }: { children: React.ReactNode }): ReactElement {
   const { reducedMotion } = useReducedMotionPreference();
 
   return (

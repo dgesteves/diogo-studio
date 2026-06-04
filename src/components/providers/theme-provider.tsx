@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from "next-themes";
 
 /**
@@ -10,7 +11,7 @@ import { ThemeProvider as NextThemesProvider, type ThemeProviderProps } from "ne
  * - Respects the system preference until the user explicitly chooses.
  * - Disables built-in transition flashes when the theme flips.
  */
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+export function ThemeProvider({ children, ...props }: ThemeProviderProps): ReactElement {
   return (
     <NextThemesProvider
       attribute="class"

@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react";
 import type { Metadata } from "next";
+import type { ReactElement } from "react";
 import Link from "next/link";
 import { essays } from "#content";
 import { PatternFilter } from "@/components/common/pattern-filter";
@@ -39,7 +40,7 @@ export default async function WritingPage({
   searchParams,
 }: {
   searchParams: Promise<{ p?: string | string[] }>;
-}) {
+}): Promise<ReactElement> {
   const { p } = await searchParams;
   const selected = parsePatternsFromQuery(p);
 

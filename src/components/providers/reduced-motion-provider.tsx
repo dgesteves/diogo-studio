@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useSyncExternalStore } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useSyncExternalStore,
+  type ReactElement,
+} from "react";
 
 /* ---------------------------------------------------------------------------
  * Public types
@@ -157,7 +164,7 @@ function persistOverride(value: boolean | null): void {
  *
  * Every animation/3D surface gates on this before kicking off motion.
  */
-export function ReducedMotionProvider({ children }: { children: React.ReactNode }) {
+export function ReducedMotionProvider({ children }: { children: React.ReactNode }): ReactElement {
   const systemReducedMotion = useSyncExternalStore(
     subscribeSystem,
     getSystemSnapshot,

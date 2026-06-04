@@ -1,3 +1,5 @@
+import type { ReactElement } from "react";
+
 /**
  * `<Sparkline />` — pure SVG, server-rendered, zero deps.
  *
@@ -29,7 +31,7 @@ export function Sparkline({
   values: readonly number[];
   tone?: SparklineTone;
   ariaLabel?: string;
-}) {
+}): ReactElement | null {
   if (values.length < 2) return null;
 
   const width = 120;
@@ -49,8 +51,9 @@ export function Sparkline({
   });
 
   const d = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const last = points[points.length - 1]!;
-  const first = points[0]!;
+  const first = points[0];
+  const last = points[points.length - 1];
+  if (!first || !last) return null;
   const area = `${d} L ${last.x} ${height - pad} L ${first.x} ${height - pad} Z`;
 
   return (

@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { HeroSection } from "./hero-section";
 import { OperatingSection } from "./operating-section";
 import { StudioSection } from "./studio-section";
@@ -17,7 +18,7 @@ import { TrustSection } from "./trust-section";
  * 2. Operating modes — three altitudes within the last 18 months.
  * 3. Trust strip — operating companies, mono small caps.
  */
-export function Home() {
+export function Home(): ReactElement {
   return (
     <>
       <HeroSection />

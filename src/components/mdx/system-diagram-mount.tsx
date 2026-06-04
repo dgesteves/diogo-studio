@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import type { ReactElement } from "react";
 import type { SystemDiagramData } from "./system-diagram-types";
 
 /**
@@ -23,6 +24,12 @@ const SystemDiagramCanvas = dynamic(
   { ssr: false, loading: () => null },
 );
 
-export function SystemDiagramMount({ data, title }: { data: SystemDiagramData; title: string }) {
+export function SystemDiagramMount({
+  data,
+  title,
+}: {
+  data: SystemDiagramData;
+  title: string;
+}): ReactElement {
   return <SystemDiagramCanvas data={data} title={title} />;
 }
