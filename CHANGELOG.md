@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.5](https://github.com/dgesteves/diogo-studio/compare/v1.2.4...v1.2.5) (2026-06-07)
+
+
+### Miscellaneous Chores
+
+* add pretest:coverage script to run velite before coverage tests ([7109652](https://github.com/dgesteves/diogo-studio/commit/7109652d0a32f4b3b59a231f63a66a79bcbe54a7))
+
 ## [1.2.4](https://github.com/dgesteves/diogo-studio/compare/v1.2.3...v1.2.4) (2026-06-04)
 
 
