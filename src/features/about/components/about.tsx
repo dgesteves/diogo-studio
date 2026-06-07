@@ -12,7 +12,7 @@ import { AboutExperience } from "./about-experience";
 import { PixelatedPortrait } from "./pixelated-portrait";
 
 const PORTRAIT = {
-  src: "/static/diogo-esteves.png",
+  src: "/images/diogo-esteves.png",
   alt: `Pixelated portrait of ${siteConfig.name}`,
 } as const;
 
