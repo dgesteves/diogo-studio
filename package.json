@@ -11,6 +11,7 @@
     "predev": "velite",
     "prebuild": "velite && pnpm agent:index:check",
     "pretest": "velite",
+    "pretest:coverage": "velite",
     "pretypecheck": "velite",
     "dev": "next dev",
     "build": "next build",
