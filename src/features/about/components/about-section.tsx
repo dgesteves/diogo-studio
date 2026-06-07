@@ -12,7 +12,7 @@ export function Prose({ title, children }: { title: string; children: ReactNode 
   return (
     <div className="flex flex-col gap-5">
       <SectionLabel>{title}</SectionLabel>
-      <div className="text-muted-foreground flex flex-col gap-4 text-base leading-relaxed">
+      <div className="text-muted-foreground flex max-w-3xl flex-col gap-4 text-base leading-relaxed">
         {children}
       </div>
     </div>

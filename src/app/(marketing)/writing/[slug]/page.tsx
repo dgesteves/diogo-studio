@@ -61,7 +61,7 @@ export default async function EssayPage({
     <article
       itemScope
       itemType="https://schema.org/Article"
-      className="relative mx-auto flex max-w-5xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
+      className="relative mx-auto flex max-w-6xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
     >
       <JsonLd
         data={articleJsonLd({

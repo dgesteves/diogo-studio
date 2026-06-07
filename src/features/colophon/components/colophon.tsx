@@ -12,7 +12,7 @@ export function Colophon(): ReactElement {
         aria-hidden="true"
         className="console-grid mask-fade-edges pointer-events-none absolute inset-0 opacity-40 dark:opacity-25"
       />
-      <div className="relative mx-auto flex max-w-3xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-12 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6">
           <div className="text-muted-foreground border-border bg-surface inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] font-medium tracking-wider uppercase">
             <StatusDot tone="good" />
@@ -72,7 +72,7 @@ export function Colophon(): ReactElement {
           <h2 className="text-subtle-foreground border-border border-b pb-3 font-mono text-[11px] font-medium tracking-wider uppercase">
             Operating principles
           </h2>
-          <ul className="flex flex-col gap-3">
+          <ul className="flex max-w-3xl flex-col gap-3">
             {colophonPrinciples.map((p) => (
               <li key={p} className="text-muted-foreground flex gap-3 text-sm leading-relaxed">
                 <span

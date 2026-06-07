@@ -22,7 +22,7 @@ export default function ContactPage(): ReactElement {
         aria-hidden="true"
         className="console-grid mask-fade-edges pointer-events-none absolute inset-0 opacity-40 dark:opacity-25"
       />
-      <div className="relative mx-auto flex max-w-3xl flex-col gap-8 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-8 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
         <div className="text-muted-foreground border-border bg-surface inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] font-medium tracking-wider uppercase">
           <StatusDot tone="good" />
           <span>Open to senior engineering roles</span>
@@ -40,7 +40,9 @@ export default function ContactPage(): ReactElement {
           wrestling with. I’ll respond with how I’d approach it.
         </p>
 
-        <ContactForm />
+        <div className="w-full max-w-2xl">
+          <ContactForm />
+        </div>
 
         <div className="flex items-center gap-3 pt-4">
           <span className="text-subtle-foreground font-mono text-[10px] tracking-wider uppercase">

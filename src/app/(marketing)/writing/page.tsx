@@ -40,7 +40,7 @@ export default async function WritingPage({
     <section
       role="region"
       aria-labelledby="writing-heading"
-      className="relative mx-auto flex max-w-3xl flex-col gap-10 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
+      className="relative mx-auto flex max-w-6xl flex-col gap-10 px-4 pt-20 pb-32 sm:px-6 lg:px-8"
     >
       <header className="flex flex-col gap-6">
         <div className="border-border bg-surface text-muted-foreground inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1 font-mono text-[10px] font-medium tracking-wider uppercase">
