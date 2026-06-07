@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.0](https://github.com/dgesteves/diogo-studio/compare/v1.2.5...v1.3.0) (2026-06-07)
+
+
+### Features
+
+* add interactive pixelated about portrait and widen pages to max-w-6xl ([3733629](https://github.com/dgesteves/diogo-studio/commit/3733629d32f9848a8b7d9ef608ce008ad8953fed))
+* commit downscaled about portrait and serve it from public/images ([9fe4a94](https://github.com/dgesteves/diogo-studio/commit/9fe4a9433f46e19950fa2b409e11c7d2e7a00f80))
+
+
+### Documentation
+
+* add CI, CodeQL, OpenSSF Scorecard, Release Please, and Dependabot auto-merge badges to README ([6e6d8d8](https://github.com/dgesteves/diogo-studio/commit/6e6d8d8d9fc4befd4afbd87f18f0c8bbc2f3c7bf))
+
+
+### Miscellaneous Chores
+
+* raise size-limit budget to 1.3 MB for the about portrait feature ([38f7fc0](https://github.com/dgesteves/diogo-studio/commit/38f7fc0b8d3a8cef00a5578928182e0bd34f9305))
+
 ## [1.2.5](https://github.com/dgesteves/diogo-studio/compare/v1.2.4...v1.2.5) (2026-06-07)
 
 
