@@ -159,3 +159,12 @@ pnpm e2e:ui          # interactive Playwright UI
 
 The easiest way to deploy is the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme).
 See the [Next.js deployment docs](https://nextjs.org/docs/app/building-your-application/deploying) for alternatives.
+
+## License
+
+Copyright (c) 2026 Diogo Esteves. **All Rights Reserved.**
+
+This is **not** open source. The source is published for portfolio and
+reference (read-only) viewing only. You may not use, copy, modify, distribute,
+or create derivative works from any part of it without prior written
+permission. See [`LICENSE`](./LICENSE) for the full terms.
