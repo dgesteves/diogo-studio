@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
-import { DESK_GROUP_Y, DESK_LEG_HEIGHT, DESK_TOP_THICKNESS } from "./constants";
+import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS } from "./constants";
 
 const LEG_POSITIONS = [
   [-1.35, -0.45],
@@ -15,7 +15,7 @@ const LEG_POSITIONS = [
 
 export function Desk(): ReactElement {
   return (
-    <group position={[0, DESK_GROUP_Y, 0]}>
+    <group position={[0, DESK_LEG_HEIGHT, 0]}>
       <RoundedBox args={[3.0, DESK_TOP_THICKNESS, 1.1]} radius={0.02} smoothness={2}>
         <meshStandardMaterial color="#0d1216" roughness={0.55} metalness={0.25} />
       </RoundedBox>
