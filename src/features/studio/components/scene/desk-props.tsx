@@ -126,21 +126,30 @@ function PlantPot(): ReactElement {
         <cylinderGeometry args={[0.05, 0.05, 0.005, 20]} />
         <meshStandardMaterial color="#0c0805" roughness={1} metalness={0} />
       </mesh>
-      <mesh position={[0, 0.16, 0]}>
-        <icosahedronGeometry args={[0.07, 0]} />
-        <meshStandardMaterial color="#1f4a32" roughness={0.6} flatShading />
-      </mesh>
-      <mesh position={[-0.035, 0.18, 0.025]}>
-        <icosahedronGeometry args={[0.05, 0]} />
-        <meshStandardMaterial color="#266a44" roughness={0.6} flatShading />
-      </mesh>
-      <mesh position={[0.03, 0.185, -0.022]}>
-        <icosahedronGeometry args={[0.045, 0]} />
-        <meshStandardMaterial color="#1a4028" roughness={0.6} flatShading />
-      </mesh>
+      {FOLIAGE_CLUMPS.map((clump) => (
+        <mesh key={clump.position.join(",")} position={clump.position}>
+          <icosahedronGeometry args={[clump.radius, 0]} />
+          <meshStandardMaterial color={clump.color} roughness={0.6} flatShading />
+        </mesh>
+      ))}
     </group>
   );
 }
+
+type FoliageClump = {
+  position: [number, number, number];
+  radius: number;
+  color: string;
+};
+
+const FOLIAGE_CLUMPS: FoliageClump[] = [
+  { position: [0, 0.155, 0], radius: 0.058, color: "#1f4a32" },
+  { position: [-0.045, 0.168, 0.014], radius: 0.05, color: "#266a44" },
+  { position: [0.046, 0.16, -0.014], radius: 0.048, color: "#1a4028" },
+  { position: [0.006, 0.166, 0.046], radius: 0.044, color: "#2b6e48" },
+  { position: [-0.008, 0.178, -0.044], radius: 0.044, color: "#22573a" },
+  { position: [0, 0.198, 0.004], radius: 0.04, color: "#266a44" },
+];
 
 function Notebook(): ReactElement {
   return (

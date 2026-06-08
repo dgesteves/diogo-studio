@@ -6,6 +6,10 @@ import type { Texture } from "three";
 import { brandColors } from "@/config/brand";
 
 import { useCenterScreenTexture, useLeftScreenTexture, useRightScreenTexture } from "../screens";
+import { DESK_TOP_Y } from "./constants";
+
+const MONITOR_Y = DESK_TOP_Y + 0.47;
+const WEBCAM_Y = DESK_TOP_Y + 0.78;
 
 export function MonitorRig(): ReactElement {
   const leftTexture = useLeftScreenTexture();
@@ -15,19 +19,19 @@ export function MonitorRig(): ReactElement {
   return (
     <>
       <Monitor
-        position={[-1.044, 1.0, -0.262]}
+        position={[-1.044, MONITOR_Y, -0.262]}
         rotation={[0, 0.15, 0]}
         size="large"
         screenTexture={leftTexture}
       />
       <Monitor
-        position={[0, 1.0, -0.34]}
+        position={[0, MONITOR_Y, -0.34]}
         rotation={[0, 0, 0]}
         size="large"
         screenTexture={centerTexture}
       />
       <Monitor
-        position={[1.044, 1.0, -0.262]}
+        position={[1.044, MONITOR_Y, -0.262]}
         rotation={[0, -0.15, 0]}
         size="large"
         screenTexture={rightTexture}
@@ -96,7 +100,7 @@ function Monitor({
 
 function Webcam(): ReactElement {
   return (
-    <group position={[0, 1.31, -0.34]}>
+    <group position={[0, WEBCAM_Y, -0.34]}>
       <RoundedBox
         args={[0.12, 0.04, 0.05]}
         radius={0.01}

@@ -16,7 +16,13 @@ export function Lighting(): ReactElement {
         decay={2}
         color={brandColors.accentSoft}
       />
-      <pointLight position={[0, 0.5, 0.65]} intensity={0.3} decay={2} color={brandColors.accent} />
+      <pointLight
+        position={[0, 0.22, 0.55]}
+        intensity={0.3}
+        distance={1.0}
+        decay={2}
+        color={brandColors.accent}
+      />
     </>
   );
 }
