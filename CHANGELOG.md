@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.1](https://github.com/dgesteves/diogo-studio/compare/v1.4.0...v1.4.1) (2026-06-08)
+
+
+### Code Refactoring
+
+* extract reusable article and agent components to reduce duplication ([21b5e51](https://github.com/dgesteves/diogo-studio/commit/21b5e51a349ca30be1ab870b8f87f09dc260a6da))
+
+
+### Documentation
+
+* tighten file length limit to 100 lines and expand single-responsibility guidance ([66034ba](https://github.com/dgesteves/diogo-studio/commit/66034ba30d15693933613819bd6889af986c40a4))
+
 ## [1.4.0](https://github.com/dgesteves/diogo-studio/compare/v1.3.0...v1.4.0) (2026-06-08)
 
 
