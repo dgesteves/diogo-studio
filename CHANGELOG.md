@@ -1,5 +1,42 @@
 # Changelog
 
+## [1.4.0](https://github.com/dgesteves/diogo-studio/compare/v1.3.0...v1.4.0) (2026-06-08)
+
+
+### Features
+
+* add desk accessories, lighting enhancements, and silence THREE.Clock deprecation ([923057b](https://github.com/dgesteves/diogo-studio/commit/923057b32ae05e85f30344dba679c3dd0e8a49d1))
+
+
+### Code Refactoring
+
+* extract magic numbers to constants and improve scene measurements ([ca265ac](https://github.com/dgesteves/diogo-studio/commit/ca265acdb7f9285e3959d6d95d41ce495a6e6024))
+* simplify desk positioning by removing DESK_GROUP_Y constant ([a7f6469](https://github.com/dgesteves/diogo-studio/commit/a7f646995c5f9140e5789b86236a4cc4d95afec0))
+
+
+### Miscellaneous Chores
+
+* change license from MIT to proprietary all rights reserved ([f378677](https://github.com/dgesteves/diogo-studio/commit/f3786779adcc49ecd497fe53122cac3e9ae2596c))
+* **deps-dev:** bump @types/node in the types group across 1 directory ([#44](https://github.com/dgesteves/diogo-studio/issues/44)) ([e28c994](https://github.com/dgesteves/diogo-studio/commit/e28c99413d27c15c54a60386e5b9b9b4ea2dd207))
+* **deps-dev:** bump knip from 6.15.0 to 6.16.1 ([#57](https://github.com/dgesteves/diogo-studio/issues/57)) ([fe51543](https://github.com/dgesteves/diogo-studio/commit/fe5154350965d58bb0e8f96fdcf37e93e7d3133a))
+* **deps-dev:** bump the testing group across 1 directory with 2 updates ([#43](https://github.com/dgesteves/diogo-studio/issues/43)) ([c70109e](https://github.com/dgesteves/diogo-studio/commit/c70109eafcd47607e7ae3f2a20e4ce2a5bff4bf6))
+* **deps:** bump @ai-sdk/openai from 3.0.65 to 3.0.68 ([#51](https://github.com/dgesteves/diogo-studio/issues/51)) ([607c352](https://github.com/dgesteves/diogo-studio/commit/607c35268474b72202610d00622bb943435a18c3))
+* **deps:** bump @radix-ui/react-accordion from 1.2.12 to 1.2.13 ([#56](https://github.com/dgesteves/diogo-studio/issues/56)) ([576fddd](https://github.com/dgesteves/diogo-studio/commit/576fdddb665d80503281f9db3c317daaa2c2bb97))
+* **deps:** bump @radix-ui/react-dialog from 1.1.15 to 1.1.16 ([#50](https://github.com/dgesteves/diogo-studio/issues/50)) ([102b7bd](https://github.com/dgesteves/diogo-studio/commit/102b7bd480dbbe127cebe108b1aa808208fe0b9b))
+* **deps:** bump @radix-ui/react-dropdown-menu from 2.1.16 to 2.1.17 ([#45](https://github.com/dgesteves/diogo-studio/issues/45)) ([35ad849](https://github.com/dgesteves/diogo-studio/commit/35ad8496e41468d2cb75a8a54ad63b7077613969))
+* **deps:** bump @radix-ui/react-popover from 1.1.15 to 1.1.16 ([#46](https://github.com/dgesteves/diogo-studio/issues/46)) ([26ab127](https://github.com/dgesteves/diogo-studio/commit/26ab1271327da919e0d1b9e23f92bc9be5f145f3))
+* **deps:** bump @radix-ui/react-slot from 1.2.4 to 1.2.5 ([#47](https://github.com/dgesteves/diogo-studio/issues/47)) ([1c6228f](https://github.com/dgesteves/diogo-studio/commit/1c6228f5d413d9b7d84702f9d02beda84257db63))
+* **deps:** bump @radix-ui/react-tabs from 1.1.13 to 1.1.14 ([#59](https://github.com/dgesteves/diogo-studio/issues/59)) ([4a59132](https://github.com/dgesteves/diogo-studio/commit/4a591320fed73be8d86522d0ffbc253cade42846))
+* **deps:** bump @radix-ui/react-visually-hidden from 1.2.4 to 1.2.5 ([#49](https://github.com/dgesteves/diogo-studio/issues/49)) ([0b5cd0c](https://github.com/dgesteves/diogo-studio/commit/0b5cd0c25e3c4544634c69a8ee6223ebef21a816))
+* **deps:** bump @sentry/nextjs from 10.55.0 to 10.56.0 ([#48](https://github.com/dgesteves/diogo-studio/issues/48)) ([3e16077](https://github.com/dgesteves/diogo-studio/commit/3e16077362f9d6d7bab2881e73f34250bb5affe0))
+* **deps:** bump @xyflow/react from 12.10.2 to 12.11.0 ([#53](https://github.com/dgesteves/diogo-studio/issues/53)) ([7d3954a](https://github.com/dgesteves/diogo-studio/commit/7d3954a2711adf709ab660bf142678600a3ef850))
+* **deps:** bump ai from 6.0.190 to 6.0.197 ([#55](https://github.com/dgesteves/diogo-studio/issues/55)) ([6993165](https://github.com/dgesteves/diogo-studio/commit/6993165f214dce060532c923664071a7df4c4d5b))
+* **deps:** bump lucide-react from 1.16.0 to 1.17.0 ([#54](https://github.com/dgesteves/diogo-studio/issues/54)) ([643d253](https://github.com/dgesteves/diogo-studio/commit/643d253dbb990b81f39f23821cfc0d45cf467373))
+* **deps:** bump shiki from 4.1.0 to 4.2.0 ([#58](https://github.com/dgesteves/diogo-studio/issues/58)) ([c6b58a3](https://github.com/dgesteves/diogo-studio/commit/c6b58a3734464f931fdadddc719a44938e5609c9))
+* **deps:** bump the next group with 3 updates ([#41](https://github.com/dgesteves/diogo-studio/issues/41)) ([51d5f32](https://github.com/dgesteves/diogo-studio/commit/51d5f32dc6d3344ee41f4d40ce7939a9d4b7dfa4))
+* **deps:** bump the react group across 1 directory with 3 updates ([#42](https://github.com/dgesteves/diogo-studio/issues/42)) ([8fc9a0b](https://github.com/dgesteves/diogo-studio/commit/8fc9a0b9f0716fe0d23e4ba70119bdce4e8c274f))
+* **deps:** bump three from 0.182.0 to 0.184.0 ([#52](https://github.com/dgesteves/diogo-studio/issues/52)) ([627d32d](https://github.com/dgesteves/diogo-studio/commit/627d32d4462ce34013f27822c5dd5806a78a1d0a))
+
 ## [1.3.0](https://github.com/dgesteves/diogo-studio/compare/v1.2.5...v1.3.0) (2026-06-07)
 
 
