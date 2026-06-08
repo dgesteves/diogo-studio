@@ -10,7 +10,7 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       "no-console": "error",
-      "max-lines": ["error", { max: 200, skipBlankLines: true, skipComments: true }],
+      "max-lines": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/consistent-type-imports": "error",

@@ -40,9 +40,11 @@ security by default. Prefer the smallest, clearest solution that ships.
 
 - **Functional and declarative.** Prefer pure functions and composition; avoid
   classes. Iterate and modularize over copy-paste (DRY).
-- **Small, single-purpose files.** Keep every file focused and short — split when
-  one approaches **~200 lines** (or a function ~50). Extract sub-components,
-  hooks, and helpers into their own files instead of growing one big file.
+- **Small, single-purpose files.** Keep every file focused and short — the lint
+  hard-caps source files at **100 lines** (blanks/comments excluded), and a
+  function should stay **~50 lines**. One file = one responsibility: split
+  sub-components, hooks, and helpers into their own files instead of growing one
+  big file. See the project-structure rule for how to separate each concern.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
   booleans (`isLoading`, `hasError`, `canSubmit`).

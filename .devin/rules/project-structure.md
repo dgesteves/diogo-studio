@@ -47,8 +47,9 @@ folder placement. The principles below are the enforced defaults.
 
 - **Colocate by feature** outside `app/`; promote to shared only when reused 2+
   times. Resist premature abstraction.
-- **Keep files small** (~200 lines max). When a component, route, or module grows
-  past that, split it into smaller sub-components, hooks, or helper files.
+- **Keep files small** (100 lines max, lint-enforced). When a component, route,
+  or module grows past that, split it into smaller sub-components, hooks, or
+  helper files (see "Single responsibility" below).
 - **Naming**: `kebab-case` files/dirs, `PascalCase` components, `useX` hooks,
   `is/has/can` booleans. One primary, **named** export per file.
 - A feature's `index.ts` exposes a **small, curated public API** (its only import
@@ -64,3 +65,41 @@ folder placement. The principles below are the enforced defaults.
   inline.
 - Mark server-only modules with `import "server-only"`; client-only files start
   with `"use client"`. Keep the boundary explicit.
+
+## Single responsibility — one file, one concern
+
+Each file does **one** job and exports **one** primary, named thing. When a file
+mixes concerns or nears the 100-line cap, split along these seams. Default to
+**colocation inside the feature** (`src/features/<feature>/…`); promote to a
+shared location only on 2+ reuse.
+
+- **Components** (`components/`, `*.tsx`) — rendering only (markup, layout,
+  presentational props). No data fetching, no business rules. A `"use client"`
+  component holds UI state/handlers; push `"use client"` to the leaves and keep
+  parents as Server Components. Split a large component into sub-components, and
+  lift any non-render logic into a hook or helper.
+- **Hooks** (`hooks/`, `use-*.ts`) — reusable **client** stateful logic
+  (effects, refs, subscriptions, derived state). One hook per file. Isomorphic,
+  generic hooks live in `src/lib/hooks/`; app-wide ones in `src/hooks/`.
+- **Server data access** (`server/data/`, DAL) — the only place that reads/writes
+  the data source. `import "server-only"`. Returns typed, validated data.
+- **Services** (`server/services/`) — server-side business logic / orchestration
+  and third-party integrations (AI, email, payments). Composes the DAL; never
+  called directly from client components.
+- **Server Actions** (`actions/`, `"use server"`) — thin mutation entry points:
+  authenticate, validate input with a schema, call a service, revalidate. No
+  business logic inline — delegate to a service.
+- **Types** (`types.ts`, `src/types/`) — `type`/`interface` declarations only,
+  no runtime code. Co-locate feature types in the feature's `types.ts`; truly
+  global/shared types go in `src/types/`. Export domain types from Zod schemas
+  with `z.infer` rather than re-declaring them.
+- **Schemas** (`schemas/`, `src/lib/validations/`) — Zod schemas as the single
+  source of truth for shape + runtime validation at every boundary (forms,
+  actions, route handlers, external APIs).
+- **Constants / config** — named values, not magic literals. Narrowest scope
+  wins: file-local `const` → feature `constants.ts` → `src/config/` for
+  site/nav/routes → `src/content/` for copy. Never a global `constants.ts` dump.
+- **Utils** (`lib/utils/`) — pure, isomorphic, side-effect-free helpers. One
+  cohesive concern per file; no React, no env, no I/O.
+- **Stores** (`src/stores/`) — app-wide client state only. Keep server state in
+  the server/data layer, not mirrored into a store.
