@@ -1,5 +1,7 @@
 "use client";
 
+import "@/components/r3f/silence-clock-deprecation";
+
 import { Suspense, type ReactElement } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDpr, AdaptiveEvents, PerspectiveCamera, Preload } from "@react-three/drei";

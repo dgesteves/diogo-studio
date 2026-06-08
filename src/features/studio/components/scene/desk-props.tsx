@@ -22,7 +22,7 @@ const KEY_ROW_OFFSETS = [-0.08, -0.02, 0.04, 0.1];
 
 function Keyboard(): ReactElement {
   return (
-    <group position={[-0.15, DESK_TOP_Y + 0.011, 0.3]}>
+    <group position={[-0.05, DESK_TOP_Y + 0.011, 0.32]}>
       <RoundedBox args={[1.05, 0.022, 0.32]} radius={0.008} smoothness={2}>
         <meshStandardMaterial color="#0a0e12" roughness={0.6} metalness={0.3} />
       </RoundedBox>
@@ -48,27 +48,49 @@ function Keyboard(): ReactElement {
   );
 }
 
+const MOUSE_UNDERGLOW_DOTS = Array.from({ length: 12 }, (_, index) => {
+  const angle = (index / 12) * Math.PI * 2;
+  return {
+    angle,
+    x: Math.cos(angle) * 0.052,
+    z: Math.sin(angle) * 0.078,
+  };
+});
+
 function Mouse(): ReactElement {
   return (
-    <group position={[0.72, DESK_TOP_Y + 0.013, 0.3]}>
+    <group position={[0.6, DESK_TOP_Y + 0.013, 0.34]}>
       <RoundedBox args={[0.085, 0.026, 0.135]} radius={0.014} smoothness={2}>
         <meshStandardMaterial color="#0a0e12" roughness={0.5} metalness={0.4} />
       </RoundedBox>
       <mesh position={[0, 0.0145, -0.02]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.006, 0.006, 0.022, 10]} />
-        <meshStandardMaterial color="#1a2530" roughness={0.45} metalness={0.7} />
-      </mesh>
-      <mesh position={[0, -0.012, 0.0]}>
-        <sphereGeometry args={[0.005, 8, 8]} />
         <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
+      <mesh position={[0, 0.0136, 0.026]}>
+        <boxGeometry args={[0.026, 0.001, 0.05]} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+      </mesh>
+      {MOUSE_UNDERGLOW_DOTS.map((dot) => (
+        <mesh key={dot.angle} position={[dot.x, -0.011, dot.z]}>
+          <sphereGeometry args={[0.004, 8, 8]} />
+          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        </mesh>
+      ))}
+      <pointLight
+        position={[0, -0.02, 0]}
+        intensity={0.28}
+        distance={0.55}
+        decay={2}
+        color={brandColors.accent}
+      />
     </group>
   );
 }
 
 function CoffeeMug(): ReactElement {
   return (
-    <group position={[1.02, DESK_TOP_Y, 0.05]}>
+    <group position={[0.95, DESK_TOP_Y, 0.3]}>
       <mesh position={[0, 0.06, 0]}>
         <cylinderGeometry args={[0.05, 0.044, 0.12, 24]} />
         <meshStandardMaterial color="#1a2a36" roughness={0.4} metalness={0.45} />
@@ -91,7 +113,7 @@ function CoffeeMug(): ReactElement {
 
 function PlantPot(): ReactElement {
   return (
-    <group position={[-1.05, DESK_TOP_Y, 0.05]}>
+    <group position={[-0.95, DESK_TOP_Y, 0.3]}>
       <mesh position={[0, 0.05, 0]}>
         <cylinderGeometry args={[0.055, 0.045, 0.1, 20]} />
         <meshStandardMaterial color="#2a1c11" roughness={0.85} metalness={0.05} />
@@ -122,7 +144,7 @@ function PlantPot(): ReactElement {
 
 function Notebook(): ReactElement {
   return (
-    <group position={[-0.72, DESK_TOP_Y + 0.008, 0.3]}>
+    <group position={[-0.6, DESK_TOP_Y + 0.008, 0.34]}>
       <RoundedBox args={[0.2, 0.012, 0.3]} radius={0.006} smoothness={2}>
         <meshStandardMaterial color="#13181d" roughness={0.5} metalness={0.4} />
       </RoundedBox>

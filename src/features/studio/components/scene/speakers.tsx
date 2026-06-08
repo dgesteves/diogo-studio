@@ -9,8 +9,8 @@ import { DESK_TOP_Y } from "./constants";
 export function Speakers(): ReactElement {
   return (
     <>
-      <Speaker position={[-1.45, DESK_TOP_Y + 0.16, -0.3]} />
-      <Speaker position={[1.45, DESK_TOP_Y + 0.16, -0.3]} />
+      <Speaker position={[-1.38, DESK_TOP_Y + 0.16, -0.1]} />
+      <Speaker position={[1.38, DESK_TOP_Y + 0.16, -0.1]} />
     </>
   );
 }
@@ -36,6 +36,14 @@ function Speaker({ position }: { position: [number, number, number] }): ReactEle
       <mesh position={[0, 0.09, 0.072]} rotation={[Math.PI / 2, 0, 0]}>
         <cylinderGeometry args={[0.022, 0.022, 0.005, 16]} />
         <meshStandardMaterial color="#040608" roughness={0.7} metalness={0.5} />
+      </mesh>
+      <mesh position={[0, -0.04, 0.075]}>
+        <torusGeometry args={[0.047, 0.0032, 10, 32]} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 0.09, 0.075]}>
+        <torusGeometry args={[0.025, 0.0022, 8, 24]} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0.045, -0.14, 0.072]}>
         <sphereGeometry args={[0.0035, 8, 8]} />
