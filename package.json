@@ -113,7 +113,7 @@
     "eslint-config-prettier": "^10.1.8",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
-    "knip": "^6.15.0",
+    "knip": "^6.16.1",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
