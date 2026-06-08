@@ -11,38 +11,28 @@ import {
   Text,
 } from "@react-email/components";
 import type { ReactElement } from "react";
-import { brandColors } from "@/config/brand";
 import type { ContactInput } from "../schemas/contact";
+
+import {
+  bodyStyle,
+  containerStyle,
+  eyebrowStyle,
+  footerStyle,
+  fromLinkStyle,
+  headingStyle,
+  hrBottomStyle,
+  hrTopStyle,
+  labelStyle,
+  messageStyle,
+  receivedStyle,
+  valueStyle,
+} from "./contact-notification-styles";
 
 type ContactNotificationProps = Pick<
   ContactInput,
   "name" | "email" | "company" | "roleAltitude" | "message"
 > & {
   receivedAt: string;
-};
-
-const INK = "#0a0a0a";
-const SURFACE = "#141414";
-const BORDER = "#2a2a2a";
-const TEXT = "#ededed";
-const MUTED = "#a1a1aa";
-const ACCENT = brandColors.accent;
-
-const labelStyle: React.CSSProperties = {
-  fontFamily: "'SF Mono', ui-monospace, Menlo, monospace",
-  fontSize: "10px",
-  letterSpacing: "0.12em",
-  textTransform: "uppercase",
-  color: MUTED,
-  margin: "0 0 4px",
-};
-
-const valueStyle: React.CSSProperties = {
-  fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
-  fontSize: "15px",
-  color: TEXT,
-  margin: "0 0 20px",
-  lineHeight: 1.5,
 };
 
 export function ContactNotification({
@@ -57,60 +47,24 @@ export function ContactNotification({
     <Html lang="en">
       <Head />
       <Preview>{`New inbound from ${name}${company ? ` · ${company}` : ""}`}</Preview>
-      <Body
-        style={{
-          backgroundColor: INK,
-          margin: 0,
-          padding: "32px 0",
-          fontFamily: "ui-sans-serif, system-ui, -apple-system, sans-serif",
-        }}
-      >
-        <Container
-          style={{
-            maxWidth: "560px",
-            margin: "0 auto",
-            backgroundColor: SURFACE,
-            border: `1px solid ${BORDER}`,
-            borderRadius: "12px",
-            overflow: "hidden",
-          }}
-        >
+      <Body style={bodyStyle}>
+        <Container style={containerStyle}>
           <Section style={{ padding: "28px 32px 0" }}>
-            <Text
-              style={{
-                fontFamily: "'SF Mono', ui-monospace, Menlo, monospace",
-                fontSize: "11px",
-                letterSpacing: "0.16em",
-                textTransform: "uppercase",
-                color: ACCENT,
-                margin: "0 0 6px",
-              }}
-            >
-              diogo.studio · inbound
-            </Text>
-            <Heading
-              as="h1"
-              style={{
-                fontSize: "22px",
-                fontWeight: 600,
-                color: TEXT,
-                letterSpacing: "-0.02em",
-                margin: "0 0 4px",
-              }}
-            >
+            <Text style={eyebrowStyle}>diogo.studio · inbound</Text>
+            <Heading as="h1" style={headingStyle}>
               New contact submission
             </Heading>
-            <Text style={{ fontSize: "12px", color: MUTED, margin: 0 }}>{receivedAt}</Text>
+            <Text style={receivedStyle}>{receivedAt}</Text>
           </Section>
 
-          <Hr style={{ borderColor: BORDER, margin: "24px 0" }} />
+          <Hr style={hrTopStyle} />
 
           <Section style={{ padding: "0 32px" }}>
             <Text style={labelStyle}>From</Text>
             <Text style={valueStyle}>
               {name}
               {"  "}
-              <Link href={`mailto:${email}`} style={{ color: ACCENT, textDecoration: "none" }}>
+              <Link href={`mailto:${email}`} style={fromLinkStyle}>
                 &lt;{email}&gt;
               </Link>
             </Text>
@@ -130,34 +84,13 @@ export function ContactNotification({
             ) : null}
 
             <Text style={labelStyle}>Message</Text>
-            <Text
-              style={{
-                ...valueStyle,
-                whiteSpace: "pre-wrap",
-                backgroundColor: INK,
-                border: `1px solid ${BORDER}`,
-                borderRadius: "8px",
-                padding: "16px",
-              }}
-            >
-              {message}
-            </Text>
+            <Text style={messageStyle}>{message}</Text>
           </Section>
 
-          <Hr style={{ borderColor: BORDER, margin: "8px 0 24px" }} />
+          <Hr style={hrBottomStyle} />
 
           <Section style={{ padding: "0 32px 28px" }}>
-            <Text
-              style={{
-                fontFamily: "'SF Mono', ui-monospace, Menlo, monospace",
-                fontSize: "10px",
-                letterSpacing: "0.08em",
-                color: MUTED,
-                margin: 0,
-              }}
-            >
-              Reply directly to this email to reach {name}.
-            </Text>
+            <Text style={footerStyle}>Reply directly to this email to reach {name}.</Text>
           </Section>
         </Container>
       </Body>

@@ -1,14 +1,12 @@
 import type { ReactElement } from "react";
-import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { aboutCommunity, aboutEducation, aboutFacts, aboutPrinciples } from "@/content/data/about";
+import { aboutFacts } from "@/content/data/about";
 import { siteConfig } from "@/config/site";
 
-import { Prose, SectionLabel } from "./about-section";
+import { Prose } from "./about-section";
 import { AboutExperience } from "./about-experience";
+import { CommunitySection, EducationSection, PrinciplesSection } from "./about-card-grids";
+import { AboutCta } from "./about-cta";
 import { PixelatedPortrait } from "./pixelated-portrait";
 
 const PORTRAIT = {
@@ -80,86 +78,15 @@ export function About(): ReactElement {
           </p>
         </Prose>
 
-        <div className="flex flex-col gap-5">
-          <SectionLabel>How I work</SectionLabel>
-          <div className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-2">
-            {aboutPrinciples.map((p) => (
-              <div key={p.title} className="bg-surface flex flex-col gap-2 p-5">
-                <h3 className="text-foreground text-sm font-medium tracking-tight">{p.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{p.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <PrinciplesSection />
 
         <AboutExperience />
 
-        <div className="flex flex-col gap-5">
-          <SectionLabel>Beyond the org</SectionLabel>
-          <div className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-3">
-            {aboutCommunity.map((c) => (
-              <div key={c.title} className="bg-surface flex flex-col gap-2 p-5">
-                <h3 className="text-foreground text-sm font-medium tracking-tight">{c.title}</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">{c.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CommunitySection />
 
-        <div className="flex flex-col gap-5">
-          <SectionLabel>Education</SectionLabel>
-          <dl className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-2">
-            {aboutEducation.map((e) => (
-              <div key={e.school} className="bg-surface flex flex-col gap-1.5 p-5">
-                <dt className="text-foreground text-sm leading-snug font-medium">{e.school}</dt>
-                <dd className="text-muted-foreground text-sm">
-                  {e.credential}
-                  <span className="text-subtle-foreground tabular ml-2 font-mono text-xs">
-                    {e.years}
-                  </span>
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
+        <EducationSection />
 
-        <div className="border-border bg-surface-inset/60 flex flex-col gap-5 rounded-lg border p-6 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-col gap-1">
-            <p className="text-foreground text-base font-medium tracking-tight">
-              Optimizing for Staff+, Principal, Founding Engineer, or VP / Head of Engineering.
-            </p>
-            <p className="text-muted-foreground text-sm">
-              Seed to Series B AI-native product companies, frontend platform teams, remote-first
-              orgs.
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button asChild variant="accent" size="md">
-              <Link href="/contact">
-                Start a conversation
-                <ArrowRight className="size-4" aria-hidden="true" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="icon" aria-label="GitHub">
-              <a href={siteConfig.links.github} target="_blank" rel="noopener noreferrer">
-                <GithubIcon className="size-4" />
-              </a>
-            </Button>
-            <Button asChild variant="outline" size="icon" aria-label="LinkedIn">
-              <a href={siteConfig.links.linkedin} target="_blank" rel="noopener noreferrer">
-                <LinkedinIcon className="size-4" />
-              </a>
-            </Button>
-          </div>
-        </div>
-
-        <Link
-          href="/work"
-          className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1.5 font-mono text-[10px] tracking-wider uppercase transition-colors"
-        >
-          See the work behind the story
-          <ArrowUpRight className="size-3" aria-hidden="true" />
-        </Link>
+        <AboutCta />
       </div>
     </section>
   );

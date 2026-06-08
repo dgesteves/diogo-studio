@@ -1,15 +1,15 @@
 "use client";
 
 import { Command } from "cmdk";
-import { Briefcase, Home, Mail, Monitor, MoonStar, Notebook, Sparkles, Sun } from "lucide-react";
+import { Briefcase, Home, Notebook, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
 import { caseStudies, essays } from "#content";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { primaryNav, siteConfig } from "@/config/site";
+import { primaryNav } from "@/config/site";
 
+import { ProfileGroup, ThemeGroup } from "./command-menu-actions";
 import { Item, iconForPage } from "./command-menu-item";
 
 export function NavigateView({ onClose }: { onClose: () => void }): ReactElement {
@@ -93,59 +93,9 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
           </Command.Group>
         ) : null}
 
-        <Command.Group heading="Theme">
-          <Item
-            icon={<Sun className="size-4" />}
-            label="Light theme"
-            onSelect={() => runAndClose(() => setTheme("light"))}
-          />
-          <Item
-            icon={<MoonStar className="size-4" />}
-            label="Dark theme"
-            onSelect={() => runAndClose(() => setTheme("dark"))}
-          />
-          <Item
-            icon={<Monitor className="size-4" />}
-            label="Follow system"
-            onSelect={() => runAndClose(() => setTheme("system"))}
-          />
-        </Command.Group>
+        <ThemeGroup run={runAndClose} setTheme={setTheme} />
 
-        <Command.Group heading="Profile">
-          <Item
-            icon={<LinkedinIcon className="size-4" />}
-            label="LinkedIn"
-            hint="linkedin.com/in/diogo-esteves"
-            external
-            onSelect={() =>
-              runAndClose(() =>
-                window.open(siteConfig.links.linkedin, "_blank", "noopener,noreferrer"),
-              )
-            }
-          />
-          <Item
-            icon={<GithubIcon className="size-4" />}
-            label="GitHub"
-            hint="github.com/dgesteves"
-            external
-            onSelect={() =>
-              runAndClose(() =>
-                window.open(siteConfig.links.github, "_blank", "noopener,noreferrer"),
-              )
-            }
-          />
-          <Item
-            icon={<Mail className="size-4" />}
-            label="Email"
-            hint={siteConfig.email}
-            external
-            onSelect={() =>
-              runAndClose(() => {
-                window.location.href = `mailto:${siteConfig.email}`;
-              })
-            }
-          />
-        </Command.Group>
+        <ProfileGroup run={runAndClose} />
       </Command.List>
     </Command>
   );

@@ -1,12 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import Link from "next/link";
-import { ArrowLeft, Mail } from "lucide-react";
-import { ContactForm } from "@/features/contact";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { ArrowLeft } from "lucide-react";
+import { ContactChannels, ContactForm } from "@/features/contact";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
-import { siteConfig } from "@/config/site";
 
 export const metadata: Metadata = {
   title: "Contact",
@@ -51,28 +49,7 @@ export default function ContactPage(): ReactElement {
           <span className="bg-border h-px flex-1" aria-hidden="true" />
         </div>
 
-        <ul className="border-border bg-border grid gap-px overflow-hidden rounded-lg border sm:grid-cols-3">
-          <ContactCard
-            label="Email"
-            value={siteConfig.email}
-            href={`mailto:${siteConfig.email}`}
-            icon={<Mail className="size-4" />}
-          />
-          <ContactCard
-            label="LinkedIn"
-            value="linkedin.com/in/diogo-esteves"
-            href={siteConfig.links.linkedin}
-            external
-            icon={<LinkedinIcon className="size-4" />}
-          />
-          <ContactCard
-            label="GitHub"
-            value="github.com/dgesteves"
-            href={siteConfig.links.github}
-            external
-            icon={<GithubIcon className="size-4" />}
-          />
-        </ul>
+        <ContactChannels />
 
         <div className="flex flex-wrap items-center gap-3 pt-2">
           <Button asChild variant="outline" size="md">
@@ -84,36 +61,5 @@ export default function ContactPage(): ReactElement {
         </div>
       </div>
     </section>
-  );
-}
-
-function ContactCard({
-  label,
-  value,
-  href,
-  icon,
-  external,
-}: {
-  label: string;
-  value: string;
-  href: string;
-  icon: React.ReactNode;
-  external?: boolean;
-}) {
-  return (
-    <li className="bg-surface">
-      <a
-        href={href}
-        target={external ? "_blank" : undefined}
-        rel={external ? "noopener noreferrer" : undefined}
-        className="hover:bg-surface-muted flex flex-col gap-2 p-5 transition-colors"
-      >
-        <span className="text-muted-foreground inline-flex items-center gap-2 font-mono text-[10px] tracking-wider uppercase">
-          {icon}
-          {label}
-        </span>
-        <span className="text-foreground text-sm break-all">{value}</span>
-      </a>
-    </li>
   );
 }

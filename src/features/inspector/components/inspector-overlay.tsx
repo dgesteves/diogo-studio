@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Gauge, Layers, X, Zap } from "lucide-react";
+import { Activity, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
@@ -15,28 +15,9 @@ import {
 } from "@/lib/telemetry/web-vitals-store";
 import { cn } from "@/lib/utils/cn";
 
-import { Panel, Stat, Vital } from "./inspector-atoms";
-import { fpsTone, formatCount } from "./inspector-format";
+import { measureRouteJs } from "./inspector-route-js";
+import { RouteJsPanel, ScenePanel, VitalsPanel } from "./inspector-panels";
 import { MotionPanel } from "./inspector-motion-panel";
-
-function measureRouteJs(): { kb: number; count: number } {
-  if (typeof performance === "undefined" || !performance.getEntriesByType) {
-    return { kb: 0, count: 0 };
-  }
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const entries = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
-  let bytes = 0;
-  let count = 0;
-  for (const entry of entries) {
-    const isScript = entry.initiatorType === "script" || entry.name.endsWith(".js");
-    const sameOrigin = entry.name.startsWith(origin) || entry.name.startsWith("/");
-    if (isScript && sameOrigin) {
-      bytes += entry.encodedBodySize || 0;
-      count += 1;
-    }
-  }
-  return { kb: Math.round(bytes / 1024), count };
-}
 
 export function InspectorOverlay(): ReactElement | null {
   const { open, setOpen } = useInspectorOverlay();
@@ -90,53 +71,9 @@ function OverlayPanel({
       </header>
 
       <div className="flex max-h-[70vh] flex-col gap-3 overflow-y-auto p-3">
-        <Panel icon={<Zap className="size-3" />} title="Web Vitals">
-          <div className="grid grid-cols-3 gap-2">
-            {(["LCP", "INP", "CLS"] as const).map((name) => (
-              <Vital key={name} name={name} sample={vitals[name]} />
-            ))}
-            {(["TTFB", "FCP"] as const).map((name) => (
-              <Vital key={name} name={name} sample={vitals[name]} />
-            ))}
-          </div>
-        </Panel>
-
-        <Panel icon={<Gauge className="size-3" />} title="3D scene">
-          {perf.active ? (
-            <div className="grid grid-cols-3 gap-2">
-              <Stat label="FPS" value={String(perf.fps)} tone={fpsTone(perf.fps)} />
-              <Stat label="Frame" value={`${perf.frameMs}ms`} />
-              <Stat label="Calls" value={String(perf.drawCalls)} />
-              <Stat label="Tris" value={formatCount(perf.triangles)} />
-              <Stat label="Geom" value={String(perf.geometries)} />
-              <Stat label="Tex" value={String(perf.textures)} />
-            </div>
-          ) : (
-            <p className="text-subtle-foreground text-[11px] leading-relaxed">
-              No live scene. The hero canvas is paused (reduced-motion, low-power, or off-screen) —
-              the static SVG carries the same data.
-            </p>
-          )}
-        </Panel>
-
-        <Panel icon={<Layers className="size-3" />} title="Route JS">
-          <div className="flex items-end justify-between gap-2">
-            <div>
-              <span className="text-foreground tabular text-xl font-medium tracking-tight">
-                {routeJs.kb}
-              </span>
-              <span className="text-muted-foreground ml-1 text-xs">KB transferred</span>
-            </div>
-            <span className="text-subtle-foreground font-mono text-[10px] tracking-wider uppercase">
-              {routeJs.count} files
-            </span>
-          </div>
-          <p className="text-subtle-foreground mt-1 font-mono text-[10px] tracking-wider">
-            <span className="text-muted-foreground break-all">{pathname}</span> · budget 1.25 MB
-            (size-limit, gzip)
-          </p>
-        </Panel>
-
+        <VitalsPanel vitals={vitals} />
+        <ScenePanel perf={perf} />
+        <RouteJsPanel routeJs={routeJs} pathname={pathname} />
         <MotionPanel />
       </div>
 

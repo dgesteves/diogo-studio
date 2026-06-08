@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import dynamic from "next/dynamic";
 import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { useInView } from "@/lib/hooks/use-in-view";
 import { useIsClient } from "@/lib/hooks/use-is-client";
 import { cn } from "@/lib/utils/cn";
 import { siteConfig } from "@/config/site";
@@ -32,30 +33,10 @@ export function PixelatedPortrait({
   bleed = false,
   className,
 }: PixelatedPortraitProps): ReactElement {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { ref: containerRef, inView } = useInView<HTMLDivElement>(VIEWPORT_MARGIN);
   const isClient = useIsClient();
   const { reducedMotion } = useReducedMotionPreference();
-  const [inView, setInView] = useState(false);
   const [status, setStatus] = useState<PortraitStatus>("loading");
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") {
-      setInView(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: VIEWPORT_MARGIN, threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
 
   const shouldMount = isClient && inView;
 

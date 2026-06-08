@@ -1,19 +1,6 @@
-import type { PatternId } from "./career-graph-patterns";
+import type { CareerNode } from "./career-graph-node-types";
 
-export type NodeId = "fueled" | "moment" | "eino" | "peacock" | "diligent" | "bmw" | "deloitte";
-
-export type CareerNode = {
-  id: NodeId;
-  label: string;
-  fullName: string;
-  role: string;
-  years: string;
-  summary: string;
-  patterns: PatternId[];
-  slug?: string;
-  position: readonly [number, number, number];
-  weight: 0.6 | 0.8 | 1 | 1.2;
-};
+export type { CareerNode, NodeId } from "./career-graph-node-types";
 
 export const nodes: readonly CareerNode[] = [
   {
@@ -106,22 +93,3 @@ export const nodes: readonly CareerNode[] = [
     weight: 0.6,
   },
 ] as const;
-
-export const PUBLISHED_CASE_STUDY_SLUGS = new Set<string>([
-  "eino-ai-network-planning",
-  "peacock-streaming",
-  "diligent-design-system",
-]);
-
-export function nodeHref(node: CareerNode): string {
-  if (node.slug && PUBLISHED_CASE_STUDY_SLUGS.has(node.slug)) {
-    return `/work/${node.slug}`;
-  }
-  return "/work";
-}
-
-export function getNode(id: NodeId): CareerNode {
-  const n = nodes.find((node) => node.id === id);
-  if (!n) throw new Error(`Unknown career-graph node: ${id}`);
-  return n;
-}

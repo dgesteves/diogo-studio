@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { AgentCitation, AgentSourcesPayload } from "@/types/agent";
-import { agentSourcesPayloadSchema } from "@/lib/validations/agent";
+import type { AgentCitation } from "@/types/agent";
 
 import type { AskStatus, RetrievalMode } from "../types";
+import { runAskRequest } from "./ask-agent-request";
 
 type UseAskAgent = {
   query: string;
@@ -47,75 +47,13 @@ export function useAskAgent(): UseAskAgent {
     setError(null);
     setRetrieval(null);
 
-    let res: Response;
-    try {
-      res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ query: q }),
-        signal: controller.signal,
-      });
-    } catch (err) {
-      if ((err as { name?: string }).name === "AbortError") return;
-      setError("Couldn't reach the agent. Check your connection and try again.");
-      setStatus("error");
-      return;
-    }
-
-    const header = res.headers.get("x-agent-sources");
-    let payload: AgentSourcesPayload | null = null;
-    if (header) {
-      payload = decodeAgentSources(header);
-      if (payload) {
-        setCitations(payload.citations);
-        setRetrieval(payload.retrieval);
-      }
-    }
-
-    if (res.status === 429) {
-      const text = await safeText(res);
-      setError(text || "Rate limit exceeded. Give it a minute and try again.");
-      setStatus("rate-limited");
-      return;
-    }
-    if (res.status === 503) {
-      const text = await safeText(res);
-      setAnswer(text);
-      setStatus("unconfigured");
-      return;
-    }
-    if (!res.ok) {
-      setError(`The agent returned ${res.status}. Try again or use Navigate mode.`);
-      setStatus("error");
-      return;
-    }
-
-    const reader = res.body?.getReader();
-    if (!reader) {
-      setError("No response stream available.");
-      setStatus("error");
-      return;
-    }
-
-    const decoder = new TextDecoder();
-    let acc = "";
-    try {
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        if (value) {
-          acc += decoder.decode(value, { stream: true });
-          setAnswer(acc);
-        }
-      }
-    } catch (err) {
-      if ((err as { name?: string }).name === "AbortError") return;
-      setError("The stream was interrupted.");
-      setStatus("error");
-      return;
-    }
-
-    setStatus(payload?.refused ? "refused" : "done");
+    await runAskRequest(q, controller.signal, {
+      setCitations,
+      setRetrieval,
+      setAnswer,
+      setStatus,
+      setError,
+    });
   }
 
   function stop(): void {
@@ -135,23 +73,4 @@ export function useAskAgent(): UseAskAgent {
     ask,
     stop,
   };
-}
-
-async function safeText(res: Response): Promise<string> {
-  try {
-    return await res.text();
-  } catch {
-    return "";
-  }
-}
-
-function decodeAgentSources(header: string): AgentSourcesPayload | null {
-  try {
-    const bytes = Uint8Array.from(atob(header), (ch) => ch.charCodeAt(0));
-    const json = new TextDecoder().decode(bytes);
-    const result = agentSourcesPayloadSchema.safeParse(JSON.parse(json));
-    return result.success ? result.data : null;
-  } catch {
-    return null;
-  }
 }

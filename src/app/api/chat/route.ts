@@ -1,54 +1,23 @@
-import * as Sentry from "@sentry/nextjs";
-import { createOpenAI } from "@ai-sdk/openai";
-import { embed, streamText } from "ai";
-
-import { env } from "@/env";
-import { agentIndexSchema, chatRequestSchema } from "@/lib/validations/agent";
+import { chatRequestSchema } from "@/lib/validations/agent";
 import { retrieve } from "@/server/ai/retrieve";
-import { formatUserPrompt, SYSTEM_PROMPT } from "@/server/ai/system-prompt";
 import { createRateLimiter } from "@/server/rate-limit";
-import type { AgentChunk, AgentCitation, AgentIndex, AgentSourcesPayload } from "@/types/agent";
+import { env } from "@/env";
+import type { AgentSourcesPayload } from "@/types/agent";
 
-import indexJson from "@/content/agent-index.json" with { type: "json" };
+import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/server/ai/agent-index";
+import {
+  buildCitations,
+  jsonResponse,
+  REFUSAL_TEXT,
+  textResponse,
+} from "@/server/ai/agent-response";
+import { embedQuery } from "@/server/ai/embed-query";
+import { streamAgentResponse } from "@/server/ai/agent-stream";
 
 export const runtime = "edge";
 export const maxDuration = 30;
 
-const INDEX: AgentIndex = agentIndexSchema.parse(indexJson);
-const CHUNKS: AgentChunk[] = INDEX.chunks;
-const CORPUS_HAS_EMBEDDINGS = CHUNKS.some(
-  (c) => Array.isArray(c.embedding) && c.embedding.length > 0,
-);
-
 const allow = createRateLimiter({ prefix: "agent-chat", limit: 10, windowMs: 60_000 });
-
-function jsonResponse(body: unknown, init?: ResponseInit): Response {
-  return new Response(JSON.stringify(body), {
-    ...init,
-    headers: {
-      "content-type": "application/json; charset=utf-8",
-      ...init?.headers,
-    },
-  });
-}
-
-function sourcesHeaderValue(payload: AgentSourcesPayload): string {
-  return btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-}
-
-function buildCitations(chunks: AgentChunk[]): AgentCitation[] {
-  return chunks.map((c, i) => ({
-    marker: i + 1,
-    chunkId: c.id,
-    sourceKind: c.sourceKind,
-    sourceTitle: c.sourceTitle,
-    href: `${c.permalink}${c.anchor ? `#${c.anchor}` : ""}`,
-    heading: c.heading,
-  }));
-}
-
-const REFUSAL_TEXT =
-  "I don't have that in the indexed material. The fastest way to get a direct answer is via [/contact](/contact) — Diogo replies.";
 
 export async function POST(req: Request): Promise<Response> {
   let body: unknown;
@@ -71,22 +40,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   const apiKey = env.OPENAI_API_KEY;
-  let queryEmbedding: number[] | null = null;
-  if (apiKey && CORPUS_HAS_EMBEDDINGS) {
-    try {
-      const openaiClient = createOpenAI({ apiKey });
-      const result = await embed({
-        model: openaiClient.embedding(env.OPENAI_EMBED_MODEL),
-        value: query,
-        providerOptions: {
-          openai: { dimensions: INDEX.embeddingDim ?? 512 },
-        },
-      });
-      queryEmbedding = result.embedding;
-    } catch (err) {
-      Sentry.captureException(err, { tags: { route: "/api/chat", stage: "embed" } });
-    }
-  }
+  const queryEmbedding = apiKey && CORPUS_HAS_EMBEDDINGS ? await embedQuery(query, apiKey) : null;
 
   const retrieval = retrieve(CHUNKS, query, queryEmbedding);
 
@@ -96,34 +50,7 @@ export async function POST(req: Request): Promise<Response> {
       retrieval: retrieval.retrieval,
       refused: true,
     };
-    return new Response(REFUSAL_TEXT, {
-      status: 200,
-      headers: {
-        "content-type": "text/plain; charset=utf-8",
-        "x-agent-sources": sourcesHeaderValue(payload),
-        "cache-control": "no-store",
-      },
-    });
-  }
-
-  if (!apiKey) {
-    const titles = retrieval.hits.map((h, i) => `[${i + 1}] ${h.chunk.sourceTitle}`).join("\n");
-    const payload: AgentSourcesPayload = {
-      citations: buildCitations(retrieval.hits.map((h) => h.chunk)),
-      retrieval: retrieval.retrieval,
-      refused: false,
-    };
-    return new Response(
-      `The chat model isn't configured (no OPENAI_API_KEY). Top matches from the index:\n\n${titles}`,
-      {
-        status: 503,
-        headers: {
-          "content-type": "text/plain; charset=utf-8",
-          "x-agent-sources": sourcesHeaderValue(payload),
-          "cache-control": "no-store",
-        },
-      },
-    );
+    return textResponse(REFUSAL_TEXT, payload, 200);
   }
 
   const orderedChunks = retrieval.hits.map((h) => h.chunk);
@@ -133,37 +60,14 @@ export async function POST(req: Request): Promise<Response> {
     refused: false,
   };
 
-  const openaiClient = createOpenAI({ apiKey });
-  const result = streamText({
-    model: openaiClient.chat(env.OPENAI_CHAT_MODEL),
-    system: SYSTEM_PROMPT,
-    prompt: formatUserPrompt(query, orderedChunks),
-    temperature: 0.2,
-    maxOutputTokens: 600,
-  });
+  if (!apiKey) {
+    const titles = retrieval.hits.map((h, i) => `[${i + 1}] ${h.chunk.sourceTitle}`).join("\n");
+    return textResponse(
+      `The chat model isn't configured (no OPENAI_API_KEY). Top matches from the index:\n\n${titles}`,
+      payload,
+      503,
+    );
+  }
 
-  const encoder = new TextEncoder();
-  const stream = new ReadableStream<Uint8Array>({
-    async start(controller) {
-      try {
-        for await (const part of result.textStream) {
-          controller.enqueue(encoder.encode(part));
-        }
-        controller.close();
-      } catch (err) {
-        Sentry.captureException(err, { tags: { route: "/api/chat", stage: "stream" } });
-        controller.enqueue(encoder.encode("\n\n[The model stream ended unexpectedly. Try again.]"));
-        controller.close();
-      }
-    },
-  });
-
-  return new Response(stream, {
-    status: 200,
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "x-agent-sources": sourcesHeaderValue(payload),
-      "cache-control": "no-store",
-    },
-  });
+  return streamAgentResponse(query, orderedChunks, payload, apiKey);
 }
