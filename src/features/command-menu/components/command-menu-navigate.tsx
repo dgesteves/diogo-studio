@@ -8,6 +8,7 @@ import { type ReactElement } from "react";
 
 import { caseStudies, essays } from "#content";
 import { primaryNav } from "@/config/navigation";
+import { sortPublished } from "@/lib/content/sort-published";
 
 import { ProfileGroup, ThemeGroup } from "./command-menu-actions";
 import { Item, iconForPage } from "./command-menu-item";
@@ -15,6 +16,8 @@ import { Item, iconForPage } from "./command-menu-item";
 export function NavigateView({ onClose }: { onClose: () => void }): ReactElement {
   const router = useRouter();
   const { setTheme } = useTheme();
+  const publishedCaseStudies = sortPublished(caseStudies);
+  const publishedEssays = sortPublished(essays);
 
   function runAndClose(action: () => void): void {
     onClose();
@@ -59,37 +62,31 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
           ))}
         </Command.Group>
 
-        {caseStudies.filter((s) => !s.draft).length > 0 ? (
+        {publishedCaseStudies.length > 0 ? (
           <Command.Group heading="Case studies">
-            {caseStudies
-              .filter((s) => !s.draft)
-              .sort((a, b) => a.order - b.order)
-              .map((study) => (
-                <Item
-                  key={study.slug}
-                  icon={<Briefcase className="size-4" />}
-                  label={study.title}
-                  hint={study.company}
-                  onSelect={() => runAndClose(() => router.push(study.permalink))}
-                />
-              ))}
+            {publishedCaseStudies.map((study) => (
+              <Item
+                key={study.slug}
+                icon={<Briefcase className="size-4" />}
+                label={study.title}
+                hint={study.company}
+                onSelect={() => runAndClose(() => router.push(study.permalink))}
+              />
+            ))}
           </Command.Group>
         ) : null}
 
-        {essays.filter((e) => !e.draft).length > 0 ? (
+        {publishedEssays.length > 0 ? (
           <Command.Group heading="Essays">
-            {essays
-              .filter((e) => !e.draft)
-              .sort((a, b) => a.order - b.order)
-              .map((essay) => (
-                <Item
-                  key={essay.slug}
-                  icon={<Notebook className="size-4" />}
-                  label={essay.title}
-                  hint={`${essay.metadata.readingTime} min read`}
-                  onSelect={() => runAndClose(() => router.push(essay.permalink))}
-                />
-              ))}
+            {publishedEssays.map((essay) => (
+              <Item
+                key={essay.slug}
+                icon={<Notebook className="size-4" />}
+                label={essay.title}
+                hint={`${essay.metadata.readingTime} min read`}
+                onSelect={() => runAndClose(() => router.push(essay.permalink))}
+              />
+            ))}
           </Command.Group>
         ) : null}
 
