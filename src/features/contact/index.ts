@@ -1,2 +1,1 @@
-export { ContactForm } from "./components/contact-form";
-export { ContactChannels } from "./components/contact-channels";
+export { Contact } from "./components/contact";

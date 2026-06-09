@@ -1,12 +1,7 @@
-import { createElement } from "react";
-import * as Sentry from "@sentry/nextjs";
-import { Resend } from "resend";
-
-import { ContactNotification } from "@/features/contact/emails/contact-notification";
 import { contactSchema } from "@/features/contact/schemas/contact";
 import { siteConfig } from "@/config/site";
-import { env } from "@/env";
 import { createRateLimiter } from "@/server/rate-limit";
+import { sendContactNotification } from "@/server/email/send-contact-notification";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;
@@ -35,9 +30,8 @@ export async function POST(req: Request): Promise<Response> {
       { status: 422 },
     );
   }
-  const { name, email, company, roleAltitude, message, company_url } = parsed.data;
 
-  if (company_url) {
+  if (parsed.data.company_url) {
     return json({ ok: true });
   }
 
@@ -48,7 +42,9 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  if (!env.RESEND_API_KEY) {
+  const result = await sendContactNotification(parsed.data);
+
+  if (result.status === "unconfigured") {
     return json(
       {
         error: "Email delivery isn't configured on this deployment.",
@@ -59,35 +55,9 @@ export async function POST(req: Request): Promise<Response> {
     );
   }
 
-  const to = env.CONTACT_TO_EMAIL ?? siteConfig.email;
-  const resend = new Resend(env.RESEND_API_KEY);
-
-  try {
-    const { error } = await resend.emails.send({
-      from: env.RESEND_FROM_EMAIL,
-      to: [to],
-      replyTo: email,
-      subject: `Inbound · ${name}${company ? ` · ${company}` : ""}`,
-      react: createElement(ContactNotification, {
-        name,
-        email,
-        company,
-        roleAltitude,
-        message,
-        receivedAt: new Date().toUTCString(),
-      }),
-    });
-
-    if (error) {
-      Sentry.captureException(new Error(`Resend send failed: ${error.message}`), {
-        tags: { route: "api/contact" },
-      });
-      return json({ error: "Couldn't send right now. Please email me directly." }, { status: 502 });
-    }
-
-    return json({ ok: true });
-  } catch (err) {
-    Sentry.captureException(err, { tags: { route: "api/contact" } });
+  if (result.status === "failed") {
     return json({ error: "Couldn't send right now. Please email me directly." }, { status: 502 });
   }
+
+  return json({ ok: true });
 }

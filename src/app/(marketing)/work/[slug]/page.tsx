@@ -8,6 +8,8 @@ import { ArticleOutcomes } from "@/components/common/article-outcomes";
 import { NextArticleLink } from "@/components/common/next-article-link";
 import { MetricGrid, MetricTile } from "@/components/mdx/metric-tile";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { nextPublished } from "@/lib/content/next-published";
+import { sortPublished } from "@/lib/content/sort-published";
 import { buildArticleMetadata } from "@/lib/seo/article-metadata";
 
 type Params = { slug: string };
@@ -38,11 +40,7 @@ export default async function CaseStudyPage({
   const study = caseStudies.find((s) => s.slug === slug);
   if (!study || study.draft) notFound();
 
-  const ordered = [...caseStudies]
-    .filter((s) => !s.draft)
-    .sort((a, b) => a.order - b.order || b.publishedAt.localeCompare(a.publishedAt));
-  const idx = ordered.findIndex((s) => s.slug === study.slug);
-  const next = ordered[(idx + 1) % ordered.length];
+  const next = nextPublished(sortPublished(caseStudies), study.slug);
 
   return (
     <article
@@ -97,7 +95,7 @@ export default async function CaseStudyPage({
 
       <ArticleOutcomes outcomes={study.outcomes} />
 
-      {next && next.slug !== study.slug ? (
+      {next ? (
         <NextArticleLink
           href={next.permalink}
           eyebrow="Next case study"

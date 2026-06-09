@@ -6,6 +6,8 @@ import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { NextArticleLink } from "@/components/common/next-article-link";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { nextPublished } from "@/lib/content/next-published";
+import { sortPublished } from "@/lib/content/sort-published";
 import { buildArticleMetadata } from "@/lib/seo/article-metadata";
 
 type Params = { slug: string };
@@ -36,11 +38,7 @@ export default async function EssayPage({
   const essay = essays.find((e) => e.slug === slug);
   if (!essay || essay.draft) notFound();
 
-  const ordered = [...essays]
-    .filter((e) => !e.draft)
-    .sort((a, b) => a.order - b.order || b.publishedAt.localeCompare(a.publishedAt));
-  const idx = ordered.findIndex((e) => e.slug === essay.slug);
-  const next = ordered[(idx + 1) % ordered.length];
+  const next = nextPublished(sortPublished(essays), essay.slug);
 
   return (
     <article
@@ -77,7 +75,7 @@ export default async function EssayPage({
 
       <ArticleBody code={essay.body} toc={essay.toc} />
 
-      {next && next.slug !== essay.slug ? (
+      {next ? (
         <NextArticleLink
           href={next.permalink}
           eyebrow="Next essay"

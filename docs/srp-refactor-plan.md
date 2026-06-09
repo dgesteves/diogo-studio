@@ -8,7 +8,7 @@
 
 - **Status:** In progress
 - **Last updated:** 2026-06-09
-- **Sections complete:** 1 / 14
+- **Sections complete:** 7 / 14
 
 ## Purpose
 
@@ -84,12 +84,12 @@ stay under the cap.
 | #   | Section                                                   | Files | Status      |
 | --- | --------------------------------------------------------- | ----- | ----------- |
 | 1   | Foundations — `lib/`, `config/`, `types/`, `env.ts`       | 15    | Done        |
-| 2   | Server core — `server/`                                   | 14    | Not started |
-| 3   | UI primitives & infra — `ui` `seo` `og` `r3f` `providers` | 18    | Not started |
-| 4   | Shared composites — `layout/`, `common/`                  | 15    | Not started |
-| 5   | MDX — `components/mdx/`                                   | 21    | Not started |
-| 6   | Content data — `content/`                                 | 12    | Not started |
-| 7   | Routing layer — `app/`                                    | 24    | Not started |
+| 2   | Server core — `server/`                                   | 14    | Done        |
+| 3   | UI primitives & infra — `ui` `seo` `og` `r3f` `providers` | 18    | Done        |
+| 4   | Shared composites — `layout/`, `common/`                  | 15    | Done        |
+| 5   | MDX — `components/mdx/`                                   | 21    | Done        |
+| 6   | Content data — `content/`                                 | 12    | Done        |
+| 7   | Routing layer — `app/`                                    | 24    | Done        |
 | 8   | Feature: `command-menu`                                   | 17    | Not started |
 | 9   | Feature: `contact`                                        | 10    | Not started |
 | 10  | Feature: `career-graph`                                   | 19    | Not started |
@@ -132,157 +132,157 @@ as the single validated env surface.
 
 ## Section 2 — Server core (`server/`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** `import "server-only"` on every module; DAL vs service vs
 orchestration separation; the retrieval pipeline (`retrieve-*`) is already split
 by concern — confirm each step is single-purpose and that `rate-limit.ts` isn't
 duplicated logic that belongs shared.
 
-- [ ] `src/server/ai/agent-index.ts`
-- [ ] `src/server/ai/agent-response.ts`
-- [ ] `src/server/ai/agent-stream.ts`
-- [ ] `src/server/ai/embed-query.ts`
-- [ ] `src/server/ai/retrieve.ts`
-- [ ] `src/server/ai/retrieve-bm25.ts`
-- [ ] `src/server/ai/retrieve-cosine.ts`
-- [ ] `src/server/ai/retrieve-keyword.ts`
-- [ ] `src/server/ai/retrieve-tokenize.ts`
-- [ ] `src/server/ai/retrieve-tunables.ts`
-- [ ] `src/server/ai/retrieve-types.ts`
-- [ ] `src/server/ai/system-prompt.ts`
-- [ ] `src/server/ai/retrieve.test.ts` `T`
-- [ ] `src/server/rate-limit.ts`
+- [x] `src/server/ai/agent-index.ts`
+- [x] `src/server/ai/agent-response.ts`
+- [x] `src/server/ai/agent-stream.ts`
+- [x] `src/server/ai/embed-query.ts`
+- [x] `src/server/ai/retrieve.ts`
+- [x] `src/server/ai/retrieve-bm25.ts`
+- [x] `src/server/ai/retrieve-cosine.ts`
+- [x] `src/server/ai/retrieve-keyword.ts`
+- [x] `src/server/ai/retrieve-tokenize.ts`
+- [x] `src/server/ai/retrieve-tunables.ts`
+- [x] `src/server/ai/retrieve-types.ts`
+- [x] `src/server/ai/system-prompt.ts`
+- [x] `src/server/ai/retrieve.test.ts` `T`
+- [x] `src/server/rate-limit.ts`
 
 ---
 
 ## Section 3 — UI primitives & infra (`ui`, `seo`, `og`, `r3f`, `providers`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** primitives in `ui/` must have no app/domain imports; providers
 should be thin client wrappers; `og-template-styles.ts` flagged below.
 
 **`components/ui/`**
 
-- [ ] `src/components/ui/badge.tsx`
-- [ ] `src/components/ui/brand-icons.tsx`
-- [ ] `src/components/ui/button.tsx`
-- [ ] `src/components/ui/kbd.tsx`
-- [ ] `src/components/ui/status-dot.tsx`
+- [x] `src/components/ui/badge.tsx`
+- [x] `src/components/ui/brand-icons.tsx`
+- [x] `src/components/ui/button.tsx`
+- [x] `src/components/ui/kbd.tsx`
+- [x] `src/components/ui/status-dot.tsx`
 
 **`components/seo/`**
 
-- [ ] `src/components/seo/article-json-ld.tsx`
-- [ ] `src/components/seo/json-ld.tsx`
+- [x] `src/components/seo/article-json-ld.tsx`
+- [x] `src/components/seo/json-ld.tsx`
 
 **`components/og/`**
 
-- [ ] `src/components/og/og-template.tsx`
-- [ ] `src/components/og/og-template-styles.ts` **(raw 101 l — verify)**
+- [x] `src/components/og/og-template.tsx`
+- [x] `src/components/og/og-template-styles.ts` (verified: ~90 code lines, under cap)
 
 **`components/r3f/`**
 
-- [ ] `src/components/r3f/perf-reporter.tsx`
-- [ ] `src/components/r3f/silence-clock-deprecation.ts`
-- [ ] `src/components/r3f/webgl-context-guard.tsx`
+- [x] `src/components/r3f/perf-reporter.tsx`
+- [x] `src/components/r3f/silence-clock-deprecation.ts`
+- [x] `src/components/r3f/webgl-context-guard.tsx`
 
 **`components/providers/`**
 
-- [ ] `src/components/providers/index.tsx`
-- [ ] `src/components/providers/lenis-provider.tsx`
-- [ ] `src/components/providers/motion-provider.tsx`
-- [ ] `src/components/providers/reduced-motion-provider.tsx`
-- [ ] `src/components/providers/reduced-motion-store.ts`
-- [ ] `src/components/providers/theme-provider.tsx`
+- [x] `src/components/providers/index.tsx`
+- [x] `src/components/providers/lenis-provider.tsx`
+- [x] `src/components/providers/motion-provider.tsx`
+- [x] `src/components/providers/reduced-motion-provider.tsx`
+- [x] `src/components/providers/reduced-motion-store.ts`
+- [x] `src/components/providers/theme-provider.tsx`
 
 ---
 
 ## Section 4 — Shared composites (`layout/`, `common/`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** app-shell pieces stay presentational; any domain logic/state
 belongs in a feature, not here. `mobile-nav` and `site-footer` flagged below.
 
 **`components/layout/`**
 
-- [ ] `src/components/layout/command-trigger.tsx`
-- [ ] `src/components/layout/mobile-nav-link.tsx`
-- [ ] `src/components/layout/mobile-nav.tsx`
-- [ ] `src/components/layout/site-footer.tsx`
-- [ ] `src/components/layout/site-nav.tsx`
-- [ ] `src/components/layout/theme-toggle.tsx`
+- [x] `src/components/layout/command-trigger.tsx`
+- [x] `src/components/layout/mobile-nav-link.tsx`
+- [x] `src/components/layout/mobile-nav.tsx` (verified: ~85 code lines, under cap)
+- [x] `src/components/layout/site-footer.tsx` (verified: ~65 code lines, under cap)
+- [x] `src/components/layout/site-nav.tsx`
+- [x] `src/components/layout/theme-toggle.tsx`
 
 **`components/common/`**
 
-- [ ] `src/components/common/article-body.tsx`
-- [ ] `src/components/common/article-header.tsx`
-- [ ] `src/components/common/article-header-links.tsx`
-- [ ] `src/components/common/article-outcomes.tsx`
-- [ ] `src/components/common/case-study-card.tsx`
-- [ ] `src/components/common/essay-card.tsx`
-- [ ] `src/components/common/next-article-link.tsx`
-- [ ] `src/components/common/pattern-badge.tsx`
-- [ ] `src/components/common/pattern-filter.tsx`
+- [x] `src/components/common/article-body.tsx`
+- [x] `src/components/common/article-header.tsx`
+- [x] `src/components/common/article-header-links.tsx`
+- [x] `src/components/common/article-outcomes.tsx`
+- [x] `src/components/common/case-study-card.tsx`
+- [x] `src/components/common/essay-card.tsx`
+- [x] `src/components/common/next-article-link.tsx`
+- [x] `src/components/common/pattern-badge.tsx`
+- [x] `src/components/common/pattern-filter.tsx`
 
 ---
 
 ## Section 5 — MDX (`components/mdx/`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** the `system-diagram-*` cluster mixes canvas rendering, geometry,
 fallback rendering, and types — confirm each file owns exactly one of those.
 Keep heavy/interactive canvas code in client leaves; types and geometry stay
 pure.
 
-- [ ] `src/components/mdx/callout.tsx`
-- [ ] `src/components/mdx/components.tsx`
-- [ ] `src/components/mdx/decisions-log.tsx`
-- [ ] `src/components/mdx/mdx-content.tsx`
-- [ ] `src/components/mdx/metric-tile.tsx`
-- [ ] `src/components/mdx/outcome.tsx`
-- [ ] `src/components/mdx/sparkline.tsx`
-- [ ] `src/components/mdx/stack-list.tsx`
-- [ ] `src/components/mdx/timeline.tsx`
-- [ ] `src/components/mdx/toc.tsx`
-- [ ] `src/components/mdx/tradeoff.tsx`
-- [ ] `src/components/mdx/system-diagram.tsx`
-- [ ] `src/components/mdx/system-diagram-mount.tsx`
-- [ ] `src/components/mdx/system-diagram-canvas.tsx`
-- [ ] `src/components/mdx/system-diagram-canvas-map.ts`
-- [ ] `src/components/mdx/system-diagram-canvas-overlay.tsx`
-- [ ] `src/components/mdx/system-diagram-geometry.ts`
-- [ ] `src/components/mdx/system-diagram-types.ts`
-- [ ] `src/components/mdx/system-diagram-fallback.tsx`
-- [ ] `src/components/mdx/system-diagram-fallback-edge.tsx`
-- [ ] `src/components/mdx/system-diagram-fallback-node.tsx`
+- [x] `src/components/mdx/callout.tsx`
+- [x] `src/components/mdx/components.tsx`
+- [x] `src/components/mdx/decisions-log.tsx`
+- [x] `src/components/mdx/mdx-content.tsx`
+- [x] `src/components/mdx/metric-tile.tsx`
+- [x] `src/components/mdx/outcome.tsx`
+- [x] `src/components/mdx/sparkline.tsx`
+- [x] `src/components/mdx/stack-list.tsx`
+- [x] `src/components/mdx/timeline.tsx`
+- [x] `src/components/mdx/toc.tsx`
+- [x] `src/components/mdx/tradeoff.tsx`
+- [x] `src/components/mdx/system-diagram.tsx`
+- [x] `src/components/mdx/system-diagram-mount.tsx`
+- [x] `src/components/mdx/system-diagram-canvas.tsx`
+- [x] `src/components/mdx/system-diagram-canvas-map.ts`
+- [x] `src/components/mdx/system-diagram-canvas-overlay.tsx`
+- [x] `src/components/mdx/system-diagram-geometry.ts`
+- [x] `src/components/mdx/system-diagram-types.ts`
+- [x] `src/components/mdx/system-diagram-fallback.tsx`
+- [x] `src/components/mdx/system-diagram-fallback-edge.tsx`
+- [x] `src/components/mdx/system-diagram-fallback-node.tsx`
 
 ---
 
 ## Section 6 — Content data (`content/`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** keep **data** separate from **logic** — `career-graph.ts`,
 `*-helpers.ts`, `*-projection.ts` should each own one transformation; `*-types.ts`
 must be runtime-free. Data lives in `content/data/`, derivation logic may belong
 in the feature's `lib/`.
 
-- [ ] `src/content/data/about.ts`
-- [ ] `src/content/data/career-graph.ts`
-- [ ] `src/content/data/career-graph-edges.ts`
-- [ ] `src/content/data/career-graph-node-helpers.ts`
-- [ ] `src/content/data/career-graph-node-types.ts`
-- [ ] `src/content/data/career-graph-nodes.ts`
-- [ ] `src/content/data/career-graph-patterns.ts`
-- [ ] `src/content/data/career-graph-projection.ts`
-- [ ] `src/content/data/colophon.ts`
-- [ ] `src/content/data/operating.ts`
-- [ ] `src/content/data/uses.ts`
-- [ ] `src/content/data/career-graph.test.ts` `T`
+- [x] `src/content/data/about.ts`
+- [x] `src/content/data/career-graph.ts`
+- [x] `src/content/data/career-graph-edges.ts`
+- [x] `src/content/data/career-graph-node-helpers.ts`
+- [x] `src/content/data/career-graph-node-types.ts`
+- [x] `src/content/data/career-graph-nodes.ts`
+- [x] `src/content/data/career-graph-patterns.ts`
+- [x] `src/content/data/career-graph-projection.ts`
+- [x] `src/content/data/colophon.ts`
+- [x] `src/content/data/operating.ts`
+- [x] `src/content/data/uses.ts`
+- [x] `src/content/data/career-graph.test.ts` `T`
 
 ---
 
 ## Section 7 — Routing layer (`app/`)
 
-**Status:** Not started
+**Status:** Done
 **Watch for:** `app/` is **routing only**. Pages/layouts must be thin — resolve
 params + data, set metadata, compose UI from `features/`/`components/`. Push any
 inline UI or logic out. Route handlers stay thin (validate → authorize →
@@ -290,39 +290,49 @@ delegate to `server/`). `work/[slug]/page.tsx` flagged below.
 
 **Pages & layouts**
 
-- [ ] `src/app/layout.tsx`
-- [ ] `src/app/(marketing)/page.tsx`
-- [ ] `src/app/(marketing)/about/page.tsx`
-- [ ] `src/app/(marketing)/contact/page.tsx`
-- [ ] `src/app/(marketing)/uses/page.tsx`
-- [ ] `src/app/(marketing)/work/page.tsx`
-- [ ] `src/app/(marketing)/work/[slug]/page.tsx` **(raw 110 l — verify)**
-- [ ] `src/app/(marketing)/writing/page.tsx`
-- [ ] `src/app/(marketing)/writing/[slug]/page.tsx`
-- [ ] `src/app/(legal)/colophon/page.tsx`
+- [x] `src/app/layout.tsx` (thin root-shell composition; fonts via `next/font` are module-scope by requirement)
+- [x] `src/app/(marketing)/page.tsx`
+- [x] `src/app/(marketing)/about/page.tsx`
+- [x] `src/app/(marketing)/contact/page.tsx` → extracted inline hero/composition to `features/contact` `Contact` view; page is now thin
+- [x] `src/app/(marketing)/uses/page.tsx`
+- [x] `src/app/(marketing)/work/page.tsx` → moved derivation to `lib/content/*`; header/empty-state to `components/common/*`
+- [x] `src/app/(marketing)/work/[slug]/page.tsx` → replaced inline sort/next logic with `sortPublished` + `nextPublished` (now under cap)
+- [x] `src/app/(marketing)/writing/page.tsx` → same extraction as `work/page.tsx`
+- [x] `src/app/(marketing)/writing/[slug]/page.tsx` → same extraction as `work/[slug]/page.tsx`
+- [x] `src/app/(legal)/colophon/page.tsx`
 
 **Route states & special files**
 
-- [ ] `src/app/error.tsx`
-- [ ] `src/app/global-error.tsx`
-- [ ] `src/app/not-found.tsx`
-- [ ] `src/app/loading.tsx`
+- [x] `src/app/error.tsx`
+- [x] `src/app/global-error.tsx`
+- [x] `src/app/not-found.tsx`
+- [x] `src/app/loading.tsx`
 
 **Metadata / images**
 
-- [ ] `src/app/opengraph-image.tsx`
-- [ ] `src/app/icon.tsx`
-- [ ] `src/app/apple-icon.tsx`
-- [ ] `src/app/robots.ts`
-- [ ] `src/app/sitemap.ts`
-- [ ] `src/app/(marketing)/work/[slug]/opengraph-image.tsx`
-- [ ] `src/app/(marketing)/writing/[slug]/opengraph-image.tsx`
+- [x] `src/app/opengraph-image.tsx`
+- [x] `src/app/icon.tsx`
+- [x] `src/app/apple-icon.tsx`
+- [x] `src/app/robots.ts`
+- [x] `src/app/sitemap.ts`
+- [x] `src/app/(marketing)/work/[slug]/opengraph-image.tsx`
+- [x] `src/app/(marketing)/writing/[slug]/opengraph-image.tsx`
 
 **Route handlers (`api/`)**
 
-- [ ] `src/app/api/chat/route.ts`
-- [ ] `src/app/api/contact/route.ts`
-- [ ] `src/app/api/health/route.ts`
+- [x] `src/app/api/chat/route.ts` (already exemplary: validate → rate-limit → delegate to `server/ai`)
+- [x] `src/app/api/contact/route.ts` → moved Resend send to `server/email/send-contact-notification.ts`; route now validate → honeypot → rate-limit → delegate → map result
+- [x] `src/app/api/health/route.ts`
+
+**New files (created this section)**
+
+- [x] `src/features/contact/components/contact.tsx` (new — `Contact` page view)
+- [x] `src/server/email/send-contact-notification.ts` (new — server-only transactional sender)
+- [x] `src/lib/content/sort-published.ts` (new — filter drafts + order)
+- [x] `src/lib/content/filter-by-pattern.ts` (new — `filterByPattern` + `collectPatterns`)
+- [x] `src/lib/content/next-published.ts` (new — adjacency for "next article")
+- [x] `src/components/common/content-index-header.tsx` (new — shared listing header)
+- [x] `src/components/common/content-empty-state.tsx` (new — shared empty-filter state)
 
 ---
 
@@ -544,13 +554,24 @@ and `*-route-js.ts` are pure helpers separated from components.
 Record every non-obvious refactor decision (a split, a move, a new file, or a
 deliberate "leave as-is"). Newest first.
 
-| Date       | Section | File(s)                                                    | Decision & rationale                                                                                                                                                                                                                   |
-| ---------- | ------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-06-09 | 1       | `config/site.ts` → `config/navigation.ts`                  | Split nav (`NavItem`, `primaryNav`) into the canonical `config/navigation.ts` (per `docs/architecture.md` layout). `site.ts` now owns only site identity + `getSiteUrl` ("name, url, social, defaults"). Updated 3 importers.          |
-| 2026-06-09 | 1       | `config/site.ts` → `content/data/operating.ts`             | Moved `operatingCompanies` out of `config/` (a content/copy list, not site config) into the content layer, co-located with `operatingAltitudes` as operating-history data. Updated `trust-section.tsx` and the agent-index script.     |
-| 2026-06-09 | 1       | `lib/seo/root-metadata.ts`, `lib/seo/structured-data.ts`   | Left as-is: each holds multiple exports but a single cohesive concern (root document head config; schema.org JSON-LD builders sharing one domain + constants). Splitting further would be over-engineering for tightly-coupled config. |
-| 2026-06-09 | 1       | telemetry stores, `validations/agent.ts`, `types/agent.ts` | Left as-is: store + its own snapshot type is the idiomatic `useSyncExternalStore` pattern; Zod schemas + `z.infer` types are the single source of truth; `types/agent.ts` is the actively-used global type re-export surface.          |
-| 2026-06-09 | —       | `docs/srp-refactor-plan.md`                                | Created the living SRP plan; 14 sections, leaves-first ordering.                                                                                                                                                                       |
+| Date       | Section | File(s)                                                                        | Decision & rationale                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------- | ------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-06-09 | 7       | `app/api/contact/route.ts` → `server/email/send-contact-notification.ts`       | Moved Resend client + email build + send + Sentry capture out of the route into a new server-only sender returning a `{ status: "sent" \| "unconfigured" \| "failed" }` result. Route is now thin (validate → honeypot → rate-limit → delegate → map result→HTTP). Matches `docs/architecture.md`'s named `server/email/` layer + the contact "thin route handler" pattern. The sender importing the feature email template (`features/contact/emails/...`) preserves the route's pre-existing deep import; sanctioned by the architecture's contact anatomy (template in feature, sender in `server/`).                                              |
+| 2026-06-09 | 7       | `app/(marketing)/contact/page.tsx` → `features/contact/components/contact.tsx` | Extracted the entire inline hero + form + channels + back-link composition into a new `Contact` feature view; the route now just sets metadata and renders `<Contact />` — consistent with `about`/`uses`/`colophon`/`home`. `index.ts` now exports only `Contact`; `ContactForm`/`ContactChannels` became feature-internal (relative imports), so they were dropped from the public surface (knip-clean).                                                                                                                                                                                                                                            |
+| 2026-06-09 | 7       | `work`/`writing` index + `[slug]` pages (4) + new `lib/content/*` & `common/*` | Pushed business logic + duplicated UI out of the routing layer per "app/ = routing only". New isomorphic helpers `sortPublished`, `filterByPattern`/`collectPatterns`, `nextPublished` dedupe sort/filter/adjacency across 4 pages (removed redundant `as PatternId` casts — Velite's enum type already equals `PatternId`). New presentational `ContentIndexHeader` + `ContentEmptyState` (in `components/common`, which the rule names for shared composites/empty states) dedupe the index header + empty-filter markup across `work`/`writing`. `work/[slug]` is now under the lint cap.                                                          |
+| 2026-06-09 | 7       | `app/` special files, metadata/images, `api/chat`, `api/health`                | No changes: each is a single-concern Next.js special file already. Route states (`error`/`global-error`/`not-found`/`loading`) are presentational under the cap (error pair correctly `"use client"` + Sentry). Metadata/image files (`opengraph-image`, `icon`, `apple-icon`, `robots`, `sitemap`, the two slug OG images) each own one image/route descriptor. `api/chat` is the exemplary thin handler (validate → rate-limit → delegate to `server/ai`); `api/health` is trivial. `layout.tsx` is thin shell composition.                                                                                                                         |
+| 2026-06-09 | 6       | `content/data` (all 12)                                                        | No changes: the `career-graph` cluster already separates concerns — `*-node-types` (runtime-free types), `*-nodes`/`*-patterns` (data), `*-edges`/`*-projection` (derivation), `*-node-helpers` (accessors), `career-graph.ts` (pure barrel facade). Standalone `about`/`colophon`/`operating`/`uses` are each one typed dataset for one page; tests co-located in `career-graph.test.ts`. Noted (left as-is): `*-edges` and `*-patterns` co-locate small derivation/accessor logic with their data — it's intrinsic to producing/querying that data (single source of truth), so it stays in `content/data/` rather than moving to a feature `lib/`. |
+| 2026-06-09 | 5       | `components/mdx` (all 21)                                                      | No changes: every MDX block is one cohesive component (or a compound list/item pair like `Timeline`/`Phase`). The `system-diagram-*` cluster is already exemplary SRP — canvas render (`canvas`, `canvas-map`, `canvas-overlay`, `mount`), pure geometry/types (`geometry`, `types`), and SSR fallback (`fallback`, `fallback-edge`, `fallback-node`) each own exactly one concern; client/server boundaries correct. Noted (left as-is): a 5-entry kind→label map is duplicated between `canvas-overlay` and `fallback-node`, but each targets a different render surface (HTML vs SVG) — not worth a shared file.                                   |
+| 2026-06-09 | 4       | `components/{layout,common}` (all 15)                                          | No changes: every file is one presentational/interactive composite. App-shell pieces (`site-nav`, `mobile-nav`, `site-footer`, `theme-toggle`, `command-trigger`) stay presentational and pull only config + UI primitives — no domain logic. Flagged `mobile-nav` (~85 code lines) and `site-footer` (~65) verified under the lint cap. `common/` cards/headers compose smaller leaves; `pattern-filter` is a `"use client"` leaf owning its own URL-toggle handlers.                                                                                                                                                                                |
+| 2026-06-09 | 3       | `components/{ui,seo,og,r3f,providers}` (all 18)                                | No changes: every file is single-concern. `ui/` primitives import only `cn`; `badge`/`button` use the standard cva `Component` + `variants` pattern; `brand-icons` is a cohesive 2-icon set sharing a private `Svg`. `og-template` (render) is split from `og-template-styles` (~90 code lines, under the cap). Providers are thin client wrappers; `reduced-motion-provider` (context+hook) is split from `reduced-motion-store` (external store).                                                                                                                                                                                                   |
+| 2026-06-09 | 2       | `server/` (all 14 files)                                                       | No changes: every module is single-purpose with `import "server-only"`. The retrieval pipeline is already split by concern; `rate-limit.ts` is the single shared limiter consumed by both `api/chat` and `api/contact` (no duplication).                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 2026-06-09 | 2       | `server/ai/agent-response.ts`                                                  | Left as-is: cohesive "agent HTTP response" toolkit (`jsonResponse`/`textResponse`/`sourcesHeaderValue`/`buildCitations`/`REFUSAL_TEXT`) — 43 lines that serve the chat route's response path as one pipeline. Splitting `buildCitations` out would add churn without clarity.                                                                                                                                                                                                                                                                                                                                                                         |
+| 2026-06-09 | 2       | `server/ai/` flat structure                                                    | Left as-is: did not reorganize into `server/data/` + `server/services/` subdirs. `docs/architecture.md` lists `server/ai/` as the agent home; per-file SRP is satisfied and a directory reshuffle is out of scope for this pass.                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 2026-06-09 | 1       | `config/site.ts` → `config/navigation.ts`                                      | Split nav (`NavItem`, `primaryNav`) into the canonical `config/navigation.ts` (per `docs/architecture.md` layout). `site.ts` now owns only site identity + `getSiteUrl` ("name, url, social, defaults"). Updated 3 importers.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 2026-06-09 | 1       | `config/site.ts` → `content/data/operating.ts`                                 | Moved `operatingCompanies` out of `config/` (a content/copy list, not site config) into the content layer, co-located with `operatingAltitudes` as operating-history data. Updated `trust-section.tsx` and the agent-index script.                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 2026-06-09 | 1       | `lib/seo/root-metadata.ts`, `lib/seo/structured-data.ts`                       | Left as-is: each holds multiple exports but a single cohesive concern (root document head config; schema.org JSON-LD builders sharing one domain + constants). Splitting further would be over-engineering for tightly-coupled config.                                                                                                                                                                                                                                                                                                                                                                                                                |
+| 2026-06-09 | 1       | telemetry stores, `validations/agent.ts`, `types/agent.ts`                     | Left as-is: store + its own snapshot type is the idiomatic `useSyncExternalStore` pattern; Zod schemas + `z.infer` types are the single source of truth; `types/agent.ts` is the actively-used global type re-export surface.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| 2026-06-09 | —       | `docs/srp-refactor-plan.md`                                                    | Created the living SRP plan; 14 sections, leaves-first ordering.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 
 ## Notes & open questions
 
