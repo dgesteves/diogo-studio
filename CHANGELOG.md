@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.4.2](https://github.com/dgesteves/diogo-studio/compare/v1.4.1...v1.4.2) (2026-06-09)
+
+
+### Documentation
+
+* add SRP refactor plan tracking document for codebase-wide single responsibility review ([c9fc615](https://github.com/dgesteves/diogo-studio/commit/c9fc61599d4ee3ee1221269f4cedaee04d33eee4))
+* complete SRP review for section 8 (command-menu) and update refactor plan tracking ([def02c3](https://github.com/dgesteves/diogo-studio/commit/def02c3e75d513248a02369edac2e02b001dbcb9))
+* complete SRP review for sections 2-7 and update refactor plan tracking ([49d2250](https://github.com/dgesteves/diogo-studio/commit/49d225056bb83ac4cce587147f9253a22981b721))
+* complete SRP review for sections 9-11 (contact, career-graph, studio) ([71cac0e](https://github.com/dgesteves/diogo-studio/commit/71cac0e0d5521a8689e13d6c296470802150bda1))
+
 ## [1.4.1](https://github.com/dgesteves/diogo-studio/compare/v1.4.0...v1.4.1) (2026-06-08)
 
 
