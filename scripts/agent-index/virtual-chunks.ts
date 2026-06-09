@@ -5,7 +5,8 @@ import {
   nodes as careerNodes,
   patterns as careerPatterns,
 } from "../../src/content/data/career-graph";
-import { operatingCompanies, siteConfig } from "../../src/config/site";
+import { operatingCompanies } from "../../src/content/data/operating";
+import { siteConfig } from "../../src/config/site";
 
 export function buildCareerChunks(): IndexEntry[] {
   const out: IndexEntry[] = [];

@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
 import { caseStudies, essays } from "#content";
-import { primaryNav } from "@/config/site";
+import { primaryNav } from "@/config/navigation";
 
 import { ProfileGroup, ThemeGroup } from "./command-menu-actions";
 import { Item, iconForPage } from "./command-menu-item";

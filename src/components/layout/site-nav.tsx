@@ -3,7 +3,8 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { primaryNav, siteConfig } from "@/config/site";
+import { primaryNav } from "@/config/navigation";
+import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils/cn";
 import { CommandTrigger } from "./command-trigger";
 import { MobileNav } from "./mobile-nav";

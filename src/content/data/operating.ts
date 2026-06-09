@@ -25,3 +25,13 @@ export const operatingAltitudes: readonly OperatingAltitude[] = [
     copy: "Owned the React + GraphQL foundation for agentic RF planning. Digital-twin maps, agent orchestration, proposal generation.",
   },
 ] as const;
+
+export const operatingCompanies = [
+  "Fueled",
+  "Moment",
+  "eino.ai",
+  "NBCUniversal · Peacock",
+  "Diligent",
+  "BMW Group",
+  "Deloitte",
+] as const;
