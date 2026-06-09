@@ -1,11 +1,10 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry } from "./types";
 
-import {
-  nodes as careerNodes,
-  patterns as careerPatterns,
-} from "../../src/content/data/career-graph";
+import { nodes as careerNodes } from "../../src/content/data/career-graph-nodes";
+import { patterns as careerPatterns } from "../../src/content/data/patterns";
 import { operatingCompanies } from "../../src/content/data/operating";
+import { caseStudyPath, routes } from "../../src/config/routes";
 import { siteConfig } from "../../src/config/site";
 
 export function buildCareerChunks(): IndexEntry[] {
@@ -15,7 +14,7 @@ export function buildCareerChunks(): IndexEntry[] {
       sourceId: "site:identity",
       sourceKind: "site",
       sourceTitle: siteConfig.name,
-      permalink: "/about",
+      permalink: routes.about,
       anchor: undefined,
       heading: "Identity",
       tags: undefined,
@@ -32,7 +31,7 @@ export function buildCareerChunks(): IndexEntry[] {
       .map((p) => careerPatterns[p]?.label ?? p)
       .filter(Boolean)
       .join(", ");
-    const permalink = node.slug ? `/work/${node.slug}` : "/work";
+    const permalink = node.slug ? caseStudyPath(node.slug) : routes.work;
     out.push(
       finalizeEntry({
         sourceId: `career:${node.id}`,

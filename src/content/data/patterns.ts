@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 export type PatternId = "ai-native" | "design-systems" | "streaming" | "agentic-ux" | "enterprise";
 
 export type PatternMeta = {
@@ -55,12 +53,4 @@ export function isPatternId(value: string): value is PatternId {
 export function parsePatternIds(value: string | string[] | undefined): PatternId[] {
   const raw = Array.isArray(value) ? value : value ? [value] : [];
   return raw.filter(isPatternId);
-}
-
-export function patternColorVar(pattern: PatternId): string {
-  return `var(--${patterns[pattern].colorVar})`;
-}
-
-export function patternColorStyle(pattern: PatternId): CSSProperties {
-  return { color: patternColorVar(pattern) };
 }

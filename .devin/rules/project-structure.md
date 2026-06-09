@@ -33,13 +33,18 @@ folder placement. The principles below are the enforced defaults.
 - `src/components/` — shared presentational UI: `ui/` (primitives), `layout/`
   (app shell), `common/` (composites), `r3f/` (shared React Three Fiber infra),
   `mdx/`, `seo/`, `og/`, `providers/`.
-- `src/server/` — **server-only** core (`import "server-only"`): `data/` (DAL),
-  `services/`, `ai/`, `email/`, optional `db/` and `auth/`.
-- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/`, `api/`,
-  `validations/`, `seo/`, `analytics/`, `telemetry/`, `hooks/` (isomorphic hooks,
-  distinct from app-wide `src/hooks/`), `errors.ts`.
-- `src/config/` — site metadata, navigation, routes (single source of truth).
-- `src/content/` — MDX + structured data. `src/styles/` — global CSS + tokens.
+- `src/server/` — **server-only** core (`import "server-only"`): `ai/`, `email/`,
+  shared `rate-limit.ts`; optional `data/` (DAL), `services/`, `db/`, `auth/`
+  added only when those capabilities land (this is a no-DB content site).
+- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/`,
+  `content/` (content query/transform helpers), `validations/`, `seo/`,
+  `telemetry/`, `hooks/` (isomorphic hooks, distinct from app-wide `src/hooks/`).
+- `src/config/` — site metadata (`site.ts`), navigation (`navigation.ts`), the
+  typed route map (`routes.ts` — the SSOT for every URL), and brand colors for
+  non-CSS contexts like OG/icons/R3F/email (`brand.ts`).
+- `src/content/` — MDX + **pure** structured data only (e.g. the `patterns`
+  taxonomy, career-graph `nodes`/`edges`); domain logic over that data lives in
+  the consuming feature's `lib/`. `src/styles/` — global CSS + tokens.
   `src/types/` — global types. `src/test/` — test utils/mocks/fixtures.
 - `src/hooks/` • `src/stores/` — global hooks / client state (app-wide only).
 

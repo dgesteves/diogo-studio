@@ -1,4 +1,4 @@
-import type { PatternId } from "./career-graph-patterns";
+import type { PatternId } from "./patterns";
 
 export type NodeId = "fueled" | "moment" | "eino" | "peacock" | "diligent" | "bmw" | "deloitte";
 

@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 
-import { nodeHref, type CareerNode } from "@/content/data/career-graph";
+import type { CareerNode } from "@/content/data/career-graph-nodes";
 
+import { nodeHref } from "../lib/node-href";
 import { VIEWPORT } from "./career-graph-svg-viewport";
 
 function labelPlacement(p: { x: number; y: number }): "above" | "below" {

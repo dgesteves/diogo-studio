@@ -1,6 +1,9 @@
 import type { ReactElement } from "react";
-import { edges, nodes, patterns, projectToSvg, type NodeId } from "@/content/data/career-graph";
+import { edges } from "@/content/data/career-graph-edges";
+import { nodes, type NodeId } from "@/content/data/career-graph-nodes";
+import { patterns } from "@/content/data/patterns";
 
+import { projectToSvg } from "../lib/project-to-svg";
 import { Axis } from "./career-graph-axis";
 import { CareerGraphDefs } from "./career-graph-defs";
 import { Node } from "./career-graph-node";

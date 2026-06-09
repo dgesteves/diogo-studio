@@ -1,4 +1,4 @@
-import type { PatternId } from "./career-graph-patterns";
+import type { PatternId } from "./patterns";
 import { nodes, type NodeId } from "./career-graph-nodes";
 
 export type CareerEdge = {

@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { essays } from "#content";
+import { routes } from "@/config/routes";
 import { ContentEmptyState } from "@/components/common/content-empty-state";
 import { ContentIndexHeader } from "@/components/common/content-index-header";
 import { EssayCard } from "@/components/common/essay-card";
 import { PatternFilter } from "@/components/common/pattern-filter";
-import { parsePatternIds } from "@/content/data/career-graph";
+import { parsePatternIds } from "@/content/data/patterns";
 import { collectPatterns, filterByPattern } from "@/lib/content/filter-by-pattern";
 import { sortPublished } from "@/lib/content/sort-published";
 
 export const metadata: Metadata = {
   title: "Writing",
   description: "Essays on platform engineering, AI-native UX, and design-system infrastructure.",
-  alternates: { canonical: "/writing" },
+  alternates: { canonical: routes.writing },
 };
 
 export default async function WritingPage({

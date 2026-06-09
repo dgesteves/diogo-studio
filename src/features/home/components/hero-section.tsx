@@ -9,8 +9,9 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
+import { routes } from "@/config/routes";
 import { siteConfig } from "@/config/site";
-import { patternList } from "@/content/data/career-graph";
+import { patternList } from "@/content/data/patterns";
 import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection(): ReactElement {
@@ -58,7 +59,7 @@ export function HeroSection(): ReactElement {
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <Button asChild size="lg" variant="default">
-                <Link href="/work">
+                <Link href={routes.work}>
                   <span>Browse case studies</span>
                   <ArrowRight className="size-4" aria-hidden="true" />
                 </Link>

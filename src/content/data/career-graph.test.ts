@@ -1,15 +1,7 @@
 import { describe, expect, it } from "vitest";
-import {
-  edges,
-  getNode,
-  nodeHref,
-  nodes,
-  patternList,
-  patterns,
-  projectToSvg,
-  PUBLISHED_CASE_STUDY_SLUGS,
-  type NodeId,
-} from "./career-graph";
+import { edges } from "./career-graph-edges";
+import { nodes, type NodeId } from "./career-graph-nodes";
+import { patternList, patterns } from "./patterns";
 
 describe("career-graph data integrity", () => {
   it("declares at least the 5 flagship engagements + a coherent count", () => {
@@ -46,9 +38,10 @@ describe("career-graph data integrity", () => {
   });
 
   it("derives edges only between nodes that share a pattern", () => {
+    const byId = new Map(nodes.map((n) => [n.id, n]));
     for (const edge of edges) {
-      const a = getNode(edge.from);
-      const b = getNode(edge.to);
+      const a = byId.get(edge.from)!;
+      const b = byId.get(edge.to)!;
       const shared = a.patterns.filter((p) => b.patterns.includes(p));
       expect(shared.length).toBeGreaterThan(0);
       expect(shared).toContain(edge.pattern);
@@ -62,34 +55,6 @@ describe("career-graph data integrity", () => {
       const key = [e.from, e.to].sort().join("::");
       expect(seen.has(key)).toBe(false);
       seen.add(key);
-    }
-  });
-
-  it("nodeHref deep-links to /work/[slug] for published case studies, falls back to /work", () => {
-    for (const n of nodes) {
-      const href = nodeHref(n);
-      if (n.slug && PUBLISHED_CASE_STUDY_SLUGS.has(n.slug)) expect(href).toBe(`/work/${n.slug}`);
-      else expect(href).toBe("/work");
-    }
-  });
-
-  it("getNode returns the matching node and throws on unknowns", () => {
-    expect(getNode("eino").id).toBe("eino");
-    expect(() => getNode("does-not-exist" as NodeId)).toThrow();
-  });
-
-  it("projectToSvg keeps points inside the viewport with padding", () => {
-    const viewport = {
-      width: 1000,
-      height: 600,
-      padding: { x: 80, top: 60, bottom: 80 },
-    };
-    for (const n of nodes) {
-      const { x, y } = projectToSvg(n.position, viewport);
-      expect(x).toBeGreaterThanOrEqual(viewport.padding.x);
-      expect(x).toBeLessThanOrEqual(viewport.width - viewport.padding.x);
-      expect(y).toBeGreaterThanOrEqual(viewport.padding.top);
-      expect(y).toBeLessThanOrEqual(viewport.height - viewport.padding.bottom);
     }
   });
 

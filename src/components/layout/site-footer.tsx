@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
+import { routes } from "@/config/routes";
 import { siteConfig } from "@/config/site";
 
 export function SiteFooter(): ReactElement {
@@ -65,7 +66,7 @@ export function SiteFooter(): ReactElement {
               © {year} {siteConfig.name}
             </span>
             <span aria-hidden="true">·</span>
-            <Link href="/colophon" className="hover:text-foreground transition-colors">
+            <Link href={routes.colophon} className="hover:text-foreground transition-colors">
               Colophon
             </Link>
           </div>

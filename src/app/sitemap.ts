@@ -1,38 +1,54 @@
 import type { MetadataRoute } from "next";
 import { caseStudies, essays } from "#content";
+import { routes } from "@/config/routes";
 import { getSiteUrl } from "@/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl();
 
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: `${baseUrl}/`, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${baseUrl}/work`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
     {
-      url: `${baseUrl}/writing`,
+      url: `${baseUrl}${routes.home}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}${routes.work}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}${routes.writing}`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}${routes.about}`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.7,
     },
     {
-      url: `${baseUrl}/contact`,
+      url: `${baseUrl}${routes.contact}`,
       lastModified: new Date(),
       changeFrequency: "yearly",
       priority: 0.5,
     },
     {
-      url: `${baseUrl}/colophon`,
+      url: `${baseUrl}${routes.colophon}`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.4,
     },
-    { url: `${baseUrl}/uses`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    {
+      url: `${baseUrl}${routes.uses}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.4,
+    },
   ];
 
   const caseStudyRoutes: MetadataRoute.Sitemap = caseStudies

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { caseStudies } from "#content";
 import { PatternBadge } from "@/components/common/pattern-badge";
-import { type PatternId } from "@/content/data/career-graph";
+import { type PatternId } from "@/content/data/patterns";
 
 type CaseStudy = (typeof caseStudies)[number];
 

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { caseStudies } from "#content";
+import { routes } from "@/config/routes";
 import { CaseStudyCard } from "@/components/common/case-study-card";
 import { ContentEmptyState } from "@/components/common/content-empty-state";
 import { ContentIndexHeader } from "@/components/common/content-index-header";
 import { PatternFilter } from "@/components/common/pattern-filter";
-import { parsePatternIds } from "@/content/data/career-graph";
+import { parsePatternIds } from "@/content/data/patterns";
 import { collectPatterns, filterByPattern } from "@/lib/content/filter-by-pattern";
 import { sortPublished } from "@/lib/content/sort-published";
 
@@ -13,7 +14,7 @@ export const metadata: Metadata = {
   title: "Case studies",
   description:
     "Telemetry-dashboard case studies on AI-native platforms, design-system infrastructure, streaming-grade reliability, and agentic UX.",
-  alternates: { canonical: "/work" },
+  alternates: { canonical: routes.work },
 };
 
 export default async function WorkPage({

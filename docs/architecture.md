@@ -109,32 +109,35 @@ app/  →  features/  →  components/ ─┐
     │   └── providers/           app-wide client providers (theme, motion, toaster)         [present]
     │
     ├── server/                  ── SERVER-ONLY CORE (no JSX/UI) — import "server-only" ────  [present]
-    │   ├── data/                Data Access Layer (repositories, queries)
-    │   ├── services/            domain/business logic orchestration
-    │   ├── ai/                  agent retrieval, prompts, embeddings
-    │   ├── email/               transactional senders (Resend)
-    │   ├── db/                  db client + schema + migrations (Drizzle/Prisma)           [optional]
-    │   └── auth/                session, RBAC, guards                                       [optional]
+    │   ├── ai/                  agent retrieval, prompts, embeddings                        [present]
+    │   ├── email/               transactional senders (Resend)                             [present]
+    │   ├── rate-limit.ts        shared IP rate-limiter (Upstash + in-memory fallback)       [present]
+    │   ├── data/                Data Access Layer — add when a database lands               [optional]
+    │   ├── services/            domain/business-logic orchestration                         [optional]
+    │   ├── db/                  db client + schema + migrations (Drizzle/Prisma)            [optional]
+    │   └── auth/                session, RBAC, guards                                        [optional]
     │
     ├── lib/                     ── ISOMORPHIC UTILITIES (client + server safe) ───────────
-    │   ├── api/                 typed fetch client / API helpers                           [new]
-    │   ├── analytics/           analytics + Web Vitals reporting                           [new]
-    │   ├── seo/                 metadata + structured-data builders                        [present]
-    │   ├── validations/         cross-cutting zod schemas shared across boundaries         [new]
-    │   ├── utils/               pure helpers (cn, format, slugify)                          [present]
-    │   ├── telemetry/           perf + web-vitals stores                                   [present]
-    │   ├── hooks/               generic isomorphic hooks (use-is-client)                   [present]
-    │   └── errors.ts            typed error classes + Result helpers                        [new]
+    │   ├── content/             content query/transform helpers (sort, filter, next)        [present]
+    │   ├── seo/                 metadata + structured-data builders                         [present]
+    │   ├── validations/         cross-cutting zod schemas shared across boundaries          [present]
+    │   ├── utils/               pure helpers (cn, …)                                         [present]
+    │   ├── telemetry/           perf + web-vitals stores                                     [present]
+    │   ├── hooks/               generic isomorphic hooks (use-is-client, use-in-view)        [present]
+    │   ├── api/                 typed fetch client / API helpers                            [new]
+    │   ├── analytics/           analytics + Web Vitals reporting                            [new]
+    │   └── errors.ts            typed error classes + Result helpers                         [new]
     │
     ├── config/                  ── STATIC CONFIG (single source of truth) ────────────────  [present]
-    │   ├── site.ts              name, url, social, defaults
-    │   ├── navigation.ts        nav/menu definitions
-    │   ├── routes.ts            typed route map
-    │   └── seo.ts               default metadata/OG config
+    │   ├── site.ts              name, url, social, defaults, getSiteUrl()                    [present]
+    │   ├── navigation.ts        nav/menu definitions (hrefs come from routes.ts)            [present]
+    │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [present]
+    │   └── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
+    │                            (SEO defaults derive from site.ts + lib/seo/; no seo.ts)
     │
     ├── content/                 MDX sources + content data (Velite → #content)             [present]
-    │   ├── case-studies/ • essays/
-    │   └── data/                structured content data (career-graph data, …)             [present]
+    │   ├── case-studies/ • essays/                                                          [present]
+    │   └── data/                PURE data only — patterns taxonomy, career-graph nodes/edges [present]
     │
     ├── hooks/                   GLOBAL shared client hooks (use-media-query, use-mounted)  [optional]
     ├── stores/                  GLOBAL client state (zustand) — app-wide only              [optional]
@@ -160,7 +163,7 @@ logic, data access, or shared components here.
 Everything for one capability, colocated. Crossing a feature boundary means
 importing from its **`index.ts`** only — internals stay private. A feature may
 contain UI, hooks, server actions, server-only data access, schemas, and tests.
-Keep each file small (~200 lines); split aggressively.
+Keep each file small (~100 lines, lint-enforced); split aggressively.
 
 ### `components/` — shared UI
 
@@ -180,9 +183,14 @@ domain logic/state, it belongs in a feature, not here.
 
 ### `config/`, `content/`, `types/`, `styles/`, `test/`
 
-- `config/` — the single source of truth for site metadata, navigation, routes.
-  Never hardcode these literals elsewhere.
-- `content/` — MDX (via Velite) + structured content data.
+- `config/` — single source of truth for site metadata, navigation, routes
+  (`routes.ts`), and brand colors (`brand.ts`). Never hardcode these literals
+  elsewhere.
+- `content/` — MDX (via Velite) + **pure** structured data only: the shared
+  `patterns` taxonomy and the career-graph `nodes`/`edges`. Domain logic over
+  that data (projection, `nodeHref`) belongs in the consuming feature's `lib/`,
+  never here — keeping `content/` declarative means it stays trivially
+  reviewable and fully covered by `knip` dead-code analysis.
 - `types/` — ambient declarations and shared domain types.
 - `styles/` — global CSS and design tokens (imported by the root layout).
 - `test/` — shared setup, render helpers, mocks/fixtures, MSW handlers.
@@ -224,10 +232,14 @@ route file.
 | Isomorphic helper (`cn`, format)    | `src/lib/utils/`                                   |
 | Zod schema shared across boundaries | `src/lib/validations/` or feature `schemas/`       |
 | Typed fetch / API client            | `src/lib/api/`                                     |
-| Site metadata, nav, routes          | `src/config/`                                      |
+| Site metadata, nav                  | `src/config/{site,navigation}.ts`                  |
+| A URL / route literal               | `src/config/routes.ts` (typed SSOT)                |
+| Brand colors for canvas/OG/email    | `src/config/brand.ts`                              |
 | Env var                             | `src/env.ts` (validated) — never raw `process.env` |
 | Global hook / store                 | `src/hooks/` • `src/stores/`                       |
-| Long-form content                   | `src/content/`                                     |
+| Long-form content / MDX             | `src/content/`                                     |
+| Pure content data / a taxonomy      | `src/content/data/`                                |
+| Domain logic over content data      | the consuming feature's `lib/`                     |
 | Test helper / mock                  | `src/test/`                                        |
 
 Reuse rule: used by **one** feature → keep it there; used by **2+** → promote to
@@ -241,7 +253,7 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
   Avoid wide barrel files inside `components/`/`lib/` (tree-shaking + cycles).
 - **Boundaries**: `"use client"` only on interactive leaves; `import "server-only"`
   on every server module. Content via `#content` only.
-- **Files small** (~200 lines). Split into sub-components/hooks/helpers first.
+- **Files small** (~100 lines, lint-enforced). Split into sub-components/hooks/helpers first.
 - **Tests** colocate with source (`*.test.ts(x)`); E2E in `e2e/`.
 
 ## Quality gates
@@ -255,21 +267,23 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 Every row below has shipped; the tree above is the realized result, not a future
 target. Kept as a record of the legacy → current move.
 
-| Today                                  | Target                                                         |
-| -------------------------------------- | -------------------------------------------------------------- |
-| `app/page.tsx`, route pages (root)     | `app/(marketing)/…` route group, thinned                       |
-| `app/page.test.tsx`                    | test beside extracted units (keep `app/` route-only)           |
-| `app/globals.css`, `app/mdx.css`       | `src/styles/` (imported by root layout)                        |
-| `components/site/*` (chrome)           | `components/layout/`                                           |
-| `components/site/*` (features)         | `features/{command-menu,contact}/…`, `features/inspector/…`    |
-| `components/career-graph/*` + `scene/` | `features/career-graph/`                                       |
-| `components/studio/*`                  | `features/studio/`                                             |
-| `lib/agent/*`                          | `server/ai/`                                                   |
-| `lib/contact-schema.ts`                | `features/contact/schemas/` (or `lib/validations/`)            |
-| `lib/structured-data.ts`               | `lib/seo/`                                                     |
-| `lib/site-config.ts`                   | `config/site.ts`                                               |
-| `content/career-graph.ts`              | `content/data/` (data) or `features/career-graph/lib/` (logic) |
-| `lib/utils.ts`                         | `lib/utils/` (cn, formatters, …)                               |
+| Today                                   | Target                                                                                                                                                 |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/page.tsx`, route pages (root)      | `app/(marketing)/…` route group, thinned                                                                                                               |
+| `app/page.test.tsx`                     | test beside extracted units (keep `app/` route-only)                                                                                                   |
+| `app/globals.css`, `app/mdx.css`        | `src/styles/` (imported by root layout)                                                                                                                |
+| `components/site/*` (chrome)            | `components/layout/`                                                                                                                                   |
+| `components/site/*` (features)          | `features/{command-menu,contact}/…`, `features/inspector/…`                                                                                            |
+| `components/career-graph/*` + `scene/`  | `features/career-graph/`                                                                                                                               |
+| `components/studio/*`                   | `features/studio/`                                                                                                                                     |
+| `lib/agent/*`                           | `server/ai/`                                                                                                                                           |
+| `lib/contact-schema.ts`                 | `features/contact/schemas/` (or `lib/validations/`)                                                                                                    |
+| `lib/structured-data.ts`                | `lib/seo/`                                                                                                                                             |
+| `lib/site-config.ts`                    | `config/site.ts`                                                                                                                                       |
+| `content/data/career-graph.ts` barrel   | `content/data/{patterns,career-graph-nodes,career-graph-edges}.ts` (data) + `features/career-graph/lib/{project-to-svg,node-href,get-node}.ts` (logic) |
+| `content/data/career-graph-patterns.ts` | `content/data/patterns.ts` (shared content taxonomy, decoupled from career-graph)                                                                      |
+| hardcoded route literals (`/work`, …)   | `config/routes.ts` (typed SSOT) + path builders                                                                                                        |
+| `lib/utils.ts`                          | `lib/utils/` (cn, formatters, …)                                                                                                                       |
 
 These slices shipped as small, independently reviewable PRs, each gated by
 `pnpm validate`. Remaining optional layers (`server/db`, `server/auth`,

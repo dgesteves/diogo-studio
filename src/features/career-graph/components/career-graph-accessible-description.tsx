@@ -1,5 +1,9 @@
 import type { ReactElement } from "react";
-import { edges, getNode, nodes, patterns } from "@/content/data/career-graph";
+import { edges } from "@/content/data/career-graph-edges";
+import { nodes } from "@/content/data/career-graph-nodes";
+import { patterns } from "@/content/data/patterns";
+
+import { getNode } from "../lib/get-node";
 
 const sortedNodes = [...nodes].sort((a, b) => b.position[0] - a.position[0]);
 

@@ -4,6 +4,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { routes } from "@/config/routes";
 import { siteConfig } from "@/config/site";
 
 export function AboutCta(): ReactElement {
@@ -21,7 +22,7 @@ export function AboutCta(): ReactElement {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <Button asChild variant="accent" size="md">
-            <Link href="/contact">
+            <Link href={routes.contact}>
               Start a conversation
               <ArrowRight className="size-4" aria-hidden="true" />
             </Link>
@@ -40,7 +41,7 @@ export function AboutCta(): ReactElement {
       </div>
 
       <Link
-        href="/work"
+        href={routes.work}
         className="text-muted-foreground hover:text-foreground inline-flex w-fit items-center gap-1.5 font-mono text-[10px] tracking-wider uppercase transition-colors"
       >
         See the work behind the story

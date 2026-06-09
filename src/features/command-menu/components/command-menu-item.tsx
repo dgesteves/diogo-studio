@@ -3,12 +3,13 @@
 import { Command } from "cmdk";
 import { ArrowUpRight, Briefcase, FileText, Send, UserRound } from "lucide-react";
 import { type ReactElement, type ReactNode } from "react";
+import { routes } from "@/config/routes";
 
 export function iconForPage(href: string): ReactElement {
-  if (href.startsWith("/work")) return <Briefcase className="size-4" />;
-  if (href.startsWith("/writing")) return <FileText className="size-4" />;
-  if (href.startsWith("/about")) return <UserRound className="size-4" />;
-  if (href.startsWith("/contact")) return <Send className="size-4" />;
+  if (href.startsWith(routes.work)) return <Briefcase className="size-4" />;
+  if (href.startsWith(routes.writing)) return <FileText className="size-4" />;
+  if (href.startsWith(routes.about)) return <UserRound className="size-4" />;
+  if (href.startsWith(routes.contact)) return <Send className="size-4" />;
   return <ArrowUpRight className="size-4" />;
 }
 

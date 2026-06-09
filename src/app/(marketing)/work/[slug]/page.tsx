@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
 import { caseStudies } from "#content";
+import { routes } from "@/config/routes";
 import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { ArticleOutcomes } from "@/components/common/article-outcomes";
@@ -56,7 +57,7 @@ export default async function CaseStudyPage({
         updatedAt={study.updatedAt}
         section="Case study"
         crumbName="Work"
-        crumbPath="/work"
+        crumbPath={routes.work}
       />
 
       <ArticleHeader
@@ -72,7 +73,7 @@ export default async function CaseStudyPage({
         ]}
         patterns={study.patterns}
         links={study.links}
-        backHref="/work"
+        backHref={routes.work}
         backLabel="All case studies"
       />
 

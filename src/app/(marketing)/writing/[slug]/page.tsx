@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
 import { essays } from "#content";
+import { routes } from "@/config/routes";
 import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { NextArticleLink } from "@/components/common/next-article-link";
@@ -54,7 +55,7 @@ export default async function EssayPage({
         updatedAt={essay.updatedAt}
         section="Essay"
         crumbName="Writing"
-        crumbPath="/writing"
+        crumbPath={routes.writing}
       />
 
       <ArticleHeader
@@ -69,7 +70,7 @@ export default async function EssayPage({
           { label: "Last updated", value: (essay.updatedAt ?? essay.publishedAt).slice(0, 10) },
         ]}
         patterns={essay.patterns}
-        backHref="/writing"
+        backHref={routes.writing}
         backLabel="All essays"
       />
 

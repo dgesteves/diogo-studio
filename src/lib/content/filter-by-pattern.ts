@@ -1,4 +1,4 @@
-import type { PatternId } from "@/content/data/career-graph";
+import type { PatternId } from "@/content/data/patterns";
 
 type PatternedItem = {
   patterns: readonly PatternId[];

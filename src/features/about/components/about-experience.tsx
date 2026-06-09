@@ -2,7 +2,10 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { nodeHref, nodes, patterns } from "@/content/data/career-graph";
+import { routes } from "@/config/routes";
+import { nodes } from "@/content/data/career-graph-nodes";
+import { patterns } from "@/content/data/patterns";
+import { nodeHref } from "@/features/career-graph";
 
 import { SectionLabel } from "./about-section";
 
@@ -13,7 +16,7 @@ export function AboutExperience(): ReactElement {
       <ol className="flex flex-col">
         {nodes.map((node) => {
           const href = nodeHref(node);
-          const hasCaseStudy = href.startsWith("/work/");
+          const hasCaseStudy = href.startsWith(`${routes.work}/`);
           return (
             <li
               key={node.id}
