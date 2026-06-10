@@ -2,12 +2,11 @@
 
 The **gold-standard, production-grade** structure for a modern Next.js (App
 Router) codebase, tailored to **diogo-studio**. It encodes `.devin/rules/` and
-is the structure the codebase is converging on. When in doubt, this document wins.
+is the structure the codebase follows. When in doubt, this document wins.
 
-The codebase is **migrating onto this structure** — the tree below is the target
-blueprint. **[present]** folders exist with real files today; **[pending: x]** marks
-code that still lives at `x` and moves per the migration map; **[new]** marks a planned
-home that isn't created yet (add the folder when its first real file lands);
+The codebase has **migrated onto this structure** — the tree below is the
+realized blueprint. **[present]** folders exist with real files today; **[new]** marks
+a planned home that isn't created yet (add the folder when its first real file lands);
 **[optional]** marks a capability folder (auth, db, i18n, etc.) added only when that
 capability exists. We **don't commit empty `.gitkeep` placeholders** — this document is
 the source of truth for where new code belongs.
@@ -68,7 +67,7 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
 ├── public/                     static assets served as-is (images, icons, fonts)           [present]
 ├── scripts/                    build/maintenance scripts (tsx)                             [present]
 ├── tests/
-│   ├── e2e/                    Playwright + axe specs, fixtures, page objects              [pending: e2e/]
+│   ├── e2e/                    Playwright + axe specs, fixtures, page objects              [present]
 │   └── mocks/                  MSW handlers, shared fixtures, render utils                 [new]
 ├── messages/                   i18n catalogs (en.json, …)                                  [optional]
 ├── instrumentation.ts          server observability register() (Sentry/OTel)              [present]
@@ -114,9 +113,9 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     ├── lib/                     ── CORE INFRASTRUCTURE & INTEGRATIONS ───────────────────
     │   │                        server-only modules start with `import "server-only"`;
     │   │                        everything else stays isomorphic (client + server safe)
-    │   ├── ai/                  agent retrieval, prompts, embeddings        (server-only)  [pending: server/ai]
-    │   ├── email/               transactional senders (Resend)              (server-only)  [pending: server/email]
-    │   ├── rate-limit.ts        shared IP rate-limiter (Upstash + fallback) (server-only)  [pending: server/]
+    │   ├── ai/                  agent retrieval, prompts, embeddings        (server-only)  [present]
+    │   ├── email/               generic senders — feature senders live in emails/           [optional]
+    │   ├── rate-limit.ts        shared IP rate-limiter (Upstash + fallback) (server-only)  [present]
     │   ├── content/             content query/transform helpers (sort, filter, next)        [present]
     │   ├── seo/                 metadata + structured-data builders                         [present]
     │   ├── validations/         cross-cutting zod schemas shared across boundaries          [present]
@@ -126,23 +125,23 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │   ├── errors.ts            typed error classes + Result helpers                         [new]
     │   └── db/ • auth/ • payments/ • safe-action.ts   when the capability lands            [optional]
     │
-    ├── hooks/                   SHARED client hooks (use-in-view, use-is-client, …)        [pending: lib/hooks]
-    ├── providers/               client providers + composed <Providers> (theme, motion…)   [pending: components/providers]
-    ├── stores/                  GLOBAL client state — zustand (perf, web-vitals, motion)    [pending: scattered]
+    ├── hooks/                   SHARED client hooks (use-in-view, use-is-client, …)        [present]
+    ├── providers/               client providers + composed <Providers> (theme, motion…)   [present]
+    ├── stores/                  GLOBAL client state — zustand (perf, web-vitals, motion)    [present]
     │
     ├── constants/               ── GLOBAL constants & enums ───────────────────────────
-    │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [pending: config/routes.ts]
+    │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [present]
     │   └── app.constants.ts     limits, defaults, feature flags                              [new]
     │
     ├── config/                  ── STATIC CONFIG (single source of truth) ────────────────  [present]
     │   ├── site.ts              name, url, social, defaults, getSiteUrl()                    [present]
     │   ├── navigation.ts        nav/menu definitions (hrefs come from constants/routes.ts)  [present]
     │   ├── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
-    │   └── env.ts               Zod-validated environment (t3-env)                           [pending: src/env.ts]
+    │   └── env.ts               Zod-validated environment (t3-env)                           [present]
     │
-    ├── data/                    GLOBAL static data consumed by 2+ features                   [pending: content/]
-    │   ├── patterns.ts          patterns taxonomy — tags every article                       [pending: content/data]
-    │   └── agent-index.json     prebuilt RAG index (generated by scripts/)                   [pending: content/]
+    ├── data/                    GLOBAL static data consumed by 2+ features                   [present]
+    │   ├── patterns.ts          patterns taxonomy — tags every article                       [present]
+    │   └── agent-index.json     prebuilt RAG index (generated by scripts/)                   [present]
     │
     ├── styles/                  globals.css, system-diagram.css (tokens in globals.css)     [present]
     ├── types/                   global/ambient types (*.d.ts, shared domain types)         [present]
@@ -238,11 +237,10 @@ features/contact/
 Submission is handled by a thin **Route Handler** at `app/api/contact/route.ts`
 (Node runtime — Resend + react-email): validate → honeypot → rate-limit → send,
 degrading to `503 { fallback }` so the form can show a `mailto:` when email isn't
-configured. A feature that prefers progressive enhancement can instead expose a
-Server Action (`actions/`) + a server-only sender (`lib/email/`)
-— both shapes are valid; choose per endpoint. Shared cross-route concerns (e.g. the
-IP rate-limiter currently duplicated with `api/chat`) belong in `lib/`
-(server-only), not the route file.
+configured. The feature-specific sender lives beside its template
+(`emails/send-contact-notification.ts`, server-only) so `lib/` never imports
+from `features/`. Shared cross-route concerns (e.g. the IP rate-limiter shared
+with `api/chat`) belong in `lib/` (server-only), not the route file.
 
 ## Where does X go? (decision guide)
 
@@ -292,12 +290,13 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 `pnpm test` / `e2e` (Vitest + Playwright/axe), `pnpm size` (size-limit),
 `pnpm analyze` (bundle analyzer). Every structural PR must pass `pnpm validate`.
 
-## Migration map (pending)
+## Migration map (complete — historical record)
 
-The legacy → feature-slice migration shipped earlier (route groups, `features/`
-extraction, typed routes, `lib/utils/`). The rows below are the remaining moves
-onto this blueprint; each ships as a small, independently reviewable PR gated by
-`pnpm validate`.
+Every row below has shipped as a small `pnpm validate`-gated commit; the tree
+above is the realized result. Kept as a record of the legacy → current move.
+One deviation: the contact sender ended in
+`features/contact/emails/send-contact-notification.ts` (not `lib/email/`) so
+that `lib/` never imports from `features/`.
 
 | Today                                                      | Target                                           |
 | ---------------------------------------------------------- | ------------------------------------------------ |
