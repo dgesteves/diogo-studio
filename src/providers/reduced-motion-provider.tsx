@@ -13,7 +13,7 @@ import {
   subscribeLowPower,
   subscribeOverride,
   subscribeSystem,
-} from "./reduced-motion-store";
+} from "@/stores/reduced-motion-store";
 
 type ReducedMotionContextValue = {
   reducedMotion: boolean;

@@ -2,7 +2,7 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import { markPerfInactive, publishPerf } from "@/lib/telemetry/perf-store";
+import { markPerfInactive, publishPerf } from "@/stores/perf-store";
 
 export function PerfReporter(): null {
   const gl = useThree((state) => state.gl);

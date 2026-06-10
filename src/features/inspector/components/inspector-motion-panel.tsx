@@ -3,7 +3,7 @@
 import { Activity } from "lucide-react";
 import { type ReactElement } from "react";
 
-import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { cn } from "@/lib/utils/cn";
 
 import { Panel, Signal } from "./inspector-atoms";

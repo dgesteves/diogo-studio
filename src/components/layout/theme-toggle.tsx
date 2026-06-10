@@ -4,7 +4,7 @@ import type { ReactElement } from "react";
 import { MoonStar, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { useIsClient } from "@/lib/hooks/use-is-client";
+import { useIsClient } from "@/hooks/use-is-client";
 
 export function ThemeToggle(): ReactElement {
   const { resolvedTheme, setTheme } = useTheme();

@@ -97,7 +97,7 @@ telemetry semantics — never decorative.
 
 ## 3. Providers
 
-All client-side providers compose under `src/components/providers/index.tsx`
+All client-side providers compose under `src/providers/index.tsx`
 as a single `<AppProviders>` mounted by the root `layout.tsx`.
 
 | Provider                | Owner of                                                               |

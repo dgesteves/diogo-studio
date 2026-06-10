@@ -2,9 +2,9 @@
 
 import { useState, type ReactElement } from "react";
 import dynamic from "next/dynamic";
-import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
-import { useInView } from "@/lib/hooks/use-in-view";
-import { useIsClient } from "@/lib/hooks/use-is-client";
+import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useInView } from "@/hooks/use-in-view";
+import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/lib/utils/cn";
 import { siteConfig } from "@/config/site";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactElement } from "react";
-import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { siteConfig } from "@/config/site";
 
 const SEQUENCE = "diogo";

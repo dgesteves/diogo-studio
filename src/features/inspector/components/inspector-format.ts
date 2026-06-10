@@ -1,4 +1,4 @@
-import type { VitalRating } from "@/lib/telemetry/web-vitals-store";
+import type { VitalRating } from "@/stores/web-vitals-store";
 
 export const ratingTone: Record<VitalRating, string> = {
   good: "text-signal-good",

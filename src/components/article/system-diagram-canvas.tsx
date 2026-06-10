@@ -2,7 +2,7 @@
 
 import { Background, BackgroundVariant, Controls, ReactFlow } from "@xyflow/react";
 import { type ReactElement } from "react";
-import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 
 import { mapEdges, mapNodes } from "./system-diagram-canvas-map";
 import { CanvasNodeOverlay } from "./system-diagram-canvas-overlay";

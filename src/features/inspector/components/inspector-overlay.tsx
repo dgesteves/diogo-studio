@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
 import { useInspectorOverlay } from "../stores/inspector-overlay-store";
-import { useReducedMotionPreference } from "@/components/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { Kbd } from "@/components/ui/kbd";
-import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/lib/telemetry/perf-store";
+import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/stores/perf-store";
 import {
   getVitalsServerSnapshot,
   getVitalsSnapshot,
   subscribeVitals,
-} from "@/lib/telemetry/web-vitals-store";
+} from "@/stores/web-vitals-store";
 import { cn } from "@/lib/utils/cn";
 
 import { measureRouteJs } from "./inspector-route-js";
