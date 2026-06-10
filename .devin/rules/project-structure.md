@@ -5,6 +5,10 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 # Architecture & project structure
 
+Feature-first vertical slices with one dependency direction:
+`app/` → `features/` → `components/` / `hooks/` / `providers/` / `stores/` →
+`lib/` → `config/` / `constants/` / `data/` / `types/`. Never import upward.
+
 ## `app/` is the routing layer only
 
 - `src/app/` contains **only** route segments and Next.js special files —
@@ -24,26 +28,36 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 ## Where everything else lives
 
-- `src/features/<feature>/` — vertical slices: `components/`, `hooks/`,
-  `actions/`, `server/`, `schemas/`, `types.ts`, plus a curated `index.ts` that
-  is the **only** import surface for the feature.
-- `src/components/` — shared presentational UI: `ui/` (primitives — button,
-  input, dialog), `layout/` (app shell — header, footer, nav), `common/`
-  (shared composites), `providers/` (client context providers).
-- `src/server/` — **server-only** core (`import "server-only"`): `data/` (DAL —
-  the only place that touches the data source), `services/` (business logic,
-  third-party integrations), `db/` (client/schema/migrations), `auth/`, shared
-  concerns like `rate-limit.ts`. Add subfolders only when the capability lands.
-- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/` (pure
-  helpers), `validations/` (shared Zod schemas), `hooks/` (generic, reusable
-  hooks — distinct from app-wide `src/hooks/`).
-- `src/config/` — site metadata (`site.ts`), navigation (`navigation.ts`), and
-  the typed route map (`routes.ts` — the SSOT for every internal URL). Env is
-  read through one validated module (e.g. `src/env.ts`), never raw
-  `process.env` scattered around.
+- `src/features/<feature>/` — vertical slices: `components/`, `actions/`
+  (Server Actions), `queries/` (server-side reads), `hooks/`, `schemas/`,
+  `stores/`, `emails/`, `data/` (feature-owned static data), `content/`
+  (authored articles — work owns case studies, writing owns essays), `utils/`
+  or `lib/`, `types.ts`, `constants.ts`, plus a curated `index.ts` that is the
+  **only** import surface for the feature.
+- `src/components/` — shared presentational UI used by 2+ features: `ui/`
+  (design-system primitives), `layout/` (app shell — nav, footer), `common/`
+  (shared composites), plus domain-neutral groups promoted on reuse
+  (`article/`, `seo/`, `og/`, `r3f/`).
+- `src/lib/` — core infrastructure & integrations. Server-only modules (`ai/`,
+  `email/`, `rate-limit.ts`, and later `db/`, `auth/`, `payments/`) start with
+  `import "server-only"`; the rest stays isomorphic and pure (`utils/`,
+  `content/`, `seo/`, `validations/`, `telemetry/`). Never mix the two in one
+  module.
+- `src/hooks/` — shared client hooks. `src/providers/` — client context
+  providers composed into one `<Providers>` (`providers/index.tsx`).
+  `src/stores/` — global client state (Zustand).
+- `src/constants/` — global constants & enums; `routes.ts` is the typed SSOT
+  for every internal URL and path builder.
+- `src/config/` — static configuration: `site.ts`, `navigation.ts`, `brand.ts`,
+  and `env.ts` (Zod-validated env — never raw `process.env` elsewhere).
+- `src/data/` — global static data consumed by 2+ features (taxonomies,
+  generated indexes). Single-feature data lives in that feature's `data/`;
+  authored articles in the owning feature's `content/`. No top-level
+  `content/` directory.
 - `src/styles/` — global CSS + design tokens. `src/types/` — truly global
-  types. `src/test/` — test utils, mocks, and fixtures.
-- `src/hooks/` • `src/stores/` — app-wide hooks / client state only.
+  types.
+- `tests/` — `e2e/` (Playwright), `mocks/`, shared setup; unit tests colocate
+  with source (`*.test.ts(x)`).
 
 ## Conventions
 
@@ -61,8 +75,9 @@ description: Apply when creating files or folders, organizing modules, naming th
   unexplained numbers or meaningful/repeated strings; give them a named `const` /
   `as const` (or a union). Place at the narrowest scope that removes the magic: a
   top-of-file `const` for single-file use → a feature `constants.ts` when shared
-  across that feature → `src/config/` for site/config data (names, URLs, routes,
-  nav). Promote outward only on reuse; never build a global `constants.ts` dump.
+  across that feature → `src/constants/` when shared by 2+ features (split by
+  domain: `routes.ts`, `app.constants.ts` — never one dump file). Static config
+  objects (site name, nav, brand, env) belong in `src/config/`, not `constants/`.
   Trivial one-off literals (a unique label) may stay inline.
 - Mark server-only modules with `import "server-only"`; client-only files start
   with `"use client"`. Keep the boundary explicit.
@@ -80,16 +95,17 @@ shared location only on 2+ reuse.
   parents as Server Components. Split a large component into sub-components, and
   lift any non-render logic into a hook or helper.
 - **Hooks** (`hooks/`, `use-*.ts`) — reusable **client** stateful logic
-  (effects, refs, subscriptions, derived state). One hook per file. Isomorphic,
-  generic hooks live in `src/lib/hooks/`; app-wide ones in `src/hooks/`.
-- **Server data access** (`server/data/`, DAL) — the only place that reads/writes
-  the data source. `import "server-only"`. Returns typed, validated data.
-- **Services** (`server/services/`) — server-side business logic / orchestration
-  and third-party integrations (AI, email, payments). Composes the DAL; never
-  called directly from client components.
+  (effects, refs, subscriptions, derived state). One hook per file. Feature
+  hooks stay in the feature; shared hooks live in `src/hooks/`.
+- **Server integrations** (`lib/{ai,email,db,auth,payments}/`,
+  `import "server-only"`) — the only place that touches data sources, secrets,
+  and server-side third-party SDKs. Returns typed, validated data; never
+  imported by a client component.
+- **Queries** (`queries/`) — feature server-side reads that compose `lib/`
+  integrations and return DTOs to pages.
 - **Server Actions** (`actions/`, `"use server"`) — thin mutation entry points:
-  authenticate, validate input with a schema, call a service, revalidate. No
-  business logic inline — delegate to a service.
+  authenticate, validate input with a schema, call a `lib/` integration or
+  feature helper, revalidate. No business logic inline.
 - **Types** (`types.ts`, `src/types/`) — `type`/`interface` declarations only,
   no runtime code. Co-locate feature types in the feature's `types.ts`; truly
   global/shared types go in `src/types/`. Export domain types from Zod schemas
@@ -98,9 +114,23 @@ shared location only on 2+ reuse.
   source of truth for shape + runtime validation at every boundary (forms,
   actions, route handlers, external APIs).
 - **Constants / config** — named values, not magic literals. Narrowest scope
-  wins: file-local `const` → feature `constants.ts` → `src/config/` for
-  site/nav/routes. Never a global `constants.ts` dump.
+  wins: file-local `const` → feature `constants.ts` → `src/constants/`
+  (`routes.ts` is the typed SSOT for URLs). Site/nav/brand/env config lives in
+  `src/config/`.
 - **Utils** (`lib/utils/`) — pure, isomorphic, side-effect-free helpers. One
   cohesive concern per file; no React, no env, no I/O.
-- **Stores** (`src/stores/`) — app-wide client state only. Keep server state in
-  the server/data layer, not mirrored into a store.
+- **Providers** (`src/providers/`, `*-provider.tsx`) — client context
+  providers; compose them once in `providers/index.tsx` and mount in the root
+  layout.
+- **Stores** (`src/stores/`) — app-wide client state only. Keep server state on
+  the server, not mirrored into a store.
+
+## Import rules & boundaries
+
+- `features/*` never import from `app/`.
+- Cross-feature imports go through the target feature's `index.ts` only —
+  better: lift shared code to `components/` or `lib/`.
+- `components/`, `lib/`, `hooks/`, `providers/`, `stores/` never import from
+  `features/` or `app/`.
+- No deep imports into a feature: `@/features/contact`, never
+  `@/features/contact/schemas/…`.

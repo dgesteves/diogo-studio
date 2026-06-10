@@ -2,30 +2,31 @@
 
 The **gold-standard, production-grade** structure for a modern Next.js (App
 Router) codebase, tailored to **diogo-studio**. It encodes `.devin/rules/` and
-is the structure the codebase follows. When in doubt, this document wins.
+is the structure the codebase is converging on. When in doubt, this document wins.
 
-The codebase has **migrated onto this structure** — the tree below is the blueprint.
-**[present]** folders exist with real files today; **[new]** marks a planned home that
-isn't created yet (add the folder when its first real file lands); **[optional]** marks
-a capability folder (auth, db, i18n, etc.) added only when that capability exists. We
-**don't commit empty `.gitkeep` placeholders** — the on-disk tree shows only what's
-real, and this document is the source of truth for where new code belongs.
+The codebase is **migrating onto this structure** — the tree below is the target
+blueprint. **[present]** folders exist with real files today; **[pending: x]** marks
+code that still lives at `x` and moves per the migration map; **[new]** marks a planned
+home that isn't created yet (add the folder when its first real file lands);
+**[optional]** marks a capability folder (auth, db, i18n, etc.) added only when that
+capability exists. We **don't commit empty `.gitkeep` placeholders** — this document is
+the source of truth for where new code belongs.
 
 ## Core ideas
 
 - **Layered + feature-first.** Thin routing on top, vertical feature slices in the
   middle, shared UI and platform code at the bottom.
 - **`app/` routes only.** Pages compose; they don't implement.
-- **`lib/` is isomorphic, `server/` is server-only.** The split is explicit and
-  enforced with `import "server-only"`.
+- **`lib/` is the infrastructure layer.** Server-only modules (AI, email, db,
+  rate limiting) are poisoned with `import "server-only"`; the rest stays
+  isomorphic (client + server safe).
 - **Curated public surface per feature.** Other code imports a feature only
   through its `index.ts`, never its internals.
 - **One direction of dependencies** (top imports down, never up):
 
 ```
-app/  →  features/  →  components/ ─┐
-                    →  server/  ────┼→  lib/  →  config/ , types/
-                    →  content/ ────┘
+app/  →  features/  →  components/ • hooks/ • providers/ • stores/
+                    →  lib/  →  config/ • constants/ • data/ • types/
 ```
 
 `ui/` primitives and `lib/` utilities are leaves — they import nothing above them.
@@ -38,13 +39,13 @@ app/  →  features/  →  components/ ─┐
 | Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                |
 | Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)              |
 | UI primitives       | Radix UI, `cmdk`, `vaul`, `sonner`, `lucide-react`                 |
-| Content             | TSX articles (typed meta + JSX bodies in `src/content/`)           |
+| Content             | TSX articles (typed meta + JSX bodies) owned by their feature      |
 | 3D / motion         | `three` + React Three Fiber + drei, `motion`, `lenis`              |
 | Forms / validation  | `react-hook-form` + `zod` (`@hookform/resolvers`)                  |
 | AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)       |
 | Email               | Resend + React Email                                               |
 | State (client)      | URL state first; `zustand` for cross-component UI state            |
-| Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/env.ts`                |
+| Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/config/env.ts`         |
 | Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`            |
 | Rate limiting       | Upstash Redis + Ratelimit                                          |
 | Tooling             | pnpm, ESLint, Prettier, Vitest, Playwright + axe, knip, size-limit |
@@ -64,9 +65,11 @@ app/  →  features/  →  components/ ─┐
 │   ├── adr/                    Architecture Decision Records (0001-title.md)               [new]
 │   ├── architecture.md         this file                                                   [present]
 │   └── design-system.md                                                                    [present]
-├── e2e/                        Playwright specs, fixtures, page objects                    [present]
 ├── public/                     static assets served as-is (images, icons, fonts)           [present]
 ├── scripts/                    build/maintenance scripts (tsx)                             [present]
+├── tests/
+│   ├── e2e/                    Playwright + axe specs, fixtures, page objects              [pending: e2e/]
+│   └── mocks/                  MSW handlers, shared fixtures, render utils                 [new]
 ├── messages/                   i18n catalogs (en.json, …)                                  [optional]
 ├── instrumentation.ts          server observability register() (Sentry/OTel)              [present]
 ├── instrumentation-client.ts   client error + Web Vitals capture                          [present]
@@ -84,66 +87,65 @@ app/  →  features/  →  components/ ─┐
     │   └── manifest.ts • robots.ts • sitemap.ts                                             [present]
     │
     ├── features/               ── VERTICAL SLICES (one folder per capability) ───────────  [present]
-    │   └── <feature>/          e.g. career-graph, studio, command-menu, contact, inspector, home
+    │   └── <feature>/          e.g. work, writing, career-graph, studio, command-menu, contact
     │       ├── components/      feature UI (server + client)
+    │       ├── actions/         Server Actions ("use server")                               [optional]
+    │       ├── queries/         server-side reads composing lib/ integrations               [optional]
     │       ├── hooks/           feature-scoped hooks
-    │       ├── actions/         Server Actions ("use server")
-    │       ├── server/          server-only data/services for this feature
     │       ├── schemas/         zod schemas (input/output contracts)
-    │       ├── stores/          client state (zustand) — only if needed
+    │       ├── stores/          feature-scoped client state (zustand) — only if needed
+    │       ├── emails/          feature email templates (React Email)                       [optional]
+    │       ├── data/            feature-owned static data (career-graph nodes, uses list…)
+    │       ├── content/         authored articles — <slug>/meta.ts + JSX body (work, writing)
     │       ├── lib/             feature-private pure helpers
-    │       ├── types.ts • constants.ts
+    │       ├── types.ts • constants.ts   (grow into types/ • constants/ when needed)
     │       ├── *.test.tsx       unit/component tests colocated beside the file they test
     │       └── index.ts         ★ curated public API — the ONLY import surface
     │
-    ├── components/              ── SHARED, REUSABLE UI (presentational) ──────────────────
+    ├── components/              ── SHARED, REUSABLE UI (presentational, 2+ features) ─────
     │   ├── ui/                  design-system primitives (button, badge, input, kbd…)      [present]
     │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [present]
     │   ├── common/              cross-feature composites (cards, empty/error states)        [present]
     │   ├── r3f/                 shared React Three Fiber infra (perf reporter, ctx guard)  [present]
     │   ├── article/             article building blocks (prose, headings, toc, diagrams…)   [present]
     │   ├── seo/                 json-ld / structured-data UI                               [present]
-    │   ├── og/                  Open Graph image templates                                 [present]
-    │   └── providers/           app-wide client providers (theme, motion, toaster)         [present]
+    │   └── og/                  Open Graph image templates                                 [present]
     │
-    ├── server/                  ── SERVER-ONLY CORE (no JSX/UI) — import "server-only" ────  [present]
-    │   ├── ai/                  agent retrieval, prompts, embeddings                        [present]
-    │   ├── email/               transactional senders (Resend)                             [present]
-    │   ├── rate-limit.ts        shared IP rate-limiter (Upstash + in-memory fallback)       [present]
-    │   ├── data/                Data Access Layer — add when a database lands               [optional]
-    │   ├── services/            domain/business-logic orchestration                         [optional]
-    │   ├── db/                  db client + schema + migrations (Drizzle/Prisma)            [optional]
-    │   └── auth/                session, RBAC, guards                                        [optional]
-    │
-    ├── lib/                     ── ISOMORPHIC UTILITIES (client + server safe) ───────────
+    ├── lib/                     ── CORE INFRASTRUCTURE & INTEGRATIONS ───────────────────
+    │   │                        server-only modules start with `import "server-only"`;
+    │   │                        everything else stays isomorphic (client + server safe)
+    │   ├── ai/                  agent retrieval, prompts, embeddings        (server-only)  [pending: server/ai]
+    │   ├── email/               transactional senders (Resend)              (server-only)  [pending: server/email]
+    │   ├── rate-limit.ts        shared IP rate-limiter (Upstash + fallback) (server-only)  [pending: server/]
     │   ├── content/             content query/transform helpers (sort, filter, next)        [present]
     │   ├── seo/                 metadata + structured-data builders                         [present]
     │   ├── validations/         cross-cutting zod schemas shared across boundaries          [present]
     │   ├── utils/               pure helpers (cn, …)                                         [present]
-    │   ├── telemetry/           perf + web-vitals stores                                     [present]
-    │   ├── hooks/               generic isomorphic hooks (use-is-client, use-in-view)        [present]
+    │   ├── telemetry/           perf + web-vitals reporting helpers                          [present]
     │   ├── api/                 typed fetch client / API helpers                            [new]
-    │   ├── analytics/           analytics + Web Vitals reporting                            [new]
-    │   └── errors.ts            typed error classes + Result helpers                         [new]
+    │   ├── errors.ts            typed error classes + Result helpers                         [new]
+    │   └── db/ • auth/ • payments/ • safe-action.ts   when the capability lands            [optional]
+    │
+    ├── hooks/                   SHARED client hooks (use-in-view, use-is-client, …)        [pending: lib/hooks]
+    ├── providers/               client providers + composed <Providers> (theme, motion…)   [pending: components/providers]
+    ├── stores/                  GLOBAL client state — zustand (perf, web-vitals, motion)    [pending: scattered]
+    │
+    ├── constants/               ── GLOBAL constants & enums ───────────────────────────
+    │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [pending: config/routes.ts]
+    │   └── app.constants.ts     limits, defaults, feature flags                              [new]
     │
     ├── config/                  ── STATIC CONFIG (single source of truth) ────────────────  [present]
     │   ├── site.ts              name, url, social, defaults, getSiteUrl()                    [present]
-    │   ├── navigation.ts        nav/menu definitions (hrefs come from routes.ts)            [present]
-    │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [present]
-    │   └── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
-    │                            (SEO defaults derive from site.ts + lib/seo/; no seo.ts)
+    │   ├── navigation.ts        nav/menu definitions (hrefs come from constants/routes.ts)  [present]
+    │   ├── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
+    │   └── env.ts               Zod-validated environment (t3-env)                           [pending: src/env.ts]
     │
-    ├── content/                 articles + content data                                      [present]
-    │   ├── case-studies/ • essays/  per-article folder: meta.ts + JSX body sections          [present]
-    │   ├── schema/              article meta + system-diagram types                          [present]
-    │   └── data/                PURE data — patterns taxonomy, career-graph nodes/edges      [present]
+    ├── data/                    GLOBAL static data consumed by 2+ features                   [pending: content/]
+    │   ├── patterns.ts          patterns taxonomy — tags every article                       [pending: content/data]
+    │   └── agent-index.json     prebuilt RAG index (generated by scripts/)                   [pending: content/]
     │
-    ├── hooks/                   GLOBAL shared client hooks (use-media-query, use-mounted)  [optional]
-    ├── stores/                  GLOBAL client state (zustand) — app-wide only              [optional]
     ├── styles/                  globals.css, system-diagram.css (tokens in globals.css)     [present]
     ├── types/                   global/ambient types (*.d.ts, shared domain types)         [present]
-    ├── test/                    setup, render utils, mocks, fixtures, msw handlers         [new]
-    ├── env.ts                   Zod-validated environment                                  [present]
     └── middleware.ts            edge middleware (headers, redirects, rate-limit gate)      [optional]
 ```
 
@@ -152,8 +154,8 @@ app/  →  features/  →  components/ ─┐
 ### `app/` — routing only
 
 Route segments and Next.js special files **only**. A `page.tsx` resolves params,
-calls a feature/`server` function for data, sets `metadata`, and composes UI from
-`features/` + `components/`. Group routes with `(group)` folders (e.g.
+calls a feature query / `lib/` function for data, sets `metadata`, and composes UI
+from `features/` + `components/`. Group routes with `(group)` folders (e.g.
 `(marketing)`, `(legal)`) to share layouts without affecting the URL. No business
 logic, data access, or shared components here.
 
@@ -161,40 +163,64 @@ logic, data access, or shared components here.
 
 Everything for one capability, colocated. Crossing a feature boundary means
 importing from its **`index.ts`** only — internals stay private. A feature may
-contain UI, hooks, server actions, server-only data access, schemas, and tests.
-Keep each file small (~100 lines, lint-enforced); split aggressively.
+contain UI, hooks, server actions, server-only data access, schemas, data,
+authored content, and tests. Keep each file small (~100 lines, lint-enforced);
+split aggressively.
+
+Authored articles follow the same rule: `features/work/` owns the case studies
+and `features/writing/` owns the essays — each article is a
+`content/<slug>/` folder with a typed `meta.ts` and a JSX body composed from
+`components/article/` building blocks. The feature's `index.ts` exports the
+collection (metas, bodies, cards), which is how the command menu, sitemap, and
+OG images consume it.
 
 ### `components/` — shared UI
 
 Presentational, reusable, mostly stateless. `ui/` = primitives (no app/domain
 imports); `layout/` = app shell; `common/` = shared composites; `r3f/` = shared
 React Three Fiber infra (perf reporter, WebGL context guard) used by the 3D
-features; `article/`, `seo/`, `og/`, `providers/` as named. If a component grows
-domain logic/state, it belongs in a feature, not here.
+features; `article/`, `seo/`, `og/` as named. If a component grows domain
+logic/state, it belongs in a feature, not here.
 
-### `server/` vs `lib/` — the critical split
+### `hooks/`, `providers/`, `stores/` — shared client layer
 
-- **`server/`** is **server-only** (`import "server-only"` at the top): DAL,
-  services, AI, email, db, auth, secrets. Never imported by a client component.
-- **`lib/`** is **isomorphic** — pure, dependency-light helpers that are safe on
-  client and server (formatters, `cn`, shared zod schemas, typed fetch, error
-  helpers). No secrets, no Node-only APIs.
+- `hooks/` — shared client hooks (`use-in-view`, `use-is-client`); feature
+  hooks stay inside the feature.
+- `providers/` — client context providers (theme, motion, lenis, reduced
+  motion) composed into one `<Providers>` in `providers/index.tsx`, mounted by
+  the root layout.
+- `stores/` — global zustand stores (perf, web-vitals, reduced motion);
+  feature-scoped stores live in `features/<feature>/stores/`.
 
-### `config/`, `content/`, `types/`, `styles/`, `test/`
+### `lib/` — infrastructure & integrations
 
-- `config/` — single source of truth for site metadata, navigation, routes
-  (`routes.ts`), and brand colors (`brand.ts`). Never hardcode these literals
-  elsewhere.
-- `content/` — the site's articles and content data. Each article is a folder
-  (`case-studies/<slug>/`, `essays/<slug>/`) with a typed `meta.ts` and a JSX
-  body composed from `components/article/` building blocks; `index.ts` collects
-  metas and `bodies.ts` maps slug → body component. `schema/` holds the meta
-  types; `data/` holds **pure** structured data (the `patterns` taxonomy,
-  career-graph `nodes`/`edges`). Domain logic over content data belongs in the
-  consuming feature's `lib/`, never here.
-- `types/` — ambient declarations and shared domain types.
+One home for platform code, with an explicit boundary inside it:
+
+- **Server-only modules** (`ai/`, `email/`, `rate-limit.ts`, and later `db/`,
+  `auth/`, `payments/`) start with `import "server-only"` so the build fails if
+  they leak into a client component. Secrets and server SDKs live only here.
+- **Isomorphic helpers** (`utils/`, `content/`, `seo/`, `validations/`,
+  `telemetry/`) are pure and dependency-light — safe on client and server. No
+  secrets, no Node-only APIs.
+
+### `config/`, `constants/`, `data/`, `types/`, `styles/`
+
+- `config/` — static configuration: site metadata (`site.ts`), navigation
+  (`navigation.ts`), brand colors (`brand.ts`), and the validated environment
+  (`env.ts` — never raw `process.env` elsewhere).
+- `constants/` — global constants & enums; `routes.ts` is the typed SSOT for
+  every internal URL and path builder. Never hardcode these literals elsewhere.
+- `data/` — global static data consumed by 2+ features: the `patterns` taxonomy
+  that tags every article, and the generated `agent-index.json` RAG index. Data
+  owned by a single feature (career-graph nodes/edges, uses list, operating
+  altitudes) lives in that feature's `data/` instead; authored articles live in
+  the owning feature's `content/`. There is no top-level `content/` directory —
+  content follows the same feature-first rule as everything else.
+- `types/` — ambient declarations and shared domain types (article meta,
+  system-diagram contracts).
 - `styles/` — global CSS and design tokens (imported by the root layout).
-- `test/` — shared setup, render helpers, mocks/fixtures, MSW handlers.
+- shared test setup, render helpers, mocks/fixtures, and MSW handlers live in
+  `tests/` at the repo root, next to `tests/e2e/`.
 
 ## Anatomy of a feature (example: `contact`)
 
@@ -213,38 +239,40 @@ Submission is handled by a thin **Route Handler** at `app/api/contact/route.ts`
 (Node runtime — Resend + react-email): validate → honeypot → rate-limit → send,
 degrading to `503 { fallback }` so the form can show a `mailto:` when email isn't
 configured. A feature that prefers progressive enhancement can instead expose a
-Server Action (`actions/`) + a server-only sender (`server/send-contact-email.ts`)
+Server Action (`actions/`) + a server-only sender (`lib/email/`)
 — both shapes are valid; choose per endpoint. Shared cross-route concerns (e.g. the
-IP rate-limiter currently duplicated with `api/chat`) belong in `server/`, not the
-route file.
+IP rate-limiter currently duplicated with `api/chat`) belong in `lib/`
+(server-only), not the route file.
 
 ## Where does X go? (decision guide)
 
-| Adding…                             | Location                                           |
-| ----------------------------------- | -------------------------------------------------- |
-| A page or API route                 | `src/app/...` (thin)                               |
-| A capability's UI + logic           | `src/features/<feature>/`                          |
-| A generic primitive                 | `src/components/ui/`                               |
-| App shell (nav/footer)              | `src/components/layout/`                           |
-| A composite shared by 2+ features   | `src/components/common/`                           |
-| DB query / repository               | `src/server/data/`                                 |
-| Domain/business logic               | `src/server/services/`                             |
-| Email / AI / auth / db              | `src/server/{email,ai,auth,db}/`                   |
-| Isomorphic helper (`cn`, format)    | `src/lib/utils/`                                   |
-| Zod schema shared across boundaries | `src/lib/validations/` or feature `schemas/`       |
-| Typed fetch / API client            | `src/lib/api/`                                     |
-| Site metadata, nav                  | `src/config/{site,navigation}.ts`                  |
-| A URL / route literal               | `src/config/routes.ts` (typed SSOT)                |
-| Brand colors for canvas/OG/email    | `src/config/brand.ts`                              |
-| Env var                             | `src/env.ts` (validated) — never raw `process.env` |
-| Global hook / store                 | `src/hooks/` • `src/stores/`                       |
-| An article (meta + JSX body)        | `src/content/{case-studies,essays}/<slug>/`        |
-| Pure content data / a taxonomy      | `src/content/data/`                                |
-| Domain logic over content data      | the consuming feature's `lib/`                     |
-| Test helper / mock                  | `src/test/`                                        |
+| Adding…                             | Location                                        |
+| ----------------------------------- | ----------------------------------------------- |
+| A page or API route                 | `src/app/...` (thin)                            |
+| A capability's UI + logic           | `src/features/<feature>/`                       |
+| A generic primitive                 | `src/components/ui/`                            |
+| App shell (nav/footer)              | `src/components/layout/`                        |
+| A composite shared by 2+ features   | `src/components/common/`                        |
+| DB query / repository               | `src/lib/db/` (server-only, when a db lands)    |
+| Server-side reads for a feature     | `src/features/<feature>/queries/`               |
+| Email / AI / auth / db              | `src/lib/{email,ai,auth,db}/` (server-only)     |
+| Isomorphic helper (`cn`, format)    | `src/lib/utils/`                                |
+| Zod schema shared across boundaries | `src/lib/validations/` or feature `schemas/`    |
+| Typed fetch / API client            | `src/lib/api/`                                  |
+| Site metadata, nav                  | `src/config/{site,navigation}.ts`               |
+| A URL / route literal               | `src/constants/routes.ts` (typed SSOT)          |
+| A global constant / enum            | `src/constants/`                                |
+| Brand colors for canvas/OG/email    | `src/config/brand.ts`                           |
+| Env var                             | `src/config/env.ts` — never raw `process.env`   |
+| Global hook / store / provider      | `src/hooks/` • `src/stores/` • `src/providers/` |
+| An article (meta + JSX body)        | `src/features/{work,writing}/content/<slug>/`   |
+| Global data shared by 2+ features   | `src/data/`                                     |
+| Static data owned by one feature    | `src/features/<feature>/data/`                  |
+| Domain logic over content data      | the consuming feature's `lib/`                  |
+| Test helper / mock                  | `tests/`                                        |
 
 Reuse rule: used by **one** feature → keep it there; used by **2+** → promote to
-`components/`, `lib/`, or `server/`.
+`components/`, `hooks/`, `stores/`, or `lib/`.
 
 ## Conventions
 
@@ -253,9 +281,10 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 - **Imports**: `@/…` alias only. Cross-feature imports go through `index.ts`.
   Avoid wide barrel files inside `components/`/`lib/` (tree-shaking + cycles).
 - **Boundaries**: `"use client"` only on interactive leaves; `import "server-only"`
-  on every server module. Article collections via `lib/content/{case-studies,essays}` only.
+  on every server module. Article collections only via the owning feature's
+  public API (`@/features/work`, `@/features/writing`).
 - **Files small** (~100 lines, lint-enforced). Split into sub-components/hooks/helpers first.
-- **Tests** colocate with source (`*.test.ts(x)`); E2E in `e2e/`.
+- **Tests** colocate with source (`*.test.ts(x)`); E2E in `tests/e2e/`.
 
 ## Quality gates
 
@@ -263,35 +292,46 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 `pnpm test` / `e2e` (Vitest + Playwright/axe), `pnpm size` (size-limit),
 `pnpm analyze` (bundle analyzer). Every structural PR must pass `pnpm validate`.
 
-## Migration map (complete — historical record)
+## Migration map (pending)
 
-Every row below has shipped; the tree above is the realized result, not a future
-target. Kept as a record of the legacy → current move.
+The legacy → feature-slice migration shipped earlier (route groups, `features/`
+extraction, typed routes, `lib/utils/`). The rows below are the remaining moves
+onto this blueprint; each ships as a small, independently reviewable PR gated by
+`pnpm validate`.
 
-| Today                                   | Target                                                                                                                                                 |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/page.tsx`, route pages (root)      | `app/(marketing)/…` route group, thinned                                                                                                               |
-| `app/page.test.tsx`                     | test beside extracted units (keep `app/` route-only)                                                                                                   |
-| `app/globals.css`, `app/mdx.css`        | `src/styles/` (imported by root layout)                                                                                                                |
-| `components/site/*` (chrome)            | `components/layout/`                                                                                                                                   |
-| `components/site/*` (features)          | `features/{command-menu,contact}/…`, `features/inspector/…`                                                                                            |
-| `components/career-graph/*` + `scene/`  | `features/career-graph/`                                                                                                                               |
-| `components/studio/*`                   | `features/studio/`                                                                                                                                     |
-| `lib/agent/*`                           | `server/ai/`                                                                                                                                           |
-| `lib/contact-schema.ts`                 | `features/contact/schemas/` (or `lib/validations/`)                                                                                                    |
-| `lib/structured-data.ts`                | `lib/seo/`                                                                                                                                             |
-| `lib/site-config.ts`                    | `config/site.ts`                                                                                                                                       |
-| `content/data/career-graph.ts` barrel   | `content/data/{patterns,career-graph-nodes,career-graph-edges}.ts` (data) + `features/career-graph/lib/{project-to-svg,node-href,get-node}.ts` (logic) |
-| `content/data/career-graph-patterns.ts` | `content/data/patterns.ts` (shared content taxonomy, decoupled from career-graph)                                                                      |
-| hardcoded route literals (`/work`, …)   | `config/routes.ts` (typed SSOT) + path builders                                                                                                        |
-| `lib/utils.ts`                          | `lib/utils/` (cn, formatters, …)                                                                                                                       |
+| Today                                                      | Target                                           |
+| ---------------------------------------------------------- | ------------------------------------------------ |
+| `src/components/providers/*`                               | `src/providers/`                                 |
+| `src/components/providers/reduced-motion-store.ts`         | `src/stores/reduced-motion-store.ts`             |
+| `src/lib/hooks/*`                                          | `src/hooks/`                                     |
+| `src/lib/telemetry/{perf,web-vitals}-store.ts`             | `src/stores/`                                    |
+| `src/config/routes.ts`                                     | `src/constants/routes.ts`                        |
+| `src/env.ts`                                               | `src/config/env.ts`                              |
+| `src/server/ai/*`                                          | `src/lib/ai/` (`import "server-only"`)           |
+| `src/server/email/*`                                       | `src/lib/email/` (`import "server-only"`)        |
+| `src/server/rate-limit.ts`                                 | `src/lib/rate-limit.ts` (`import "server-only"`) |
+| `e2e/*`                                                    | `tests/e2e/` (+ `playwright.config.ts` update)   |
+| deep imports of `@/features/contact/…`                     | the `@/features/contact` public API              |
+| raw `process.env` in `features/career-graph/…/dev-hud.tsx` | `src/config/env.ts`                              |
+| `content/case-studies/*` + `lib/content/case-studies.ts`   | `features/work/{content,lib}/` + `index.ts` API  |
+| `content/essays/*` + `lib/content/essays.ts`               | `features/writing/{content,lib}/` + `index.ts`   |
+| `components/common/case-study-card.tsx`                    | `features/work/components/`                      |
+| `components/common/essay-card.tsx`                         | `features/writing/components/`                   |
+| `content/schema/{article,system-diagram}.ts`               | `src/types/`                                     |
+| `content/data/patterns.ts`                                 | `src/data/patterns.ts`                           |
+| `content/agent-index.json`                                 | `src/data/agent-index.json` (+ scripts paths)    |
+| `content/data/career-graph-{nodes,edges,node-types}.ts`    | `features/career-graph/data/`                    |
+| `content/data/operating.ts`                                | `features/home/data/`                            |
+| `content/data/about.ts`                                    | `features/about/data/`                           |
+| `content/data/uses.ts`                                     | `features/uses/data/`                            |
+| `content/data/colophon.ts`                                 | `features/colophon/data/`                        |
+| `src/content/` (emptied by the rows above)                 | deleted                                          |
 
-These slices shipped as small, independently reviewable PRs, each gated by
-`pnpm validate`. Remaining optional layers (`server/db`, `server/auth`,
-`messages/`, `stores/`) are added only when that capability lands.
+Optional layers (`lib/db`, `lib/auth`, `messages/`, `src/middleware.ts`) are
+added only when that capability lands.
 
 ## Architecture Decision Records
 
 Record significant choices in `docs/adr/NNNN-title.md` (context → decision →
-consequences). First candidates: the `features/` slicing model, the `lib/` vs
-`server/` split, and content-as-typed-blocks.
+consequences). First candidates: the `features/` slicing model, the server-only
+vs isomorphic split inside `lib/`, and feature-owned content-as-typed-blocks.
