@@ -1,18 +1,13 @@
 import { chatRequestSchema } from "@/lib/validations/agent";
-import { retrieve } from "@/server/ai/retrieve";
-import { createRateLimiter } from "@/server/rate-limit";
+import { retrieve } from "@/lib/ai/retrieve";
+import { createRateLimiter } from "@/lib/rate-limit";
 import { env } from "@/config/env";
 import type { AgentSourcesPayload } from "@/types/agent";
 
-import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/server/ai/agent-index";
-import {
-  buildCitations,
-  jsonResponse,
-  REFUSAL_TEXT,
-  textResponse,
-} from "@/server/ai/agent-response";
-import { embedQuery } from "@/server/ai/embed-query";
-import { streamAgentResponse } from "@/server/ai/agent-stream";
+import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/lib/ai/agent-index";
+import { buildCitations, jsonResponse, REFUSAL_TEXT, textResponse } from "@/lib/ai/agent-response";
+import { embedQuery } from "@/lib/ai/embed-query";
+import { streamAgentResponse } from "@/lib/ai/agent-stream";
 
 export const runtime = "edge";
 export const maxDuration = 30;
