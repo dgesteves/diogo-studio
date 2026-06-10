@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.4.4](https://github.com/dgesteves/diogo-studio/compare/v1.4.3...v1.4.4) (2026-06-10)
+
+
+### Code Refactoring
+
+* dissolve src/content into feature-owned content and src/data ([a3254ea](https://github.com/dgesteves/diogo-studio/commit/a3254ea45c27b4cb500aa160c72e3a75c8f0fbbf))
+* dissolve src/server into src/lib server-only modules ([dba6875](https://github.com/dgesteves/diogo-studio/commit/dba68755d75290dc8c0c42ff6373b828b95067db))
+* enforce contact feature public API and fix lib-to-feature dependency ([21ac5cb](https://github.com/dgesteves/diogo-studio/commit/21ac5cb6b2f2fbbdb00f43d2367ab0ae07f2f2cb))
+* extract shared hooks, providers, and global stores to top level ([b0aa8fa](https://github.com/dgesteves/diogo-studio/commit/b0aa8fa4a00f7e4b610f6e64e7e356f476a5f7db))
+* migrate from Velite MDX to typed TypeScript content blocks ([f4540c0](https://github.com/dgesteves/diogo-studio/commit/f4540c00510109b9cfc101489035878d5de33c0b))
+* move Playwright suite to tests/e2e ([1b8cac5](https://github.com/dgesteves/diogo-studio/commit/1b8cac5be0a3fd834ffe135375e6eb891cfe2f86))
+* move typed route map to src/constants/routes.ts ([6624817](https://github.com/dgesteves/diogo-studio/commit/6624817abb7fafe8b6c3933dcb4dfe39c6fbbb75))
+* move validated env to src/config/env.ts ([654f207](https://github.com/dgesteves/diogo-studio/commit/654f20793998fb68d020ea6cff0714201a5a3843))
+* remove unused content utilities (toc, article-text, parse-inline, reading-stats) ([14c9b28](https://github.com/dgesteves/diogo-studio/commit/14c9b28fa575e77aa3b25e935a528f85aa7f8e6b))
+* rename mdx/ to article/ and remove unused agent-index frontmatter parser ([be30c90](https://github.com/dgesteves/diogo-studio/commit/be30c902f657b9ab5bf3e3548e485f8975880d35))
+* tighten and consolidate .devin rules for clarity and consistency ([e641bc9](https://github.com/dgesteves/diogo-studio/commit/e641bc9f2c875f1ca90c041adbe4789d39fa538f))
+
+
+### Documentation
+
+* consolidate architecture around feature-first structure with lib/ as infrastructure layer ([24543d4](https://github.com/dgesteves/diogo-studio/commit/24543d49e3f76afe47b120c1521a19cdefe54e66))
+* mark structure migration complete in architecture blueprint ([0ad18de](https://github.com/dgesteves/diogo-studio/commit/0ad18de21dbe5987dd0cc19e532e2703dab6d9e2))
+* update architecture docs to reflect TSX article migration ([fe3cc87](https://github.com/dgesteves/diogo-studio/commit/fe3cc8772c3e7b31af0997ca585ea7fba1b60918))
+
 ## [1.4.3](https://github.com/dgesteves/diogo-studio/compare/v1.4.2...v1.4.3) (2026-06-09)
 
 
