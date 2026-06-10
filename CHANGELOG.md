@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.3](https://github.com/dgesteves/diogo-studio/compare/v1.4.2...v1.4.3) (2026-06-09)
+
+
+### Documentation
+
+* remove completed SRP refactor plan after finishing 11/14 sections ([10b25ff](https://github.com/dgesteves/diogo-studio/commit/10b25ff024c6ba00e6ca4e0e64db9afb54d7eec5))
+
 ## [1.4.2](https://github.com/dgesteves/diogo-studio/compare/v1.4.1...v1.4.2) (2026-06-09)
 
 
