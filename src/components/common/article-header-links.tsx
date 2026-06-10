@@ -9,8 +9,8 @@ export function ArticleHeaderLinks({
   patterns,
   links,
 }: {
-  patterns: PatternId[];
-  links?: { label: string; href: string }[];
+  patterns: readonly PatternId[];
+  links?: readonly { label: string; href: string }[];
 }): ReactElement {
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-3">

@@ -4,46 +4,6 @@ import type { IndexEntry, RawSection, SourceKind } from "./types";
 const MAX_CHUNK_CHARS = 1400;
 const MIN_CHUNK_CHARS = 120;
 
-export function stripMdxJsx(md: string): string {
-  let s = md;
-  s = s.replace(/```[\s\S]*?```/g, "");
-  s = s.replace(/<[A-Z][A-Za-z0-9]*\b[\s\S]*?\/>/g, "");
-  s = s.replace(/<[A-Z][A-Za-z0-9]*\b[\s\S]*?>/g, "");
-  s = s.replace(/<\/[A-Z][A-Za-z0-9]*>/g, "");
-  s = s.replace(/!\[[^\]]*\]\([^)]*\)/g, "");
-  s = s.replace(/\n{3,}/g, "\n\n");
-  return s.trim();
-}
-
-function slugifyHeading(s: string): string {
-  return s
-    .toLowerCase()
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
-    .trim()
-    .replace(/\s+/g, "-");
-}
-
-function splitIntoSections(body: string): RawSection[] {
-  const lines = body.split(/\r?\n/);
-  const sections: RawSection[] = [];
-  let current: RawSection = { body: "" };
-  for (const line of lines) {
-    const h2 = line.match(/^##\s+(.+?)\s*$/);
-    if (h2) {
-      if (current.body.trim()) sections.push(current);
-      const heading = h2[1]!;
-      current = { heading, anchor: slugifyHeading(heading), body: "" };
-      continue;
-    }
-    if (/^#\s/.test(line)) continue;
-    current.body += `${line}\n`;
-  }
-  if (current.body.trim()) sections.push(current);
-  return sections;
-}
-
 function splitLongSection(section: RawSection): RawSection[] {
   const body = section.body.trim();
   if (body.length <= MAX_CHUNK_CHARS) return [section];
@@ -63,16 +23,16 @@ function splitLongSection(section: RawSection): RawSection[] {
   return out;
 }
 
-export function buildMdxChunks(opts: {
+export function buildArticleChunks(opts: {
   kind: SourceKind;
   slug: string;
   permalink: string;
   sourceTitle: string;
   description?: string;
   tags?: string[];
-  body: string;
+  sections: readonly RawSection[];
 }): IndexEntry[] {
-  const { kind, slug, permalink, sourceTitle, description, tags, body } = opts;
+  const { kind, slug, permalink, sourceTitle, description, tags, sections } = opts;
   const sourceId = `${kind}:${slug}`;
   const entries: IndexEntry[] = [];
 
@@ -92,7 +52,6 @@ export function buildMdxChunks(opts: {
     );
   }
 
-  const sections = splitIntoSections(stripMdxJsx(body));
   let ordinal = 1;
   for (const raw of sections) {
     const split = splitLongSection(raw);

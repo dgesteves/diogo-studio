@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { ReactElement } from "react";
-import type { SystemDiagramData } from "./system-diagram-types";
+import type { SystemDiagramData } from "@/content/schema/system-diagram";
 
 const SystemDiagramCanvas = dynamic(
   () => import("./system-diagram-canvas").then((m) => m.SystemDiagramCanvas),

@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
-import { caseStudies } from "#content";
 import { routes } from "@/config/routes";
+import { ArticleMetrics } from "@/components/article/article-metrics";
 import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { ArticleOutcomes } from "@/components/common/article-outcomes";
 import { NextArticleLink } from "@/components/common/next-article-link";
-import { MetricGrid, MetricTile } from "@/components/mdx/metric-tile";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { caseStudies } from "@/lib/content/case-studies";
 import { nextPublished } from "@/lib/content/next-published";
 import { sortPublished } from "@/lib/content/sort-published";
 import { buildArticleMetadata } from "@/lib/seo/article-metadata";
@@ -78,21 +78,10 @@ export default async function CaseStudyPage({
       />
 
       <section aria-label="Headline metrics">
-        <MetricGrid>
-          {study.metrics.map((metric) => (
-            <MetricTile
-              key={metric.label}
-              label={metric.label}
-              value={metric.value}
-              unit={metric.unit}
-              hint={metric.hint}
-              tone="default"
-            />
-          ))}
-        </MetricGrid>
+        <ArticleMetrics items={study.metrics} />
       </section>
 
-      <ArticleBody code={study.body} toc={study.toc} />
+      <ArticleBody blocks={study.body} toc={study.toc} />
 
       <ArticleOutcomes outcomes={study.outcomes} />
 

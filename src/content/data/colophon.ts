@@ -24,8 +24,11 @@ export const colophonStack: readonly StackGroup[] = [
   {
     category: "Content & data",
     items: [
-      { name: "Velite", note: "MDX → typed collections for case studies and essays." },
-      { name: "Zod", note: "Schema validation for content frontmatter, forms, and API payloads." },
+      {
+        name: "Typed content blocks",
+        note: "Case studies and essays authored as TypeScript data, rendered by React components.",
+      },
+      { name: "Zod", note: "Schema validation for forms and API payloads." },
       { name: "Career graph", note: "One hand-tuned dataset drives the hero, /about, and /work." },
     ],
   },

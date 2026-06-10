@@ -1,0 +1,24 @@
+.system-diagram-canvas .react-flow__handle {
+  display: none;
+}
+.system-diagram-canvas .react-flow__node {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
+}
+.system-diagram-canvas .react-flow__controls {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: none;
+}
+.system-diagram-canvas .react-flow__controls-button {
+  background: transparent;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted-foreground);
+}
+.system-diagram-canvas .react-flow__controls-button:hover {
+  background: var(--surface-muted);
+  color: var(--foreground);
+}

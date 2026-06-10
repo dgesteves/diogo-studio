@@ -1,6 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["velite.config.ts"],
   "ignoreDependencies": [
     "sharp",
     "@testing-library/user-event",

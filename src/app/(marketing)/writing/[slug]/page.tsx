@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
-import { essays } from "#content";
 import { routes } from "@/config/routes";
 import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { NextArticleLink } from "@/components/common/next-article-link";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { essays } from "@/lib/content/essays";
 import { nextPublished } from "@/lib/content/next-published";
 import { sortPublished } from "@/lib/content/sort-published";
 import { buildArticleMetadata } from "@/lib/seo/article-metadata";
@@ -74,7 +74,7 @@ export default async function EssayPage({
         backLabel="All essays"
       />
 
-      <ArticleBody code={essay.body} toc={essay.toc} />
+      <ArticleBody blocks={essay.body} toc={essay.toc} />
 
       {next ? (
         <NextArticleLink

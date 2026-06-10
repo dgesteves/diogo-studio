@@ -1,39 +1,38 @@
-import { existsSync, readFileSync } from "node:fs";
-import { readdir } from "node:fs/promises";
-import { join } from "node:path";
+import { caseStudies } from "@/lib/content/case-studies";
+import { essays } from "@/lib/content/essays";
 
-import { buildMdxChunks } from "./chunker";
-import { parseFrontmatter } from "./frontmatter";
-import { CONTENT_ROOT } from "./paths";
-import type { IndexEntry, SourceKind } from "./types";
+import { articleSections } from "./article-sections";
+import { buildArticleChunks } from "./chunker";
+import type { IndexEntry } from "./types";
 
-export async function readMdxCollection(
-  subdir: "case-studies" | "essays",
-  kind: SourceKind,
-  permalinkPrefix: "/work" | "/writing",
-): Promise<IndexEntry[]> {
-  const dir = join(CONTENT_ROOT, subdir);
-  if (!existsSync(dir)) return [];
-  const files = (await readdir(dir)).filter((f) => f.endsWith(".mdx")).sort();
-  const out: IndexEntry[] = [];
-  for (const file of files) {
-    const filePath = join(dir, file);
-    const raw = readFileSync(filePath, "utf8");
-    const { data, body } = parseFrontmatter(raw);
-    const slug = data.slug ?? file.replace(/\.mdx$/, "");
-    const sourceTitle = data.title ?? slug;
-    const permalink = `${permalinkPrefix}/${slug}`;
-    out.push(
-      ...buildMdxChunks({
-        kind,
-        slug,
-        permalink,
-        sourceTitle,
-        description: data.description,
-        tags: data.patterns,
-        body,
+export function caseStudyChunks(): IndexEntry[] {
+  return [...caseStudies]
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .flatMap((study) =>
+      buildArticleChunks({
+        kind: "case-study",
+        slug: study.slug,
+        permalink: study.permalink,
+        sourceTitle: study.title,
+        description: study.description,
+        tags: [...study.patterns],
+        sections: articleSections(study.body),
       }),
     );
-  }
-  return out;
+}
+
+export function essayChunks(): IndexEntry[] {
+  return [...essays]
+    .sort((a, b) => a.slug.localeCompare(b.slug))
+    .flatMap((essay) =>
+      buildArticleChunks({
+        kind: "essay",
+        slug: essay.slug,
+        permalink: essay.permalink,
+        sourceTitle: essay.title,
+        description: essay.description,
+        tags: [...essay.patterns],
+        sections: articleSections(essay.body),
+      }),
+    );
 }

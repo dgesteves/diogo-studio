@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
-import { caseStudies, essays } from "#content";
 import { routes } from "@/config/routes";
 import { getSiteUrl } from "@/config/site";
+import { caseStudies } from "@/lib/content/case-studies";
+import { essays } from "@/lib/content/essays";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl();

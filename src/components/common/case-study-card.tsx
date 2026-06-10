@@ -1,11 +1,9 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import type { caseStudies } from "#content";
 import { PatternBadge } from "@/components/common/pattern-badge";
 import { type PatternId } from "@/content/data/patterns";
-
-type CaseStudy = (typeof caseStudies)[number];
+import type { CaseStudy } from "@/lib/content/case-studies";
 
 export function CaseStudyCard({ study }: { study: CaseStudy }): ReactElement {
   const topMetrics = study.metrics.slice(0, 2);

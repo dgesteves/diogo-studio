@@ -11,7 +11,7 @@ export function StackList({
   tone?: "outline" | "default" | "accent";
 }): ReactElement {
   return (
-    <div className="not-prose flex flex-wrap items-center gap-x-4 gap-y-2" data-mdx-block="stack">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <span className="text-subtle-foreground font-mono text-[10px] font-medium tracking-wider uppercase">
         {label}
       </span>

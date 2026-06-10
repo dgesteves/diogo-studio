@@ -11,8 +11,7 @@ export function Tradeoff({
 }): ReactElement {
   return (
     <aside
-      className="not-prose border-border bg-surface flex flex-col gap-4 rounded-lg border p-5"
-      data-mdx-block="tradeoff"
+      className="border-border bg-surface flex flex-col gap-4 rounded-lg border p-5"
       aria-label={title ?? "Tradeoff"}
     >
       {title ? (

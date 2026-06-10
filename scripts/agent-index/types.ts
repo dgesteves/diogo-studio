@@ -22,17 +22,7 @@ export type AgentIndex = {
   chunks: IndexEntry[];
 };
 
-export type Frontmatter = {
-  title?: string;
-  description?: string;
-  slug?: string;
-  patterns?: string[];
-  company?: string;
-  role?: string;
-  years?: string;
-};
-
 export type RawSection = { heading?: string; anchor?: string; body: string };
 
-export const CHUNKER_VERSION = 1;
+export const CHUNKER_VERSION = 2;
 export const EMBED_DIMENSIONS = 512;

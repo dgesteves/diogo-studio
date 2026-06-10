@@ -1,7 +1,6 @@
 import type { ReactElement, ReactNode } from "react";
+import type { MetricTone } from "@/content/schema/article-blocks";
 import { cn } from "@/lib/utils/cn";
-
-type MetricTone = "default" | "good" | "warn" | "hot" | "accent";
 
 const toneClasses: Record<MetricTone, { ring: string; value: string }> = {
   default: { ring: "border-border", value: "text-foreground" },
@@ -57,10 +56,7 @@ export function MetricTile({
 
 export function MetricGrid({ children }: { children: ReactNode }): ReactElement {
   return (
-    <div
-      className="not-prose mdx-metric-grid grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]"
-      data-mdx-block="metrics"
-    >
+    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[repeat(auto-fit,minmax(220px,1fr))]">
       {children}
     </div>
   );

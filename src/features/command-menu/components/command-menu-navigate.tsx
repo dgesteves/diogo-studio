@@ -6,8 +6,9 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
-import { caseStudies, essays } from "#content";
 import { primaryNav } from "@/config/navigation";
+import { caseStudies } from "@/lib/content/case-studies";
+import { essays } from "@/lib/content/essays";
 import { sortPublished } from "@/lib/content/sort-published";
 
 import { ProfileGroup, ThemeGroup } from "./command-menu-actions";

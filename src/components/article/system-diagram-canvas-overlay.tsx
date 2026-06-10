@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { cn } from "@/lib/utils/cn";
 
 import { NODE_H, NODE_W, nodeTopLeft } from "./system-diagram-geometry";
-import type { SystemDiagramData, SystemNodeKind } from "./system-diagram-types";
+import type { SystemDiagramData, SystemNodeKind } from "@/content/schema/system-diagram";
 
 const kindClass: Record<SystemNodeKind, string> = {
   client: "border-accent/60 text-accent",

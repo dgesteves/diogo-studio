@@ -1,16 +1,11 @@
 "use client";
 
 import { useEffect, useState, type ReactElement } from "react";
-
-export type TocItem = {
-  title: string;
-  url: string;
-  items?: TocItem[];
-};
+import type { TocItem } from "@/content/schema/toc";
 
 type FlatItem = { id: string; title: string; depth: number };
 
-function flatten(items: TocItem[], depth = 0, acc: FlatItem[] = []): FlatItem[] {
+function flatten(items: readonly TocItem[], depth = 0, acc: FlatItem[] = []): FlatItem[] {
   for (const item of items) {
     const id = item.url.startsWith("#") ? item.url.slice(1) : item.url;
     acc.push({ id, title: item.title, depth });
@@ -21,7 +16,7 @@ function flatten(items: TocItem[], depth = 0, acc: FlatItem[] = []): FlatItem[] 
   return acc;
 }
 
-export function TableOfContents({ items }: { items: TocItem[] }): ReactElement | null {
+export function TableOfContents({ items }: { items: readonly TocItem[] }): ReactElement | null {
   const flat = flatten(items);
   const [activeId, setActiveId] = useState<string | null>(flat[0]?.id ?? null);
 
@@ -48,7 +43,7 @@ export function TableOfContents({ items }: { items: TocItem[] }): ReactElement |
   if (flat.length === 0) return null;
 
   return (
-    <nav aria-label="Table of contents" className="mdx-toc flex flex-col gap-3">
+    <nav aria-label="Table of contents" className="flex flex-col gap-3">
       <p className="text-subtle-foreground font-mono text-[10px] font-medium tracking-wider uppercase">
         On this page
       </p>

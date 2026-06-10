@@ -1,14 +1,14 @@
 import type { ComponentProps, ReactElement } from "react";
 import { SystemDiagramFallback } from "./system-diagram-fallback";
 import { SystemDiagramMount } from "./system-diagram-mount";
-import type { SystemDiagramData } from "./system-diagram-types";
+import type { SystemDiagramData } from "@/content/schema/system-diagram";
 
 export type SystemDiagramProps = {
   title: string;
   description?: string;
   data: SystemDiagramData;
   caption?: string;
-} & Pick<ComponentProps<typeof SystemDiagramFallback>, "height">;
+} & Partial<Pick<ComponentProps<typeof SystemDiagramFallback>, "height">>;
 
 export function SystemDiagram({
   title,
@@ -19,9 +19,8 @@ export function SystemDiagram({
 }: SystemDiagramProps): ReactElement {
   return (
     <figure
-      className="not-prose border-border bg-surface mdx-system-diagram flex flex-col gap-2 overflow-hidden rounded-lg border"
+      className="border-border bg-surface flex flex-col gap-2 overflow-hidden rounded-lg border"
       aria-label={title}
-      data-mdx-block="diagram"
     >
       <header className="border-border bg-surface-muted flex items-center justify-between border-b px-4 py-2">
         <div className="flex flex-col gap-0.5">

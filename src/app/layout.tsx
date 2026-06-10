@@ -12,7 +12,7 @@ import { env } from "@/env";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
 import { cn } from "@/lib/utils/cn";
 import "@/styles/globals.css";
-import "@/styles/mdx.css";
+import "@/styles/system-diagram.css";
 
 export { rootMetadata as metadata, rootViewport as viewport } from "@/lib/seo/root-metadata";
 

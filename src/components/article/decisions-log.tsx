@@ -2,11 +2,7 @@ import type { ReactElement, ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 export function DecisionsLog({ children }: { children: ReactNode }): ReactElement {
-  return (
-    <ol className="not-prose mdx-decisions-log flex flex-col gap-4" data-mdx-block="decisions">
-      {children}
-    </ol>
-  );
+  return <ol className="flex flex-col gap-4">{children}</ol>;
 }
 
 export function Decision({

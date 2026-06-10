@@ -2,10 +2,7 @@ import type { ReactElement, ReactNode } from "react";
 
 export function Timeline({ children }: { children: ReactNode }): ReactElement {
   return (
-    <ol
-      className="not-prose mdx-timeline border-border-strong relative flex flex-col gap-6 border-l border-dashed pl-6"
-      data-mdx-block="timeline"
-    >
+    <ol className="border-border-strong relative flex flex-col gap-6 border-l border-dashed pl-6">
       {children}
     </ol>
   );
@@ -40,7 +37,7 @@ export function Phase({
           ) : null}
         </div>
         <h3 className="text-foreground text-base font-medium tracking-tight">{title}</h3>
-        <div className="text-muted-foreground text-sm leading-relaxed [&>p]:my-0">{children}</div>
+        <div className="text-muted-foreground text-sm leading-relaxed">{children}</div>
       </div>
     </li>
   );

@@ -28,10 +28,6 @@
 /.next/
 /out/
 
-# velite — generated content output (committed types live in src; data is built)
-/.velite/
-/public/static/
-
 # production
 /build
 

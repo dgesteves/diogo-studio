@@ -5,7 +5,7 @@ import { dirname, relative } from "node:path";
 import { runCheck } from "./agent-index/check";
 import { embedMissingChunks } from "./agent-index/embed";
 import { INDEX_PATH, ROOT, loadEnvFiles } from "./agent-index/paths";
-import { readMdxCollection } from "./agent-index/sources";
+import { caseStudyChunks, essayChunks } from "./agent-index/sources";
 import { indexById, loadExistingIndex, serialize } from "./agent-index/store";
 import { CHUNKER_VERSION, EMBED_DIMENSIONS } from "./agent-index/types";
 import type { AgentIndex, IndexEntry } from "./agent-index/types";
@@ -22,13 +22,13 @@ const flags = {
 async function main(): Promise<void> {
   loadEnvFiles();
   console.log("[agent:index] gathering source chunks…");
-  const mdxCase = await readMdxCollection("case-studies", "case-study", "/work");
-  const mdxEssay = await readMdxCollection("essays", "essay", "/writing");
+  const caseChunks = caseStudyChunks();
+  const essaySourceChunks = essayChunks();
   const career = buildCareerChunks();
-  const chunks = [...career, ...mdxCase, ...mdxEssay];
+  const chunks = [...career, ...caseChunks, ...essaySourceChunks];
 
   console.log(
-    `[agent:index] ${chunks.length} chunks (career=${career.length}, case=${mdxCase.length}, essay=${mdxEssay.length})`,
+    `[agent:index] ${chunks.length} chunks (career=${career.length}, case=${caseChunks.length}, essay=${essaySourceChunks.length})`,
   );
 
   const existing = loadExistingIndex();

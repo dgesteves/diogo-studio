@@ -1,7 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 
 import { nodeTopLeft } from "./system-diagram-geometry";
-import type { SystemDiagramData, SystemNode } from "./system-diagram-types";
+import type { SystemDiagramData, SystemNode } from "@/content/schema/system-diagram";
 
 export function mapNodes(nodes: readonly SystemNode[]): Node[] {
   return nodes.map((n) => {

@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { project, VIEW_H, VIEW_W } from "./system-diagram-geometry";
 import { FallbackEdge } from "./system-diagram-fallback-edge";
 import { FallbackNode } from "./system-diagram-fallback-node";
-import type { SystemDiagramData } from "./system-diagram-types";
+import type { SystemDiagramData } from "@/content/schema/system-diagram";
 
 export function SystemDiagramFallback({
   title,

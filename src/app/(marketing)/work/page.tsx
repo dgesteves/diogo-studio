@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { caseStudies } from "#content";
 import { routes } from "@/config/routes";
+import { caseStudies } from "@/lib/content/case-studies";
 import { CaseStudyCard } from "@/components/common/case-study-card";
 import { ContentEmptyState } from "@/components/common/content-empty-state";
 import { ContentIndexHeader } from "@/components/common/content-index-header";

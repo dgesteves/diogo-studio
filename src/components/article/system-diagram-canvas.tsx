@@ -6,7 +6,7 @@ import { useReducedMotionPreference } from "@/components/providers/reduced-motio
 
 import { mapEdges, mapNodes } from "./system-diagram-canvas-map";
 import { CanvasNodeOverlay } from "./system-diagram-canvas-overlay";
-import type { SystemDiagramData } from "./system-diagram-types";
+import type { SystemDiagramData } from "@/content/schema/system-diagram";
 import "@xyflow/react/dist/style.css";
 
 export function SystemDiagramCanvas({
@@ -24,11 +24,7 @@ export function SystemDiagramCanvas({
   if (reducedMotion) return null;
 
   return (
-    <div
-      className="mdx-system-diagram-canvas absolute inset-0"
-      role="presentation"
-      aria-label={title}
-    >
+    <div className="system-diagram-canvas absolute inset-0" role="presentation" aria-label={title}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -47,7 +43,7 @@ export function SystemDiagramCanvas({
         defaultViewport={{ x: 0, y: 0, zoom: 1 }}
       >
         <Background variant={BackgroundVariant.Dots} gap={24} size={1} color="var(--border)" />
-        <Controls position="bottom-right" showInteractive={false} className="mdx-flow-controls" />
+        <Controls position="bottom-right" showInteractive={false} />
       </ReactFlow>
       <CanvasNodeOverlay data={data} />
     </div>

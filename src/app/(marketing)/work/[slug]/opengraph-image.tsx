@@ -1,5 +1,5 @@
-import { caseStudies } from "#content";
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgImage } from "@/components/og/og-template";
+import { caseStudies } from "@/lib/content/case-studies";
 
 export const alt = "Case study — Diogo Esteves";
 export const size = OG_SIZE;

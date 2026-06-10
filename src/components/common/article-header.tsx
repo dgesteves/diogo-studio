@@ -11,9 +11,9 @@ export type ArticleHeaderMeta = {
   title: string;
   dek?: string;
   description: string;
-  facts: { label: string; value: string }[];
-  patterns: PatternId[];
-  links?: { label: string; href: string }[];
+  facts: readonly { label: string; value: string }[];
+  patterns: readonly PatternId[];
+  links?: readonly { label: string; href: string }[];
   backHref: string;
   backLabel: string;
 };

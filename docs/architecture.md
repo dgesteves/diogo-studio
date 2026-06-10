@@ -38,7 +38,7 @@ app/  →  features/  →  components/ ─┐
 | Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                |
 | Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)              |
 | UI primitives       | Radix UI, `cmdk`, `vaul`, `sonner`, `lucide-react`                 |
-| Content             | MDX via **Velite** (`#content` → `.velite`)                        |
+| Content             | Typed TS content blocks (`src/content/` → `src/lib/content/`)      |
 | 3D / motion         | `three` + React Three Fiber + drei, `motion`, `lenis`              |
 | Forms / validation  | `react-hook-form` + `zod` (`@hookform/resolvers`)                  |
 | AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)       |
@@ -52,7 +52,6 @@ app/  →  features/  →  components/ ─┐
 ## Path aliases
 
 - `@/*` → `src/*` — always use this; never deep relative imports (`../../../`).
-- `#content` → `.velite` — generated, type-safe content collections.
 
 ## Repository tree
 
@@ -71,7 +70,6 @@ app/  →  features/  →  components/ ─┐
 ├── messages/                   i18n catalogs (en.json, …)                                  [optional]
 ├── instrumentation.ts          server observability register() (Sentry/OTel)              [present]
 ├── instrumentation-client.ts   client error + Web Vitals capture                          [present]
-├── velite.config.ts            content pipeline                                            [present]
 ├── next.config.ts • tsconfig.json • eslint.config.mjs • vitest.config.ts • …              [present]
 └── src/
     ├── app/                    ── ROUTING LAYER ONLY ──────────────────────────────────
@@ -103,7 +101,7 @@ app/  →  features/  →  components/ ─┐
     │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [present]
     │   ├── common/              cross-feature composites (cards, empty/error states)        [present]
     │   ├── r3f/                 shared React Three Fiber infra (perf reporter, ctx guard)  [present]
-    │   ├── mdx/                 MDX component map + content blocks                          [present]
+    │   ├── article/             article block renderer + content components                 [present]
     │   ├── seo/                 json-ld / structured-data UI                               [present]
     │   ├── og/                  Open Graph image templates                                 [present]
     │   └── providers/           app-wide client providers (theme, motion, toaster)         [present]
@@ -135,13 +133,14 @@ app/  →  features/  →  components/ ─┐
     │   └── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
     │                            (SEO defaults derive from site.ts + lib/seo/; no seo.ts)
     │
-    ├── content/                 MDX sources + content data (Velite → #content)             [present]
-    │   ├── case-studies/ • essays/                                                          [present]
-    │   └── data/                PURE data only — patterns taxonomy, career-graph nodes/edges [present]
+    ├── content/                 typed article data + content data (PURE data only)          [present]
+    │   ├── case-studies/ • essays/  article meta + body blocks per article folder            [present]
+    │   ├── schema/              article block + collection types                             [present]
+    │   └── data/                patterns taxonomy, career-graph nodes/edges                  [present]
     │
     ├── hooks/                   GLOBAL shared client hooks (use-media-query, use-mounted)  [optional]
     ├── stores/                  GLOBAL client state (zustand) — app-wide only              [optional]
-    ├── styles/                  globals.css, mdx.css (tokens live in globals.css)           [present]
+    ├── styles/                  globals.css, system-diagram.css (tokens in globals.css)     [present]
     ├── types/                   global/ambient types (*.d.ts, shared domain types)         [present]
     ├── test/                    setup, render utils, mocks, fixtures, msw handlers         [new]
     ├── env.ts                   Zod-validated environment                                  [present]
@@ -170,7 +169,7 @@ Keep each file small (~100 lines, lint-enforced); split aggressively.
 Presentational, reusable, mostly stateless. `ui/` = primitives (no app/domain
 imports); `layout/` = app shell; `common/` = shared composites; `r3f/` = shared
 React Three Fiber infra (perf reporter, WebGL context guard) used by the 3D
-features; `mdx/`, `seo/`, `og/`, `providers/` as named. If a component grows
+features; `article/`, `seo/`, `og/`, `providers/` as named. If a component grows
 domain logic/state, it belongs in a feature, not here.
 
 ### `server/` vs `lib/` — the critical split
@@ -186,11 +185,13 @@ domain logic/state, it belongs in a feature, not here.
 - `config/` — single source of truth for site metadata, navigation, routes
   (`routes.ts`), and brand colors (`brand.ts`). Never hardcode these literals
   elsewhere.
-- `content/` — MDX (via Velite) + **pure** structured data only: the shared
-  `patterns` taxonomy and the career-graph `nodes`/`edges`. Domain logic over
-  that data (projection, `nodeHref`) belongs in the consuming feature's `lib/`,
-  never here — keeping `content/` declarative means it stays trivially
-  reviewable and fully covered by `knip` dead-code analysis.
+- `content/` — **pure** structured data only: typed article inputs (case
+  studies, essays — meta + body blocks per article folder), the block/collection
+  types in `schema/`, the shared `patterns` taxonomy, and the career-graph
+  `nodes`/`edges`. Derivation (permalinks, toc, reading stats) lives in
+  `lib/content/`; domain logic over content data belongs in the consuming
+  feature's `lib/`, never here — keeping `content/` declarative means it stays
+  trivially reviewable and fully covered by `knip` dead-code analysis.
 - `types/` — ambient declarations and shared domain types.
 - `styles/` — global CSS and design tokens (imported by the root layout).
 - `test/` — shared setup, render helpers, mocks/fixtures, MSW handlers.
@@ -237,7 +238,7 @@ route file.
 | Brand colors for canvas/OG/email    | `src/config/brand.ts`                              |
 | Env var                             | `src/env.ts` (validated) — never raw `process.env` |
 | Global hook / store                 | `src/hooks/` • `src/stores/`                       |
-| Long-form content / MDX             | `src/content/`                                     |
+| Long-form article content           | `src/content/{case-studies,essays}/`               |
 | Pure content data / a taxonomy      | `src/content/data/`                                |
 | Domain logic over content data      | the consuming feature's `lib/`                     |
 | Test helper / mock                  | `src/test/`                                        |
@@ -252,7 +253,7 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 - **Imports**: `@/…` alias only. Cross-feature imports go through `index.ts`.
   Avoid wide barrel files inside `components/`/`lib/` (tree-shaking + cycles).
 - **Boundaries**: `"use client"` only on interactive leaves; `import "server-only"`
-  on every server module. Content via `#content` only.
+  on every server module. Article collections via `lib/content/{case-studies,essays}` only.
 - **Files small** (~100 lines, lint-enforced). Split into sub-components/hooks/helpers first.
 - **Tests** colocate with source (`*.test.ts(x)`); E2E in `e2e/`.
 
@@ -293,4 +294,4 @@ These slices shipped as small, independently reviewable PRs, each gated by
 
 Record significant choices in `docs/adr/NNNN-title.md` (context → decision →
 consequences). First candidates: the `features/` slicing model, the `lib/` vs
-`server/` split, and content-as-Velite.
+`server/` split, and content-as-typed-blocks.
