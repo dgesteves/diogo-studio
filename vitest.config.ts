@@ -30,7 +30,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     css: true,
     include: ["src/**/*.{test,spec}.{ts,tsx}", "tests/**/*.{test,spec}.{ts,tsx}"],
-    exclude: ["node_modules", ".next", "out", "build", "coverage"],
+    exclude: ["node_modules", ".next", "out", "build", "coverage", "tests/e2e/**"],
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
