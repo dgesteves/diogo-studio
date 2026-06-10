@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { StatusDot } from "@/components/ui/status-dot";
 import { InspectorTrigger } from "@/features/inspector";
 import { siteConfig } from "@/config/site";
-import { colophonPrinciples, colophonStack } from "@/content/data/colophon";
+import { colophonPrinciples, colophonStack } from "@/features/colophon/data/colophon";
 
 export function Colophon(): ReactElement {
   return (

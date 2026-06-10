@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import type { HeadlineMetric } from "@/content/schema/article";
+import type { HeadlineMetric } from "@/types/article";
 import { MetricGrid, MetricTile } from "./metric-tile";
 
 export function ArticleMetrics({ items }: { items: readonly HeadlineMetric[] }): ReactElement {

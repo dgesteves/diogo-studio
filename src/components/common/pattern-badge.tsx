@@ -1,6 +1,6 @@
 import type { CSSProperties, ReactElement } from "react";
 import { Badge } from "@/components/ui/badge";
-import { patterns as patternMeta, type PatternId } from "@/content/data/patterns";
+import { patterns as patternMeta, type PatternId } from "@/data/patterns";
 
 export function PatternBadge({
   id,

@@ -1,4 +1,4 @@
-import type { PatternId } from "@/content/data/patterns";
+import type { PatternId } from "@/data/patterns";
 
 type PatternedItem = {
   patterns: readonly PatternId[];

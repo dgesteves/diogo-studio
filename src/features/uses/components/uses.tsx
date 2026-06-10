@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { StatusDot } from "@/components/ui/status-dot";
-import { usesGroups } from "@/content/data/uses";
+import { usesGroups } from "@/features/uses/data/uses";
 
 export function Uses(): ReactElement {
   return (

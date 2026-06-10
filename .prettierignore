@@ -11,4 +11,6 @@ playwright-report
 test-results
 CHANGELOG.md
 .velite
-src/content
+src/features/work/content
+src/features/writing/content
+src/data/agent-index.json

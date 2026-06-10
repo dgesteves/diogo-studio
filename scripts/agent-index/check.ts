@@ -11,7 +11,7 @@ type CheckArgs = {
 export function runCheck({ chunks, existing, previous, strict }: CheckArgs): boolean {
   if (!existing) {
     console.error(
-      "[agent:index] --check failed: no existing index. Run `pnpm agent:index` and commit src/content/agent-index.json.",
+      "[agent:index] --check failed: no existing index. Run `pnpm agent:index` and commit src/data/agent-index.json.",
     );
     return false;
   }

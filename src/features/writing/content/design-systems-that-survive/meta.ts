@@ -1,4 +1,4 @@
-import type { EssayMeta } from "@/content/schema/article";
+import type { EssayMeta } from "@/types/article";
 
 export const designSystemsThatSurviveMeta: EssayMeta = {
   title: "Design systems that survive multiple product lines",

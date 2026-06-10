@@ -1,8 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { nodes } from "@/content/data/career-graph-nodes";
-import { PUBLISHED_CASE_STUDY_SLUGS } from "@/features/career-graph";
+import { careerGraphNodes as nodes, PUBLISHED_CASE_STUDY_SLUGS } from "@/features/career-graph";
 import { Home } from "./home";
 
 function renderHome() {

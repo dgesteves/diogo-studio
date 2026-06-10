@@ -1,7 +1,7 @@
-import { caseStudyBodies } from "@/content/case-studies/bodies";
-import { essayBodies } from "@/content/essays/bodies";
-import { caseStudies } from "@/lib/content/case-studies";
-import { essays } from "@/lib/content/essays";
+import { caseStudyBodies } from "@/features/work";
+import { essayBodies } from "@/features/writing";
+import { caseStudies } from "@/features/work";
+import { essays } from "@/features/writing";
 
 import { bodySections } from "./article-walker";
 import { buildArticleChunks } from "./chunker";

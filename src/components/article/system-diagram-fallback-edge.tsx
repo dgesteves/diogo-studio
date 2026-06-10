@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 
 import { edgeAnchor } from "./system-diagram-geometry";
-import type { SystemEdge } from "@/content/schema/system-diagram";
+import type { SystemEdge } from "@/types/system-diagram";
 
 type Point = { cx: number; cy: number };
 

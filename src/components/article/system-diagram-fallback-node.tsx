@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { cn } from "@/lib/utils/cn";
 
 import { NODE_H, NODE_W } from "./system-diagram-geometry";
-import type { SystemNode, SystemNodeKind } from "@/content/schema/system-diagram";
+import type { SystemNode, SystemNodeKind } from "@/types/system-diagram";
 
 const nodeKindStyles: Record<SystemNodeKind, { ring: string; tag: string; tagText: string }> = {
   client: { ring: "stroke-accent", tag: "fill-accent/15", tagText: "fill-accent" },

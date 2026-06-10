@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { operatingAltitudes, type OperatingAltitude } from "@/content/data/operating";
+import { operatingAltitudes, type OperatingAltitude } from "@/features/home/data/operating";
 
 export function OperatingSection(): ReactElement {
   return (

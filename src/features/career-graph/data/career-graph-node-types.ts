@@ -1,4 +1,4 @@
-import type { PatternId } from "./patterns";
+import type { PatternId } from "@/data/patterns";
 
 export type NodeId = "fueled" | "moment" | "eino" | "peacock" | "diligent" | "bmw" | "deloitte";
 

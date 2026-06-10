@@ -1,5 +1,5 @@
 import { OG_CONTENT_TYPE, OG_SIZE, renderOgImage } from "@/components/og/og-template";
-import { essays } from "@/lib/content/essays";
+import { essays } from "@/features/writing";
 
 export const alt = "Essay — Diogo Esteves";
 export const size = OG_SIZE;

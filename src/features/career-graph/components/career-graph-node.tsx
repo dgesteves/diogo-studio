@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 
-import type { CareerNode } from "@/content/data/career-graph-nodes";
+import type { CareerNode } from "@/features/career-graph/data/career-graph-nodes";
 
 import { nodeHref } from "../lib/node-href";
 import { VIEWPORT } from "./career-graph-svg-viewport";

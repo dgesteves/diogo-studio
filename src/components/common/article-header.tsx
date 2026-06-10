@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { StatusDot } from "@/components/ui/status-dot";
-import { type PatternId } from "@/content/data/patterns";
+import { type PatternId } from "@/data/patterns";
 
 import { ArticleHeaderLinks } from "./article-header-links";
 

@@ -4,8 +4,8 @@ import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(HERE, "..", "..");
-export const CONTENT_ROOT = join(ROOT, "src", "content");
-export const INDEX_PATH = join(CONTENT_ROOT, "agent-index.json");
+export const DATA_ROOT = join(ROOT, "src", "data");
+export const INDEX_PATH = join(DATA_ROOT, "agent-index.json");
 
 export function loadEnvFiles(): void {
   for (const name of [".env.local", ".env"]) {

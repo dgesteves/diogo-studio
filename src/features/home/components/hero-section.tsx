@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
-import { patternList } from "@/content/data/patterns";
+import { patternList } from "@/data/patterns";
 import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection(): ReactElement {

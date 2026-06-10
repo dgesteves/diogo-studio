@@ -1,4 +1,4 @@
-import type { CaseStudyMeta } from "@/content/schema/article";
+import type { CaseStudyMeta } from "@/types/article";
 
 export const diligentDesignSystemMeta: CaseStudyMeta = {
   title: "An enterprise design system that survived two frameworks",

@@ -1,4 +1,4 @@
-import type { PatternId } from "@/content/data/patterns";
+import type { PatternId } from "@/data/patterns";
 
 export type ArticleLink = {
   label: string;

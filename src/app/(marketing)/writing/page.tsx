@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/constants/routes";
-import { essays } from "@/lib/content/essays";
+import { essays } from "@/features/writing";
 import { ContentEmptyState } from "@/components/common/content-empty-state";
 import { ContentIndexHeader } from "@/components/common/content-index-header";
-import { EssayCard } from "@/components/common/essay-card";
+import { EssayCard } from "@/features/writing";
 import { PatternFilter } from "@/components/common/pattern-filter";
-import { parsePatternIds } from "@/content/data/patterns";
+import { parsePatternIds } from "@/data/patterns";
 import { collectPatterns, filterByPattern } from "@/lib/content/filter-by-pattern";
 import { sortPublished } from "@/lib/content/sort-published";
 

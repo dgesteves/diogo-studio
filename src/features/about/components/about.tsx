@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { StatusDot } from "@/components/ui/status-dot";
-import { aboutFacts } from "@/content/data/about";
+import { aboutFacts } from "@/features/about/data/about";
 import { siteConfig } from "@/config/site";
 
 import { Prose } from "./about-section";

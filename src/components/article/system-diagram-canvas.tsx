@@ -6,7 +6,7 @@ import { useReducedMotionPreference } from "@/providers/reduced-motion-provider"
 
 import { mapEdges, mapNodes } from "./system-diagram-canvas-map";
 import { CanvasNodeOverlay } from "./system-diagram-canvas-overlay";
-import type { SystemDiagramData } from "@/content/schema/system-diagram";
+import type { SystemDiagramData } from "@/types/system-diagram";
 import "@xyflow/react/dist/style.css";
 
 export function SystemDiagramCanvas({

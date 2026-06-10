@@ -3,7 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactElement } from "react";
 import { PatternBadge } from "@/components/common/pattern-badge";
-import { type PatternId } from "@/content/data/patterns";
+import { type PatternId } from "@/data/patterns";
 import { cn } from "@/lib/utils/cn";
 
 export function PatternFilter({

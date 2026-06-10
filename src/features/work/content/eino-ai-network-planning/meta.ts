@@ -1,4 +1,4 @@
-import type { CaseStudyMeta } from "@/content/schema/article";
+import type { CaseStudyMeta } from "@/types/article";
 
 export const einoAiNetworkPlanningMeta: CaseStudyMeta = {
   title: "Agentic RF network planning at eino.ai",

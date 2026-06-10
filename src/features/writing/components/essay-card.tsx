@@ -2,8 +2,8 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { PatternBadge } from "@/components/common/pattern-badge";
-import type { PatternId } from "@/content/data/patterns";
-import type { Essay } from "@/lib/content/essays";
+import type { PatternId } from "@/data/patterns";
+import type { Essay } from "@/features/writing/lib/essays";
 
 export function EssayCard({ essay }: { essay: Essay }): ReactElement {
   return (

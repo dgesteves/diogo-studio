@@ -1,4 +1,4 @@
-import type { EssayMeta } from "@/content/schema/article";
+import type { EssayMeta } from "@/types/article";
 
 export const agenticUxWithoutTheDemoTaxMeta: EssayMeta = {
   title: "Agentic UX without the demo tax",

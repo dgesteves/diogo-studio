@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactElement } from "react";
 import { SystemDiagramFallback } from "./system-diagram-fallback";
 import { SystemDiagramMount } from "./system-diagram-mount";
-import type { SystemDiagramData } from "@/content/schema/system-diagram";
+import type { SystemDiagramData } from "@/types/system-diagram";
 
 export type SystemDiagramProps = {
   title: string;

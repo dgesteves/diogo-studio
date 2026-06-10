@@ -1,5 +1,5 @@
 import { routes } from "@/constants/routes";
-import type { ArticleMeta, CaseStudyMeta, EssayMeta } from "@/content/schema/article";
+import type { ArticleMeta, CaseStudyMeta, EssayMeta } from "@/types/article";
 
 type ArticleComputed = {
   permalink: string;

@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { aboutCommunity, aboutEducation, aboutPrinciples } from "@/content/data/about";
+import { aboutCommunity, aboutEducation, aboutPrinciples } from "@/features/about/data/about";
 
 import { SectionLabel } from "./about-section";
 

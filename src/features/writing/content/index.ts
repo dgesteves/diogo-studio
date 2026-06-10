@@ -1,4 +1,4 @@
-import type { EssayMeta } from "@/content/schema/article";
+import type { EssayMeta } from "@/types/article";
 import { agenticUxWithoutTheDemoTaxMeta } from "./agentic-ux-without-the-demo-tax/meta";
 import { designSystemsThatSurviveMeta } from "./design-systems-that-survive/meta";
 

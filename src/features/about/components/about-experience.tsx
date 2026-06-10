@@ -3,8 +3,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { routes } from "@/constants/routes";
-import { nodes } from "@/content/data/career-graph-nodes";
-import { patterns } from "@/content/data/patterns";
+import { careerGraphNodes as nodes } from "@/features/career-graph";
+import { patterns } from "@/data/patterns";
 import { nodeHref } from "@/features/career-graph";
 
 import { SectionLabel } from "./about-section";
