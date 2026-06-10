@@ -4,7 +4,7 @@ import type { IndexEntry } from "./types";
 import { nodes as careerNodes } from "../../src/content/data/career-graph-nodes";
 import { patterns as careerPatterns } from "../../src/content/data/patterns";
 import { operatingCompanies } from "../../src/content/data/operating";
-import { caseStudyPath, routes } from "../../src/config/routes";
+import { caseStudyPath, routes } from "../../src/constants/routes";
 import { siteConfig } from "../../src/config/site";
 
 export function buildCareerChunks(): IndexEntry[] {

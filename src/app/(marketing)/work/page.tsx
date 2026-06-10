@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { caseStudies } from "@/lib/content/case-studies";
 import { CaseStudyCard } from "@/components/common/case-study-card";
 import { ContentEmptyState } from "@/components/common/content-empty-state";

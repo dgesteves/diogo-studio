@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { nodes } from "@/content/data/career-graph-nodes";
 import { patterns } from "@/content/data/patterns";
 import { nodeHref } from "@/features/career-graph";

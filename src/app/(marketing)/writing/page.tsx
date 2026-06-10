@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { essays } from "@/lib/content/essays";
 import { ContentEmptyState } from "@/components/common/content-empty-state";
 import { ContentIndexHeader } from "@/components/common/content-index-header";

@@ -1,4 +1,4 @@
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 
 export type NavItem = {
   label: string;

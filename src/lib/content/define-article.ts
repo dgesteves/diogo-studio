@@ -1,4 +1,4 @@
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import type { ArticleMeta, CaseStudyMeta, EssayMeta } from "@/content/schema/article";
 
 type ArticleComputed = {

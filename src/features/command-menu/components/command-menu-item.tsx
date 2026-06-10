@@ -3,7 +3,7 @@
 import { Command } from "cmdk";
 import { ArrowUpRight, Briefcase, FileText, Send, UserRound } from "lucide-react";
 import { type ReactElement, type ReactNode } from "react";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 
 export function iconForPage(href: string): ReactElement {
   if (href.startsWith(routes.work)) return <Briefcase className="size-4" />;

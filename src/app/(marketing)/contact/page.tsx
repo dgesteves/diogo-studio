@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { Contact } from "@/features/contact";
 
 export const metadata: Metadata = {

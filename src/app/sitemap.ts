@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { getSiteUrl } from "@/config/site";
 import { caseStudies } from "@/lib/content/case-studies";
 import { essays } from "@/lib/content/essays";

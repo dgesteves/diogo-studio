@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 
 export function SiteFooter(): ReactElement {

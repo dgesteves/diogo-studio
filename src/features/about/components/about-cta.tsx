@@ -4,7 +4,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 
 export function AboutCta(): ReactElement {

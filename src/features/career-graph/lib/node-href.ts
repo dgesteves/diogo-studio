@@ -1,4 +1,4 @@
-import { caseStudyPath, routes } from "@/config/routes";
+import { caseStudyPath, routes } from "@/constants/routes";
 import type { CareerNode } from "@/content/data/career-graph-nodes";
 
 export const PUBLISHED_CASE_STUDY_SLUGS = new Set<string>([

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { notFound } from "next/navigation";
-import { routes } from "@/config/routes";
+import { routes } from "@/constants/routes";
 import { ArticleMetrics } from "@/components/article/article-metrics";
 import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
