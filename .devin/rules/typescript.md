@@ -21,5 +21,8 @@ globs: **/*.ts, **/*.tsx, **/*.mts, **/*.cts
   (pages, layouts, `route.ts`, metadata image files, config files).
 - Make illegal states unrepresentable: discriminated unions over loose boolean
   flags, `readonly` / `as const` for immutable config, and narrow return types.
+- Use `satisfies` to validate config objects without widening their inferred
+  type. Make `switch` statements over unions **exhaustive** (a `never`-typed
+  default) so adding a variant fails the build until handled.
 - Declare **explicit return types** on exported functions and public APIs. Type
   every component's `Props`; never leave them implicit `any`.

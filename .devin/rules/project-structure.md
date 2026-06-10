@@ -5,9 +5,6 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 # Architecture & project structure
 
-Canonical, repo-specific layout lives in `docs/architecture.md` — consult it for
-folder placement. The principles below are the enforced defaults.
-
 ## `app/` is the routing layer only
 
 - `src/app/` contains **only** route segments and Next.js special files —
@@ -30,36 +27,31 @@ folder placement. The principles below are the enforced defaults.
 - `src/features/<feature>/` — vertical slices: `components/`, `hooks/`,
   `actions/`, `server/`, `schemas/`, `types.ts`, plus a curated `index.ts` that
   is the **only** import surface for the feature.
-- `src/components/` — shared presentational UI: `ui/` (primitives), `layout/`
-  (app shell), `common/` (composites), `r3f/` (shared React Three Fiber infra),
-  `article/` (article building blocks: prose, headings, toc, metric tiles,
-  diagrams), `seo/`, `og/`, `providers/`.
-- `src/server/` — **server-only** core (`import "server-only"`): `ai/`, `email/`,
-  shared `rate-limit.ts`; optional `data/` (DAL), `services/`, `db/`, `auth/`
-  added only when those capabilities land (this is a no-DB content site).
-- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/`,
-  `content/` (content query/transform helpers), `validations/`, `seo/`,
-  `telemetry/`, `hooks/` (isomorphic hooks, distinct from app-wide `src/hooks/`).
-- `src/config/` — site metadata (`site.ts`), navigation (`navigation.ts`), the
-  typed route map (`routes.ts` — the SSOT for every URL), and brand colors for
-  non-CSS contexts like OG/icons/R3F/email (`brand.ts`).
-- `src/content/` — articles and content data. Each article is a folder
-  (`case-studies/<slug>/`, `essays/<slug>/`) with a typed `meta.ts` plus a JSX
-  body composed from `components/article/` building blocks; `index.ts` collects
-  metas, `bodies.ts` maps slug → body component. `schema/` holds article meta
-  types; `data/` holds **pure** structured data (e.g. the `patterns` taxonomy,
-  career-graph `nodes`/`edges`). Domain logic over content data lives in the
-  consuming feature's `lib/`. `src/styles/` — global CSS + tokens.
-  `src/types/` — global types. `src/test/` — test utils/mocks/fixtures.
-- `src/hooks/` • `src/stores/` — global hooks / client state (app-wide only).
+- `src/components/` — shared presentational UI: `ui/` (primitives — button,
+  input, dialog), `layout/` (app shell — header, footer, nav), `common/`
+  (shared composites), `providers/` (client context providers).
+- `src/server/` — **server-only** core (`import "server-only"`): `data/` (DAL —
+  the only place that touches the data source), `services/` (business logic,
+  third-party integrations), `db/` (client/schema/migrations), `auth/`, shared
+  concerns like `rate-limit.ts`. Add subfolders only when the capability lands.
+- `src/lib/` — **isomorphic** utilities (client + server safe): `utils/` (pure
+  helpers), `validations/` (shared Zod schemas), `hooks/` (generic, reusable
+  hooks — distinct from app-wide `src/hooks/`).
+- `src/config/` — site metadata (`site.ts`), navigation (`navigation.ts`), and
+  the typed route map (`routes.ts` — the SSOT for every internal URL). Env is
+  read through one validated module (e.g. `src/env.ts`), never raw
+  `process.env` scattered around.
+- `src/styles/` — global CSS + design tokens. `src/types/` — truly global
+  types. `src/test/` — test utils, mocks, and fixtures.
+- `src/hooks/` • `src/stores/` — app-wide hooks / client state only.
 
 ## Conventions
 
 - **Colocate by feature** outside `app/`; promote to shared only when reused 2+
   times. Resist premature abstraction.
-- **Keep files small** (100 lines max, lint-enforced). When a component, route,
-  or module grows past that, split it into smaller sub-components, hooks, or
-  helper files (see "Single responsibility" below).
+- **Keep files small** (~100 lines). When a component, route, or module grows
+  past that, split it into smaller sub-components, hooks, or helper files (see
+  "Single responsibility" below).
 - **Naming**: `kebab-case` files/dirs, `PascalCase` components, `useX` hooks,
   `is/has/can` booleans. One primary, **named** export per file.
 - A feature's `index.ts` exposes a **small, curated public API** (its only import
@@ -70,9 +62,8 @@ folder placement. The principles below are the enforced defaults.
   `as const` (or a union). Place at the narrowest scope that removes the magic: a
   top-of-file `const` for single-file use → a feature `constants.ts` when shared
   across that feature → `src/config/` for site/config data (names, URLs, routes,
-  nav) → `src/content/` for copy. Promote outward only on reuse; never build a
-  global `constants.ts` dump. Trivial one-off literals (a unique label) may stay
-  inline.
+  nav). Promote outward only on reuse; never build a global `constants.ts` dump.
+  Trivial one-off literals (a unique label) may stay inline.
 - Mark server-only modules with `import "server-only"`; client-only files start
   with `"use client"`. Keep the boundary explicit.
 
@@ -108,7 +99,7 @@ shared location only on 2+ reuse.
   actions, route handlers, external APIs).
 - **Constants / config** — named values, not magic literals. Narrowest scope
   wins: file-local `const` → feature `constants.ts` → `src/config/` for
-  site/nav/routes → `src/content/` for copy. Never a global `constants.ts` dump.
+  site/nav/routes. Never a global `constants.ts` dump.
 - **Utils** (`lib/utils/`) — pure, isomorphic, side-effect-free helpers. One
   cohesive concern per file; no React, no env, no I/O.
 - **Stores** (`src/stores/`) — app-wide client state only. Keep server state in

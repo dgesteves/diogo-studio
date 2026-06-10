@@ -50,12 +50,12 @@ globs: **/*.tsx, **/*.jsx, **/*.css
   shift), and `next/script` (defer/lazy) — never raw `<img>`, font `<link>`s, or
   blocking third-party scripts.
 - Lazy-load heavy/below-the-fold client code with `next/dynamic`. Keep animation,
-  charting, 3D, and rich editors inside client boundaries so the server shell
-  stays lean.
-- **The React Compiler is enabled** (`reactCompiler: true` in `next.config.ts`),
-  so automatic memoization is in effect. **Do not add `useMemo` / `useCallback` /
-  `React.memo`** — rely on the compiler. Reach for manual memoization only to fix
-  a **measured** problem or to preserve a referentially-stable value an external
-  API requires (e.g. a Three.js/R3F uniforms object, a `CanvasTexture`), and say
-  so in a short comment. Protect the LCP element and avoid layout shift (reserve
-  space for media/embeds).
+  charting, 3D, and rich editors inside small client boundaries so the server
+  shell stays lean.
+- **With the React Compiler enabled** (`reactCompiler: true`), automatic
+  memoization is in effect — **do not add `useMemo` / `useCallback` /
+  `React.memo`**. Reach for manual memoization only to fix a **measured**
+  problem or to preserve a referentially-stable value an external API requires,
+  and say so in a short comment. Without the compiler, memoize only proven hot
+  paths — never speculatively. Protect the LCP element and avoid layout shift
+  (reserve space for media/embeds).

@@ -33,7 +33,10 @@ globs: app/**, src/app/**, **/app/**
 - **Keep `app/` to routing only** — route segments + Next.js special files.
   Import UI/logic/data from outside `app/` (`src/features`, `src/components`,
   `src/server`, `src/lib`); keep `page.tsx`/`layout.tsx` as thin composition
-  layers. (See the project-structure rule + `docs/architecture.md`.)
+  layers. (See the project-structure rule.)
+- Keep **middleware** lean and fast: optimistic checks (session cookie
+  presence, redirects, headers) only — no data fetching or heavy work. Real
+  authorization happens in the data layer and inside each action/handler.
 
 ## Data fetching, caching & rendering
 
