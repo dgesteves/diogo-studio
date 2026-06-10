@@ -2,8 +2,10 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 export const env = createEnv({
-  server: {
+  shared: {
     NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  },
+  server: {
     VERCEL: z.string().optional(),
     SENTRY_DSN: z.string().url().optional(),
     SENTRY_AUTH_TOKEN: z.string().optional(),

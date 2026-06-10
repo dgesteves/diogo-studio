@@ -1,7 +1,7 @@
 import { chatRequestSchema } from "@/lib/validations/agent";
 import { retrieve } from "@/server/ai/retrieve";
 import { createRateLimiter } from "@/server/rate-limit";
-import { env } from "@/env";
+import { env } from "@/config/env";
 import type { AgentSourcesPayload } from "@/types/agent";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/server/ai/agent-index";

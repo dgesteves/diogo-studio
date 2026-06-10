@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { EasterEgg } from "@/features/easter-egg";
 import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
-import { env } from "@/env";
+import { env } from "@/config/env";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
 import { cn } from "@/lib/utils/cn";
 import "@/styles/globals.css";

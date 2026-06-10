@@ -6,7 +6,7 @@ import { Resend } from "resend";
 import { ContactNotification } from "@/features/contact/emails/contact-notification";
 import type { ContactInput } from "@/features/contact/schemas/contact";
 import { siteConfig } from "@/config/site";
-import { env } from "@/env";
+import { env } from "@/config/env";
 
 type ContactDeliveryResult = { status: "sent" } | { status: "unconfigured" } | { status: "failed" };
 

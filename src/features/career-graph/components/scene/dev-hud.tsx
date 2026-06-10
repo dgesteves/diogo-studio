@@ -3,9 +3,9 @@
 import { Stats } from "@react-three/drei";
 import type { ReactElement } from "react";
 
-import { env } from "@/env";
+import { env } from "@/config/env";
 
-const isDev = process.env.NODE_ENV !== "production";
+const isDev = env.NODE_ENV !== "production";
 
 const enabled = isDev && env.NEXT_PUBLIC_PERF_HUD === "1";
 
