@@ -1,7 +1,6 @@
-import { contactSchema } from "@/features/contact/schemas/contact";
+import { contactSchema, sendContactNotification } from "@/features/contact";
 import { siteConfig } from "@/config/site";
 import { createRateLimiter } from "@/lib/rate-limit";
-import { sendContactNotification } from "@/lib/email/send-contact-notification";
 
 export const runtime = "nodejs";
 export const maxDuration = 15;

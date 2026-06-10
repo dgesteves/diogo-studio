@@ -3,8 +3,8 @@ import { createElement } from "react";
 import * as Sentry from "@sentry/nextjs";
 import { Resend } from "resend";
 
-import { ContactNotification } from "@/features/contact/emails/contact-notification";
-import type { ContactInput } from "@/features/contact/schemas/contact";
+import { ContactNotification } from "./contact-notification";
+import type { ContactInput } from "../schemas/contact";
 import { siteConfig } from "@/config/site";
 import { env } from "@/config/env";
 
