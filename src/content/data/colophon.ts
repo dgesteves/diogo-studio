@@ -25,8 +25,8 @@ export const colophonStack: readonly StackGroup[] = [
     category: "Content & data",
     items: [
       {
-        name: "Typed content blocks",
-        note: "Case studies and essays authored as TypeScript data, rendered by React components.",
+        name: "TSX articles",
+        note: "Case studies and essays authored as React components with typed metadata.",
       },
       { name: "Zod", note: "Schema validation for forms and API payloads." },
       { name: "Career graph", note: "One hand-tuned dataset drives the hero, /about, and /work." },

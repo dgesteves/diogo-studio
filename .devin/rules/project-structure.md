@@ -32,8 +32,8 @@ folder placement. The principles below are the enforced defaults.
   is the **only** import surface for the feature.
 - `src/components/` — shared presentational UI: `ui/` (primitives), `layout/`
   (app shell), `common/` (composites), `r3f/` (shared React Three Fiber infra),
-  `article/` (article block renderer + content components), `seo/`, `og/`,
-  `providers/`.
+  `article/` (article building blocks: prose, headings, toc, metric tiles,
+  diagrams), `seo/`, `og/`, `providers/`.
 - `src/server/` — **server-only** core (`import "server-only"`): `ai/`, `email/`,
   shared `rate-limit.ts`; optional `data/` (DAL), `services/`, `db/`, `auth/`
   added only when those capabilities land (this is a no-DB content site).
@@ -43,12 +43,13 @@ folder placement. The principles below are the enforced defaults.
 - `src/config/` — site metadata (`site.ts`), navigation (`navigation.ts`), the
   typed route map (`routes.ts` — the SSOT for every URL), and brand colors for
   non-CSS contexts like OG/icons/R3F/email (`brand.ts`).
-- `src/content/` — **pure** structured data only: typed article inputs
-  (`case-studies/`, `essays/` — meta + body blocks per article folder), the
-  block/collection types in `schema/`, and `data/` (e.g. the `patterns`
-  taxonomy, career-graph `nodes`/`edges`). Derivation (permalinks, toc, reading
-  stats) lives in `src/lib/content/`; domain logic over content data lives in
-  the consuming feature's `lib/`. `src/styles/` — global CSS + tokens.
+- `src/content/` — articles and content data. Each article is a folder
+  (`case-studies/<slug>/`, `essays/<slug>/`) with a typed `meta.ts` plus a JSX
+  body composed from `components/article/` building blocks; `index.ts` collects
+  metas, `bodies.ts` maps slug → body component. `schema/` holds article meta
+  types; `data/` holds **pure** structured data (e.g. the `patterns` taxonomy,
+  career-graph `nodes`/`edges`). Domain logic over content data lives in the
+  consuming feature's `lib/`. `src/styles/` — global CSS + tokens.
   `src/types/` — global types. `src/test/` — test utils/mocks/fixtures.
 - `src/hooks/` • `src/stores/` — global hooks / client state (app-wide only).
 

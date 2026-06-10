@@ -1,7 +1,8 @@
 import { CircleAlert, Info, Lightbulb, ShieldAlert } from "lucide-react";
 import type { ReactElement, ReactNode } from "react";
-import type { CalloutTone } from "@/content/schema/article-blocks";
 import { cn } from "@/lib/utils/cn";
+
+type CalloutTone = "info" | "warn" | "danger" | "tip";
 
 const toneConfig: Record<CalloutTone, { Icon: typeof Info; ring: string; text: string }> = {
   info: { Icon: Info, ring: "border-border bg-surface-muted", text: "text-muted-foreground" },

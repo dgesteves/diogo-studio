@@ -1,12 +1,23 @@
 import type { PatternId } from "@/content/data/patterns";
-import type { ArticleBlock, MetricItem } from "./article-blocks";
 
 export type ArticleLink = {
   label: string;
   href: string;
 };
 
-export type ArticleInput = {
+export type HeadlineMetric = {
+  label: string;
+  value: string;
+  unit?: string;
+  hint?: string;
+};
+
+export type ReadingStats = {
+  readingTime: number;
+  wordCount: number;
+};
+
+export type ArticleMeta = {
   title: string;
   description: string;
   slug: string;
@@ -15,18 +26,18 @@ export type ArticleInput = {
   draft?: boolean;
   patterns: readonly PatternId[];
   order: number;
-  body: readonly ArticleBlock[];
+  metadata: ReadingStats;
 };
 
-export type CaseStudyInput = ArticleInput & {
+export type CaseStudyMeta = ArticleMeta & {
   company: string;
   role: string;
   years: string;
-  metrics: readonly MetricItem[];
+  metrics: readonly HeadlineMetric[];
   outcomes: readonly string[];
   links?: readonly ArticleLink[];
 };
 
-export type EssayInput = ArticleInput & {
+export type EssayMeta = ArticleMeta & {
   dek?: string;
 };

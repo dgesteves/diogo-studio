@@ -1,33 +1,25 @@
 import { routes } from "@/config/routes";
-import type { ArticleInput, CaseStudyInput, EssayInput } from "@/content/schema/article";
-import type { TocItem } from "@/content/schema/toc";
-import { articleText } from "./article-text";
-import { deriveToc } from "./derive-toc";
-import { deriveReadingStats, type ReadingStats } from "./reading-stats";
+import type { ArticleMeta, CaseStudyMeta, EssayMeta } from "@/content/schema/article";
 
 type ArticleComputed = {
   permalink: string;
   draft: boolean;
-  toc: TocItem[];
-  metadata: ReadingStats;
 };
 
-export type CaseStudy = CaseStudyInput & ArticleComputed;
-export type Essay = EssayInput & ArticleComputed;
+export type CaseStudy = CaseStudyMeta & ArticleComputed;
+export type Essay = EssayMeta & ArticleComputed;
 
-function compute(input: ArticleInput, basePath: string): ArticleComputed {
+function compute(meta: ArticleMeta, basePath: string): ArticleComputed {
   return {
-    permalink: `${basePath}/${input.slug}`,
-    draft: input.draft ?? false,
-    toc: deriveToc(input.body),
-    metadata: deriveReadingStats(articleText(input.body)),
+    permalink: `${basePath}/${meta.slug}`,
+    draft: meta.draft ?? false,
   };
 }
 
-export function defineCaseStudy(input: CaseStudyInput): CaseStudy {
-  return { ...input, ...compute(input, routes.work) };
+export function defineCaseStudy(meta: CaseStudyMeta): CaseStudy {
+  return { ...meta, ...compute(meta, routes.work) };
 }
 
-export function defineEssay(input: EssayInput): Essay {
-  return { ...input, ...compute(input, routes.writing) };
+export function defineEssay(meta: EssayMeta): Essay {
+  return { ...meta, ...compute(meta, routes.writing) };
 }

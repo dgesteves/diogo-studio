@@ -38,7 +38,7 @@ app/  →  features/  →  components/ ─┐
 | Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                |
 | Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)              |
 | UI primitives       | Radix UI, `cmdk`, `vaul`, `sonner`, `lucide-react`                 |
-| Content             | Typed TS content blocks (`src/content/` → `src/lib/content/`)      |
+| Content             | TSX articles (typed meta + JSX bodies in `src/content/`)           |
 | 3D / motion         | `three` + React Three Fiber + drei, `motion`, `lenis`              |
 | Forms / validation  | `react-hook-form` + `zod` (`@hookform/resolvers`)                  |
 | AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)       |
@@ -101,7 +101,7 @@ app/  →  features/  →  components/ ─┐
     │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [present]
     │   ├── common/              cross-feature composites (cards, empty/error states)        [present]
     │   ├── r3f/                 shared React Three Fiber infra (perf reporter, ctx guard)  [present]
-    │   ├── article/             article block renderer + content components                 [present]
+    │   ├── article/             article building blocks (prose, headings, toc, diagrams…)   [present]
     │   ├── seo/                 json-ld / structured-data UI                               [present]
     │   ├── og/                  Open Graph image templates                                 [present]
     │   └── providers/           app-wide client providers (theme, motion, toaster)         [present]
@@ -133,10 +133,10 @@ app/  →  features/  →  components/ ─┐
     │   └── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
     │                            (SEO defaults derive from site.ts + lib/seo/; no seo.ts)
     │
-    ├── content/                 typed article data + content data (PURE data only)          [present]
-    │   ├── case-studies/ • essays/  article meta + body blocks per article folder            [present]
-    │   ├── schema/              article block + collection types                             [present]
-    │   └── data/                patterns taxonomy, career-graph nodes/edges                  [present]
+    ├── content/                 articles + content data                                      [present]
+    │   ├── case-studies/ • essays/  per-article folder: meta.ts + JSX body sections          [present]
+    │   ├── schema/              article meta + system-diagram types                          [present]
+    │   └── data/                PURE data — patterns taxonomy, career-graph nodes/edges      [present]
     │
     ├── hooks/                   GLOBAL shared client hooks (use-media-query, use-mounted)  [optional]
     ├── stores/                  GLOBAL client state (zustand) — app-wide only              [optional]
@@ -185,13 +185,13 @@ domain logic/state, it belongs in a feature, not here.
 - `config/` — single source of truth for site metadata, navigation, routes
   (`routes.ts`), and brand colors (`brand.ts`). Never hardcode these literals
   elsewhere.
-- `content/` — **pure** structured data only: typed article inputs (case
-  studies, essays — meta + body blocks per article folder), the block/collection
-  types in `schema/`, the shared `patterns` taxonomy, and the career-graph
-  `nodes`/`edges`. Derivation (permalinks, toc, reading stats) lives in
-  `lib/content/`; domain logic over content data belongs in the consuming
-  feature's `lib/`, never here — keeping `content/` declarative means it stays
-  trivially reviewable and fully covered by `knip` dead-code analysis.
+- `content/` — the site's articles and content data. Each article is a folder
+  (`case-studies/<slug>/`, `essays/<slug>/`) with a typed `meta.ts` and a JSX
+  body composed from `components/article/` building blocks; `index.ts` collects
+  metas and `bodies.ts` maps slug → body component. `schema/` holds the meta
+  types; `data/` holds **pure** structured data (the `patterns` taxonomy,
+  career-graph `nodes`/`edges`). Domain logic over content data belongs in the
+  consuming feature's `lib/`, never here.
 - `types/` — ambient declarations and shared domain types.
 - `styles/` — global CSS and design tokens (imported by the root layout).
 - `test/` — shared setup, render helpers, mocks/fixtures, MSW handlers.
@@ -238,7 +238,7 @@ route file.
 | Brand colors for canvas/OG/email    | `src/config/brand.ts`                              |
 | Env var                             | `src/env.ts` (validated) — never raw `process.env` |
 | Global hook / store                 | `src/hooks/` • `src/stores/`                       |
-| Long-form article content           | `src/content/{case-studies,essays}/`               |
+| An article (meta + JSX body)        | `src/content/{case-studies,essays}/<slug>/`        |
 | Pure content data / a taxonomy      | `src/content/data/`                                |
 | Domain logic over content data      | the consuming feature's `lib/`                     |
 | Test helper / mock                  | `src/test/`                                        |

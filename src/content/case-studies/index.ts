@@ -1,10 +1,10 @@
-import type { CaseStudyInput } from "@/content/schema/article";
-import { diligentDesignSystem } from "./diligent-design-system";
-import { einoAiNetworkPlanning } from "./eino-ai-network-planning";
-import { peacockStreaming } from "./peacock-streaming";
+import type { CaseStudyMeta } from "@/content/schema/article";
+import { diligentDesignSystemMeta } from "./diligent-design-system/meta";
+import { einoAiNetworkPlanningMeta } from "./eino-ai-network-planning/meta";
+import { peacockStreamingMeta } from "./peacock-streaming/meta";
 
-export const caseStudyInputs: readonly CaseStudyInput[] = [
-  einoAiNetworkPlanning,
-  peacockStreaming,
-  diligentDesignSystem,
+export const caseStudyMetas: readonly CaseStudyMeta[] = [
+  einoAiNetworkPlanningMeta,
+  peacockStreamingMeta,
+  diligentDesignSystemMeta,
 ];

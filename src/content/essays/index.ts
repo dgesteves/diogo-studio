@@ -1,8 +1,8 @@
-import type { EssayInput } from "@/content/schema/article";
-import { agenticUxWithoutTheDemoTax } from "./agentic-ux-without-the-demo-tax";
-import { designSystemsThatSurvive } from "./design-systems-that-survive";
+import type { EssayMeta } from "@/content/schema/article";
+import { agenticUxWithoutTheDemoTaxMeta } from "./agentic-ux-without-the-demo-tax/meta";
+import { designSystemsThatSurviveMeta } from "./design-systems-that-survive/meta";
 
-export const essayInputs: readonly EssayInput[] = [
-  designSystemsThatSurvive,
-  agenticUxWithoutTheDemoTax,
+export const essayMetas: readonly EssayMeta[] = [
+  designSystemsThatSurviveMeta,
+  agenticUxWithoutTheDemoTaxMeta,
 ];

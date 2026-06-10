@@ -1,35 +1,21 @@
 "use client";
 
 import { useEffect, useState, type ReactElement } from "react";
-import type { TocItem } from "@/content/schema/toc";
+import type { TocEntry } from "./extract-toc";
 
-type FlatItem = { id: string; title: string; depth: number };
-
-function flatten(items: readonly TocItem[], depth = 0, acc: FlatItem[] = []): FlatItem[] {
-  for (const item of items) {
-    const id = item.url.startsWith("#") ? item.url.slice(1) : item.url;
-    acc.push({ id, title: item.title, depth });
-    if (item.items?.length) {
-      flatten(item.items, depth + 1, acc);
-    }
-  }
-  return acc;
-}
-
-export function TableOfContents({ items }: { items: readonly TocItem[] }): ReactElement | null {
-  const flat = flatten(items);
-  const [activeId, setActiveId] = useState<string | null>(flat[0]?.id ?? null);
+export function ArticleToc({ entries }: { entries: readonly TocEntry[] }): ReactElement | null {
+  const [activeId, setActiveId] = useState<string | null>(entries[0]?.id ?? null);
 
   useEffect(() => {
-    if (flat.length === 0 || typeof IntersectionObserver === "undefined") return;
-    const elements = flat
-      .map((i) => document.getElementById(i.id))
+    if (entries.length === 0 || typeof IntersectionObserver === "undefined") return;
+    const elements = entries
+      .map((entry) => document.getElementById(entry.id))
       .filter((el): el is HTMLElement => el !== null);
     if (elements.length === 0) return;
 
     const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
+      (observed) => {
+        const visible = observed
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
         if (visible[0]) setActiveId(visible[0].target.id);
@@ -38,9 +24,9 @@ export function TableOfContents({ items }: { items: readonly TocItem[] }): React
     );
     for (const el of elements) observer.observe(el);
     return () => observer.disconnect();
-  }, [flat]);
+  }, [entries]);
 
-  if (flat.length === 0) return null;
+  if (entries.length === 0) return null;
 
   return (
     <nav aria-label="Table of contents" className="flex flex-col gap-3">
@@ -48,12 +34,12 @@ export function TableOfContents({ items }: { items: readonly TocItem[] }): React
         On this page
       </p>
       <ol className="flex flex-col gap-1.5">
-        {flat.map((item) => {
-          const isActive = item.id === activeId;
+        {entries.map((entry) => {
+          const isActive = entry.id === activeId;
           return (
             <li
-              key={item.id}
-              style={{ paddingLeft: `${item.depth * 0.75}rem` }}
+              key={entry.id}
+              style={{ paddingLeft: `${entry.depth * 0.75}rem` }}
               className="flex items-center gap-2"
             >
               <span
@@ -65,7 +51,7 @@ export function TableOfContents({ items }: { items: readonly TocItem[] }): React
                 }
               />
               <a
-                href={`#${item.id}`}
+                href={`#${entry.id}`}
                 aria-current={isActive ? "true" : undefined}
                 className={
                   isActive
@@ -73,7 +59,7 @@ export function TableOfContents({ items }: { items: readonly TocItem[] }): React
                     : "text-muted-foreground hover:text-foreground text-xs leading-tight transition-colors"
                 }
               >
-                {item.title}
+                {entry.title}
               </a>
             </li>
           );

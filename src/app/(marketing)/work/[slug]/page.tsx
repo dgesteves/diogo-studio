@@ -8,6 +8,7 @@ import { ArticleBody } from "@/components/common/article-body";
 import { ArticleOutcomes } from "@/components/common/article-outcomes";
 import { NextArticleLink } from "@/components/common/next-article-link";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { caseStudyBodies } from "@/content/case-studies/bodies";
 import { caseStudies } from "@/lib/content/case-studies";
 import { nextPublished } from "@/lib/content/next-published";
 import { sortPublished } from "@/lib/content/sort-published";
@@ -39,7 +40,8 @@ export default async function CaseStudyPage({
 }): Promise<ReactElement> {
   const { slug } = await params;
   const study = caseStudies.find((s) => s.slug === slug);
-  if (!study || study.draft) notFound();
+  const Body = caseStudyBodies[slug];
+  if (!study || study.draft || !Body) notFound();
 
   const next = nextPublished(sortPublished(caseStudies), study.slug);
 
@@ -81,7 +83,9 @@ export default async function CaseStudyPage({
         <ArticleMetrics items={study.metrics} />
       </section>
 
-      <ArticleBody blocks={study.body} toc={study.toc} />
+      <ArticleBody>
+        <Body />
+      </ArticleBody>
 
       <ArticleOutcomes outcomes={study.outcomes} />
 

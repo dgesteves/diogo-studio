@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
-import type { SparklineTone } from "@/content/schema/article-blocks";
 import { cn } from "@/lib/utils/cn";
+
+type SparklineTone = "accent" | "good" | "warn" | "hot" | "muted";
 
 const toneClasses: Record<SparklineTone, string> = {
   accent: "text-accent",

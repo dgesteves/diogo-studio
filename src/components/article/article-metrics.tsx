@@ -1,9 +1,8 @@
 import type { ReactElement } from "react";
-import type { MetricItem } from "@/content/schema/article-blocks";
+import type { HeadlineMetric } from "@/content/schema/article";
 import { MetricGrid, MetricTile } from "./metric-tile";
-import { Sparkline } from "./sparkline";
 
-export function ArticleMetrics({ items }: { items: readonly MetricItem[] }): ReactElement {
+export function ArticleMetrics({ items }: { items: readonly HeadlineMetric[] }): ReactElement {
   return (
     <MetricGrid>
       {items.map((item) => (
@@ -13,16 +12,7 @@ export function ArticleMetrics({ items }: { items: readonly MetricItem[] }): Rea
           value={item.value}
           unit={item.unit}
           hint={item.hint}
-          tone={item.tone}
-        >
-          {item.sparkline ? (
-            <Sparkline
-              values={item.sparkline.values}
-              tone={item.sparkline.tone}
-              ariaLabel={item.sparkline.ariaLabel}
-            />
-          ) : null}
-        </MetricTile>
+        />
       ))}
     </MetricGrid>
   );

@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
-import type { MetricTone } from "@/content/schema/article-blocks";
 import { cn } from "@/lib/utils/cn";
+
+type MetricTone = "default" | "good" | "warn" | "hot" | "accent";
 
 const toneClasses: Record<MetricTone, { ring: string; value: string }> = {
   default: { ring: "border-border", value: "text-foreground" },

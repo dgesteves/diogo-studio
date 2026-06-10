@@ -25,7 +25,7 @@ providers, and a11y/perf contracts.
 | ------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
 | **1 — Foundation**        | ✅ Shipped | Tokens, providers, app shell, ⌘K skeleton, mobile drawer, typography hero. Full a11y + perf gates.     |
 | **2 — Signature hero**    | ⏭ Next    | 3D Career Graph (Three + R3F + drei + postprocessing), heatmap shader, SVG fallback.                   |
-| **3 — Content layer**     | ⏳         | Typed TS content blocks, telemetry-dashboard case studies, system diagrams via `@xyflow/react`.        |
+| **3 — Content layer**     | ⏳         | TSX articles, telemetry-dashboard case studies, system diagrams via `@xyflow/react`.                   |
 | **4 — Agentic ⌘K**        | ⏳         | Vercel AI SDK, build-time embedding pipeline, cited streaming answers.                                 |
 | **5 — Polish & receipts** | ⏳         | Inspector overlay (web-vitals + r3f-perf), contact form (Resend + react-email), JSON-LD, per-route OG. |
 

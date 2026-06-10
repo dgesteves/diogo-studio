@@ -6,6 +6,7 @@ import { ArticleHeader } from "@/components/common/article-header";
 import { ArticleBody } from "@/components/common/article-body";
 import { NextArticleLink } from "@/components/common/next-article-link";
 import { ArticleJsonLd } from "@/components/seo/article-json-ld";
+import { essayBodies } from "@/content/essays/bodies";
 import { essays } from "@/lib/content/essays";
 import { nextPublished } from "@/lib/content/next-published";
 import { sortPublished } from "@/lib/content/sort-published";
@@ -37,7 +38,8 @@ export default async function EssayPage({
 }): Promise<ReactElement> {
   const { slug } = await params;
   const essay = essays.find((e) => e.slug === slug);
-  if (!essay || essay.draft) notFound();
+  const Body = essayBodies[slug];
+  if (!essay || essay.draft || !Body) notFound();
 
   const next = nextPublished(sortPublished(essays), essay.slug);
 
@@ -74,7 +76,9 @@ export default async function EssayPage({
         backLabel="All essays"
       />
 
-      <ArticleBody blocks={essay.body} toc={essay.toc} />
+      <ArticleBody>
+        <Body />
+      </ArticleBody>
 
       {next ? (
         <NextArticleLink
