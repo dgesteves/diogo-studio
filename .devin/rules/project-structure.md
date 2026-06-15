@@ -7,7 +7,7 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 Feature-first vertical slices with one dependency direction:
 `app/` → `features/` → `components/` / `hooks/` / `providers/` / `stores/` →
-`lib/` → `config/` / `constants/` / `data/` / `types/`. Never import upward.
+`lib/` → `config/` / `constants/` / `types/`. Never import upward.
 
 ## `app/` is the routing layer only
 
@@ -30,10 +30,11 @@ Feature-first vertical slices with one dependency direction:
 
 - `src/features/<feature>/` — vertical slices: `components/`, `actions/`
   (Server Actions), `queries/` (server-side reads), `hooks/`, `schemas/`,
-  `stores/`, `emails/`, `data/` (feature-owned static data), `content/`
-  (authored articles — work owns case studies, writing owns essays), `utils/`
-  or `lib/`, `types.ts`, `constants.ts`, plus a curated `index.ts` that is the
-  **only** import surface for the feature.
+  `stores/`, `emails/`, `content/` (authored articles — work owns case
+  studies, writing owns essays), `utils/` or `lib/`, `types.ts`,
+  `constants/` or `constants.ts` (feature-owned constants **and** static
+  data), plus a curated `index.ts` that is the **only** import surface for
+  the feature.
 - `src/components/` — shared presentational UI used by 2+ features: `ui/`
   (design-system primitives), `layout/` (app shell — nav, footer), `common/`
   (shared composites), plus domain-neutral groups promoted on reuse
@@ -46,14 +47,15 @@ Feature-first vertical slices with one dependency direction:
 - `src/hooks/` — shared client hooks. `src/providers/` — client context
   providers composed into one `<Providers>` (`providers/index.tsx`).
   `src/stores/` — global client state (Zustand).
-- `src/constants/` — global constants & enums; `routes.ts` is the typed SSOT
-  for every internal URL and path builder.
+- `src/constants/` — global constants, enums **and** static data shared by 2+
+  features (taxonomies, generated indexes like `agent-index.json`); `routes.ts`
+  is the typed SSOT for every internal URL and path builder. There is no
+  separate `src/data/` — constants and static data live together here.
+  Single-feature static data lives in that feature's `constants/`; authored
+  articles in the owning feature's `content/` (no top-level `content/`
+  directory).
 - `src/config/` — static configuration: `site.ts`, `navigation.ts`, `brand.ts`,
   and `env.ts` (Zod-validated env — never raw `process.env` elsewhere).
-- `src/data/` — global static data consumed by 2+ features (taxonomies,
-  generated indexes). Single-feature data lives in that feature's `data/`;
-  authored articles in the owning feature's `content/`. No top-level
-  `content/` directory.
 - `src/styles/` — global CSS + design tokens. `src/types/` — truly global
   types.
 - `tests/` — `e2e/` (Playwright), `mocks/`, shared setup; unit tests colocate
@@ -113,10 +115,11 @@ shared location only on 2+ reuse.
 - **Schemas** (`schemas/`, `src/lib/validations/`) — Zod schemas as the single
   source of truth for shape + runtime validation at every boundary (forms,
   actions, route handlers, external APIs).
-- **Constants / config** — named values, not magic literals. Narrowest scope
-  wins: file-local `const` → feature `constants.ts` → `src/constants/`
-  (`routes.ts` is the typed SSOT for URLs). Site/nav/brand/env config lives in
-  `src/config/`.
+- **Constants & static data / config** — named values and static data, not
+  magic literals. Narrowest scope wins: file-local `const` → feature
+  `constants/` → `src/constants/` (`routes.ts` is the typed SSOT for URLs;
+  shared taxonomies and generated indexes live here too). Site/nav/brand/env
+  config lives in `src/config/`.
 - **Utils** (`lib/utils/`) — pure, isomorphic, side-effect-free helpers. One
   cohesive concern per file; no React, no env, no I/O.
 - **Providers** (`src/providers/`, `*-provider.tsx`) — client context

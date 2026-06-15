@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { edges } from "./career-graph-edges";
 import { nodes, type NodeId } from "./career-graph-nodes";
-import { patternList, patterns } from "@/data/patterns";
+import { patternList, patterns } from "@/constants/patterns";
 
 describe("career-graph data integrity", () => {
   it("declares at least the 5 flagship engagements + a coherent count", () => {
