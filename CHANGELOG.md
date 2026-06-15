@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.4.5](https://github.com/dgesteves/diogo-studio/compare/v1.4.4...v1.4.5) (2026-06-15)
+
+
+### Code Refactoring
+
+* consolidate static data into constants directories ([b7e7de5](https://github.com/dgesteves/diogo-studio/commit/b7e7de5d72f5340592bc48e14976581b97e6d461))
+
+
+### Documentation
+
+* update architecture to consolidate static data into constants directories ([f3c44f1](https://github.com/dgesteves/diogo-studio/commit/f3c44f12909386e6a9f566b7272ec42a7dd9fe0a))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @types/node in the types group across 1 directory ([#75](https://github.com/dgesteves/diogo-studio/issues/75)) ([6cce369](https://github.com/dgesteves/diogo-studio/commit/6cce3692fbfbef71833a87cb6145359fedfbfe14))
+* **deps-dev:** bump @types/three in the types group ([#66](https://github.com/dgesteves/diogo-studio/issues/66)) ([0ed1d0a](https://github.com/dgesteves/diogo-studio/commit/0ed1d0ab7826c09058b08335a52148fcb48cf114))
+* **deps-dev:** bump prettier from 3.8.3 to 3.8.4 in the linting group ([#65](https://github.com/dgesteves/diogo-studio/issues/65)) ([1fa504e](https://github.com/dgesteves/diogo-studio/commit/1fa504ecb792fe98d4f63922fec328ae32021ba5))
+* **deps-dev:** bump tsx from 4.22.3 to 4.22.4 ([#70](https://github.com/dgesteves/diogo-studio/issues/70)) ([292bd90](https://github.com/dgesteves/diogo-studio/commit/292bd90ffdcbd00acedc0c4059a2fb9bbf4ec659))
+* **deps:** bump @ai-sdk/openai from 3.0.68 to 3.0.69 ([#69](https://github.com/dgesteves/diogo-studio/issues/69)) ([4396ed6](https://github.com/dgesteves/diogo-studio/commit/4396ed6b00ac563d3c4fc77dfd49c8e8e54516c7))
+* **deps:** bump @radix-ui/react-tooltip from 1.2.8 to 1.2.9 ([#71](https://github.com/dgesteves/diogo-studio/issues/71)) ([67cf616](https://github.com/dgesteves/diogo-studio/commit/67cf61685a7602747457e4b265542272086446b0))
+* **deps:** bump @sentry/nextjs from 10.56.0 to 10.57.0 ([#67](https://github.com/dgesteves/diogo-studio/issues/67)) ([926ccb6](https://github.com/dgesteves/diogo-studio/commit/926ccb641c1f69a56e75c6d133b352c48092b6fc))
+* **deps:** bump ai from 6.0.197 to 6.0.199 ([#72](https://github.com/dgesteves/diogo-studio/issues/72)) ([4f8971e](https://github.com/dgesteves/diogo-studio/commit/4f8971e47954e8a096f0905be96f5308216c4dcb))
+* **deps:** bump ai from 6.0.199 to 6.0.205 ([#76](https://github.com/dgesteves/diogo-studio/issues/76)) ([ba3dfba](https://github.com/dgesteves/diogo-studio/commit/ba3dfbac792c7abb9d9c6feed4895f847228424a))
+* **deps:** bump lucide-react from 1.17.0 to 1.18.0 ([#80](https://github.com/dgesteves/diogo-studio/issues/80)) ([4bfe581](https://github.com/dgesteves/diogo-studio/commit/4bfe58182a2014bad03548a148caa935124d6047))
+* **deps:** bump react-hook-form from 7.77.0 to 7.78.0 ([#68](https://github.com/dgesteves/diogo-studio/issues/68)) ([75219dc](https://github.com/dgesteves/diogo-studio/commit/75219dce006987a5844948289816694787d30a7a))
+* **deps:** bump sharp from 0.34.5 to 0.35.1 ([#79](https://github.com/dgesteves/diogo-studio/issues/79)) ([d63a118](https://github.com/dgesteves/diogo-studio/commit/d63a118aed4807190c58a7e4573893e2f9c92951))
+* **deps:** bump the next group with 3 updates ([#73](https://github.com/dgesteves/diogo-studio/issues/73)) ([1b05adf](https://github.com/dgesteves/diogo-studio/commit/1b05adfe3cf293b3ad9f2907411d36e106bc1be4))
+* remove unused dependencies and simplify README ([a3e6443](https://github.com/dgesteves/diogo-studio/commit/a3e6443e87cde50693648a19d6fc3384041d4287))
+
 ## [1.4.4](https://github.com/dgesteves/diogo-studio/compare/v1.4.3...v1.4.4) (2026-06-10)
 
 
