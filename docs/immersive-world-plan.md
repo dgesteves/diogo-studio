@@ -13,6 +13,49 @@ lands. `[x]` done · `[~]` in progress · `[ ]` not started.
 > seconds — and can still use it perfectly on a phone, with a keyboard, or with
 > a screen reader, and it ranks on Google.
 
+## Locked decisions
+
+- **Landing = full world takeover.** `/` is the world itself — no classic
+  scrolling home sections. Cinematic fly-in, minimal neon title, "Explore the
+  studio" affordance. Existing hero/operating/trust content is re-homed onto
+  destination pages so nothing is orphaned.
+- **No MDX / no markdown content.** All site content is authored as **typed
+  TypeScript data modules** (the `ContentBlock` system in feature `content/`
+  dirs). Extend the block union for new needs — never introduce MDX.
+- **3D is enhancement, never the only path.** Full reduced-motion / no-WebGL
+  parity via real DOM panels + dock + command menu (guardrails below).
+- **Spatial model = hub + themed alcoves, built room-first.** A central hub with
+  neon signage; cinematic doorway transitions into per-theme alcoves (each with
+  its own neon color identity + hero object). We ship the current single room at
+  cinematic quality first, then carve alcoves incrementally. Architected so it
+  can grow toward fully separate sub-rooms later without a rewrite.
+- **Quality bar = "most awesome."** Crazy-good-looking, fully immersive, fully
+  interactive — held to the **Experience pillars** below. Smoothness (60fps on a
+  mid-range phone) is treated as part of the wow, not optional.
+- **Defaults locked:** career-graph hero re-homed to `/timeline`; baseline 3D is
+  stylized primitives + emissive/neon materials (selective high-detail only for
+  hero objects, lazy-loaded); ambient sound deferred to M10 (off by default,
+  toggle, reduced-motion aware); cinematic intro plays once per session, quick
+  settle on repeat, skipped under reduced-motion.
+
+## Experience pillars (the "WOW" bar)
+
+Every milestone is measured against these. If a change doesn't move at least one
+forward (or protect them), reconsider it.
+
+- **Cinematic first frame** — atmospheric lighting, depth, bloom/vignette/color
+  grade; looks like a render, not a demo.
+- **Travel is the magic** — eased, curved doorway transitions between hub and
+  alcoves; the mood/color shifts as you move.
+- **Everything reacts** — hover/focus glow, parallax, object micro-animations,
+  live screens; the world feels alive and responsive to the cursor.
+- **Distinct, memorable zones** — each theme has its own color, light, and hero
+  object worth screenshotting.
+- **Buttery + instant** — 60fps target on mid-range mobile; fast LCP; no jank,
+  no layout shift.
+- **Perfect parity** — keyboard, screen reader, reduced-motion, and no-WebGL
+  users get an equally polished (non-3D) experience.
+
 ## Non-negotiable guardrails (apply to every milestone)
 
 - **Accessibility (WCAG 2.2 AA)** — every destination reachable + readable
@@ -42,44 +85,84 @@ lands. `[x]` done · `[~]` in progress · `[ ]` not started.
 
 ---
 
-## Milestone 1 — Immersive landing `/`
+## Milestone 1 — Immersive landing `/` (full takeover) _(shipped)_
 
-Make the first impression the world itself, not the classic scrolling home.
+The first impression is the world itself — no classic scrolling home.
 
-- [ ] Replace classic home composition with a world-first intro overlay
-      (minimal title + tagline + "Explore the studio" affordance)
-- [ ] Cinematic intro fly-in on first load (orbit → settle on overview station)
-- [ ] Re-home the existing hero/career-graph/operating/trust content onto the
-      right destination pages (so nothing is orphaned)
-- [ ] "Enter" interaction hint + ambient idle motion
-- [ ] First-visit-only intro (respect reduced-motion: skip straight to overview)
+- [x] Remove classic home composition; `/` opens directly into the world
+      (`Home` is now a full-height, pointer-events-through landing over the world)
+- [x] World-first intro overlay (minimal neon title + tagline + "Explore the
+      studio" affordance) — `HeroSection` repurposed; title/summary read from the
+      `home` destination data (SSOT)
+- [x] Cinematic intro fly-in on first load (elevated start → eased settle on the
+      overview station) — `world/lib/intro.ts` + `WorldCamera`
+- [x] Re-home the existing content (so nothing is orphaned): career-graph →
+      `/timeline` (`CareerGraphShowcase`); operating altitudes + selected
+      engagements → `/work` (reused `OperatingSection`/`TrustSection`)
+- [x] "Enter" interaction hint (`world-hint-pulse`) + ambient idle motion (camera
+      orbit)
+- [x] First-visit-only intro; quick settle on repeat (sessionStorage
+      `world-intro-played`, consumed in `WorldCamera`)
+- [x] Reduced-motion / no-WebGL landing: static backdrop (`WorldFallback`) + real
+      DOM intro panel + dock (full content + navigation parity)
+- [x] Verified: lint, typecheck, format, 41 unit tests, knip; `/`, `/work`,
+      `/timeline` serve 200
 
-## Milestone 2 — Bespoke 3D objects per topic
+## Milestone 2 — Bespoke 3D objects per topic _(in progress)_
 
 Replace generic portal markers with real props you click to travel.
 
-- [ ] `/work` & `/projects` & `/case-studies` → the three monitors (live screens)
-- [ ] `/writing` → bookshelf with glowing spines
-- [ ] `/speaking` → mic stand / speaker stack
-- [ ] `/open-source` → server rack with blinking LEDs
-- [ ] `/playground` → arcade / handheld console
-- [ ] `/resume` → framed CV on the wall
-- [ ] `/stack` → whiteboard / pegboard of tools
-- [ ] `/now` → coffee mug + desk lamp
-- [ ] `/contact` → door with exit sign
-- [ ] `/principles` → neon poster
-- [ ] `/lab` → plant / experiment bench
-- [ ] `/timeline` → wall-mounted neon timeline strip
-- [ ] `/uses` → the desk rig overview (retire the 2nd WebGL context)
-- [ ] Hover label + focus glow standardized across all objects
+**Approach (locked, corrected):** an earlier attempt rendered stylized emissive
+neon "glyph" props hovering on a pad at each station. It read as amateur/emoji-like
+and clashed with the professional studio scene, so it was reverted (the
+`objects/*` glyph files were removed; `PortalMarker` is back to the clean
+glow-pad + dot + hover light + neon label markers). The real M2 = **clean realism,
+reuse the room**:
 
-## Milestone 3 — Neon zones & room build-out
+1. Make the EXISTING realistic furniture the click-to-travel targets with a
+   subtle hover highlight (no new icons): monitors → work/projects/about,
+   speakers → speaking, bookshelf → writing, server rack → open-source,
+   plant → lab, framed art → resume, neon sign → brand/home.
+2. For content-heavy topics, build **glowing wall-screens** using the SAME
+   canvas-texture technique as the studio monitors
+   (`features/studio/components/screens/*`): a `<canvas>` is drawn with real
+   content and used as both `map` + `emissiveMap` so the panel glows. Shared
+   helpers live in `world/components/props/screen-draw-kit.ts`; the reusable
+   `WallScreen` + per-topic `*-screen-draw.ts` files render via `WallScreens`.
+   The user approved this look (vs. flat PBR primitives / neon glyphs).
+3. Keep `station.object` (`constants/object-kinds.ts`) as the typed metadata
+   mapping each route → its prop/furniture.
 
-- [ ] Expand the room (more walls / depth) to host distinct "zones"
-- [ ] Neon wall signs with topic names + a one-line blurb per zone
+- [x] Glowing wall-screen system shipped: `/resume`, `/timeline`, `/principles`,
+      `/stack`, `/playground` render as a 5-panel emissive video wall on the back
+      wall; cameras + markers reframed to each panel (`stations.ts`)
+- [ ] Map existing furniture → routes + subtle hover highlight (reuse the room)
+- [ ] `/now` coffee + lamp, `/contact` door realistic targets placed in room
+- [ ] `/case-studies` realistic target
+- [ ] `/uses` → desk rig overview (retire the 2nd WebGL context) — deferred:
+      retiring `StudioSection`/`StudioCanvas` from `/uses` requires re-homing the
+      `studio` feature to avoid orphaning it under the knip gate (separate refactor)
+- [ ] Hover highlight + label standardized across all targets
+- [x] Clean marker layer restored; glyph experiment reverted; gate green
+      (lint, typecheck, format, 45 unit tests, knip)
+
+## Milestone 3 — Hub + themed alcoves
+
+Carve the single room into a central hub with per-theme alcoves (room-first →
+expandable to full sub-rooms later, no rewrite).
+
+- [ ] Define the 4 theme clusters + their alcoves:
+      **Work** (work · projects · case-studies · resume),
+      **Craft** (writing · speaking · open-source · stack),
+      **Profile** (about · now · timeline · contact),
+      **Lab** (playground · lab · uses · principles)
+- [ ] Central hub with neon signage pointing to each alcove
+- [ ] Per-alcove neon color identity + hero object + lighting mood
+- [ ] Cinematic doorway/portal transition hub ↔ alcove
 - [ ] Light strips, emissive trims, animated signage
-- [ ] Group destinations into themed clusters (Work / Craft / Profile / Lab)
-- [ ] Floor decals / wayfinding lines toward each zone
+- [ ] Floor decals / wayfinding toward each alcove
+- [ ] Architecture note: alcoves declared as data so adding/splitting rooms is
+      config-only (extend `stations`/zone config, lazy-mount alcove contents)
 
 ## Milestone 4 — Camera choreography & controls
 
@@ -98,13 +181,20 @@ Replace generic portal markers with real props you click to travel.
 
 ## Milestone 6 — Content depth (real substance)
 
-- [ ] `/work` — richer per-role detail + outcomes
-- [ ] `/projects` — detail per project (problem → approach → impact)
-- [ ] `/case-studies` — full MDX write-ups
-- [ ] `/writing` — MDX essays (owning feature `content/`)
+**Authoring model (locked): no MDX / no markdown content files.** Everything is
+typed TypeScript data in each feature's `content/` dir (like
+`world/content/destinations-*.ts`), rendered by the `ContentBlock` system.
+Extend the `ContentBlock` union with new block types as needed (e.g. `quote`,
+`figure`, `steps`, `codeSample`) and add their renderers.
+
+- [ ] `/work` — richer per-role detail + outcomes (typed data)
+- [ ] `/projects` — detail per project (problem → approach → impact, typed data)
+- [ ] `/case-studies` — long-form write-ups via extended `ContentBlock` types
+- [ ] `/writing` — essays as typed content modules (no MDX)
 - [ ] `/open-source` — live GitHub repos (cached server fetch)
-- [ ] `/speaking` — talks list + links
-- [ ] `/now` — editable "now" snapshot
+- [ ] `/speaking` — talks list + links (typed data)
+- [ ] `/now` — "now" snapshot (typed data)
+- [ ] Extend `ContentBlock` union + renderers for any new block types
 
 ## Milestone 7 — Accessibility & SEO hardening
 
@@ -150,10 +240,17 @@ Replace generic portal markers with real props you click to travel.
 
 ## Open questions / decisions to confirm
 
-- [ ] Landing: full takeover world vs. brief intro then overview?
-- [ ] Keep the classic career-graph hero somewhere (e.g. `/timeline`)?
-- [ ] Ambient sound: in scope or skip?
-- [ ] How much bespoke 3D modeling vs. stylized primitives?
+_All resolved → see **Locked decisions**._
+
+- [x] Landing = full world takeover
+- [x] Content = typed TypeScript data (no MDX)
+- [x] Spatial model = hub + themed alcoves, built room-first (expandable to sub-rooms)
+- [x] Career-graph hero → re-home to `/timeline`
+- [x] 3D fidelity → stylized primitives + emissive; selective lazy-loaded hero models
+- [x] Ambient sound → M10, off by default, toggle, reduced-motion aware
+- [x] Intro → once per session, quick settle on repeat, skipped under reduced-motion
+
+Nothing blocking remains — the plan is locked and ready to execute.
 
 ## Working notes
 
