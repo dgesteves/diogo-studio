@@ -1,7 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { careerGraphNodes as nodes } from "@/features/career-graph";
 import { Home } from "./home";
 
 function renderHome() {
@@ -12,8 +11,8 @@ function renderHome() {
   );
 }
 
-describe("Home page", () => {
-  it("renders the senior-grade hero heading", () => {
+describe("Home landing", () => {
+  it("renders the neon brand heading", () => {
     renderHome();
     expect(
       screen.getByRole("heading", {
@@ -33,7 +32,13 @@ describe("Home page", () => {
     expect(screen.getByText(/available\s*[—-]\s*staff\+\s*\/\s*principal/i)).toBeInTheDocument();
   });
 
-  it("renders all pattern labels at least once on the page", () => {
+  it("offers a primary affordance into the studio via the work hub", () => {
+    renderHome();
+    const explore = screen.getByRole("link", { name: /explore the studio/i });
+    expect(explore).toHaveAttribute("href", "/work");
+  });
+
+  it("renders all pattern labels at least once on the landing", () => {
     renderHome();
     for (const pattern of [
       /ai-native platforms/i,
@@ -44,32 +49,5 @@ describe("Home page", () => {
     ]) {
       expect(screen.getAllByText(pattern).length).toBeGreaterThan(0);
     }
-  });
-
-  it("renders the three operating-altitude cards with the most recent org names", () => {
-    renderHome();
-    expect(
-      screen.getByRole("heading", { level: 2, name: /equally comfortable/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/fueled · current/i)).toBeInTheDocument();
-    expect(screen.getByText(/moment · 2025/i)).toBeInTheDocument();
-    expect(screen.getByText(/eino\.ai · 2023[\u2013-]2025/i)).toBeInTheDocument();
-  });
-
-  it("renders the SVG career-graph LCP frame with a focusable anchor per node", () => {
-    renderHome();
-    for (const node of nodes) {
-      const escaped = node.fullName.replace(/[/\\^$*+?.()|[\]{}]/g, "\\$&");
-      const link = screen.getByRole("link", {
-        name: new RegExp(`^${escaped}\\s*[—-]`, "i"),
-      });
-      expect(link).toBeInTheDocument();
-      expect(link).toHaveAttribute("href", "/");
-    }
-  });
-
-  it("includes a screen-reader description summarizing the career graph", () => {
-    renderHome();
-    expect(screen.getByText(/career graph of \d+ engagements/i)).toBeInTheDocument();
   });
 });
