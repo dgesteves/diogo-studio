@@ -1,11 +1,11 @@
 "use client";
 
-import { useRef, useState, type ReactElement } from "react";
-import { useFrame, type ThreeEvent } from "@react-three/fiber";
+import { useState, type ReactElement } from "react";
+import { type ThreeEvent } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
-import type { Mesh } from "three";
 import { setHoveredStation } from "@/stores/world-store";
 import type { WorldStation } from "../types";
+import { GlowPad } from "./objects/glow-pad";
 
 type PortalMarkerProps = {
   station: WorldStation;
@@ -20,16 +20,8 @@ export function PortalMarker({
   active,
   onSelect,
 }: PortalMarkerProps): ReactElement {
-  const ringRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const focus = hovered || active;
-
-  useFrame(({ clock }) => {
-    const ring = ringRef.current;
-    if (!ring) return;
-    const pulse = 1 + Math.sin(clock.elapsedTime * 2 + station.anchor[0]) * 0.08;
-    ring.scale.setScalar((focus ? 1.4 : 1) * pulse);
-  });
 
   function handleOver(event: ThreeEvent<PointerEvent>): void {
     event.stopPropagation();
@@ -57,17 +49,14 @@ export function PortalMarker({
       onPointerOut={handleOut}
       onClick={handleClick}
     >
-      <mesh ref={ringRef} rotation={[-Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.13, 0.012, 8, 32]} />
-        <meshBasicMaterial color={station.accent} toneMapped={false} />
-      </mesh>
       <mesh>
-        <sphereGeometry args={[0.035, 16, 16]} />
-        <meshBasicMaterial color={station.accent} toneMapped={false} />
+        <sphereGeometry args={[0.09, 12, 12]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
-      <pointLight color={station.accent} intensity={focus ? 1.1 : 0.45} distance={1.6} decay={2} />
+      <GlowPad accent={station.accent} focus={focus} seed={station.anchor[0]} />
+      <pointLight color={station.accent} intensity={focus ? 1.3 : 0.12} distance={2} decay={2} />
       {focus ? (
-        <Html position={[0, 0.26, 0]} center distanceFactor={9} zIndexRange={[0, 0]}>
+        <Html position={[0, 0.28, 0]} center distanceFactor={9} zIndexRange={[0, 0]}>
           <span
             aria-hidden="true"
             className="pointer-events-none font-mono text-[11px] font-medium tracking-[0.18em] whitespace-nowrap uppercase"

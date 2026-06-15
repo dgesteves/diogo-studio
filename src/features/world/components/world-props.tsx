@@ -3,6 +3,8 @@
 import { type ReactElement } from "react";
 import { brandColors } from "@/config/brand";
 
+import { WallScreens } from "./props/wall-screens";
+
 const SHELF_Y = [0.55, 0.95, 1.35, 1.75] as const;
 
 export function WorldProps(): ReactElement {
@@ -55,6 +57,8 @@ export function WorldProps(): ReactElement {
           <meshBasicMaterial color={brandColors.ink} toneMapped={false} />
         </mesh>
       </group>
+
+      <WallScreens />
     </group>
   );
 }

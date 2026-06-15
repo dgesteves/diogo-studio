@@ -1,4 +1,5 @@
 import type { RouteKey, RoutePath } from "@/constants/routes";
+import type { WorldObjectKind } from "./constants/object-kinds";
 
 export type Vec3 = readonly [number, number, number];
 
@@ -38,21 +39,7 @@ export type Destination = {
   blocks: readonly ContentBlock[];
 };
 
-export type WorldObjectKind =
-  | "monitor-left"
-  | "monitor-center"
-  | "monitor-right"
-  | "neon-sign"
-  | "bookshelf"
-  | "server-rack"
-  | "speaker-stack"
-  | "plant"
-  | "coffee"
-  | "door"
-  | "poster"
-  | "whiteboard"
-  | "arcade"
-  | "frame";
+export type { WorldObjectKind };
 
 export type WorldStation = {
   slug: RouteKey;
