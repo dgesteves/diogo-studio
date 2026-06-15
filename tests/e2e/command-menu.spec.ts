@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("⌘K Command Menu", () => {
-  test("opens with the keyboard shortcut and navigates to /work", async ({ page }) => {
+  test("opens with the keyboard shortcut and navigates to /about", async ({ page }) => {
     await page.goto("/");
 
     const modifier = process.platform === "darwin" ? "Meta" : "Control";
@@ -12,10 +12,10 @@ test.describe("⌘K Command Menu", () => {
 
     const input = dialog.getByPlaceholder(/type a command, page, or question/i);
     await expect(input).toBeFocused();
-    await input.fill("Work");
+    await input.fill("About");
 
     await page.keyboard.press("Enter");
-    await expect(page).toHaveURL(/\/work$/);
+    await expect(page).toHaveURL(/\/about$/);
   });
 
   test("opens via the nav trigger and dismisses with Escape", async ({ page }) => {

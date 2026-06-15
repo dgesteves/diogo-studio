@@ -1,8 +1,7 @@
 import type { ReactElement } from "react";
-import Link from "next/link";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
-import { routes } from "@/constants/routes";
+import { InspectorFooterTrigger } from "@/features/inspector";
 import { siteConfig } from "@/config/site";
 
 export function SiteFooter(): ReactElement {
@@ -66,9 +65,7 @@ export function SiteFooter(): ReactElement {
               © {year} {siteConfig.name}
             </span>
             <span aria-hidden="true">·</span>
-            <Link href={routes.colophon} className="hover:text-foreground transition-colors">
-              Colophon
-            </Link>
+            <InspectorFooterTrigger />
           </div>
         </div>
       </div>

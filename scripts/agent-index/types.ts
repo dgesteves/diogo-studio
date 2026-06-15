@@ -22,7 +22,5 @@ export type AgentIndex = {
   chunks: IndexEntry[];
 };
 
-export type RawSection = { heading?: string; anchor?: string; body: string };
-
 export const CHUNKER_VERSION = 2;
 export const EMBED_DIMENSIONS = 512;

@@ -18,10 +18,7 @@ test.describe("Mobile navigation", () => {
     await expect(dialog).toBeVisible();
 
     await expect(dialog.getByRole("link", { name: /^home$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^work$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^writing$/i })).toBeVisible();
     await expect(dialog.getByRole("link", { name: /^about$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^contact$/i })).toBeVisible();
   });
 
   test("desktop primary nav is hidden on mobile", async ({ page }) => {

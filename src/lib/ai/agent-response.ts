@@ -3,7 +3,7 @@ import "server-only";
 import type { AgentChunk, AgentCitation, AgentSourcesPayload } from "@/types/agent";
 
 export const REFUSAL_TEXT =
-  "I don't have that in the indexed material. The fastest way to get a direct answer is via [/contact](/contact) — Diogo replies.";
+  "I don't have that in the indexed material yet. Reach out to Diogo directly via the links in the site footer.";
 
 export function jsonResponse(body: unknown, init?: ResponseInit): Response {
   return new Response(JSON.stringify(body), {

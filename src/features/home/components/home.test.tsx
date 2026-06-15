@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { careerGraphNodes as nodes, PUBLISHED_CASE_STUDY_SLUGS } from "@/features/career-graph";
+import { careerGraphNodes as nodes } from "@/features/career-graph";
 import { Home } from "./home";
 
 function renderHome() {
@@ -21,13 +21,6 @@ describe("Home page", () => {
         name: /engineering the systems behind ambitious products/i,
       }),
     ).toBeInTheDocument();
-  });
-
-  it("links to the case studies page", () => {
-    renderHome();
-    const link = screen.getByRole("link", { name: /browse case studies/i });
-    expect(link).toBeInTheDocument();
-    expect(link).toHaveAttribute("href", "/work");
   });
 
   it("exposes a ⌘K trigger CTA that opens the agent in Ask mode", () => {
@@ -71,11 +64,7 @@ describe("Home page", () => {
         name: new RegExp(`^${escaped}\\s*[—-]`, "i"),
       });
       expect(link).toBeInTheDocument();
-      if (node.slug && PUBLISHED_CASE_STUDY_SLUGS.has(node.slug)) {
-        expect(link).toHaveAttribute("href", `/work/${node.slug}`);
-      } else {
-        expect(link).toHaveAttribute("href", "/work");
-      }
+      expect(link).toHaveAttribute("href", "/");
     }
   });
 

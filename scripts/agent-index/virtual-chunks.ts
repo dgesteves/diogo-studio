@@ -4,7 +4,7 @@ import type { IndexEntry } from "./types";
 import { nodes as careerNodes } from "../../src/features/career-graph/data/career-graph-nodes";
 import { patterns as careerPatterns } from "../../src/data/patterns";
 import { operatingCompanies } from "../../src/features/home/data/operating";
-import { caseStudyPath, routes } from "../../src/constants/routes";
+import { routes } from "../../src/constants/routes";
 import { siteConfig } from "../../src/config/site";
 
 export function buildCareerChunks(): IndexEntry[] {
@@ -31,7 +31,7 @@ export function buildCareerChunks(): IndexEntry[] {
       .map((p) => careerPatterns[p]?.label ?? p)
       .filter(Boolean)
       .join(", ");
-    const permalink = node.slug ? caseStudyPath(node.slug) : routes.work;
+    const permalink = routes.home;
     out.push(
       finalizeEntry({
         sourceId: `career:${node.id}`,

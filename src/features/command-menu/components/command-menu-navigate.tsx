@@ -1,15 +1,12 @@
 "use client";
 
 import { Command } from "cmdk";
-import { Briefcase, Home, Notebook, Sparkles } from "lucide-react";
+import { Home, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
 import { primaryNav } from "@/config/navigation";
-import { caseStudies } from "@/features/work";
-import { essays } from "@/features/writing";
-import { sortPublished } from "@/lib/content/sort-published";
 
 import { ProfileGroup, ThemeGroup } from "./command-menu-actions";
 import { Item, iconForPage } from "./command-menu-item";
@@ -17,8 +14,6 @@ import { Item, iconForPage } from "./command-menu-item";
 export function NavigateView({ onClose }: { onClose: () => void }): ReactElement {
   const router = useRouter();
   const { setTheme } = useTheme();
-  const publishedCaseStudies = sortPublished(caseStudies);
-  const publishedEssays = sortPublished(essays);
 
   function runAndClose(action: () => void): void {
     onClose();
@@ -40,9 +35,8 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
 
       <Command.List className="max-h-[420px] overflow-y-auto px-2 py-2">
         <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-sm">
-          No results. Try <span className="text-foreground font-medium">work</span>,{" "}
-          <span className="text-foreground font-medium">writing</span>, or{" "}
-          <span className="text-foreground font-medium">contact</span>.
+          No results. Try <span className="text-foreground font-medium">home</span> or{" "}
+          <span className="text-foreground font-medium">about</span>.
         </Command.Empty>
 
         <Command.Group heading="Pages">
@@ -62,34 +56,6 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
             />
           ))}
         </Command.Group>
-
-        {publishedCaseStudies.length > 0 ? (
-          <Command.Group heading="Case studies">
-            {publishedCaseStudies.map((study) => (
-              <Item
-                key={study.slug}
-                icon={<Briefcase className="size-4" />}
-                label={study.title}
-                hint={study.company}
-                onSelect={() => runAndClose(() => router.push(study.permalink))}
-              />
-            ))}
-          </Command.Group>
-        ) : null}
-
-        {publishedEssays.length > 0 ? (
-          <Command.Group heading="Essays">
-            {publishedEssays.map((essay) => (
-              <Item
-                key={essay.slug}
-                icon={<Notebook className="size-4" />}
-                label={essay.title}
-                hint={`${essay.metadata.readingTime} min read`}
-                onSelect={() => runAndClose(() => router.push(essay.permalink))}
-              />
-            ))}
-          </Command.Group>
-        ) : null}
 
         <ThemeGroup run={runAndClose} setTheme={setTheme} />
 

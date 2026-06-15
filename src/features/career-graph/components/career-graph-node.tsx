@@ -26,7 +26,7 @@ export function Node({
 
   return (
     <Link
-      href={nodeHref(node)}
+      href={nodeHref()}
       data-career-graph-node={node.id}
       aria-label={`${node.fullName} — ${node.role}, ${node.years}. ${node.summary}`}
       className="cg-node-link group cursor-pointer outline-none"

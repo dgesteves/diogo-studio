@@ -1,15 +1,11 @@
 import type { ReactElement } from "react";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import {
   CareerGraphAccessibleDescription,
   CareerGraphAtmosphere,
   CareerGraphFigure,
 } from "@/features/career-graph";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
-import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 import { patternList } from "@/data/patterns";
 import { HeroAskCta } from "./hero-ask-cta";
@@ -58,12 +54,6 @@ export function HeroSection(): ReactElement {
             </p>
 
             <div className="flex flex-wrap items-center gap-3 pt-2">
-              <Button asChild size="lg" variant="default">
-                <Link href={routes.work}>
-                  <span>Browse case studies</span>
-                  <ArrowRight className="size-4" aria-hidden="true" />
-                </Link>
-              </Button>
               <HeroAskCta />
             </div>
 

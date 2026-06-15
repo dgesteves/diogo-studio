@@ -1,4 +1,4 @@
-import type { Article, BreadcrumbList, Person, WebSite, WithContext } from "schema-dts";
+import type { Person, WebSite, WithContext } from "schema-dts";
 import { getSiteUrl, siteConfig } from "@/config/site";
 
 const PERSON_ID = "#person";
@@ -42,47 +42,5 @@ export function websiteJsonLd(): WithContext<WebSite> {
     inLanguage: "en",
     author: { "@id": `${url}/${PERSON_ID}` },
     publisher: { "@id": `${url}/${PERSON_ID}` },
-  };
-}
-
-export function articleJsonLd(input: {
-  title: string;
-  description: string;
-  path: string;
-  datePublished: string;
-  dateModified?: string;
-  section?: string;
-}): WithContext<Article> {
-  const url = getSiteUrl();
-  const canonical = `${url}${input.path}`;
-  return {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: input.title,
-    description: input.description,
-    url: canonical,
-    mainEntityOfPage: canonical,
-    datePublished: input.datePublished,
-    dateModified: input.dateModified ?? input.datePublished,
-    inLanguage: "en",
-    ...(input.section ? { articleSection: input.section } : {}),
-    author: { "@id": `${url}/${PERSON_ID}` },
-    publisher: { "@id": `${url}/${PERSON_ID}` },
-  };
-}
-
-export function breadcrumbJsonLd(
-  items: { name: string; path: string }[],
-): WithContext<BreadcrumbList> {
-  const url = getSiteUrl();
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
-      "@type": "ListItem",
-      position: index + 1,
-      name: item.name,
-      item: `${url}${item.path}`,
-    })),
   };
 }

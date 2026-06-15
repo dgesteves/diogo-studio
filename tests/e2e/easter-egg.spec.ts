@@ -13,12 +13,15 @@ test("typing 'diogo' reveals a greeting and then dismisses it", async ({ page })
 });
 
 test("typing 'diogo' inside a text field does NOT trigger the egg", async ({ page }) => {
-  await page.goto("/contact");
+  await page.goto("/");
 
-  const nameField = page.getByLabel(/name/i).first();
-  await nameField.click();
+  const modifier = process.platform === "darwin" ? "Meta" : "Control";
+  await page.keyboard.press(`${modifier}+KeyK`);
+
+  const input = page.getByPlaceholder(/type a command, page, or question/i);
+  await expect(input).toBeFocused();
   await page.keyboard.type("diogo");
 
   await expect(page.getByText(/Hi, I.?m Diogo/i)).toHaveCount(0);
-  await expect(nameField).toHaveValue("diogo");
+  await expect(input).toHaveValue("diogo");
 });

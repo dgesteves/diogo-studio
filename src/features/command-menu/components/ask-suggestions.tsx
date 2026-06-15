@@ -30,8 +30,8 @@ export function AskSuggestions({ onPick }: { onPick: (s: string) => void }): Rea
         ))}
       </ul>
       <p className="text-subtle-foreground pt-1 text-xs">
-        The agent only answers from this site&apos;s indexed case studies and career data. It
-        refuses anything outside that scope.
+        The agent only answers from this site&apos;s indexed career data. It refuses anything
+        outside that scope.
       </p>
     </div>
   );

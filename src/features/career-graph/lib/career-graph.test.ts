@@ -1,20 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { caseStudyPath, routes } from "@/constants/routes";
+import { routes } from "@/constants/routes";
 import { nodes, type NodeId } from "@/features/career-graph/data/career-graph-nodes";
 import { getNode } from "./get-node";
-import { nodeHref, PUBLISHED_CASE_STUDY_SLUGS } from "./node-href";
+import { nodeHref } from "./node-href";
 import { projectToSvg } from "./project-to-svg";
 
 describe("career-graph logic", () => {
-  it("nodeHref deep-links to the case study for published slugs, falls back to /work", () => {
-    for (const n of nodes) {
-      const href = nodeHref(n);
-      if (n.slug && PUBLISHED_CASE_STUDY_SLUGS.has(n.slug)) {
-        expect(href).toBe(caseStudyPath(n.slug));
-      } else {
-        expect(href).toBe(routes.work);
-      }
-    }
+  it("nodeHref points every node to the home route", () => {
+    expect(nodeHref()).toBe(routes.home);
   });
 
   it("getNode returns the matching node and throws on unknowns", () => {

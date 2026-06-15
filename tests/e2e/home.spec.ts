@@ -11,7 +11,6 @@ test.describe("Home page", () => {
       }),
     ).toBeVisible();
 
-    await expect(page.getByRole("link", { name: /browse case studies/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /press.*to ask/i })).toBeVisible();
     await expect(page.getByText(/available\s*[—-]\s*staff\+\s*\/\s*principal/i)).toBeVisible();
   });
