@@ -4,19 +4,12 @@ import { getSiteUrl } from "@/config/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl();
+  const lastModified = new Date();
 
-  return [
-    {
-      url: `${baseUrl}${routes.home}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly",
-      priority: 1,
-    },
-    {
-      url: `${baseUrl}${routes.about}`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.7,
-    },
-  ];
+  return Object.values(routes).map((path) => ({
+    url: `${baseUrl}${path}`,
+    lastModified,
+    changeFrequency: path === routes.home ? "weekly" : "monthly",
+    priority: path === routes.home ? 1 : 0.7,
+  }));
 }

@@ -1,0 +1,21 @@
+import type { Metadata } from "next";
+import type { ReactElement } from "react";
+import { routes } from "@/constants/routes";
+import { StudioSection } from "@/features/home";
+import { DestinationView } from "@/features/world";
+
+export const metadata: Metadata = {
+  title: "Uses",
+  description: "The hardware, software, and rig Diogo Esteves ships the work from.",
+  alternates: { canonical: routes.uses },
+};
+
+export default function UsesPage(): ReactElement {
+  return (
+    <DestinationView slug="uses">
+      <div className="bg-background relative z-10">
+        <StudioSection />
+      </div>
+    </DestinationView>
+  );
+}
