@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { operatingCompanies } from "@/features/home/data/operating";
+import { operatingCompanies } from "@/features/home/constants/operating";
 
 export function TrustSection(): ReactElement {
   return (

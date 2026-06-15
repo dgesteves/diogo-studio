@@ -7,7 +7,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusDot } from "@/components/ui/status-dot";
 import { siteConfig } from "@/config/site";
-import { patternList } from "@/data/patterns";
+import { patternList } from "@/constants/patterns";
 import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection(): ReactElement {

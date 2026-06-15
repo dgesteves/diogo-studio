@@ -3,7 +3,7 @@ import "server-only";
 import { agentIndexSchema } from "@/lib/validations/agent";
 import type { AgentChunk, AgentIndex } from "@/types/agent";
 
-import indexJson from "@/data/agent-index.json" with { type: "json" };
+import indexJson from "@/constants/agent-index.json" with { type: "json" };
 
 export const INDEX: AgentIndex = agentIndexSchema.parse(indexJson);
 export const CHUNKS: AgentChunk[] = INDEX.chunks;

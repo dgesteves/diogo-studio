@@ -1,9 +1,9 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry } from "./types";
 
-import { nodes as careerNodes } from "../../src/features/career-graph/data/career-graph-nodes";
-import { patterns as careerPatterns } from "../../src/data/patterns";
-import { operatingCompanies } from "../../src/features/home/data/operating";
+import { nodes as careerNodes } from "../../src/features/career-graph/constants/career-graph-nodes";
+import { patterns as careerPatterns } from "../../src/constants/patterns";
+import { operatingCompanies } from "../../src/features/home/constants/operating";
 import { routes } from "../../src/constants/routes";
 import { siteConfig } from "../../src/config/site";
 

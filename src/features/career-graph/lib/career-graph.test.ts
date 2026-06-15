@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { routes } from "@/constants/routes";
-import { nodes, type NodeId } from "@/features/career-graph/data/career-graph-nodes";
+import { nodes, type NodeId } from "@/features/career-graph/constants/career-graph-nodes";
 import { getNode } from "./get-node";
 import { nodeHref } from "./node-href";
 import { projectToSvg } from "./project-to-svg";

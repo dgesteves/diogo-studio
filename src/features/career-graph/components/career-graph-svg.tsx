@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
-import { edges } from "@/features/career-graph/data/career-graph-edges";
-import { nodes, type NodeId } from "@/features/career-graph/data/career-graph-nodes";
-import { patterns } from "@/data/patterns";
+import { edges } from "@/features/career-graph/constants/career-graph-edges";
+import { nodes, type NodeId } from "@/features/career-graph/constants/career-graph-nodes";
+import { patterns } from "@/constants/patterns";
 
 import { projectToSvg } from "../lib/project-to-svg";
 import { Axis } from "./career-graph-axis";

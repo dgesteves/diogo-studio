@@ -1,5 +1,5 @@
-import { nodes } from "@/features/career-graph/data/career-graph-nodes";
-import type { CareerNode, NodeId } from "@/features/career-graph/data/career-graph-nodes";
+import { nodes } from "@/features/career-graph/constants/career-graph-nodes";
+import type { CareerNode, NodeId } from "@/features/career-graph/constants/career-graph-nodes";
 
 export function getNode(id: NodeId): CareerNode {
   const node = nodes.find((candidate) => candidate.id === id);

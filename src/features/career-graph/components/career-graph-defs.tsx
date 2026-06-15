@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 
-import { patterns } from "@/data/patterns";
+import { patterns } from "@/constants/patterns";
 
 export function CareerGraphDefs(): ReactElement {
   return (
