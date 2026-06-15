@@ -3,3 +3,7 @@ allowBuilds:
   unrs-resolver: true
   "@sentry/cli": true
   esbuild: true
+
+overrides:
+  "esbuild@<0.28.1": ">=0.28.1"
+  "postcss@<8.5.10": ">=8.5.10"
