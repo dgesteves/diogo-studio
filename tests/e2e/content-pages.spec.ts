@@ -16,6 +16,18 @@ test.describe("/about", () => {
   });
 });
 
+test.describe("/work", () => {
+  test("operating-altitudes section shows the three most recent engagements", async ({ page }) => {
+    await page.goto("/work");
+    await expect(
+      page.getByRole("heading", { level: 2, name: /equally comfortable/i }),
+    ).toBeVisible();
+    await expect(page.getByText(/fueled · current/i)).toBeVisible();
+    await expect(page.getByText(/moment · 2025/i)).toBeVisible();
+    await expect(page.getByText(/eino\.ai · 2023[\u2013-]2025/i)).toBeVisible();
+  });
+});
+
 test("footer trigger launches the Inspector overlay", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /open the performance inspector overlay/i }).click();

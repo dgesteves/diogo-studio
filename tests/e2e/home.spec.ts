@@ -15,16 +15,6 @@ test.describe("Home page", () => {
     await expect(page.getByText(/available\s*[—-]\s*staff\+\s*\/\s*principal/i)).toBeVisible();
   });
 
-  test("operating-altitudes section shows the three most recent engagements", async ({ page }) => {
-    await page.goto("/");
-    await expect(
-      page.getByRole("heading", { level: 2, name: /equally comfortable/i }),
-    ).toBeVisible();
-    await expect(page.getByText(/fueled · current/i)).toBeVisible();
-    await expect(page.getByText(/moment · 2025/i)).toBeVisible();
-    await expect(page.getByText(/eino\.ai · 2023[\u2013-]2025/i)).toBeVisible();
-  });
-
   test("exposes the /api/health endpoint", async ({ request }) => {
     const response = await request.get("/api/health");
     expect(response.status()).toBe(200);
