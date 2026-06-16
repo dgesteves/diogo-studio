@@ -17,6 +17,19 @@ describe("furniture hotspots", () => {
 
   it("recognizes furniture routes via the type guard", () => {
     expect(isFurnitureRoute("work")).toBe(true);
-    expect(isFurnitureRoute("contact")).toBe(false);
+    expect(isFurnitureRoute("contact")).toBe(true);
+    expect(isFurnitureRoute("resume")).toBe(true);
+    expect(isFurnitureRoute("uses")).toBe(true);
+    expect(isFurnitureRoute("home")).toBe(false);
+  });
+
+  it("covers every route except home", () => {
+    expect(Object.keys(furnitureHotspots).length).toBe(Object.keys(routes).length - 1);
+  });
+
+  it("gives every wall-screen route a wall-oriented glow", () => {
+    for (const slug of ["resume", "timeline", "principles", "stack", "playground"] as const) {
+      expect(furnitureHotspots[slug].glow).toBe("wall");
+    }
   });
 });

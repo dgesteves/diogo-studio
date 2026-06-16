@@ -2,12 +2,16 @@
 
 import { useState, type ReactElement } from "react";
 import { type ThreeEvent } from "@react-three/fiber";
-import { AdditiveBlending } from "three";
 import { setHoveredStation } from "@/stores/world-store";
 import type { WorldStation } from "../types";
 import type { FurnitureHotspot as Hotspot } from "../constants/hotspots";
-import { createRadialGlowTexture } from "../lib/radial-glow";
+import { HotspotGlow } from "./hotspot-glow";
 import { NeonLabel } from "./neon-label";
+
+const GLOW_SPREAD = 1.6;
+const GLOW_PADDING = 0.18;
+const WALL_GLOW_OFFSET = 0.02;
+const LABEL_GAP = 0.16;
 
 type FurnitureHotspotProps = {
   station: WorldStation;
@@ -29,8 +33,16 @@ export function FurnitureHotspot({
   const [cx, cy, cz] = hotspot.center;
   const [sx, sy, sz] = hotspot.size;
   const [ax, ay, az] = station.anchor;
-  const glow = createRadialGlowTexture();
-  const glowSize = Math.max(0.6, Math.max(sx, sz) * 0.8) * 2;
+  const isWall = hotspot.glow === "wall";
+  const floorY = hotspot.glow === "wall" ? 0 : hotspot.groundY;
+  const glowSize = Math.max(sx, isWall ? sy : sz) * GLOW_SPREAD + GLOW_PADDING;
+  const glowPosition: [number, number, number] = isWall
+    ? [cx, cy, cz - WALL_GLOW_OFFSET]
+    : [cx, floorY, cz];
+  const glowRotation: [number, number, number] = isWall ? [0, 0, 0] : [-Math.PI / 2, 0, 0];
+  const labelPosition: [number, number, number] = isWall
+    ? [cx, cy + sy / 2 + LABEL_GAP, cz]
+    : [ax, ay + 0.24, az];
 
   function handleOver(event: ThreeEvent<PointerEvent>): void {
     event.stopPropagation();
@@ -65,18 +77,12 @@ export function FurnitureHotspot({
 
       {focus ? (
         <>
-          <mesh position={[cx, hotspot.groundY, cz]} rotation={[-Math.PI / 2, 0, 0]}>
-            <planeGeometry args={[glowSize, glowSize]} />
-            <meshBasicMaterial
-              map={glow}
-              color={station.accent}
-              transparent
-              opacity={0.6}
-              blending={AdditiveBlending}
-              depthWrite={false}
-              toneMapped={false}
-            />
-          </mesh>
+          <HotspotGlow
+            position={glowPosition}
+            rotation={glowRotation}
+            size={glowSize}
+            accent={station.accent}
+          />
           <pointLight
             position={station.anchor}
             color={station.accent}
@@ -84,7 +90,7 @@ export function FurnitureHotspot({
             distance={2.4}
             decay={2}
           />
-          <NeonLabel position={[ax, ay + 0.24, az]} accent={station.accent} label={label} />
+          <NeonLabel position={labelPosition} accent={station.accent} label={label} />
         </>
       ) : null}
     </group>
