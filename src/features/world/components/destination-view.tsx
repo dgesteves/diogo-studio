@@ -7,9 +7,10 @@ import { DestinationPanel } from "./destination-panel";
 type DestinationViewProps = {
   slug: RouteKey;
   children?: ReactNode;
+  media?: ReactNode;
 };
 
-export function DestinationView({ slug, children }: DestinationViewProps): ReactElement {
+export function DestinationView({ slug, children, media }: DestinationViewProps): ReactElement {
   const destination = getDestination(slug);
 
   return (
@@ -19,6 +20,7 @@ export function DestinationView({ slug, children }: DestinationViewProps): React
           eyebrow={destination.eyebrow}
           title={destination.title}
           summary={destination.summary}
+          media={media}
         >
           <ContentBlocks blocks={destination.blocks} />
         </DestinationPanel>
