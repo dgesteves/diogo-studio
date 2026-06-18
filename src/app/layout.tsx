@@ -8,14 +8,11 @@ import { JsonLd } from "@/components/seo/json-ld";
 import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { EasterEgg } from "@/features/easter-egg";
 import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
-import { env } from "@/config/env";
 import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
 import { cn } from "@/lib/utils/cn";
 import "@/styles/globals.css";
 
 export { rootMetadata as metadata, rootViewport as viewport } from "@/lib/seo/root-metadata";
-
-const isVercel = env.VERCEL === "1";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,12 +53,8 @@ export default function RootLayout({
             </CommandMenuProvider>
           </InspectorOverlayProvider>
         </AppProviders>
-        {isVercel ? (
-          <>
-            <Analytics />
-            <SpeedInsights />
-          </>
-        ) : null}
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
