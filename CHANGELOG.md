@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.6.0](https://github.com/dgesteves/diogo-studio/compare/v1.5.0...v1.6.0) (2026-06-17)
+
+
+### Features
+
+* add furniture hotspot system with radial glow and neon labels for 7 routes ([2189f2f](https://github.com/dgesteves/diogo-studio/commit/2189f2fa862d8d19409418a041f5515e824305af))
+
+
+### Code Refactoring
+
+* migrate about page to DestinationView with media slot support ([d435180](https://github.com/dgesteves/diogo-studio/commit/d435180d2091d8136d9413a12a87c5b756bf2ddd))
+* remove standalone studio section and migrate to wall-screen system ([a11594b](https://github.com/dgesteves/diogo-studio/commit/a11594bdb5f1346b98641c51853cdc87d0937db7))
+
+
+### Documentation
+
+* remove immersive-world-plan.md after M1/M2 completion ([3ca51eb](https://github.com/dgesteves/diogo-studio/commit/3ca51eb36efc1bd39c825254144b4fb41e5e0b31))
+
 ## [1.5.0](https://github.com/dgesteves/diogo-studio/compare/v1.4.4...v1.5.0) (2026-06-15)
 
 
