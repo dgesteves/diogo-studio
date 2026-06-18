@@ -11,7 +11,7 @@ const RAW: Record<RouteKey, RawStation> = {
   caseStudies: ["monitor-center", "CASE STUDIES", "#a78bfa", [0, 1.65, 2.4], [-0.6, 0.92, 0.34]],
   writing: ["bookshelf", "WRITING", "#f472b6", [-1.3, 1.7, 1.6], [-2.0, 1.4, -0.6]],
   speaking: ["speaker-stack", "SPEAKING", "#fb7185", [1.7, 1.4, 2.1], [1.38, 1.12, -0.1]],
-  openSource: ["server-rack", "OPEN SOURCE", "#34d399", [1.9, 1.5, 1.3], [2.0, 1.0, -0.85]],
+  openSource: ["tv", "OPEN SOURCE", "#34d399", [1.8, 1.85, 2.0], [3.6, 1.05, -1.5]],
   playground: ["arcade", "PLAYGROUND", "#facc15", [0.86, 1.7, 1.6], [1.56, 1.12, -2.18]],
   resume: ["frame", "RESUME", "#22d3ee", [-0.86, 1.7, 1.6], [-1.56, 1.12, -2.18]],
   now: ["coffee", "NOW", "#fbbf24", [0.8, 1.35, 1.8], [0.95, 0.96, 0.3]],

@@ -23,19 +23,6 @@ export function WorldProps(): ReactElement {
         ))}
       </group>
 
-      <group position={[2.0, 0, -0.85]}>
-        <mesh position={[0, 0.85, 0]}>
-          <boxGeometry args={[0.5, 1.7, 0.5]} />
-          <meshStandardMaterial color="#0a0f13" roughness={0.5} metalness={0.6} />
-        </mesh>
-        {[0.4, 0.7, 1.0, 1.3].map((y) => (
-          <mesh key={y} position={[0.26, y, 0]}>
-            <boxGeometry args={[0.01, 0.04, 0.34]} />
-            <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
-          </mesh>
-        ))}
-      </group>
-
       <group position={[-2.0, 0, 0.2]}>
         <mesh position={[0, 0.18, 0]}>
           <cylinderGeometry args={[0.16, 0.12, 0.36, 16]} />

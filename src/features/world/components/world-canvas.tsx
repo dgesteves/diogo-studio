@@ -13,6 +13,7 @@ import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/constants/routes";
 
 import { getStation } from "../constants/stations";
+import { Lounge } from "./lounge/lounge";
 import { WorldCamera } from "./world-camera";
 import { WorldNeon } from "./world-neon";
 import { WorldPortals } from "./world-portals";
@@ -43,6 +44,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
 
       <StudioScene />
       <WorldProps />
+      <Lounge />
       <WorldNeon />
       <WorldPortals active={active} />
 

@@ -5,6 +5,7 @@ export const worldObjectKinds = [
   "neon-sign",
   "bookshelf",
   "server-rack",
+  "tv",
   "speaker-stack",
   "plant",
   "coffee",

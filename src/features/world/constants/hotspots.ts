@@ -23,8 +23,8 @@ export const furnitureHotspots = {
   writing: { center: [-2.18, 1.15, -0.6], size: [0.4, 2.3, 1.15], glow: "floor", groundY: FLOOR_Y },
   speaking: { center: [1.38, 0.9, -0.1], size: [0.3, 0.55, 0.3], glow: "floor", groundY: FLOOR_Y },
   openSource: {
-    center: [2.0, 0.85, -0.85],
-    size: [0.65, 1.75, 0.65],
+    center: [3.6, 1.5, -2.25],
+    size: [1.8, 1.1, 0.5],
     glow: "floor",
     groundY: FLOOR_Y,
   },
