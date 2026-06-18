@@ -1,11 +1,12 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors } from "@/config/brand";
 
 import { FRAME } from "./constants";
 
 const POLE_H = 1.5;
+const BULB = "#ffca7a";
+const WARM_LIGHT = "#ffb774";
 
 export function LoungeLamp(): ReactElement {
   return (
@@ -21,21 +22,25 @@ export function LoungeLamp(): ReactElement {
       <mesh position={[0, POLE_H + 0.04, 0]}>
         <cylinderGeometry args={[0.12, 0.16, 0.2, 20, 1, true]} />
         <meshStandardMaterial
-          color="#1a2630"
-          roughness={0.6}
-          metalness={0.2}
-          emissive={brandColors.accentSoft}
-          emissiveIntensity={0.5}
+          color="#c79a5e"
+          roughness={0.5}
+          metalness={0.1}
+          emissive={BULB}
+          emissiveIntensity={1.1}
           side={2}
           toneMapped={false}
         />
       </mesh>
+      <mesh position={[0, POLE_H - 0.05, 0]}>
+        <sphereGeometry args={[0.07, 16, 16]} />
+        <meshBasicMaterial color="#ffe6b0" toneMapped={false} />
+      </mesh>
       <pointLight
-        position={[0, POLE_H, 0]}
-        intensity={0.55}
-        distance={2.6}
+        position={[0, POLE_H - 0.08, 0]}
+        intensity={1.5}
+        distance={3.4}
         decay={2}
-        color={brandColors.accentSoft}
+        color={WARM_LIGHT}
       />
     </group>
   );
