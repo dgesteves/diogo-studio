@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.7.0](https://github.com/dgesteves/diogo-studio/compare/v1.6.0...v1.7.0) (2026-06-19)
+
+
+### Features
+
+* add lounge zone with sofa, coffee table, lamp, rug, and 3-channel TV system ([7a131b7](https://github.com/dgesteves/diogo-studio/commit/7a131b720cb985ee18b13e9448635e6ffdcd4863))
+
+
+### Code Refactoring
+
+* enhance lounge lamp with warmer bulb colors and brighter lighting ([c4008ce](https://github.com/dgesteves/diogo-studio/commit/c4008ceeed70f1709852cc19234cefaa1f9f275e))
+
+
+### Continuous Integration
+
+* **deps:** bump pnpm/action-setup from 6.0.8 to 6.0.9 ([#87](https://github.com/dgesteves/diogo-studio/issues/87)) ([eb46b56](https://github.com/dgesteves/diogo-studio/commit/eb46b56f14f014f2a797114ab0076e0b41d19ba8))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump knip from 6.16.1 to 6.17.1 ([#102](https://github.com/dgesteves/diogo-studio/issues/102)) ([5a3c815](https://github.com/dgesteves/diogo-studio/commit/5a3c815bc3224500d50e2140b6ce568f4f5b1d72))
+* **deps-dev:** bump the testing group with 2 updates ([#89](https://github.com/dgesteves/diogo-studio/issues/89)) ([7281ce1](https://github.com/dgesteves/diogo-studio/commit/7281ce124f753c8aad9fcc976f8dc77bf9e56ea6))
+* **deps:** bump @ai-sdk/openai from 3.0.69 to 3.0.72 ([#91](https://github.com/dgesteves/diogo-studio/issues/91)) ([2d2cef2](https://github.com/dgesteves/diogo-studio/commit/2d2cef223eefd58230e811c9d9f6ad2ec2dac269))
+* **deps:** bump @radix-ui/react-dialog from 1.1.16 to 1.1.17 ([#99](https://github.com/dgesteves/diogo-studio/issues/99)) ([0087b91](https://github.com/dgesteves/diogo-studio/commit/0087b916242fa7cb924e5c571334e7f488b58061))
+* **deps:** bump @radix-ui/react-slot from 1.2.5 to 1.3.0 ([#90](https://github.com/dgesteves/diogo-studio/issues/90)) ([353e7b1](https://github.com/dgesteves/diogo-studio/commit/353e7b1e21596743095e6b498f32b53961309dc0))
+* **deps:** bump @radix-ui/react-tabs from 1.1.14 to 1.1.15 ([#96](https://github.com/dgesteves/diogo-studio/issues/96)) ([ee0657d](https://github.com/dgesteves/diogo-studio/commit/ee0657d916c9453962935a677f53b028babeb9ee))
+* **deps:** bump @radix-ui/react-tooltip from 1.2.9 to 1.2.10 ([#94](https://github.com/dgesteves/diogo-studio/issues/94)) ([0fd2ec5](https://github.com/dgesteves/diogo-studio/commit/0fd2ec543c07da4b4212d0eb08a852e6baadfa2b))
+* **deps:** bump @sentry/nextjs from 10.57.0 to 10.58.0 ([#97](https://github.com/dgesteves/diogo-studio/issues/97)) ([692d006](https://github.com/dgesteves/diogo-studio/commit/692d00664ad9f0b93feb500e90d2c8b104107b9d))
+* **deps:** bump ai from 6.0.205 to 6.0.207 ([#101](https://github.com/dgesteves/diogo-studio/issues/101)) ([a138fc4](https://github.com/dgesteves/diogo-studio/commit/a138fc4431707ea1dc72aa9ba9ca4a53c60a9d6b))
+* **deps:** bump dependencies across multiple packages ([25fec45](https://github.com/dgesteves/diogo-studio/commit/25fec45a6614108d9e46a8ee385bef9c45383c21))
+* **deps:** bump dependencies and update commitlint config ([ac57055](https://github.com/dgesteves/diogo-studio/commit/ac57055f6adcc14a8e28aba2d8c510ed79d24f1c))
+* **deps:** bump lucide-react from 1.18.0 to 1.20.0 ([#92](https://github.com/dgesteves/diogo-studio/issues/92)) ([139e4f5](https://github.com/dgesteves/diogo-studio/commit/139e4f5feaecdeafa5adf9c19208ba3d34c6de00))
+
 ## [1.6.0](https://github.com/dgesteves/diogo-studio/compare/v1.5.0...v1.6.0) (2026-06-17)
 
 
