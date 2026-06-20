@@ -6,25 +6,34 @@ import { Vector3 } from "three";
 import type { RouteKey } from "@/constants/routes";
 import { getStation } from "../constants/stations";
 import { consumeIntro, introStartPosition } from "../utils/intro";
+import { framingPullback } from "../utils/framing";
 
 export function WorldCamera({ active }: { active: RouteKey }): null {
   const look = useRef(new Vector3());
   const desired = useRef(new Vector3());
   const lookTarget = useRef(new Vector3());
+  const direction = useRef(new Vector3());
   const ready = useRef(false);
   const intro = useRef(false);
 
-  useFrame(({ camera, clock, pointer }, delta) => {
+  useFrame(({ camera, clock, pointer, size }, delta) => {
     const station = getStation(active);
     const [px, py, pz] = station.position;
     const [tx, ty, tz] = station.target;
+
+    lookTarget.current.set(tx, ty, tz);
+    direction.current.set(px - tx, py - ty, pz - tz);
+    const baseDistance = direction.current.length() || 1;
+    direction.current.divideScalar(baseDistance);
+    const distance = baseDistance * framingPullback(size.width / size.height);
 
     const t = clock.elapsedTime;
     const orbitX = Math.sin(t * 0.1) * 0.16 + pointer.x * 0.4;
     const orbitY = Math.cos(t * 0.08) * 0.08 - pointer.y * 0.25;
 
-    desired.current.set(px + orbitX, py + orbitY, pz);
-    lookTarget.current.set(tx, ty, tz);
+    desired.current.copy(lookTarget.current).addScaledVector(direction.current, distance);
+    desired.current.x += orbitX;
+    desired.current.y += orbitY;
 
     if (!ready.current) {
       intro.current = consumeIntro(active === "home");
