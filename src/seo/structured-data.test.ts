@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { siteConfig } from "@/config/site";
-import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
+import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";
 
 type Json = Record<string, unknown>;
 

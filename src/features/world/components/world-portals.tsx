@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { useRouter } from "next/navigation";
 import type { RouteKey } from "@/constants/routes";
-import { worldDestinations } from "../content/destinations";
+import { worldDestinations } from "../constants/destinations";
 import { furnitureHotspots, isFurnitureRoute } from "../constants/hotspots";
 import { getStation } from "../constants/stations";
 import { FurnitureHotspot } from "./furniture-hotspot";

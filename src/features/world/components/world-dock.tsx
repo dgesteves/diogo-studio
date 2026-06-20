@@ -3,9 +3,9 @@
 import { type ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 import { setHoveredStation } from "@/stores/world-store";
-import { worldDestinations } from "../content/destinations";
+import { worldDestinations } from "../constants/destinations";
 import { resolveStation } from "../hooks/use-active-station";
 import { useHoveredStation } from "../hooks/use-hovered-station";
 

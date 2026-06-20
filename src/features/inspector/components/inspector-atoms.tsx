@@ -1,7 +1,7 @@
 import { type ReactElement, type ReactNode } from "react";
 
 import type { VitalSample } from "@/stores/web-vitals-store";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { formatVital, ratingTone } from "./inspector-format";
 

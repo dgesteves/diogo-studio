@@ -1,6 +1,6 @@
 import "server-only";
 
-import { agentIndexSchema } from "@/lib/validations/agent";
+import { agentIndexSchema } from "@/schemas/agent";
 import type { AgentChunk, AgentIndex } from "@/types/agent";
 
 import indexJson from "@/constants/agent-index.json" with { type: "json" };

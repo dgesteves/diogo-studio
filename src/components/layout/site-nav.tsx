@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { primaryNav } from "@/config/navigation";
 import { siteConfig } from "@/config/site";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 import { CommandTrigger } from "./command-trigger";
 import { MobileNav } from "./mobile-nav";
 import { ThemeToggle } from "./theme-toggle";

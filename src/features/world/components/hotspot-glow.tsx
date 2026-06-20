@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { AdditiveBlending } from "three";
-import { createRadialGlowTexture } from "../lib/radial-glow";
+import { createRadialGlowTexture } from "../utils/radial-glow";
 
 type HotspotGlowProps = {
   position: [number, number, number];

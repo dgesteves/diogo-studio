@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactElement, ReactNode } from "react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 export function MobileLink({
   href,

@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { Vector3 } from "three";
 import type { RouteKey } from "@/constants/routes";
 import { getStation } from "../constants/stations";
-import { consumeIntro, introStartPosition } from "../lib/intro";
+import { consumeIntro, introStartPosition } from "../utils/intro";
 
 export function WorldCamera({ active }: { active: RouteKey }): null {
   const look = useRef(new Vector3());

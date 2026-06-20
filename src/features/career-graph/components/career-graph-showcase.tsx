@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 import { CareerGraphAtmosphere } from "./career-graph";
 import { CareerGraphAccessibleDescription } from "./career-graph-accessible-description";
 import { CareerGraphSvg } from "./career-graph-svg";

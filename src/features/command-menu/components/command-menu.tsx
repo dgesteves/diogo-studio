@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactElement } from "react";
 
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { useCommandMenu } from "../stores/command-menu-store";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { CommandMenuAsk } from "./command-menu-ask";
 import { Footer } from "./command-menu-footer";

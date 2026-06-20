@@ -3,7 +3,7 @@ import { edges } from "@/features/career-graph/constants/career-graph-edges";
 import { nodes } from "@/features/career-graph/constants/career-graph-nodes";
 import { patterns } from "@/constants/patterns";
 
-import { getNode } from "../lib/get-node";
+import { getNode } from "../utils/get-node";
 
 const sortedNodes = [...nodes].sort((a, b) => b.position[0] - a.position[0]);
 
