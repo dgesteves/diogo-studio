@@ -7,7 +7,7 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 Feature-first vertical slices with one dependency direction:
 `app/` → `features/` → `components/` / `hooks/` / `providers/` / `stores/` →
-`utils/` / `ai/` / `seo/` / `validations/` / `telemetry/` →
+`utils/` / `ai/` / `seo/` / `schemas/` / `telemetry/` →
 `config/` / `constants/` / `types/`. Never import upward.
 
 ## `app/` is the routing layer only
@@ -135,7 +135,7 @@ shared location only on 2+ reuse.
 - Cross-feature imports go through the target feature's `index.ts` only —
   better: lift shared code to `components/` or a shared infra folder
   (`utils/`, `ai/`, `seo/`, …).
-- `components/`, `utils/`, `ai/`, `seo/`, `validations/`, `telemetry/`, `hooks/`,
+- `components/`, `utils/`, `ai/`, `seo/`, `schemas/`, `telemetry/`, `hooks/`,
   `providers/`, `stores/` never import from `features/` or `app/`.
 - No deep imports into a feature: `@/features/contact`, never
   `@/features/contact/schemas/…`.
