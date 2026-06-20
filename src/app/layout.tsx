@@ -6,7 +6,6 @@ import { SiteFooter } from "@/components/layout/site-footer";
 import { SiteNav } from "@/components/layout/site-nav";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
-import { EasterEgg } from "@/features/easter-egg";
 import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
 import { env } from "@/config/env";
 import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";
@@ -52,7 +51,6 @@ export default function RootLayout({
               <SiteFooter />
               <CommandMenu />
               <InspectorOverlay />
-              <EasterEgg />
             </CommandMenuProvider>
           </InspectorOverlayProvider>
         </AppProviders>
