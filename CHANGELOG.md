@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/dgesteves/diogo-studio/compare/v1.7.0...v1.7.1) (2026-06-20)
+
+
+### Continuous Integration
+
+* add Conventional Commits PR title check ([#105](https://github.com/dgesteves/diogo-studio/issues/105)) ([f9aee72](https://github.com/dgesteves/diogo-studio/commit/f9aee725398b20391fb6833b7c696e7c3c80f848))
+
 ## [1.7.0](https://github.com/dgesteves/diogo-studio/compare/v1.6.0...v1.7.0) (2026-06-19)
 
 
