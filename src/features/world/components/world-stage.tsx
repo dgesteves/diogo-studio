@@ -7,6 +7,7 @@ import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/utils/cn";
 import { useActiveStation } from "../hooks/use-active-station";
 import { WorldFallback } from "./world-fallback";
+import { WorldThemeBridge } from "./world-theme-bridge";
 
 const WorldCanvas = dynamic(() => import("./world-canvas").then((m) => m.WorldCanvas), {
   ssr: false,
@@ -26,14 +27,17 @@ export function WorldStage(): ReactElement {
       <WorldFallback className="absolute inset-0" />
 
       {shouldMount ? (
-        <div
-          className={cn(
-            "absolute inset-0 transition-opacity duration-1000 ease-out",
-            ready ? "opacity-100" : "opacity-0",
-          )}
-        >
-          <WorldCanvas active={active} onReady={() => setReady(true)} />
-        </div>
+        <>
+          <WorldThemeBridge />
+          <div
+            className={cn(
+              "absolute inset-0 transition-opacity duration-1000 ease-out",
+              ready ? "opacity-100" : "opacity-0",
+            )}
+          >
+            <WorldCanvas active={active} onReady={() => setReady(true)} />
+          </div>
+        </>
       ) : null}
     </div>
   );

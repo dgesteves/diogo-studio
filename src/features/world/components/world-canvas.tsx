@@ -11,6 +11,7 @@ import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/constants/routes";
+import { useWorldPalette } from "@/hooks/use-world-palette";
 
 import { getStation } from "../constants/stations";
 import { Lounge } from "./lounge/lounge";
@@ -26,6 +27,7 @@ type WorldCanvasProps = {
 
 export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement {
   const home = getStation("home");
+  const palette = useWorldPalette();
 
   return (
     <Canvas
@@ -33,8 +35,8 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
       onCreated={() => onReady?.()}
     >
-      <color attach="background" args={["#05080b"]} />
-      <fog attach="fog" args={["#05080b", 9, 30]} />
+      <color attach="background" args={[palette.background]} />
+      <fog attach="fog" args={[palette.fogColor, palette.fogNear, palette.fogFar]} />
 
       <WebGLContextGuard />
       <PerfReporter />
@@ -49,8 +51,17 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       <WorldPortals active={active} />
 
       <EffectComposer enableNormalPass={false} multisampling={0}>
-        <Bloom intensity={0.8} luminanceThreshold={0.45} luminanceSmoothing={0.2} mipmapBlur />
-        <Vignette offset={0.3} darkness={0.6} eskil={false} />
+        <Bloom
+          intensity={palette.bloomIntensity}
+          luminanceThreshold={palette.bloomLuminanceThreshold}
+          luminanceSmoothing={palette.bloomLuminanceSmoothing}
+          mipmapBlur
+        />
+        <Vignette
+          offset={palette.vignetteOffset}
+          darkness={palette.vignetteDarkness}
+          eskil={false}
+        />
       </EffectComposer>
 
       <AdaptiveDpr pixelated={false} />

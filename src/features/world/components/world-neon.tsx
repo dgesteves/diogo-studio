@@ -4,10 +4,13 @@ import { type ReactElement } from "react";
 import { Html } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 import { siteConfig } from "@/config/site";
+import { useWorldPalette } from "@/hooks/use-world-palette";
 
 const BACK = -2.27;
 
 export function WorldNeon(): ReactElement {
+  const palette = useWorldPalette();
+
   return (
     <group>
       <Html position={[0, 2.45, BACK]} center distanceFactor={8} zIndexRange={[0, 0]}>
@@ -41,7 +44,7 @@ export function WorldNeon(): ReactElement {
       <pointLight
         position={[0, 2.4, BACK + 0.6]}
         color={brandColors.accent}
-        intensity={1.2}
+        intensity={1.2 * palette.neonIntensity}
         distance={5}
         decay={2}
       />
