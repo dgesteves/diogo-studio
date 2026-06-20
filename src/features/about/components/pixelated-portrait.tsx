@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { useInView } from "@/hooks/use-in-view";
 import { useIsClient } from "@/hooks/use-is-client";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 import { siteConfig } from "@/config/site";
 
 const PixelatedPortraitCanvas = dynamic(

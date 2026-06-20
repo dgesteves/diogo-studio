@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import type { RouteKey } from "@/constants/routes";
-import { worldDestinations } from "../content/destinations";
+import { worldDestinations } from "../constants/destinations";
 
 export function useActiveStation(): RouteKey {
   const pathname = usePathname();

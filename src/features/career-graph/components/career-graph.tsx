@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { useIsClient } from "@/hooks/use-is-client";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 const CareerGraphCanvas = dynamic(
   () => import("./career-graph-canvas").then((m) => m.CareerGraphCanvas),

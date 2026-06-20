@@ -13,7 +13,7 @@ import {
   getVitalsSnapshot,
   subscribeVitals,
 } from "@/stores/web-vitals-store";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { measureRouteJs } from "./inspector-route-js";
 import { RouteJsPanel, ScenePanel, VitalsPanel } from "./inspector-panels";

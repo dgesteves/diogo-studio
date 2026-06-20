@@ -1,5 +1,5 @@
 import type { AgentSourcesPayload } from "@/types/agent";
-import { agentSourcesPayloadSchema } from "@/lib/validations/agent";
+import { agentSourcesPayloadSchema } from "@/schemas/agent";
 
 export async function safeText(res: Response): Promise<string> {
   try {

@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import { StudioFallback } from "@/features/studio";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 export function WorldFallback({ className }: { className?: string }): ReactElement {
   return (

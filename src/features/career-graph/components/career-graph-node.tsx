@@ -3,7 +3,7 @@ import Link from "next/link";
 
 import type { CareerNode } from "@/features/career-graph/constants/career-graph-nodes";
 
-import { nodeHref } from "../lib/node-href";
+import { nodeHref } from "../utils/node-href";
 import { VIEWPORT } from "./career-graph-svg-viewport";
 
 function labelPlacement(p: { x: number; y: number }): "above" | "below" {

@@ -1,7 +1,7 @@
 import type { ReactElement, ReactNode } from "react";
 
 import type { AgentCitation } from "@/types/agent";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { renderFormatting } from "./ask-answer-formatting";
 

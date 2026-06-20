@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { cn } from "@/lib/utils/cn";
+import { cn } from "@/utils/cn";
 
 import { MonitorOutline } from "./studio-fallback-monitor-outline";
 

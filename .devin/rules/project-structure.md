@@ -7,7 +7,8 @@ description: Apply when creating files or folders, organizing modules, naming th
 
 Feature-first vertical slices with one dependency direction:
 `app/` → `features/` → `components/` / `hooks/` / `providers/` / `stores/` →
-`lib/` → `config/` / `constants/` / `types/`. Never import upward.
+`utils/` / `ai/` / `seo/` / `schemas/` / `telemetry/` →
+`config/` / `constants/` / `types/`. Never import upward.
 
 ## `app/` is the routing layer only
 
@@ -24,26 +25,26 @@ Feature-first vertical slices with one dependency direction:
   logic, or data access live.
 - Do not put shared components, hooks, utils, or domain logic under `app/`. If
   code is genuinely route-private, use a Next.js **private folder**
-  (`_components/`, `_lib/`) so it stays non-routable — but prefer the shared tree.
+  (`_components/`, `_utils/`) so it stays non-routable — but prefer the shared tree.
 
 ## Where everything else lives
 
 - `src/features/<feature>/` — vertical slices: `components/`, `actions/`
   (Server Actions), `queries/` (server-side reads), `hooks/`, `schemas/`,
-  `stores/`, `emails/`, `content/` (authored articles — work owns case
-  studies, writing owns essays), `utils/` or `lib/`, `types.ts`,
-  `constants/` or `constants.ts` (feature-owned constants **and** static
-  data), plus a curated `index.ts` that is the **only** import surface for
-  the feature.
+  `stores/`, `emails/`, `utils/`, `types.ts`, `constants/` or
+  `constants.ts` (feature-owned constants, static data **and** authored
+  content — e.g. articles), plus a curated `index.ts` that is the **only**
+  import surface for the feature.
 - `src/components/` — shared presentational UI used by 2+ features: `ui/`
   (design-system primitives), `layout/` (app shell — nav, footer), `common/`
   (shared composites), plus domain-neutral groups promoted on reuse
   (`article/`, `seo/`, `og/`, `r3f/`).
-- `src/lib/` — core infrastructure & integrations. Server-only modules (`ai/`,
-  `email/`, `rate-limit.ts`, and later `db/`, `auth/`, `payments/`) start with
-  `import "server-only"`; the rest stays isomorphic and pure (`utils/`,
-  `content/`, `seo/`, `validations/`, `telemetry/`). Never mix the two in one
-  module.
+- Core infrastructure & integrations live in **named top-level folders by
+  type** — there is no catch-all `src/lib/`. Server-only modules (`src/ai/`,
+  `src/rate-limit.ts`, and later `src/email/`, `src/db/`, `src/auth/`,
+  `src/payments/`) start with `import "server-only"`; isomorphic, pure modules
+  (`src/utils/`, `src/seo/`, `src/schemas/`, `src/telemetry/`) carry no
+  secrets and run on client or server. Never mix the two in one module.
 - `src/hooks/` — shared client hooks. `src/providers/` — client context
   providers composed into one `<Providers>` (`providers/index.tsx`).
   `src/stores/` — global client state (Zustand).
@@ -51,9 +52,9 @@ Feature-first vertical slices with one dependency direction:
   features (taxonomies, generated indexes like `agent-index.json`); `routes.ts`
   is the typed SSOT for every internal URL and path builder. There is no
   separate `src/data/` — constants and static data live together here.
-  Single-feature static data lives in that feature's `constants/`; authored
-  articles in the owning feature's `content/` (no top-level `content/`
-  directory).
+  Single-feature static data and authored content live in that feature's
+  `constants/` — there is no `content/` directory (top-level or per-feature);
+  features keep all static data and content under `constants/`.
 - `src/config/` — static configuration: `site.ts`, `navigation.ts`, `brand.ts`,
   and `env.ts` (Zod-validated env — never raw `process.env` elsewhere).
 - `src/styles/` — global CSS + design tokens. `src/types/` — truly global
@@ -71,8 +72,8 @@ Feature-first vertical slices with one dependency direction:
 - **Naming**: `kebab-case` files/dirs, `PascalCase` components, `useX` hooks,
   `is/has/can` booleans. One primary, **named** export per file.
 - A feature's `index.ts` exposes a **small, curated public API** (its only import
-  surface). Avoid wide barrels in `components/`/`lib/` that re-export everything —
-  they hurt tree-shaking and invite circular imports.
+  surface). Avoid wide barrels in `components/` or the shared infra folders that
+  re-export everything — they hurt tree-shaking and invite circular imports.
 - **No magic values — name them, then place them by scope.** Don't inline
   unexplained numbers or meaningful/repeated strings; give them a named `const` /
   `as const` (or a union). Place at the narrowest scope that removes the magic: a
@@ -99,29 +100,29 @@ shared location only on 2+ reuse.
 - **Hooks** (`hooks/`, `use-*.ts`) — reusable **client** stateful logic
   (effects, refs, subscriptions, derived state). One hook per file. Feature
   hooks stay in the feature; shared hooks live in `src/hooks/`.
-- **Server integrations** (`lib/{ai,email,db,auth,payments}/`,
+- **Server integrations** (`src/{ai,email,db,auth,payments}/`,
   `import "server-only"`) — the only place that touches data sources, secrets,
   and server-side third-party SDKs. Returns typed, validated data; never
   imported by a client component.
-- **Queries** (`queries/`) — feature server-side reads that compose `lib/`
-  integrations and return DTOs to pages.
+- **Queries** (`queries/`) — feature server-side reads that compose the server
+  integrations (`src/ai/`, `src/email/`, …) and return DTOs to pages.
 - **Server Actions** (`actions/`, `"use server"`) — thin mutation entry points:
-  authenticate, validate input with a schema, call a `lib/` integration or
+  authenticate, validate input with a schema, call a server integration or
   feature helper, revalidate. No business logic inline.
 - **Types** (`types.ts`, `src/types/`) — `type`/`interface` declarations only,
   no runtime code. Co-locate feature types in the feature's `types.ts`; truly
   global/shared types go in `src/types/`. Export domain types from Zod schemas
   with `z.infer` rather than re-declaring them.
-- **Schemas** (`schemas/`, `src/lib/validations/`) — Zod schemas as the single
-  source of truth for shape + runtime validation at every boundary (forms,
-  actions, route handlers, external APIs).
+- **Schemas** (feature `schemas/`, global `src/schemas/`) — Zod schemas as the
+  single source of truth for shape + runtime validation at every boundary
+  (forms, actions, route handlers, external APIs).
 - **Constants & static data / config** — named values and static data, not
   magic literals. Narrowest scope wins: file-local `const` → feature
   `constants/` → `src/constants/` (`routes.ts` is the typed SSOT for URLs;
   shared taxonomies and generated indexes live here too). Site/nav/brand/env
   config lives in `src/config/`.
-- **Utils** (`lib/utils/`) — pure, isomorphic, side-effect-free helpers. One
-  cohesive concern per file; no React, no env, no I/O.
+- **Utils** (`src/utils/`, feature `utils/`) — pure, isomorphic, side-effect-free
+  helpers. One cohesive concern per file; no React, no env, no I/O.
 - **Providers** (`src/providers/`, `*-provider.tsx`) — client context
   providers; compose them once in `providers/index.tsx` and mount in the root
   layout.
@@ -132,8 +133,9 @@ shared location only on 2+ reuse.
 
 - `features/*` never import from `app/`.
 - Cross-feature imports go through the target feature's `index.ts` only —
-  better: lift shared code to `components/` or `lib/`.
-- `components/`, `lib/`, `hooks/`, `providers/`, `stores/` never import from
-  `features/` or `app/`.
+  better: lift shared code to `components/` or a shared infra folder
+  (`utils/`, `ai/`, `seo/`, …).
+- `components/`, `utils/`, `ai/`, `seo/`, `schemas/`, `telemetry/`, `hooks/`,
+  `providers/`, `stores/` never import from `features/` or `app/`.
 - No deep imports into a feature: `@/features/contact`, never
   `@/features/contact/schemas/…`.

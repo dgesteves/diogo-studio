@@ -3,7 +3,7 @@ import { edges } from "@/features/career-graph/constants/career-graph-edges";
 import { nodes, type NodeId } from "@/features/career-graph/constants/career-graph-nodes";
 import { patterns } from "@/constants/patterns";
 
-import { projectToSvg } from "../lib/project-to-svg";
+import { projectToSvg } from "../utils/project-to-svg";
 import { Axis } from "./career-graph-axis";
 import { CareerGraphDefs } from "./career-graph-defs";
 import { Node } from "./career-graph-node";

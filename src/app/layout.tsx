@@ -9,11 +9,11 @@ import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { EasterEgg } from "@/features/easter-egg";
 import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
 import { env } from "@/config/env";
-import { personJsonLd, websiteJsonLd } from "@/lib/seo/structured-data";
-import { cn } from "@/lib/utils/cn";
+import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";
+import { cn } from "@/utils/cn";
 import "@/styles/globals.css";
 
-export { rootMetadata as metadata, rootViewport as viewport } from "@/lib/seo/root-metadata";
+export { rootMetadata as metadata, rootViewport as viewport } from "@/seo/root-metadata";
 
 const isVercel = env.VERCEL === "1";
 

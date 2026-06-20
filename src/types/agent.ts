@@ -4,4 +4,4 @@ export type {
   AgentIndex,
   AgentCitation,
   AgentSourcesPayload,
-} from "@/lib/validations/agent";
+} from "@/schemas/agent";

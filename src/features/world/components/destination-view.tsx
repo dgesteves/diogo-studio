@@ -1,6 +1,6 @@
 import { type ReactElement, type ReactNode } from "react";
 import type { RouteKey } from "@/constants/routes";
-import { getDestination } from "../content/destinations";
+import { getDestination } from "../constants/destinations";
 import { ContentBlocks } from "./content-blocks";
 import { DestinationPanel } from "./destination-panel";
 
