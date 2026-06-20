@@ -12,8 +12,10 @@ import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/constants/routes";
 import { useWorldPalette } from "@/hooks/use-world-palette";
+import { markWorldReady } from "@/stores/boot-store";
 
 import { getStation } from "../constants/stations";
+import { BootProgressReporter } from "./boot-progress-reporter";
 import { Lounge } from "./lounge/lounge";
 import { WorldCamera } from "./world-camera";
 import { WorldNeon } from "./world-neon";
@@ -33,13 +35,17 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
     <Canvas
       dpr={[1, 1.5]}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-      onCreated={() => onReady?.()}
+      onCreated={() => {
+        markWorldReady();
+        onReady?.();
+      }}
     >
       <color attach="background" args={[palette.background]} />
       <fog attach="fog" args={[palette.fogColor, palette.fogNear, palette.fogFar]} />
 
       <WebGLContextGuard />
       <PerfReporter />
+      <BootProgressReporter />
 
       <PerspectiveCamera makeDefault fov={44} near={0.1} far={60} position={home.position} />
       <WorldCamera active={active} />

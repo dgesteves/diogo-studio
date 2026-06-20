@@ -16,6 +16,7 @@ import { AUDIO_STORAGE_KEY, type SfxName } from "./constants";
 
 type AudioContextValue = {
   enabled: boolean;
+  enable: () => Promise<void>;
   toggle: () => void;
   play: (name: SfxName) => void;
 };
@@ -83,7 +84,7 @@ export function AudioProvider({ children }: { children: ReactNode }): ReactEleme
   }, [reducedMotion, enable]);
 
   return (
-    <AudioStateContext.Provider value={{ enabled, toggle, play }}>
+    <AudioStateContext.Provider value={{ enabled, enable, toggle, play }}>
       {children}
     </AudioStateContext.Provider>
   );
