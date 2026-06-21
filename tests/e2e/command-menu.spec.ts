@@ -32,7 +32,7 @@ test.describe("⌘K Command Menu", () => {
   test("Phase 4: the hero CTA opens the menu directly in Ask mode", async ({ page }) => {
     await page.goto("/");
 
-    await page.getByRole("button", { name: /ask the agent about diogo/i }).click();
+    await page.getByRole("button", { name: /ask the agent about diogo/i }).press("Enter");
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
