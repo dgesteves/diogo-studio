@@ -289,6 +289,72 @@ lab, rooftop, …), mapped onto real routes — never empty rooms.
 
 ---
 
+## Phase 9 — Signature boot sequence + audio entry
+
+**Goal:** First arrival feels like powering on the studio (vision §3) — a
+game-style "creating the studio" screen that covers real asset/shader warm-up,
+then hands off into the existing camera fly-in. Doubles as the audio opt-in
+gesture.
+
+**Status:** In progress — shipped first version (terminal/progress UI + audio
+entry). Cinematic power-on choreography is the follow-up.
+
+- [x] `BootSequence` client island in `MarketingLayout` + a small `boot-store`
+      (`useSyncExternalStore`, same pattern as `world-store`).
+- [x] Drive progress from drei `useProgress` via an in-canvas
+      `BootProgressReporter` (keeps drei off the critical path), plus a faux
+      ease, a min display floor, and a max-timeout fallback so it never hangs.
+- [ ] Staged power-on choreography (grid → desk/monitors → neon → audio swell)
+      gated on load milestones; type-on terminal copy. _(v1 ships a progress bar + stepped status text; full choreography is the next pass.)_
+- [x] Two entry CTAs — **"Enter with sound"** / **"Enter muted"** — wired to
+      `useAudio().enable` (now exposed from the provider). The "Enter" click is
+      the browser-required user gesture for audio.
+- [x] Once per session (`studio-booted` sessionStorage key); skippable
+      (`Esc` via Radix dialog / Skip / Enter); reduced-motion = instant
+      (returns null). _Follow-up: pre-select "sound" when_
+      `studio-audio-enabled=1` _is stored._
+
+**Files:** new `features/world/components/boot-sequence.tsx` (+ subparts),
+`src/stores/boot-store.ts`, `features/audio/audio-provider.tsx`
+(`enable`/`enabled`), `app/(marketing)/layout.tsx`.
+
+**Acceptance:** First visit shows the boot screen tied to real load; skippable
+and keyboard-operable; audio only ever starts from the explicit gesture; nothing
+downloaded for "Enter muted"; reduced-motion users land instantly with full
+content.
+
+---
+
+## Phase 10 — Day/night flagship world (theme-reactive)
+
+**Goal:** Light mode = day, dark mode = night — the whole world changes.
+Flagship scope: not just a recolor but a second art pass (daylight rig, sky,
+eventually sun + skyline + time-of-day).
+
+**Status:** In progress — palette foundation shipped (night-first).
+
+- [x] Extract a single source of truth: `config/world-theme.ts`
+      (`worldPalettes` for `day|night` + `resolveWorldMode`) +
+      `src/stores/world-theme-store.ts` + `useWorldPalette` hook +
+      `WorldThemeBridge` (maps `next-themes` → world mode). Night palette = exact
+      current look; wired canvas bg/fog/bloom/vignette, lighting, neon. World
+      defaults to night even under system.
+- [ ] Tune the day palette on-device (daylight lighting, sky/haze background,
+      bloom down, neon legibility, contact-shadow color/opacity).
+- [ ] Smooth day↔night transition (lerp colors/intensities in `useFrame`);
+      reduced-motion = instant swap.
+- [ ] Flagship extras: sun/sky dome, daytime city skyline, time-of-day polish.
+
+**Files:** `config/world-theme.ts` (+ test), `src/stores/world-theme-store.ts`,
+`src/hooks/use-world-palette.ts`, `world-theme-bridge.tsx`, `world-canvas.tsx`,
+`lighting.tsx`, `world-neon.tsx`, `world-stage.tsx`.
+
+**Acceptance:** Toggling theme switches the whole world day↔night; night is
+byte-for-byte the prior look; day is convincing (not a washed-out recolor);
+reduced-motion + no-3D paths unaffected.
+
+---
+
 ## Open decisions
 
 - Home hero treatment: fully minimal vs slim dismissible card (lean: slim,
@@ -300,10 +366,13 @@ lab, rooftop, …), mapped onto real routes — never empty rooms.
 
 ## Session log
 
-| Date       | Phase | Change                                                                                                                                                                                  | Status                         |
-| ---------- | ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| 2026-06-20 | —     | Roadmap created; scope agreed as phased multi-session plan toward the north star.                                                                                                       | Done                           |
-| 2026-06-20 | 0     | Aspect-aware camera framing: added `framingPullback` util + test; `world-camera.tsx` pulls back on narrow viewports. `pnpm validate` green.                                             | Done (pending on-device check) |
-| 2026-06-20 | 2     | Non-blocking composition (CSS, in-flow): content cards now bottom-sheet on mobile / narrower side card on desktop so the world is visible everywhere. `pnpm validate` green (54 tests). | In progress                    |
-| 2026-06-20 | 7     | Reverted the procedural-synth audio prototype (moving to downloaded royalty-free assets — see `docs/audio-assets.md`); removed the legacy "type diogo" easter egg.                      | Reverted                       |
-| 2026-06-20 | 7     | File-based opt-in audio player: looping `ambient.mp3` + hover/whoosh/confirm SFX, lazy-loaded on first enable, reduced-motion aware. `pnpm validate` green (54 tests).                  | In progress                    |
+| Date       | Phase | Change                                                                                                                                                                                                                                                                                         | Status                         |
+| ---------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| 2026-06-20 | —     | Roadmap created; scope agreed as phased multi-session plan toward the north star.                                                                                                                                                                                                              | Done                           |
+| 2026-06-20 | 0     | Aspect-aware camera framing: added `framingPullback` util + test; `world-camera.tsx` pulls back on narrow viewports. `pnpm validate` green.                                                                                                                                                    | Done (pending on-device check) |
+| 2026-06-20 | 2     | Non-blocking composition (CSS, in-flow): content cards now bottom-sheet on mobile / narrower side card on desktop so the world is visible everywhere. `pnpm validate` green (54 tests).                                                                                                        | In progress                    |
+| 2026-06-20 | 7     | Reverted the procedural-synth audio prototype (moving to downloaded royalty-free assets — see `docs/audio-assets.md`); removed the legacy "type diogo" easter egg.                                                                                                                             | Reverted                       |
+| 2026-06-20 | 7     | File-based opt-in audio player: looping `ambient.mp3` + hover/whoosh/confirm SFX, lazy-loaded on first enable, reduced-motion aware. `pnpm validate` green (54 tests).                                                                                                                         | In progress                    |
+| 2026-06-20 | 9/10  | Scoped 3 new features from design chat: signature boot sequence (Phase 9), audio-opt-in on boot, day/night flagship world (Phase 10). Decision: boot = once/session; day/night = full flagship.                                                                                                | Planned                        |
+| 2026-06-20 | 10    | World palette foundation: `config/world-theme.ts` (`day\|night`) + `world-theme-store` + `useWorldPalette` + `WorldThemeBridge`; wired canvas/lighting/neon; night = exact current look; day = first-draft. lint+typecheck+test+knip green.                                                    | In progress                    |
+| 2026-06-20 | 9     | Boot sequence v1: `boot-store` + `BootSequence`/`BootOverlay`/`BootActions` (Radix dialog) + in-canvas `BootProgressReporter` (drei `useProgress`); once/session, skippable, reduced-motion-instant; "Enter with sound/muted" wired to exposed `useAudio().enable`. validate green (61 tests). | In progress                    |
