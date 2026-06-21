@@ -1,7 +1,10 @@
 "use client";
 
-import type { ReactElement, RefObject } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { useState, type ReactElement, type RefObject } from "react";
+import { Button } from "@/components/ui/button";
+import { BootSoundToggle } from "./boot-sound-toggle";
+import { BootThemeToggle } from "./boot-theme-toggle";
 
 type BootActionsProps = {
   canEnter: boolean;
@@ -16,37 +19,37 @@ export function BootActions({
   onEnterWithSound,
   onEnterMuted,
 }: BootActionsProps): ReactElement {
+  const [soundOn, setSoundOn] = useState(true);
+
   if (!canEnter) {
     return (
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={onEnterMuted}
-        className="font-mono text-[10px] tracking-widest text-white/40 uppercase underline-offset-4 transition-colors hover:text-white/70 hover:underline"
+        className="focus-visible:ring-offset-brand-ink font-mono text-[10px] tracking-widest text-white/45 uppercase hover:bg-white/5 hover:text-white/80"
       >
         Skip intro
-      </button>
+      </Button>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-3 sm:flex-row">
-      <button
+    <div className="flex flex-col items-center gap-5">
+      <div className="flex flex-wrap items-center justify-center gap-3">
+        <BootThemeToggle />
+        <BootSoundToggle soundOn={soundOn} onChange={setSoundOn} />
+      </div>
+      <Button
         ref={primaryRef}
         type="button"
-        onClick={onEnterWithSound}
-        className="inline-flex items-center gap-2 rounded-full border border-[#22d3ee]/50 bg-[#22d3ee]/10 px-5 py-2.5 font-mono text-[11px] tracking-widest text-[#67e8f9] uppercase transition-colors hover:bg-[#22d3ee]/20"
+        onClick={() => (soundOn ? onEnterWithSound() : onEnterMuted())}
+        className="bg-brand-cyan text-brand-ink hover:bg-brand-cyan-bright active:bg-brand-cyan-bright focus-visible:ring-offset-brand-ink h-11 gap-2 px-8 font-mono text-[11px] font-semibold tracking-[0.2em] uppercase shadow-[0_0_28px_var(--brand-cyan)]"
       >
-        <Volume2 className="size-4" aria-hidden="true" />
-        Enter with sound
-      </button>
-      <button
-        type="button"
-        onClick={onEnterMuted}
-        className="inline-flex items-center gap-2 rounded-full border border-white/15 px-5 py-2.5 font-mono text-[11px] tracking-widest text-white/70 uppercase transition-colors hover:border-white/35 hover:text-white"
-      >
-        <VolumeX className="size-4" aria-hidden="true" />
-        Enter muted
-      </button>
+        Enter the studio
+        <ArrowRight aria-hidden="true" />
+      </Button>
     </div>
   );
 }

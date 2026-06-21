@@ -6,6 +6,11 @@ import { siteConfig } from "@/config/site";
 import { cn } from "@/utils/cn";
 import { BOOT_READY_LABEL, BOOT_STEPS } from "../constants/boot";
 import { BootActions } from "./boot-actions";
+import { BootBackdrop } from "./boot-backdrop";
+import { BootHud } from "./boot-hud";
+import { BootLog } from "./boot-log";
+import { BootProgress } from "./boot-progress";
+import { BootWordmark } from "./boot-wordmark";
 
 type BootOverlayProps = {
   progress: number;
@@ -48,32 +53,29 @@ export function BootOverlay({
           aria-describedby={undefined}
           onInteractOutside={(event) => event.preventDefault()}
           className={cn(
-            "fixed inset-0 z-50 flex flex-col items-center justify-center px-6 text-center outline-none",
-            "bg-[radial-gradient(130%_120%_at_50%_12%,#0c1925_0%,#05080b_64%)]",
+            "fixed inset-0 z-50 flex items-center justify-center overflow-hidden px-6 pb-[8vh] outline-none",
             "transition-opacity duration-700 ease-out",
             exiting ? "opacity-0" : "opacity-100",
           )}
         >
-          <div className="flex w-full max-w-sm flex-col items-center gap-7">
-            <p className="font-mono text-[11px] tracking-[0.42em] text-[#67e8f9]/80 uppercase">
-              {siteConfig.name}
-            </p>
-            <Dialog.Title className="font-mono text-lg font-medium tracking-[0.18em] text-white/95 uppercase">
-              Creating the studio
+          <BootBackdrop />
+          <BootHud />
+
+          <div
+            className={cn(
+              "relative flex w-full max-w-md flex-col items-center gap-8 text-center",
+              !exiting && "world-intro-rise",
+            )}
+          >
+            <Dialog.Title className="sr-only">
+              Entering {siteConfig.name}&rsquo;s studio
             </Dialog.Title>
 
-            <div className="w-full">
-              <div className="h-px w-full overflow-hidden bg-white/10">
-                <div
-                  className="h-full bg-[#22d3ee] shadow-[0_0_12px_#22d3ee] transition-[width] duration-300 ease-out"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <div className="mt-3 flex items-center justify-between font-mono text-[10px] tracking-widest text-white/45 uppercase">
-                <span>{step}</span>
-                <span className="tabular">{Math.round(pct)}%</span>
-              </div>
-            </div>
+            <BootWordmark />
+
+            <BootLog pct={pct} ready={canEnter} />
+
+            <BootProgress pct={pct} step={step} ready={canEnter} />
 
             <BootActions
               canEnter={canEnter}

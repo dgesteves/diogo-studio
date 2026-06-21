@@ -4,9 +4,15 @@ export const BOOT_EXIT_MS = 700;
 
 export const BOOT_STEPS = [
   "Initializing render pipeline",
+  "Compiling WebGL shaders",
   "Loading workstation geometry",
+  "Streaming studio textures",
   "Calibrating neon & volumetrics",
+  "Wiring ambient audio bus",
   "Spinning up ambient systems",
+  "Mounting interface layer",
 ] as const;
 
 export const BOOT_READY_LABEL = "Studio ready";
+
+export const BOOT_ROLE_LINE = "Staff · Principal · Founding Engineer";
