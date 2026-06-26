@@ -8,6 +8,7 @@ import {
   getBootServerSnapshot,
   getBootSnapshot,
   hasBootedThisSession,
+  hideBootSplash,
   markBootedThisSession,
   subscribeBoot,
 } from "@/stores/boot-store";
@@ -30,6 +31,10 @@ export function BootSequence(): ReactElement | null {
   const [forceReady, setForceReady] = useState(false);
 
   const show = isClient && !reducedMotion && !finished && !hasBootedThisSession();
+
+  useEffect(() => {
+    if (isClient) hideBootSplash();
+  }, [isClient]);
 
   useEffect(() => {
     if (!show) return;

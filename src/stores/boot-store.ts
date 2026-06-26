@@ -1,6 +1,7 @@
 export type BootSignal = { progress: number; ready: boolean };
 
-const BOOT_SESSION_KEY = "studio-booted";
+export const BOOT_SESSION_KEY = "studio-booted";
+export const BOOT_SPLASH_ID = "boot-splash";
 const INITIAL: BootSignal = { progress: 0, ready: false };
 
 let signal: BootSignal = INITIAL;
@@ -57,4 +58,10 @@ export function markBootedThisSession(): void {
   } catch {
     /* storage unavailable */
   }
+}
+
+export function hideBootSplash(): void {
+  if (typeof document === "undefined") return;
+  const el = document.getElementById(BOOT_SPLASH_ID);
+  if (el) el.style.display = "none";
 }

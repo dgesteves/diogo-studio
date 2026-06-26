@@ -1,60 +1,88 @@
 "use client";
 
-import { createContext, useContext, useEffect, useRef, useState, type ReactElement } from "react";
+import { useEffect, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
 
-type InspectorOverlayContextValue = {
+const STORAGE_KEY = "studio-inspector-open";
+
+function readStored(): boolean {
+  try {
+    return window.sessionStorage.getItem(STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function persist(open: boolean): void {
+  try {
+    window.sessionStorage.setItem(STORAGE_KEY, open ? "1" : "0");
+  } catch {
+    /* storage unavailable */
+  }
+}
+
+let isOpen = false;
+let hydrated = false;
+const listeners = new Set<() => void>();
+
+function hydrate(): void {
+  if (hydrated || typeof window === "undefined") return;
+  hydrated = true;
+  isOpen = readStored();
+}
+
+function subscribe(callback: () => void): () => void {
+  hydrate();
+  listeners.add(callback);
+  return () => {
+    listeners.delete(callback);
+  };
+}
+
+function getSnapshot(): boolean {
+  hydrate();
+  return isOpen;
+}
+
+function getServerSnapshot(): boolean {
+  return false;
+}
+
+export function setInspectorOpen(next: boolean): void {
+  hydrated = true;
+  if (isOpen === next) return;
+  isOpen = next;
+  persist(next);
+  for (const listener of listeners) listener();
+}
+
+export function toggleInspector(): void {
+  setInspectorOpen(!isOpen);
+}
+
+type InspectorOverlayValue = {
   open: boolean;
   setOpen: (value: boolean) => void;
   toggle: () => void;
 };
 
-const InspectorOverlayContext = createContext<InspectorOverlayContextValue | null>(null);
+export function useInspectorOverlay(): InspectorOverlayValue {
+  const open = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return { open, setOpen: setInspectorOpen, toggle: toggleInspector };
+}
 
-export function InspectorOverlayProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}): ReactElement {
-  const [open, setOpenState] = useState(false);
-  const openRef = useRef(false);
-
-  function setOpen(next: boolean): void {
-    openRef.current = next;
-    setOpenState(next);
-  }
-
-  function toggle(): void {
-    setOpen(!openRef.current);
-  }
-
+export function InspectorOverlayProvider({ children }: { children: ReactNode }): ReactElement {
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    function onKeyDown(event: KeyboardEvent) {
+    function onKeyDown(event: KeyboardEvent): void {
       if (event.key === "`" && event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault();
-        const next = !openRef.current;
-        openRef.current = next;
-        setOpenState(next);
-      } else if (event.key === "Escape" && openRef.current) {
-        openRef.current = false;
-        setOpenState(false);
+        toggleInspector();
+      } else if (event.key === "Escape" && isOpen) {
+        setInspectorOpen(false);
       }
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const value: InspectorOverlayContextValue = { open, setOpen, toggle };
-
-  return (
-    <InspectorOverlayContext.Provider value={value}>{children}</InspectorOverlayContext.Provider>
-  );
-}
-
-export function useInspectorOverlay(): InspectorOverlayContextValue {
-  const ctx = useContext(InspectorOverlayContext);
-  if (!ctx) {
-    throw new Error("useInspectorOverlay must be used within <InspectorOverlayProvider>.");
-  }
-  return ctx;
+  return <>{children}</>;
 }

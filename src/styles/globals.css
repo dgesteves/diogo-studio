@@ -33,6 +33,7 @@
 
   --brand-cyan: #22d3ee;
   --brand-cyan-bright: #67e8f9;
+  --brand-magenta: #f0468a;
   --brand-ink: #0d0f12;
   --brand-ink-raised: #181c22;
   --brand-edge: #262b33;
@@ -97,6 +98,7 @@
 
   --color-brand-cyan: var(--brand-cyan);
   --color-brand-cyan-bright: var(--brand-cyan-bright);
+  --color-brand-magenta: var(--brand-magenta);
   --color-brand-ink: var(--brand-ink);
   --color-brand-ink-raised: var(--brand-ink-raised);
   --color-brand-edge: var(--brand-edge);
@@ -407,6 +409,333 @@
   animation: boot-sheen 2.4s ease-in-out infinite;
 }
 
+.boot-scene {
+  background-color: var(--brand-ink);
+  background-image: radial-gradient(
+    132% 92% at 50% 120%,
+    color-mix(in srgb, var(--brand-cyan) 16%, transparent),
+    transparent 60%
+  );
+}
+
+.boot-readability {
+  background: radial-gradient(
+    60% 54% at 50% 47%,
+    color-mix(in srgb, var(--brand-ink) 88%, transparent) 0%,
+    color-mix(in srgb, var(--brand-ink) 72%, transparent) 42%,
+    color-mix(in srgb, var(--brand-ink) 32%, transparent) 68%,
+    transparent 84%
+  );
+}
+
+@keyframes boot-sun-pulse {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1.035);
+  }
+}
+.boot-sun {
+  background: radial-gradient(
+    circle at 50% 50%,
+    var(--brand-cyan-bright) 0%,
+    color-mix(in srgb, var(--brand-cyan) 92%, white) 24%,
+    var(--brand-cyan) 46%,
+    color-mix(in srgb, var(--brand-cyan) 28%, transparent) 66%,
+    transparent 74%
+  );
+  filter: drop-shadow(0 0 44px color-mix(in srgb, var(--brand-cyan) 42%, transparent));
+  animation: boot-sun-pulse 5s ease-in-out infinite;
+}
+.boot-sun-grilles {
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 6px,
+    var(--brand-ink) 6px,
+    var(--brand-ink) 10px
+  );
+  -webkit-mask-image: linear-gradient(to bottom, transparent 26%, black 80%);
+  mask-image: linear-gradient(to bottom, transparent 26%, black 80%);
+}
+
+@keyframes boot-scan-beam {
+  0% {
+    transform: translateY(-32vh);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.85;
+  }
+  88% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(112vh);
+    opacity: 0;
+  }
+}
+.boot-scan-beam {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--brand-cyan) 55%, transparent) 45%,
+    color-mix(in srgb, var(--brand-cyan-bright) 90%, transparent) 50%,
+    color-mix(in srgb, var(--brand-cyan) 55%, transparent) 55%,
+    transparent
+  );
+  box-shadow: 0 0 44px 6px color-mix(in srgb, var(--brand-cyan) 32%, transparent);
+  animation: boot-scan-beam 5.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes boot-motes-drift {
+  to {
+    background-position:
+      0 -620px,
+      60px -480px;
+  }
+}
+.boot-motes {
+  background-image:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--brand-cyan-bright) 75%, transparent) 1px,
+      transparent 1.8px
+    ),
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--brand-cyan) 60%, transparent) 1px,
+      transparent 1.6px
+    );
+  background-size:
+    150px 150px,
+    96px 96px;
+  background-position:
+    0 0,
+    60px 80px;
+  animation: boot-motes-drift 18s linear infinite;
+}
+
+@keyframes boot-crt-flicker {
+  0%,
+  100% {
+    opacity: 0.035;
+  }
+  45% {
+    opacity: 0.06;
+  }
+  47% {
+    opacity: 0.02;
+  }
+  60% {
+    opacity: 0.07;
+  }
+}
+.boot-crt {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.05) 0,
+    rgba(255, 255, 255, 0.05) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  mix-blend-mode: overlay;
+  animation: boot-crt-flicker 4s steps(1, end) infinite;
+}
+
+.boot-glitch {
+  position: relative;
+  display: inline-block;
+}
+.boot-glitch::before,
+.boot-glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.boot-glitch::before {
+  color: var(--brand-magenta);
+  animation: boot-glitch-a 3.4s steps(2, end) infinite;
+}
+.boot-glitch::after {
+  color: var(--brand-cyan-bright);
+  animation: boot-glitch-b 2.9s steps(2, end) infinite;
+}
+@keyframes boot-glitch-a {
+  0%,
+  88%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  90% {
+    opacity: 0.85;
+    transform: translate(-2px, -1px);
+    clip-path: inset(12% 0 58% 0);
+  }
+  93% {
+    opacity: 0.85;
+    transform: translate(2px, 1px);
+    clip-path: inset(64% 0 12% 0);
+  }
+  96% {
+    opacity: 0.85;
+    transform: translate(-1px, 0);
+    clip-path: inset(38% 0 38% 0);
+  }
+}
+@keyframes boot-glitch-b {
+  0%,
+  85%,
+  100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0 0 0 0);
+  }
+  87% {
+    opacity: 0.8;
+    transform: translate(2px, 1px);
+    clip-path: inset(70% 0 8% 0);
+  }
+  91% {
+    opacity: 0.8;
+    transform: translate(-2px, -1px);
+    clip-path: inset(20% 0 50% 0);
+  }
+  94% {
+    opacity: 0.8;
+    transform: translate(1px, 0);
+    clip-path: inset(46% 0 30% 0);
+  }
+}
+
+@keyframes boot-hud-sweep {
+  0% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+}
+.boot-hud-sweep {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    color-mix(in srgb, var(--brand-cyan) 22%, transparent),
+    transparent
+  );
+  animation: boot-hud-sweep 6s linear infinite;
+}
+
+@keyframes boot-caret {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+.boot-caret {
+  animation: boot-caret 1s steps(1, end) infinite;
+}
+
+.boot-progress-track {
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent 11px,
+    color-mix(in srgb, var(--brand-ink) 65%, transparent) 11px,
+    color-mix(in srgb, var(--brand-ink) 65%, transparent) 12px
+  );
+}
+@keyframes boot-fill-stripes {
+  to {
+    background-position:
+      24px 0,
+      0 0;
+  }
+}
+.boot-fill {
+  background-image:
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.28) 0,
+      rgba(255, 255, 255, 0.28) 6px,
+      transparent 6px,
+      transparent 12px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--brand-cyan) 78%, transparent),
+      var(--brand-cyan-bright)
+    );
+  background-size:
+    auto,
+    100% 100%;
+  animation: boot-fill-stripes 0.8s linear infinite;
+}
+
+@keyframes boot-ring-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.7;
+  }
+  70%,
+  100% {
+    transform: scale(1.28);
+    opacity: 0;
+  }
+}
+.boot-ring {
+  animation: boot-ring-pulse 2.2s ease-out infinite;
+}
+
+@property --boot-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes boot-cta-spin {
+  to {
+    --boot-angle: 360deg;
+  }
+}
+.boot-cta-frame {
+  background: conic-gradient(
+    from var(--boot-angle),
+    transparent 0deg,
+    var(--brand-cyan-bright) 50deg,
+    transparent 110deg,
+    transparent 230deg,
+    color-mix(in srgb, var(--brand-cyan) 90%, white) 290deg,
+    transparent 350deg
+  );
+  padding: 1px;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: boot-cta-spin 4s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -415,5 +744,9 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
+  }
+
+  #boot-splash {
+    display: none;
   }
 }
