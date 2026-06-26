@@ -82,7 +82,7 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │   ├── api/                Route Handlers — <name>/route.ts                             [present]
     │   ├── layout.tsx           root layout (fonts, providers, <html>)                      [present]
     │   ├── error.tsx • global-error.tsx • not-found.tsx • loading.tsx                       [present]
-    │   ├── opengraph-image.tsx • icon.tsx • apple-icon.tsx • favicon.ico                    [present]
+    │   ├── icon.tsx • apple-icon.tsx • favicon.ico                                          [present]
     │   └── manifest.ts • robots.ts • sitemap.ts                                             [present]
     │
     ├── features/               ── VERTICAL SLICES (one folder per capability) ───────────  [present]

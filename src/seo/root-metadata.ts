@@ -6,6 +6,13 @@ const siteName = siteConfig.name;
 const siteTitle = `${siteConfig.name} — ${siteConfig.role}`;
 const siteDescription = siteConfig.tagline;
 
+const ogImage = {
+  url: "/images/world-poster.png",
+  width: 5116,
+  height: 2084,
+  alt: siteTitle,
+} as const;
+
 export const rootMetadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
@@ -39,12 +46,14 @@ export const rootMetadata: Metadata = {
     description: siteDescription,
     url: "/",
     locale: "en_US",
+    images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: siteTitle,
     description: siteDescription,
     creator: siteConfig.twitterHandle,
+    images: [ogImage],
   },
   robots: {
     index: true,
