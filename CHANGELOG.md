@@ -1,5 +1,44 @@
 # Changelog
 
+## [1.8.0](https://github.com/dgesteves/diogo-studio/compare/v1.7.1...v1.8.0) (2026-06-26)
+
+
+### Features
+
+* **audio:** add ambient music and sound effects system with user toggle ([197b679](https://github.com/dgesteves/diogo-studio/commit/197b679f3ebc4108c6d517be99c3fca1beaf1184))
+* **boot:** enhance boot sequence with retro-futuristic visual effects and splash screen ([cda1898](https://github.com/dgesteves/diogo-studio/commit/cda189830a4f2effca47b8ef973c48baac9a5896))
+* **config:** add local network IP to allowed dev origins for mobile testing ([ef262a6](https://github.com/dgesteves/diogo-studio/commit/ef262a6e7acf79dd1236217d475ea5f856e9fd08))
+* **world:** add boot sequence with loading overlay and audio opt-in ([8bf7a06](https://github.com/dgesteves/diogo-studio/commit/8bf7a06c8a05feb5250f13e9a1cf205d7df53c9f))
+* **world:** add day/night theme system with dynamic lighting and post-processing ([6eaae00](https://github.com/dgesteves/diogo-studio/commit/6eaae00b169a1287dbba9ed67bc8a00f73a28a2d))
+* **world:** add poster image to fallback view for faster perceived load ([02e4f03](https://github.com/dgesteves/diogo-studio/commit/02e4f039caaa2c1b09ea0e63643490fed99c403a))
+* **world:** add responsive camera framing based on viewport aspect ratio ([ed613fd](https://github.com/dgesteves/diogo-studio/commit/ed613fd40bc504f064c0cff0430bd58c29f750e1))
+* **world:** adjust panel positioning and add instructional text for mobile viewports ([c6cb1b0](https://github.com/dgesteves/diogo-studio/commit/c6cb1b033a87c9bc4afbde600c86a408c0a6ad72))
+* **world:** redesign boot sequence with neon grid backdrop, segmented controls, and enhanced visual polish ([5d364ea](https://github.com/dgesteves/diogo-studio/commit/5d364ea66c0abccbc4aefe65bc47c8467e3808e5))
+
+
+### Code Refactoring
+
+* **inspector:** convert overlay store to external store pattern with sessionStorage persistence ([614a8b9](https://github.com/dgesteves/diogo-studio/commit/614a8b99b443d919986caa8f24ae1b73943e3e62))
+* **studio:** remove unused fallback SVG illustration components ([e73a30a](https://github.com/dgesteves/diogo-studio/commit/e73a30aae859a819ab776672df8f1e830b44d4d1))
+
+
+### Documentation
+
+* add comprehensive immersive world vision, roadmap, and audio asset guide ([47eac10](https://github.com/dgesteves/diogo-studio/commit/47eac10d9ce6f4915a5c74ccf45e5e4a756f0970))
+* **roadmap:** add Phase 9 (boot sequence) and Phase 10 (day/night theme) with session log updates ([40da4b2](https://github.com/dgesteves/diogo-studio/commit/40da4b2a6845c887bc06942b4a7edf63f643406c))
+
+
+### Tests
+
+* **e2e:** use keyboard press instead of click for hero CTA in command menu test ([de3f726](https://github.com/dgesteves/diogo-studio/commit/de3f72670e332bc260a97866a3588c670f89763c))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @types/node from 25.9.3 to 26.0.0 in the types group across 1 directory ([#109](https://github.com/dgesteves/diogo-studio/issues/109)) ([3091e21](https://github.com/dgesteves/diogo-studio/commit/3091e219d1758f65dcd8b792a804153069002b09))
+* **deps-dev:** bump lint-staged from 17.0.7 to 17.0.8 in the linting group ([#108](https://github.com/dgesteves/diogo-studio/issues/108)) ([40f1673](https://github.com/dgesteves/diogo-studio/commit/40f16737e570b16c8bf5b3371b2bf4c950bb44e5))
+* **deps:** bump sharp from 0.35.1 to 0.35.2 ([#111](https://github.com/dgesteves/diogo-studio/issues/111)) ([eeea33a](https://github.com/dgesteves/diogo-studio/commit/eeea33abd2860a33f857e5279fc4bafc1e28e97b))
+
 ## [1.7.1](https://github.com/dgesteves/diogo-studio/compare/v1.7.0...v1.7.1) (2026-06-20)
 
 
