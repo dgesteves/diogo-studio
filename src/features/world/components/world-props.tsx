@@ -10,7 +10,7 @@ const SHELF_Y = [0.55, 0.95, 1.35, 1.75] as const;
 export function WorldProps(): ReactElement {
   return (
     <group>
-      <group position={[-2.18, 0, -0.6]}>
+      <group position={[-2.18, 0, 3.7]}>
         <mesh position={[0, 1.15, 0]}>
           <boxGeometry args={[0.18, 2.3, 1.1]} />
           <meshStandardMaterial color="#0c1116" roughness={0.7} metalness={0.2} />
@@ -23,7 +23,7 @@ export function WorldProps(): ReactElement {
         ))}
       </group>
 
-      <group position={[-2.0, 0, 0.2]}>
+      <group position={[-1.8, 0, 1.4]}>
         <mesh position={[0, 0.18, 0]}>
           <cylinderGeometry args={[0.16, 0.12, 0.36, 16]} />
           <meshStandardMaterial color="#11181f" roughness={0.8} />
@@ -34,7 +34,7 @@ export function WorldProps(): ReactElement {
         </mesh>
       </group>
 
-      <group position={[-2.27, 0, 1.2]} rotation={[0, Math.PI / 2, 0]}>
+      <group position={[-2.27, 0, 2.4]} rotation={[0, Math.PI / 2, 0]}>
         <mesh position={[0, 1.05, 0]}>
           <boxGeometry args={[0.9, 2.1, 0.06]} />
           <meshStandardMaterial color="#0b1116" roughness={0.6} metalness={0.3} />

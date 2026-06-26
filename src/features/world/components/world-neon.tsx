@@ -49,8 +49,8 @@ export function WorldNeon(): ReactElement {
         decay={2}
       />
 
-      <mesh position={[-2.27, 1.7, 0]} rotation={[0, Math.PI / 2, 0]}>
-        <boxGeometry args={[4.2, 0.012, 0.012]} />
+      <mesh position={[-2.27, 1.7, 2.6]} rotation={[0, Math.PI / 2, 0]}>
+        <boxGeometry args={[3.2, 0.012, 0.012]} />
         <meshBasicMaterial color={brandColors.accentSoft} toneMapped={false} />
       </mesh>
     </group>
