@@ -41,15 +41,43 @@ export function BootActions({
         <BootThemeToggle />
         <BootSoundToggle soundOn={soundOn} onChange={setSoundOn} />
       </div>
-      <Button
-        ref={primaryRef}
-        type="button"
-        onClick={() => (soundOn ? onEnterWithSound() : onEnterMuted())}
-        className="bg-brand-cyan text-brand-ink hover:bg-brand-cyan-bright active:bg-brand-cyan-bright focus-visible:ring-offset-brand-ink h-11 gap-2 px-8 font-mono text-[11px] font-semibold tracking-[0.2em] uppercase shadow-[0_0_28px_var(--brand-cyan)]"
-      >
-        Enter the studio
-        <ArrowRight aria-hidden="true" />
-      </Button>
+      <div className="group relative inline-flex">
+        <span
+          aria-hidden="true"
+          className="boot-cta-frame pointer-events-none absolute -inset-px rounded-sm"
+        />
+        <Button
+          ref={primaryRef}
+          type="button"
+          onClick={() => (soundOn ? onEnterWithSound() : onEnterMuted())}
+          className="bg-brand-cyan text-brand-ink hover:bg-brand-cyan-bright active:bg-brand-cyan-bright focus-visible:ring-offset-brand-ink relative h-11 gap-2 overflow-hidden rounded-sm px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_30px_var(--brand-cyan)]"
+        >
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/50 to-transparent transition-transform duration-700 ease-out group-hover:translate-x-full"
+          />
+          <span className="relative z-10 inline-flex items-center gap-2">
+            Enter the studio
+            <ArrowRight aria-hidden="true" />
+          </span>
+        </Button>
+        <span
+          aria-hidden="true"
+          className="border-brand-cyan-bright pointer-events-none absolute -top-1 -left-1 size-2.5 border-t-2 border-l-2 transition-all duration-300 group-hover:-top-1.5 group-hover:-left-1.5"
+        />
+        <span
+          aria-hidden="true"
+          className="border-brand-cyan-bright pointer-events-none absolute -top-1 -right-1 size-2.5 border-t-2 border-r-2 transition-all duration-300 group-hover:-top-1.5 group-hover:-right-1.5"
+        />
+        <span
+          aria-hidden="true"
+          className="border-brand-cyan-bright pointer-events-none absolute -bottom-1 -left-1 size-2.5 border-b-2 border-l-2 transition-all duration-300 group-hover:-bottom-1.5 group-hover:-left-1.5"
+        />
+        <span
+          aria-hidden="true"
+          className="border-brand-cyan-bright pointer-events-none absolute -right-1 -bottom-1 size-2.5 border-r-2 border-b-2 transition-all duration-300 group-hover:-right-1.5 group-hover:-bottom-1.5"
+        />
+      </div>
     </div>
   );
 }

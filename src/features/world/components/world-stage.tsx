@@ -24,7 +24,7 @@ export function WorldStage(): ReactElement {
 
   return (
     <div aria-hidden="true" className="fixed inset-0 -z-10" data-world-root="">
-      <WorldFallback className="absolute inset-0" />
+      <WorldFallback className="absolute inset-0" showPoster={isClient && reducedMotion} />
 
       {shouldMount ? (
         <>

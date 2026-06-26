@@ -25,7 +25,7 @@ export function BootLog({ pct, ready }: BootLogProps): ReactElement {
             key={label}
             className={cn(
               "flex items-center gap-2.5 transition-colors duration-300",
-              done ? "text-brand-cyan" : active ? "text-white/75" : "text-white/25",
+              done ? "text-brand-cyan-bright" : active ? "text-white/90" : "text-white/45",
             )}
           >
             <span className="flex w-3 justify-center">
@@ -40,7 +40,13 @@ export function BootLog({ pct, ready }: BootLogProps): ReactElement {
                 />
               )}
             </span>
-            <span className="flex-1 text-left">{label}</span>
+            <span className="tabular text-[9px] opacity-50">
+              {`0x${(index + 1).toString(16).toUpperCase().padStart(2, "0")}`}
+            </span>
+            <span className="flex-1 text-left">
+              {label}
+              {active && <span className="boot-caret text-brand-cyan ml-1">_</span>}
+            </span>
             <span className="text-[9px] opacity-70">{done ? "OK" : active ? "··" : ""}</span>
           </li>
         );

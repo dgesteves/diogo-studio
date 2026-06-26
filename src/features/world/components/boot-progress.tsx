@@ -10,9 +10,9 @@ type BootProgressProps = {
 export function BootProgress({ pct, step, ready }: BootProgressProps): ReactElement {
   return (
     <div className="w-full">
-      <div className="relative h-1.5 w-full overflow-hidden rounded-full border border-white/15 bg-white/5">
+      <div className="boot-progress-track relative h-2 w-full overflow-hidden rounded-full border border-white/15 bg-white/5">
         <div
-          className="bg-brand-cyan absolute inset-y-0 left-0 overflow-hidden rounded-full shadow-[0_0_16px_var(--brand-cyan)] transition-[width] duration-300 ease-out"
+          className="boot-fill absolute inset-y-0 left-0 overflow-hidden rounded-full shadow-[0_0_18px_var(--brand-cyan)] transition-[width] duration-300 ease-out"
           style={{ width: `${pct}%` }}
         >
           <span className="boot-sheen absolute inset-0" />
@@ -28,7 +28,12 @@ export function BootProgress({ pct, step, ready }: BootProgressProps): ReactElem
           />
           {step}
         </span>
-        <span className="tabular text-brand-cyan-bright">{Math.round(pct)}%</span>
+        <span
+          data-text={`${Math.round(pct)}%`}
+          className="boot-glitch tabular text-brand-cyan-bright"
+        >
+          {Math.round(pct)}%
+        </span>
       </div>
     </div>
   );

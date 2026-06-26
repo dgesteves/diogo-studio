@@ -27,7 +27,7 @@ export function BootSegmented<T extends string>({
     <div
       role="group"
       aria-label={label}
-      className="bg-brand-ink/80 inline-flex items-center gap-1 rounded-full border border-white/15 p-1 shadow-[0_2px_28px_rgba(0,0,0,0.55)] backdrop-blur-md"
+      className="bg-brand-ink/85 border-brand-cyan/25 inline-flex items-center gap-1 rounded-sm border p-1 shadow-[0_0_20px_rgba(34,211,238,0.12)] backdrop-blur-md"
     >
       {options.map(({ value: optionValue, label: optionLabel, Icon }) => {
         const selected = value === optionValue;
@@ -38,8 +38,10 @@ export function BootSegmented<T extends string>({
             aria-pressed={selected}
             onClick={() => onChange(optionValue)}
             className={cn(
-              "focus-visible:ring-brand-cyan focus-visible:ring-offset-brand-ink inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 font-mono text-[10px] tracking-widest uppercase transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
-              selected ? "bg-brand-cyan text-brand-ink" : "text-white/55 hover:text-white",
+              "focus-visible:ring-brand-cyan focus-visible:ring-offset-brand-ink inline-flex items-center gap-1.5 rounded-sm px-3 py-1.5 font-mono text-[10px] tracking-widest uppercase transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+              selected
+                ? "bg-brand-cyan text-brand-ink shadow-[0_0_14px_var(--brand-cyan)]"
+                : "hover:text-brand-cyan-bright text-white/55 hover:bg-white/5",
             )}
           >
             <Icon className="size-3.5" aria-hidden="true" />
