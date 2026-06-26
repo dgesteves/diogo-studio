@@ -26,7 +26,7 @@ export function LoungeLamp(): ReactElement {
           roughness={0.5}
           metalness={0.1}
           emissive={BULB}
-          emissiveIntensity={1.1}
+          emissiveIntensity={0.5}
           side={2}
           toneMapped={false}
         />
@@ -37,7 +37,7 @@ export function LoungeLamp(): ReactElement {
       </mesh>
       <pointLight
         position={[0, POLE_H - 0.08, 0]}
-        intensity={1.5}
+        intensity={0.8}
         distance={3.4}
         decay={2}
         color={WARM_LIGHT}
