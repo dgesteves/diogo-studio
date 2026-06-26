@@ -3,6 +3,8 @@
 import { ArrowRight } from "lucide-react";
 import { useState, type ReactElement, type RefObject } from "react";
 import { Button } from "@/components/ui/button";
+import { useInspectorOverlay } from "@/features/inspector";
+import { BootInspectorToggle } from "./boot-inspector-toggle";
 import { BootSoundToggle } from "./boot-sound-toggle";
 import { BootThemeToggle } from "./boot-theme-toggle";
 
@@ -20,6 +22,14 @@ export function BootActions({
   onEnterMuted,
 }: BootActionsProps): ReactElement {
   const [soundOn, setSoundOn] = useState(true);
+  const [inspectorOn, setInspectorOn] = useState(true);
+  const { setOpen: setInspectorOpen } = useInspectorOverlay();
+
+  function handleEnter(withSound: boolean): void {
+    setInspectorOpen(inspectorOn);
+    if (withSound) onEnterWithSound();
+    else onEnterMuted();
+  }
 
   if (!canEnter) {
     return (
@@ -27,7 +37,7 @@ export function BootActions({
         type="button"
         variant="ghost"
         size="sm"
-        onClick={onEnterMuted}
+        onClick={() => handleEnter(false)}
         className="focus-visible:ring-offset-brand-ink font-mono text-[10px] tracking-widest text-white/45 uppercase hover:bg-white/5 hover:text-white/80"
       >
         Skip intro
@@ -40,6 +50,7 @@ export function BootActions({
       <div className="flex flex-wrap items-center justify-center gap-3">
         <BootThemeToggle />
         <BootSoundToggle soundOn={soundOn} onChange={setSoundOn} />
+        <BootInspectorToggle inspectorOn={inspectorOn} onChange={setInspectorOn} />
       </div>
       <div className="group relative inline-flex">
         <span
@@ -49,7 +60,7 @@ export function BootActions({
         <Button
           ref={primaryRef}
           type="button"
-          onClick={() => (soundOn ? onEnterWithSound() : onEnterMuted())}
+          onClick={() => handleEnter(soundOn)}
           className="bg-brand-cyan text-brand-ink hover:bg-brand-cyan-bright active:bg-brand-cyan-bright focus-visible:ring-offset-brand-ink relative h-11 gap-2 overflow-hidden rounded-sm px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_30px_var(--brand-cyan)]"
         >
           <span
