@@ -2,8 +2,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AppProviders } from "@/providers";
-import { SiteFooter } from "@/components/layout/site-footer";
-import { SiteNav } from "@/components/layout/site-nav";
 import { JsonLd } from "@/components/seo/json-ld";
 import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
@@ -44,11 +42,9 @@ export default function RootLayout({
         <AppProviders>
           <InspectorOverlayProvider>
             <CommandMenuProvider>
-              <SiteNav />
               <main id="main" className="flex flex-1 flex-col">
                 {children}
               </main>
-              <SiteFooter />
               <CommandMenu />
               <InspectorOverlay />
             </CommandMenuProvider>

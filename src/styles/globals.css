@@ -292,6 +292,51 @@
   animation: world-hint-pulse 2.6s ease-in-out infinite;
 }
 
+.deck-radar-grid {
+  background-image:
+    linear-gradient(
+      to right,
+      color-mix(in srgb, var(--accent) 18%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--accent) 18%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 25% 25%;
+}
+
+@keyframes deck-radar-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.deck-radar-sweep {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--accent) 32%, transparent) 36deg,
+    transparent 76deg
+  );
+  animation: deck-radar-sweep 4s linear infinite;
+}
+
+.deck-shell::before {
+  content: "";
+  position: absolute;
+  inset-inline: 14%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in srgb, var(--accent) 55%, transparent),
+    transparent
+  );
+  pointer-events: none;
+}
+
 @keyframes scene-grid-pan {
   to {
     background-position: 0 80px;
