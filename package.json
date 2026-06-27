@@ -1,6 +1,6 @@
 {
   "name": "diogo-studio",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "private": true,
   "license": "UNLICENSED",
   "packageManager": "pnpm@11.7.0",

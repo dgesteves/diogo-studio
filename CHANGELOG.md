@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.10.0](https://github.com/dgesteves/diogo-studio/compare/v1.9.0...v1.10.0) (2026-06-27)
+
+
+### Features
+
+* **bookshelf:** add procedural book generation with seeded randomization and shelf lighting ([dd33670](https://github.com/dgesteves/diogo-studio/commit/dd33670f3528df91c7c38e7d58c87238bafcb92c))
+* **env:** add Vercel URL environment variables with fallback chain and normalization ([cbedbef](https://github.com/dgesteves/diogo-studio/commit/cbedbefc51aadc062944ddfb09b692b4e41364c7))
+* **seo:** add node environment directive to structured-data tests ([c947e84](https://github.com/dgesteves/diogo-studio/commit/c947e849b3738d95d7b20f3bc2666799ca532c95))
+
+
+### Code Refactoring
+
+* **scene:** optimize rendering with instanced meshes and adaptive DPR ([4e95e86](https://github.com/dgesteves/diogo-studio/commit/4e95e86460397b78cd289b81cd6a2981f1391e01))
+
 ## [1.9.0](https://github.com/dgesteves/diogo-studio/compare/v1.8.0...v1.9.0) (2026-06-27)
 
 
