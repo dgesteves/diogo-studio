@@ -17,8 +17,12 @@ import { markWorldReady } from "@/stores/boot-store";
 
 import { getDestination } from "../constants/destinations";
 import { getStation } from "../constants/stations";
+import { useExplore } from "../hooks/use-explore";
+import { useExploreHandoff } from "../hooks/use-explore-handoff";
+import { useExploreInput } from "../hooks/use-explore-input";
 import { useOrbitInput } from "../hooks/use-orbit-input";
 import { BootProgressReporter } from "./boot-progress-reporter";
+import { ExploreController } from "./explore-controller";
 import { Lounge } from "./lounge/lounge";
 import { WorldCamera } from "./world-camera";
 import { WorldInteract } from "./world-interact";
@@ -35,8 +39,11 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   const home = getStation("home");
   const palette = useWorldPalette();
   const router = useRouter();
-  const orbitEnabled = active === "home";
+  const explore = useExplore();
+  const orbitEnabled = active === "home" && !explore;
   const orbitInput = useOrbitInput(orbitEnabled);
+  const exploreInput = useExploreInput(explore);
+  useExploreHandoff(active, explore);
 
   return (
     <Canvas
@@ -56,10 +63,14 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
 
       <PerspectiveCamera makeDefault fov={44} near={0.1} far={60} position={home.position} />
       <WorldCamera active={active} input={orbitInput} />
-      <WorldInteract
-        input={orbitInput}
-        onSelect={(slug) => router.push(getDestination(slug).href)}
-      />
+      {explore ? (
+        <ExploreController input={exploreInput} />
+      ) : (
+        <WorldInteract
+          input={orbitInput}
+          onSelect={(slug) => router.push(getDestination(slug).href)}
+        />
+      )}
 
       <StudioScene />
       <WorldProps />

@@ -4,6 +4,7 @@ import { useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { MathUtils, Spherical, Vector3 } from "three";
 import type { RouteKey } from "@/constants/routes";
+import { getExploreSnapshot } from "@/stores/explore-store";
 import { getStation } from "../constants/stations";
 import { consumeIntro, introStartPosition } from "../utils/intro";
 import { framingPullback } from "../utils/framing";
@@ -23,10 +24,17 @@ export function WorldCamera({ active, input }: WorldCameraProps): null {
   const direction = useRef(new Vector3());
   const spherical = useRef(new Spherical());
   const applied = useRef({ azimuth: 0, polar: 0, zoom: 1 });
+  const forward = useRef(new Vector3());
   const ready = useRef(false);
   const intro = useRef(false);
 
   useFrame(({ camera, clock, pointer, size }, delta) => {
+    if (getExploreSnapshot()) {
+      camera.getWorldDirection(forward.current);
+      look.current.copy(camera.position).add(forward.current);
+      return;
+    }
+
     const station = getStation(active);
     const [px, py, pz] = station.position;
     const [tx, ty, tz] = station.target;

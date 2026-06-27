@@ -9,6 +9,7 @@ import { useCommandMenu } from "@/features/command-menu";
 import { useInspectorOverlay } from "@/features/inspector";
 import { useIsClient } from "@/hooks/use-is-client";
 import { DeckButton } from "./deck-button";
+import { DeckExploreToggle } from "./deck-explore-toggle";
 
 export function DeckControls(): ReactElement {
   const { setOpen, openWithMode } = useCommandMenu();
@@ -48,6 +49,8 @@ export function DeckControls(): ReactElement {
       >
         {soundOn ? <Volume2 aria-hidden="true" /> : <VolumeX aria-hidden="true" />}
       </DeckButton>
+
+      <DeckExploreToggle />
 
       <DeckButton
         onClick={() => setTheme(isDark ? "light" : "dark")}

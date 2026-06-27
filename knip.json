@@ -1,15 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": [
-    "sharp",
-    "@testing-library/user-event",
-    "@radix-ui/react-accordion",
-    "@radix-ui/react-dropdown-menu",
-    "@radix-ui/react-popover",
-    "@radix-ui/react-tabs",
-    "@radix-ui/react-tooltip",
-    "@commitlint/types"
-  ],
+  "ignoreDependencies": ["sharp", "@commitlint/types"],
   "ignoreExportsUsedInFile": true,
   "playwright": {
     "config": ["playwright.config.ts"],
