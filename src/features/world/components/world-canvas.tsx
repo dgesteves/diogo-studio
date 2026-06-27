@@ -2,9 +2,9 @@
 
 import "@/components/r3f/silence-clock-deprecation";
 
-import { type ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { Canvas } from "@react-three/fiber";
-import { AdaptiveDpr, AdaptiveEvents, PerspectiveCamera, Preload } from "@react-three/drei";
+import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera, Preload } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
 import { useRouter } from "next/navigation";
 
@@ -44,10 +44,11 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   const orbitInput = useOrbitInput(orbitEnabled);
   const exploreInput = useExploreInput(explore);
   useExploreHandoff(active, explore);
+  const [dpr, setDpr] = useState(1.5);
 
   return (
     <Canvas
-      dpr={[1, 1.5]}
+      dpr={dpr}
       gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
       onCreated={() => {
         markWorldReady();
@@ -92,7 +93,11 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
         />
       </EffectComposer>
 
-      <AdaptiveDpr pixelated={false} />
+      <PerformanceMonitor
+        onChange={({ factor }) => setDpr(Math.round((1 + 0.5 * factor) * 10) / 10)}
+        flipflops={3}
+        onFallback={() => setDpr(1)}
+      />
       <AdaptiveEvents />
       <Preload all />
     </Canvas>

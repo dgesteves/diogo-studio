@@ -15,7 +15,6 @@ type ScreenDraw = (ctx: CanvasRenderingContext2D) => void;
 type WallScreenProps = {
   draw: ScreenDraw;
   position: [number, number, number];
-  accent: string;
   width?: number;
   height?: number;
 };
@@ -34,7 +33,6 @@ function useScreenTexture(draw: ScreenDraw): CanvasTexture {
 export function WallScreen({
   draw,
   position,
-  accent,
   width = 0.6,
   height = 0.66,
 }: WallScreenProps): ReactElement {
@@ -54,7 +52,6 @@ export function WallScreen({
           toneMapped={false}
         />
       </mesh>
-      <pointLight position={[0, 0, 0.6]} intensity={0.4} distance={2} decay={2} color={accent} />
     </group>
   );
 }

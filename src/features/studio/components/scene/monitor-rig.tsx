@@ -36,6 +36,13 @@ export function MonitorRig(): ReactElement {
         size="large"
         screenTexture={rightTexture}
       />
+      <pointLight
+        position={[0, MONITOR_Y - 0.12, 0.2]}
+        intensity={0.9}
+        distance={2.6}
+        decay={2}
+        color={brandColors.accent}
+      />
       <Webcam />
     </>
   );
@@ -79,13 +86,6 @@ function Monitor({
           toneMapped={false}
         />
       </mesh>
-      <pointLight
-        position={[0, -0.12, 0.5]}
-        intensity={0.4}
-        distance={1.9}
-        decay={2}
-        color={brandColors.accent}
-      />
       <mesh position={[0, -h / 2 - standH / 2, -0.02]}>
         <boxGeometry args={[0.06, standH, 0.04]} />
         <meshStandardMaterial color="#13181d" roughness={0.6} metalness={0.5} />
