@@ -6,6 +6,7 @@ import { type ReactElement } from "react";
 import { Canvas } from "@react-three/fiber";
 import { AdaptiveDpr, AdaptiveEvents, PerspectiveCamera, Preload } from "@react-three/drei";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
+import { useRouter } from "next/navigation";
 
 import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
@@ -14,10 +15,13 @@ import type { RouteKey } from "@/constants/routes";
 import { useWorldPalette } from "@/hooks/use-world-palette";
 import { markWorldReady } from "@/stores/boot-store";
 
+import { getDestination } from "../constants/destinations";
 import { getStation } from "../constants/stations";
+import { useOrbitInput } from "../hooks/use-orbit-input";
 import { BootProgressReporter } from "./boot-progress-reporter";
 import { Lounge } from "./lounge/lounge";
 import { WorldCamera } from "./world-camera";
+import { WorldInteract } from "./world-interact";
 import { WorldNeon } from "./world-neon";
 import { WorldPortals } from "./world-portals";
 import { WorldProps } from "./world-props";
@@ -30,6 +34,9 @@ type WorldCanvasProps = {
 export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement {
   const home = getStation("home");
   const palette = useWorldPalette();
+  const router = useRouter();
+  const orbitEnabled = active === "home";
+  const orbitInput = useOrbitInput(orbitEnabled);
 
   return (
     <Canvas
@@ -48,7 +55,11 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       <BootProgressReporter />
 
       <PerspectiveCamera makeDefault fov={44} near={0.1} far={60} position={home.position} />
-      <WorldCamera active={active} />
+      <WorldCamera active={active} input={orbitInput} />
+      <WorldInteract
+        input={orbitInput}
+        onSelect={(slug) => router.push(getDestination(slug).href)}
+      />
 
       <StudioScene />
       <WorldProps />

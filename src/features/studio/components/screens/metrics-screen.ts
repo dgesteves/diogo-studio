@@ -5,56 +5,45 @@
  * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture } from "three";
 
 import { createCanvasTexture } from "./canvas-texture";
 import { drawMetrics } from "./metrics-screen-draw";
 
-const SPARK_LEN = 22;
-
-function driftSeries(series: number[]): number[] {
-  const next = series.slice(1);
-  const last = series[series.length - 1] ?? 0.5;
-  const target = 0.5 + (Math.random() - 0.5) * 0.45;
-  next.push(last + (target - last) * 0.55);
-  return next;
-}
+const SPARK_LEN = 32;
+const SAMPLE_SECONDS = 0.5;
+const INITIAL_FPS = 60;
 
 export function useRightScreenTexture(): CanvasTexture {
   const { canvas, texture } = useMemo(() => createCanvasTexture(640, 400), []);
-  const [series, setSeries] = useState(() => ({
-    req: Array.from({ length: SPARK_LEN }, () => 0.4 + Math.random() * 0.5),
-    lat: Array.from({ length: SPARK_LEN }, () => 0.4 + Math.random() * 0.5),
-    err: Array.from({ length: SPARK_LEN }, () => 0.4 + Math.random() * 0.5),
-  }));
+  const frames = useRef(0);
+  const elapsed = useRef(0);
+  const history = useRef<number[]>(Array.from({ length: SPARK_LEN }, () => INITIAL_FPS));
 
-  useEffect(() => {
-    const idReq = window.setInterval(
-      () => setSeries((s) => ({ ...s, req: driftSeries(s.req) })),
-      1200,
-    );
-    const idLat = window.setInterval(
-      () => setSeries((s) => ({ ...s, lat: driftSeries(s.lat) })),
-      1500,
-    );
-    const idErr = window.setInterval(
-      () => setSeries((s) => ({ ...s, err: driftSeries(s.err) })),
-      2200,
-    );
-    return () => {
-      window.clearInterval(idReq);
-      window.clearInterval(idLat);
-      window.clearInterval(idErr);
-    };
-  }, []);
+  useFrame((state, delta) => {
+    frames.current += 1;
+    elapsed.current += delta;
+    if (elapsed.current < SAMPLE_SECONDS) return;
 
-  useEffect(() => {
+    const fps = frames.current / elapsed.current;
+    frames.current = 0;
+    elapsed.current = 0;
+    history.current = [...history.current.slice(1), fps];
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-    drawMetrics(ctx, series);
+    const { domElement } = state.gl;
+    drawMetrics(ctx, {
+      fps,
+      frameMs: 1000 / fps,
+      history: history.current,
+      resolution: `${domElement.width}×${domElement.height}`,
+      dpr: state.gl.getPixelRatio(),
+    });
     texture.needsUpdate = true;
-  }, [canvas, series, texture]);
+  });
 
   return texture;
 }

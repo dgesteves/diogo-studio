@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
-import { type ThreeEvent } from "@react-three/fiber";
-import { setHoveredStation } from "@/stores/world-store";
+import { useEffect, useRef, type ReactElement } from "react";
+import type { Mesh } from "three";
+import { useHoveredStation } from "../hooks/use-hovered-station";
+import { registerHotspot, unregisterHotspot } from "../utils/hotspot-registry";
 import type { WorldStation } from "../types";
 import type { FurnitureHotspot as Hotspot } from "../constants/hotspots";
-import { HotspotGlow } from "./hotspot-glow";
-import { NeonLabel } from "./neon-label";
+import { HotspotFocus } from "./hotspot-focus";
 
 const GLOW_SPREAD = 1.6;
 const GLOW_PADDING = 0.18;
@@ -18,7 +18,6 @@ type FurnitureHotspotProps = {
   hotspot: Hotspot;
   label: string;
   active: boolean;
-  onSelect: () => void;
 };
 
 export function FurnitureHotspot({
@@ -26,9 +25,9 @@ export function FurnitureHotspot({
   hotspot,
   label,
   active,
-  onSelect,
 }: FurnitureHotspotProps): ReactElement {
-  const [hovered, setHovered] = useState(false);
+  const meshRef = useRef<Mesh>(null);
+  const hovered = useHoveredStation() === station.slug;
   const focus = hovered || active;
   const [cx, cy, cz] = hotspot.center;
   const [sx, sy, sz] = hotspot.size;
@@ -44,55 +43,31 @@ export function FurnitureHotspot({
     ? [cx, cy + sy / 2 + LABEL_GAP, cz]
     : [ax, ay + 0.24, az];
 
-  function handleOver(event: ThreeEvent<PointerEvent>): void {
-    event.stopPropagation();
-    setHovered(true);
-    setHoveredStation(station.slug);
-    document.body.style.cursor = "pointer";
-  }
-
-  function handleOut(event: ThreeEvent<PointerEvent>): void {
-    event.stopPropagation();
-    setHovered(false);
-    setHoveredStation(null);
-    document.body.style.cursor = "auto";
-  }
-
-  function handleClick(event: ThreeEvent<MouseEvent>): void {
-    event.stopPropagation();
-    onSelect();
-  }
+  useEffect(() => {
+    const mesh = meshRef.current;
+    if (!mesh) return;
+    mesh.userData.hotspotSlug = station.slug;
+    registerHotspot(mesh);
+    return () => unregisterHotspot(mesh);
+  }, [station.slug]);
 
   return (
     <group>
-      <mesh
-        position={[cx, cy, cz]}
-        onPointerOver={handleOver}
-        onPointerOut={handleOut}
-        onClick={handleClick}
-      >
+      <mesh ref={meshRef} position={[cx, cy, cz]}>
         <boxGeometry args={[sx, sy, sz]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      {focus ? (
-        <>
-          <HotspotGlow
-            position={glowPosition}
-            rotation={glowRotation}
-            size={glowSize}
-            accent={station.accent}
-          />
-          <pointLight
-            position={station.anchor}
-            color={station.accent}
-            intensity={1.4}
-            distance={2.4}
-            decay={2}
-          />
-          <NeonLabel position={labelPosition} accent={station.accent} label={label} />
-        </>
-      ) : null}
+      <HotspotFocus
+        focus={focus}
+        accent={station.accent}
+        label={label}
+        lightPosition={station.anchor}
+        glowPosition={glowPosition}
+        glowRotation={glowRotation}
+        glowSize={glowSize}
+        labelPosition={labelPosition}
+      />
     </group>
   );
 }

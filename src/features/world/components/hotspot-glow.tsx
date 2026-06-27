@@ -1,7 +1,7 @@
 "use client";
 
-import { type ReactElement } from "react";
-import { AdditiveBlending } from "three";
+import { type ReactElement, type Ref } from "react";
+import { AdditiveBlending, type Mesh } from "three";
 import { createRadialGlowTexture } from "../utils/radial-glow";
 
 type HotspotGlowProps = {
@@ -9,12 +9,19 @@ type HotspotGlowProps = {
   rotation: [number, number, number];
   size: number;
   accent: string;
+  ref?: Ref<Mesh>;
 };
 
-export function HotspotGlow({ position, rotation, size, accent }: HotspotGlowProps): ReactElement {
+export function HotspotGlow({
+  position,
+  rotation,
+  size,
+  accent,
+  ref,
+}: HotspotGlowProps): ReactElement {
   const texture = createRadialGlowTexture();
   return (
-    <mesh position={position} rotation={rotation}>
+    <mesh ref={ref} position={position} rotation={rotation}>
       <planeGeometry args={[size, size]} />
       <meshBasicMaterial
         map={texture}

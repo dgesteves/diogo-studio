@@ -1,9 +1,36 @@
 import { brandColors } from "@/config/brand";
 import { MONO } from "./canvas-texture";
 
-export type MetricsSeries = { req: number[]; lat: number[]; err: number[] };
+export type MetricsView = {
+  fps: number;
+  frameMs: number;
+  history: readonly number[];
+  resolution: string;
+  dpr: number;
+};
 
-export function drawMetrics(ctx: CanvasRenderingContext2D, series: MetricsSeries): void {
+const FPS_SCALE = 72;
+
+function drawSparkline(ctx: CanvasRenderingContext2D, history: readonly number[]): void {
+  const W = ctx.canvas.width;
+  const sparkX = 250;
+  const sparkY = 116;
+  const sparkW = W - sparkX - 30;
+  const sparkH = 64;
+  ctx.strokeStyle = brandColors.accent;
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  for (let i = 0; i < history.length; i += 1) {
+    const value = Math.max(0, Math.min(1, (history[i] ?? 0) / FPS_SCALE));
+    const x = sparkX + (i / Math.max(history.length - 1, 1)) * sparkW;
+    const y = sparkY + (1 - value) * sparkH;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+}
+
+export function drawMetrics(ctx: CanvasRenderingContext2D, view: MetricsView): void {
   const W = ctx.canvas.width;
   const H = ctx.canvas.height;
 
@@ -16,7 +43,7 @@ export function drawMetrics(ctx: CanvasRenderingContext2D, series: MetricsSeries
   ctx.textBaseline = "top";
   ctx.fillStyle = brandColors.accent;
   ctx.font = `bold 22px ${MONO}`;
-  ctx.fillText("● SIGNALS · LAST 30M", 30, 30);
+  ctx.fillText("● RENDER · LIVE", 30, 30);
 
   ctx.strokeStyle = "rgba(34, 211, 238, 0.18)";
   ctx.lineWidth = 1;
@@ -25,63 +52,28 @@ export function drawMetrics(ctx: CanvasRenderingContext2D, series: MetricsSeries
   ctx.lineTo(W - 30, 70);
   ctx.stroke();
 
-  const latest = (s: number[]): number => s[s.length - 1] ?? 0.5;
-  const rows = [
-    {
-      label: "REQ/MIN",
-      value: String(Math.round(620 + latest(series.req) * 280)),
-      color: brandColors.accent,
-      data: series.req,
-    },
-    {
-      label: "P95 ms",
-      value: String(Math.round(110 + latest(series.lat) * 40)),
-      color: brandColors.accentSoft,
-      data: series.lat,
-    },
-    {
-      label: "ERR %",
-      value: (latest(series.err) * 0.18).toFixed(2),
-      color: "#a5f3fc",
-      data: series.err,
-    },
-  ];
+  ctx.fillStyle = "rgba(232,246,252,0.55)";
+  ctx.font = `16px ${MONO}`;
+  ctx.fillText("FRAMES / SEC", 30, 90);
+  ctx.fillStyle = "#e8f6fc";
+  ctx.font = `bold 64px ${MONO}`;
+  ctx.fillText(String(Math.round(view.fps)), 30, 110);
 
+  drawSparkline(ctx, view.history);
+
+  const rows = [
+    { label: "frame", value: `${view.frameMs.toFixed(1)} ms` },
+    { label: "res", value: view.resolution },
+    { label: "dpr", value: `${view.dpr.toFixed(2)}×` },
+  ];
+  ctx.font = `20px ${MONO}`;
   for (let r = 0; r < rows.length; r += 1) {
     const row = rows[r];
     if (!row) continue;
-    const y = 96 + r * 96;
-
-    ctx.fillStyle = "rgba(232,246,252,0.55)";
-    ctx.font = `16px ${MONO}`;
+    const y = 222 + r * 40;
+    ctx.fillStyle = "rgba(125, 232, 200, 0.85)";
     ctx.fillText(row.label, 30, y);
-
-    ctx.fillStyle = "#e8f6fc";
-    ctx.font = `bold 36px ${MONO}`;
-    ctx.fillText(row.value, 30, y + 22);
-
-    const sparkX = 260;
-    const sparkY = y + 12;
-    const sparkW = W - sparkX - 30;
-    const sparkH = 56;
-    ctx.strokeStyle = row.color;
-    ctx.lineWidth = 2.4;
-    ctx.beginPath();
-    for (let i = 0; i < row.data.length; i += 1) {
-      const value = row.data[i];
-      if (value === undefined) continue;
-      const x = sparkX + (i / Math.max(row.data.length - 1, 1)) * sparkW;
-      const dy = sparkY + (1 - Math.max(0, Math.min(1, value))) * sparkH;
-      if (i === 0) ctx.moveTo(x, dy);
-      else ctx.lineTo(x, dy);
-    }
-    ctx.stroke();
-
-    const lastValue = row.data[row.data.length - 1] ?? 0;
-    const lastY = sparkY + (1 - Math.max(0, Math.min(1, lastValue))) * sparkH;
-    ctx.fillStyle = row.color;
-    ctx.beginPath();
-    ctx.arc(sparkX + sparkW, lastY, 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = "rgba(232,246,252,0.72)";
+    ctx.fillText(row.value, 150, y);
   }
 }
