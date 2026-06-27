@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.9.0](https://github.com/dgesteves/diogo-studio/compare/v1.8.0...v1.9.0) (2026-06-27)
+
+
+### Features
+
+* **deck:** add radar ping animation for active station and resume nav item ([d803931](https://github.com/dgesteves/diogo-studio/commit/d803931600b91245cd64345a0b55a196bd9e87a4))
+* **studio:** add cityscape window with procedural textures and neon-lit buildings ([96700c1](https://github.com/dgesteves/diogo-studio/commit/96700c165881ebeb35c89b10bae3ce4cff4a1b83))
+
+
+### Code Refactoring
+
+* **lounge-lamp:** reduce bulb and point light intensity for softer ambient lighting ([4b2543f](https://github.com/dgesteves/diogo-studio/commit/4b2543f87c1bf63a7896f20e4d548f2cc7c860f0))
+* **seo:** replace dynamic OG image generation with static world-poster image ([0936a4e](https://github.com/dgesteves/diogo-studio/commit/0936a4e50004260e4932d5319d4b6d73ba5c073b))
+* **studio:** replace mock metrics/logs with live render stats and studio info ([41ed445](https://github.com/dgesteves/diogo-studio/commit/41ed445216e79192a11b79e7ac2b4fe437ffa596))
+
+
+### Continuous Integration
+
+* **deps:** bump actions/cache from 5 to 6 ([#113](https://github.com/dgesteves/diogo-studio/issues/113)) ([81be19f](https://github.com/dgesteves/diogo-studio/commit/81be19f71907ec83590349b20cf2de17fb8d0b86))
+
+
+### Miscellaneous Chores
+
+* **deps:** remove unused Radix UI components and increase Dependabot PR limits ([88f4b9d](https://github.com/dgesteves/diogo-studio/commit/88f4b9d27cd569bcb8aa1375fc7eb8064ad2d2e1))
+* **deps:** remove vaul drawer dependency and refactor navigation to command deck ([96f0e2e](https://github.com/dgesteves/diogo-studio/commit/96f0e2e5310b203d113dacc80e657c6453142784))
+
 ## [1.8.0](https://github.com/dgesteves/diogo-studio/compare/v1.7.1...v1.8.0) (2026-06-26)
 
 
