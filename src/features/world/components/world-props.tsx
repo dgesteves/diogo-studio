@@ -3,25 +3,13 @@
 import { type ReactElement } from "react";
 import { brandColors } from "@/config/brand";
 
+import { Bookshelf } from "./props/bookshelf";
 import { WallScreens } from "./props/wall-screens";
-
-const SHELF_Y = [0.55, 0.95, 1.35, 1.75] as const;
 
 export function WorldProps(): ReactElement {
   return (
     <group>
-      <group position={[-2.18, 0, 3.7]}>
-        <mesh position={[0, 1.15, 0]}>
-          <boxGeometry args={[0.18, 2.3, 1.1]} />
-          <meshStandardMaterial color="#0c1116" roughness={0.7} metalness={0.2} />
-        </mesh>
-        {SHELF_Y.map((y) => (
-          <mesh key={y} position={[0.02, y, 0]}>
-            <boxGeometry args={[0.16, 0.02, 1.0]} />
-            <meshStandardMaterial color="#161d24" roughness={0.6} />
-          </mesh>
-        ))}
-      </group>
+      <Bookshelf />
 
       <group position={[-1.8, 0, 1.4]}>
         <mesh position={[0, 0.18, 0]}>
