@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactElement } from "react";
+import { Fragment, type ReactElement } from "react";
 import type { RouteKey } from "@/constants/routes";
 import { cn } from "@/utils/cn";
 import { radarPoints } from "../../utils/radar-layout";
@@ -19,20 +19,31 @@ export function DeckRadarPlot({ active, hovered }: DeckRadarPlotProps): ReactEle
         const isActive = point.slug === active;
         const isHovered = point.slug === hovered;
         return (
-          <span
-            key={point.slug}
-            className={cn(
-              "absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200",
-              isActive ? "size-1.5" : "size-1",
-              !isActive && !isHovered && "opacity-60",
+          <Fragment key={point.slug}>
+            {isActive && (
+              <span
+                className="deck-radar-ping absolute size-1.5 rounded-full motion-reduce:hidden"
+                style={{
+                  left: `${point.x * 100}%`,
+                  top: `${point.y * 100}%`,
+                  border: `1px solid ${point.accent}`,
+                }}
+              />
             )}
-            style={{
-              left: `${point.x * 100}%`,
-              top: `${point.y * 100}%`,
-              backgroundColor: point.accent,
-              boxShadow: isActive || isHovered ? `0 0 6px ${point.accent}` : undefined,
-            }}
-          />
+            <span
+              className={cn(
+                "absolute -translate-x-1/2 -translate-y-1/2 rounded-full transition-all duration-200",
+                isActive ? "size-1.5" : "size-1",
+                !isActive && !isHovered && "opacity-60",
+              )}
+              style={{
+                left: `${point.x * 100}%`,
+                top: `${point.y * 100}%`,
+                backgroundColor: point.accent,
+                boxShadow: isActive || isHovered ? `0 0 6px ${point.accent}` : undefined,
+              }}
+            />
+          </Fragment>
         );
       })}
     </span>

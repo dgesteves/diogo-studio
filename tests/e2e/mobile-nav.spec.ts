@@ -7,22 +7,29 @@ test.use({
 });
 
 test.describe("Mobile navigation", () => {
-  test("hamburger opens a drawer with primary routes", async ({ page }) => {
+  test("the studio map opens from the deck and routes to a destination", async ({ page }) => {
     await page.goto("/");
 
-    const trigger = page.getByRole("button", { name: /open menu/i });
+    const trigger = page.getByRole("button", { name: /open studio map/i });
     await expect(trigger).toBeVisible();
     await trigger.click();
 
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
 
-    await expect(dialog.getByRole("link", { name: /^home$/i })).toBeVisible();
-    await expect(dialog.getByRole("link", { name: /^about$/i })).toBeVisible();
+    const destinations = dialog.getByRole("navigation", { name: /all studio destinations/i });
+    await expect(destinations.getByRole("link", { name: /^studio$/i })).toBeVisible();
+    await expect(destinations.getByRole("link", { name: /^about$/i })).toBeVisible();
+
+    await destinations.getByRole("link", { name: /^about$/i }).click();
+    await expect(page).toHaveURL(/\/about$/);
+    await expect(dialog).toBeHidden();
   });
 
-  test("desktop primary nav is hidden on mobile", async ({ page }) => {
+  test("the inline deck waypoints are hidden on mobile", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("navigation", { name: /^primary$/i })).toBeHidden();
+    await expect(
+      page.getByRole("navigation", { name: "Studio destinations", exact: true }),
+    ).toBeHidden();
   });
 });

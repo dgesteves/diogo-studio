@@ -322,6 +322,21 @@
   animation: deck-radar-sweep 4s linear infinite;
 }
 
+@keyframes deck-radar-ping {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.75;
+  }
+  70%,
+  100% {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
+.deck-radar-ping {
+  animation: deck-radar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
 .deck-shell::before {
   content: "";
   position: absolute;

@@ -28,6 +28,11 @@ export const primaryNav: NavItem[] = [
     description: "Background, leadership philosophy, how I work.",
   },
   {
+    label: "Résumé",
+    href: routes.resume,
+    description: "The full professional record.",
+  },
+  {
     label: "Contact",
     href: routes.contact,
     description: "Get in touch.",
