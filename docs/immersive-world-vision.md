@@ -127,13 +127,13 @@ coffee table).
 
 | Space                    | Represents                           | Maps to routes                               | Status          |
 | ------------------------ | ------------------------------------ | -------------------------------------------- | --------------- |
-| 🖥 Engineering Studio    | Work / experience / craft            | `/work`, `/resume`, `/stack`, `/principles`  | Current         |
-| 🛋 Lounge                | About / personality                  | `/about`, `/uses`, `/now`                    | Current         |
+| 🖥 Engineering Studio     | Work / experience / craft            | `/work`, `/resume`, `/stack`, `/principles`  | Current         |
+| 🛋 Lounge                 | About / personality                  | `/about`, `/uses`, `/now`                    | Current         |
 | 🚀 Project Hangar        | What he's built                      | `/projects`, `/case-studies`, `/open-source` | Proposed        |
 | 📚 Library / Observatory | Words & ideas                        | `/writing`, `/speaking`                      | Proposed        |
 | 🧪 Innovation Lab        | Experiments & AI                     | `/lab`, `/playground`                        | Proposed        |
 | 🌿 Rooftop Garden        | Reach & trajectory                   | `/contact`, `/timeline`                      | Proposed        |
-| 🎞 Memory Gallery        | Career timeline (walk-through)       | `/timeline`                                  | Idea            |
+| 🎞 Memory Gallery         | Career timeline (walk-through)       | `/timeline`                                  | Idea            |
 | 🌌 Hall of Ideas         | Hero showcase (floating holo panels) | best of `/projects` + `/writing`             | Idea (flagship) |
 
 **Room flavor notes:**
