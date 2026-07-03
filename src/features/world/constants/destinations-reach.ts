@@ -14,6 +14,15 @@ export const reachDestinations: readonly Destination[] = [
     blocks: [
       { kind: "lede", text: siteConfig.availability },
       {
+        kind: "list",
+        title: "Best fit",
+        items: [
+          "AI-native product companies, seed to Series B.",
+          "Elite remote-first engineering organizations.",
+          "Teams where the frontend is the product.",
+        ],
+      },
+      {
         kind: "links",
         items: [
           { label: "Email", href: `mailto:${siteConfig.email}`, external: true },
@@ -25,7 +34,7 @@ export const reachDestinations: readonly Destination[] = [
       {
         kind: "list",
         title: "Based in",
-        items: [siteConfig.location, "Portuguese (native) · English (fluent)"],
+        items: [siteConfig.location, "Portuguese (native) · English (full professional)"],
       },
     ],
   },
@@ -40,14 +49,23 @@ export const reachDestinations: readonly Destination[] = [
     blocks: [
       {
         kind: "lede",
-        text: "AI-native systems, enterprise UI infrastructure, scalable web architectures. Targeting Staff+, Principal, or Founding Engineer roles, or VP / Head of Engineering mandates at seed–Series B AI-native companies.",
+        text: "AI-native systems, enterprise UI infrastructure, scalable web architectures. Targeting Staff+, Principal, or Founding Engineer roles, and VP / Head of Engineering mandates at AI-native companies.",
       },
       {
         kind: "stats",
         items: [
-          { label: "Experience", value: "11+ yrs", hint: "since 2014" },
-          { label: "Education", value: "ISEL", hint: "Computer Engineering" },
-          { label: "Base", value: "Lisbon", hint: "Remote, US-aligned" },
+          { label: "Experience", value: "11+ yrs", hint: "Deloitte → Fueled" },
+          { label: "Companies", value: "8", hint: "startup → Fortune-class" },
+          { label: "Base", value: "Lisbon", hint: "Remote · US-aligned" },
+        ],
+      },
+      {
+        kind: "list",
+        title: "Credentials",
+        items: [
+          "Computer Engineering — ISEL, Lisbon.",
+          "LLB in Law — Universidade Lusófona.",
+          "Meta Front-End Developer Professional Certificate.",
         ],
       },
       {

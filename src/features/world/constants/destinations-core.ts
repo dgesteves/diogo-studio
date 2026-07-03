@@ -9,17 +9,17 @@ export const coreDestinations: readonly Destination[] = [
     eyebrow: "Enter the studio",
     title: "Engineering the systems behind ambitious products.",
     summary:
-      "Staff / Principal frontend & platform engineer. 11+ years shipping AI-native interfaces, design-system infrastructure, and streaming-grade platforms.",
+      "Staff / Principal frontend & platform engineer. 11+ years shipping AI-native products, design-system infrastructure, and streaming platforms used by tens of millions.",
     blocks: [
       {
         kind: "lede",
-        text: "This is the rig the work ships from — a living studio you can walk through. Pick a surface, a sign, or a screen to explore the work, the principles, and the stack behind it.",
+        text: "This is the rig the work ships from — a living studio you can walk through. Every sign, screen, and surface is a door into the record: the work, the principles, the stack, the story.",
       },
       {
         kind: "stats",
         items: [
           { label: "Years shipping", value: "11+", hint: "frontend & platform" },
-          { label: "Scale", value: "M+ users", hint: "Peacock · streaming" },
+          { label: "Scale", value: "10M+", hint: "streaming subscribers" },
           { label: "Altitudes", value: "IC → VPE", hint: "last 18 months" },
         ],
       },
@@ -27,7 +27,7 @@ export const coreDestinations: readonly Destination[] = [
         kind: "links",
         items: [
           { label: "See the work", href: routes.work },
-          { label: "Read the principles", href: routes.principles },
+          { label: "Read the case studies", href: routes.caseStudies },
           { label: "Inspect the stack", href: routes.stack },
           { label: "Get in touch", href: routes.contact },
         ],
@@ -46,19 +46,28 @@ export const coreDestinations: readonly Destination[] = [
       {
         kind: "prose",
         paragraphs: [
-          "I build the engineering systems behind ambitious products. Over 11+ years I've shipped frontend platforms and AI-native interfaces across very different scales — NBCUniversal's Peacock, BMW Group's innovation programs, Diligent's governance software, eino.ai's agentic network-planning platform, plus Moment, Superglue, Deloitte, and Fueled.",
-          "The pattern across all of it: I'm the senior engineering voice on the surfaces users actually touch, plus the infrastructure underneath them. Design systems that survive multiple product lines. Monorepos that keep ten teams unblocked. AI workflows that hold up in production, not just in demos.",
-          "I'm equally comfortable as a Staff IC inside a large engineering org and as a founding engineer or VP of Engineering inside a fast-moving AI startup. I've done both in the last eighteen months.",
+          "I build the engineering systems behind ambitious products. For 11+ years I've been the senior engineering voice on platforms used by millions — streaming at Sky and Peacock, governance software at Diligent, innovation systems at BMW Group, and AI-native products at eino.ai, Moment, and Fueled.",
+          "I've operated at both ends of the spectrum: founding-engineer altitude inside seed to Series B AI startups, and Staff / Lead altitude inside Fortune-class enterprises with strict reliability, accessibility, and compliance constraints.",
+          "I'm most useful to teams where the frontend is the product — not a thin layer over an API — where AI is a first-class part of the experience, and where architectural taste, hiring leverage, and execution speed compound.",
         ],
       },
       {
         kind: "list",
-        title: "How I work",
+        title: "What I actually do",
         items: [
-          "Turn product ambiguity into composable, evolvable architectures.",
-          "Set the hiring bar, leveling, and technical strategy.",
-          "Lead with RFC culture and tight product/design/executive partnership.",
-          "Treat accessibility, performance, and release safety as requirements, not polish.",
+          "Architect frontend platforms — design systems, monorepos, micro frontends, and developer experience that make product teams faster.",
+          "Build AI-native product surfaces — agentic UX, RAG-backed flows, and the human-in-the-loop patterns that make LLMs feel like real software.",
+          "Lead engineering organizations — hiring, leveling, technical strategy, and the operating system of a high-trust, async, shipping-oriented team.",
+          "Translate business ambiguity into durable architecture, partnering directly with founders, CTOs, and product leadership.",
+        ],
+      },
+      {
+        kind: "list",
+        title: "Beyond the code",
+        items: [
+          "Portuguese (native) · English (full professional).",
+          "Computer Engineering at ISEL — after an LLB in Law.",
+          "Meta Front-End Developer Professional Certificate.",
         ],
       },
     ],

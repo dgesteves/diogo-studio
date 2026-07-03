@@ -4,6 +4,7 @@ import { coreDestinations } from "./destinations-core";
 import { craftDestinations } from "./destinations-craft";
 import { experienceDestinations } from "./destinations-experience";
 import { explorationDestinations } from "./destinations-explorations";
+import { openSourceDestinations } from "./destinations-open-source";
 import { projectDestinations } from "./destinations-projects";
 import { reachDestinations } from "./destinations-reach";
 import { stanceDestinations } from "./destinations-stance";
@@ -15,6 +16,7 @@ const all: readonly Destination[] = [
   ...experienceDestinations,
   ...projectDestinations,
   ...craftDestinations,
+  ...openSourceDestinations,
   ...explorationDestinations,
   ...reachDestinations,
   ...stanceDestinations,

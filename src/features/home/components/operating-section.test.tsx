@@ -19,7 +19,7 @@ describe("Trust section", () => {
   it("lists the selected engagement companies", () => {
     render(<TrustSection />);
     expect(screen.getByRole("heading", { name: /selected engagements/i })).toBeInTheDocument();
-    expect(screen.getByText("NBCUniversal · Peacock")).toBeInTheDocument();
+    expect(screen.getByText("Sky · NBCUniversal")).toBeInTheDocument();
     expect(screen.getByText("Fueled")).toBeInTheDocument();
   });
 });

@@ -12,16 +12,24 @@ export const stanceDestinations: readonly Destination[] = [
     blocks: [
       {
         kind: "lede",
-        text: "Leading frontend architecture for enterprise-grade web applications at Fueled — setting technical direction across React, TypeScript, design systems, and AI integrations.",
+        text: "Leading web-application engineering at Fueled — the senior frontend voice on enterprise engagements across AI, media, and digital transformation.",
       },
       {
         kind: "list",
         title: "Currently",
         items: [
-          "Shipping production AI-powered enterprise platforms.",
-          "Translating ambiguous client requirements into maintainable architectures.",
-          "Improving engineering velocity, observability, and developer experience.",
-          "Building this studio — an interactive 3D portfolio world.",
+          "Shipping AI-augmented surfaces for enterprise audiences: LLM-driven workflows, content intelligence, internal tooling.",
+          "Balancing delivery timelines against long-term maintainability across parallel engagements.",
+          "Raising the bar on velocity, code quality, observability, and developer experience.",
+          "Building this studio in the open — an interactive 3D portfolio world on R3F and Next.js.",
+        ],
+      },
+      {
+        kind: "list",
+        title: "Learning & sharpening",
+        items: [
+          "Eval tooling for agentic workflows.",
+          "WebGL performance budgets for content-heavy scenes.",
         ],
       },
     ],
@@ -39,34 +47,34 @@ export const stanceDestinations: readonly Destination[] = [
         kind: "cards",
         items: [
           {
-            title: "Systems thinking",
+            title: "The frontend is the product",
+            meta: "Strategy",
+            body: "Treat the surface users touch as the business — never a thin layer over an API.",
+          },
+          {
+            title: "Systems over heroics",
             meta: "Architecture",
-            body: "Turn product ambiguity into composable, evolvable architectures that survive multiple product lines.",
-          },
-          {
-            title: "Accessibility is a requirement",
-            meta: "WCAG",
-            body: "Semantic HTML, keyboard support, visible focus. A11y is a gate, never a polish step.",
-          },
-          {
-            title: "Performance is a feature",
-            meta: "Core Web Vitals",
-            body: "Bundle budgets, runtime optimization, and release safety — measured, not assumed.",
+            body: "Turn ambiguity into composable, evolvable architectures that survive multiple product lines and team changes.",
           },
           {
             title: "AI that ships",
             meta: "AI-native",
-            body: "Agentic UX and RAG-backed flows that hold up in production, not just in demos.",
+            body: "Agentic UX, RAG-backed flows, and human-in-the-loop review that hold up in production, not just in demos.",
           },
           {
-            title: "RFC-driven decisions",
+            title: "Accessibility is a gate",
+            meta: "WCAG",
+            body: "Semantic HTML, keyboard support, visible focus — a requirement inherited from boardroom and broadcast-grade software.",
+          },
+          {
+            title: "Performance is a feature",
+            meta: "Core Web Vitals",
+            body: "Bundle budgets, runtime optimization, and release safety — measured, not assumed. Learned at streaming scale.",
+          },
+          {
+            title: "Decide in the open",
             meta: "Leadership",
-            body: "Technical strategy in the open — leveling, hiring bar, and roadmaps the team can reason about.",
-          },
-          {
-            title: "Developer experience",
-            meta: "DX",
-            body: "Typed contracts, CI/CD, and observability so teams stay unblocked and fast.",
+            body: "RFCs, leveling rubrics, and roadmaps the whole team can reason about. High trust, async, shipping-oriented.",
           },
         ],
       },

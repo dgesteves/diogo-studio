@@ -3,6 +3,7 @@ import { coreDestinations } from "./destinations-core";
 import { craftDestinations } from "./destinations-craft";
 import { experienceDestinations } from "./destinations-experience";
 import { explorationDestinations } from "./destinations-explorations";
+import { openSourceDestinations } from "./destinations-open-source";
 import { projectDestinations } from "./destinations-projects";
 import { reachDestinations } from "./destinations-reach";
 import { stanceDestinations } from "./destinations-stance";
@@ -18,7 +19,7 @@ export const worldSectors: readonly WorldSector[] = [
   { label: "Core", destinations: coreDestinations },
   { label: "Experience", destinations: experienceDestinations },
   { label: "Projects", destinations: projectDestinations },
-  { label: "Craft", destinations: craftDestinations },
+  { label: "Craft", destinations: [...craftDestinations, ...openSourceDestinations] },
   { label: "Stance", destinations: stanceDestinations },
   { label: "Tooling", destinations: toolingDestinations },
   { label: "Explorations", destinations: explorationDestinations },

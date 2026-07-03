@@ -11,20 +11,24 @@ export const explorationDestinations: readonly Destination[] = [
     summary: "Interactive experiments powering this studio — 3D, motion, and command-driven UX.",
     blocks: [
       {
+        kind: "lede",
+        text: "Everything here is running live in the site you're standing in. No mockups — view source is the case study.",
+      },
+      {
         kind: "cards",
         items: [
           {
             title: "This 3D world",
             meta: "R3F · Three.js",
-            body: "A persistent, navigable studio rendered with React Three Fiber — the site you're in now.",
+            body: "A persistent, navigable studio rendered with React Three Fiber — neon, volumetrics, and a boot sequence included.",
           },
           {
             title: "Career graph",
             meta: "SVG · Motion",
-            body: "An animated graph connecting engagements by the patterns that link them.",
+            body: "An animated graph connecting eleven years of engagements by the patterns that link them.",
           },
           {
-            title: "Command menu",
+            title: "Command deck",
             meta: "cmdk · AI",
             body: "A ⌘K palette that navigates the world and answers questions about the work.",
           },
@@ -52,23 +56,23 @@ export const explorationDestinations: readonly Destination[] = [
           {
             title: "Agentic eval harnesses",
             meta: "AI",
-            body: "Tooling to measure whether AI workflows actually hold up under real-world inputs.",
+            body: "Tooling to measure whether agentic workflows hold up under real-world inputs — not just curated demos.",
           },
           {
             title: "Streaming UI primitives",
             meta: "Performance",
-            body: "Suspense-driven components for data-heavy, low-latency interfaces.",
+            body: "Suspense-driven components for data-heavy, low-latency interfaces, distilled from streaming-scale work.",
           },
           {
             title: "Spatial navigation",
             meta: "3D",
-            body: "Mapping information architecture onto a navigable 3D space — like this studio.",
+            body: "Mapping information architecture onto navigable 3D space — the research behind this studio.",
           },
         ],
       },
       {
         kind: "lede",
-        text: "Experiments here are rough on purpose. Some graduate to the playground.",
+        text: "Experiments here are rough on purpose. The good ones graduate to the playground; the best ones ship for clients.",
       },
     ],
   },
