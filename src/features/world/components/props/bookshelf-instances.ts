@@ -19,13 +19,11 @@ const ROWS = [
 ] as const;
 
 export const SHELF_BOOKS: BookInstance[] = ROWS.flatMap((row) =>
-  buildShelfBooks(row.seed, row.maxHeight).map(
-    (book): BookInstance => ({
-      key: `${row.seed}-${book.z.toFixed(3)}`,
-      position: [BOOK_FRONT_X - book.depth / 2, row.baseY + book.height / 2, book.z],
-      scale: [book.depth, book.height, book.thickness],
-      rotation: [book.lean, 0, 0],
-      color: book.color,
-    }),
-  ),
+  buildShelfBooks(row.seed, row.maxHeight).map((book): BookInstance => ({
+    key: `${row.seed}-${book.z.toFixed(3)}`,
+    position: [BOOK_FRONT_X - book.depth / 2, row.baseY + book.height / 2, book.z],
+    scale: [book.depth, book.height, book.thickness],
+    rotation: [book.lean, 0, 0],
+    color: book.color,
+  })),
 );
