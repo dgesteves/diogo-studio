@@ -5,6 +5,7 @@ import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
 import { FRAME, SURFACE, TABLE_Z } from "./constants";
+import { LoungeTableItems } from "./lounge-table-items";
 
 const TOP_Y = 0.34;
 const LEG_X = 0.5;
@@ -25,12 +26,12 @@ export function LoungeCoffeeTable(): ReactElement {
 
       <mesh position={[0, TOP_Y + 0.032, 0]}>
         <boxGeometry args={[1.0, 0.004, 0.5]} />
-        <meshBasicMaterial
-          color={brandColors.accent}
-          toneMapped={false}
-          transparent
-          opacity={0.35}
-        />
+        <meshStandardMaterial color="#0a1218" roughness={0.15} metalness={0.6} />
+      </mesh>
+
+      <mesh position={[0, TOP_Y + 0.026, 0.352]}>
+        <boxGeometry args={[1.2, 0.005, 0.005]} />
+        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
 
       {[-LEG_X, LEG_X].map((x) =>
@@ -42,14 +43,7 @@ export function LoungeCoffeeTable(): ReactElement {
         )),
       )}
 
-      <mesh position={[0.34, TOP_Y + 0.06, 0.06]}>
-        <boxGeometry args={[0.22, 0.07, 0.3]} />
-        <meshStandardMaterial color="#101820" roughness={0.7} metalness={0.1} />
-      </mesh>
-      <mesh position={[0.34, TOP_Y + 0.1, 0.06]} rotation={[0.18, 0.3, 0]}>
-        <boxGeometry args={[0.2, 0.012, 0.28]} />
-        <meshStandardMaterial color="#16222c" roughness={0.7} metalness={0.1} />
-      </mesh>
+      <LoungeTableItems topY={TOP_Y + 0.034} />
     </group>
   );
 }

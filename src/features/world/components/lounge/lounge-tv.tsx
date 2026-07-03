@@ -5,6 +5,7 @@ import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
 import { CONSOLE_Z, SURFACE, TV_CENTER_Y, TV_WALL_Z } from "./constants";
+import { LoungeSoundbar } from "./lounge-soundbar";
 import { useLoungeTvTexture } from "./use-lounge-tv-texture";
 
 const CONSOLE_W = 1.9;
@@ -33,6 +34,7 @@ export function LoungeTv(): ReactElement {
           <boxGeometry args={[CONSOLE_W - 0.1, 0.01, 0.004]} />
           <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
         </mesh>
+        <LoungeSoundbar topY={CONSOLE_H + 0.02} />
       </group>
 
       <group position={[0, TV_CENTER_Y, TV_Z]}>
