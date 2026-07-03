@@ -8,6 +8,7 @@ import { INDEX_PATH, ROOT, loadEnvFiles } from "./agent-index/paths";
 import { indexById, loadExistingIndex, serialize } from "./agent-index/store";
 import { CHUNKER_VERSION, EMBED_DIMENSIONS } from "./agent-index/types";
 import type { AgentIndex, IndexEntry } from "./agent-index/types";
+import { buildDestinationChunks } from "./agent-index/destination-chunks";
 import { buildCareerChunks } from "./agent-index/virtual-chunks";
 
 const DEFAULT_EMBED_MODEL = "text-embedding-3-small";
@@ -22,9 +23,12 @@ async function main(): Promise<void> {
   loadEnvFiles();
   console.log("[agent:index] gathering source chunks…");
   const career = buildCareerChunks();
-  const chunks = [...career];
+  const destinations = buildDestinationChunks();
+  const chunks = [...career, ...destinations];
 
-  console.log(`[agent:index] ${chunks.length} chunks (career=${career.length})`);
+  console.log(
+    `[agent:index] ${chunks.length} chunks (career=${career.length}, routes=${destinations.length})`,
+  );
 
   const existing = loadExistingIndex();
   const previous = existing ? indexById(existing.chunks) : new Map<string, IndexEntry>();
