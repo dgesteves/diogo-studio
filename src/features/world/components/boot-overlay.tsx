@@ -10,6 +10,7 @@ import { BootBackdrop } from "./boot-backdrop";
 import { BootHud } from "./boot-hud";
 import { BootLog } from "./boot-log";
 import { BootProgress } from "./boot-progress";
+import { BootWipNotice } from "./boot-wip-notice";
 import { BootWordmark } from "./boot-wordmark";
 
 type BootOverlayProps = {
@@ -72,6 +73,8 @@ export function BootOverlay({
             </Dialog.Title>
 
             <BootWordmark />
+
+            <BootWipNotice />
 
             <BootLog pct={pct} ready={canEnter} />
 

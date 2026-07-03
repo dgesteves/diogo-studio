@@ -16,3 +16,8 @@ export const BOOT_STEPS = [
 export const BOOT_READY_LABEL = "Studio ready";
 
 export const BOOT_ROLE_LINE = "Staff · Principal · Founding Engineer";
+
+export const BOOT_WIP_BADGE = "Alpha · Work in progress";
+
+export const BOOT_WIP_MESSAGE =
+  "Welcome to my new portfolio an immersive, interactive 3D world. It is still in its early stages, so expect placeholder content and rough edges while I build it out.";
