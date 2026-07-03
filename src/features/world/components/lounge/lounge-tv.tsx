@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
-import { CONSOLE_Z, TV_CENTER_Y, TV_WALL_Z, WOOD } from "./constants";
+import { CONSOLE_Z, SURFACE, TV_CENTER_Y, TV_WALL_Z } from "./constants";
 import { useLoungeTvTexture } from "./use-lounge-tv-texture";
 
 const CONSOLE_W = 1.9;
@@ -27,7 +27,7 @@ export function LoungeTv(): ReactElement {
           position={[0, CONSOLE_H / 2 + 0.02, 0]}
           castShadow
         >
-          <meshStandardMaterial {...WOOD} />
+          <meshStandardMaterial {...SURFACE} />
         </RoundedBox>
         <mesh position={[0, 0.12, CONSOLE_D / 2 + 0.001]}>
           <boxGeometry args={[CONSOLE_W - 0.1, 0.01, 0.004]} />

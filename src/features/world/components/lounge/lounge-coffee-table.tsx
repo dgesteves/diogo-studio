@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
-import { FRAME, TABLE_Z, WOOD } from "./constants";
+import { FRAME, SURFACE, TABLE_Z } from "./constants";
 
 const TOP_Y = 0.34;
 const LEG_X = 0.5;
@@ -20,7 +20,7 @@ export function LoungeCoffeeTable(): ReactElement {
         position={[0, TOP_Y, 0]}
         castShadow
       >
-        <meshStandardMaterial {...WOOD} />
+        <meshStandardMaterial {...SURFACE} />
       </RoundedBox>
 
       <mesh position={[0, TOP_Y + 0.032, 0]}>
