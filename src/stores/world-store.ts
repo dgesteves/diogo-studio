@@ -2,9 +2,10 @@ import type { RouteKey } from "@/constants/routes";
 
 export type WorldState = {
   hovered: RouteKey | null;
+  aiCoreHovered: boolean;
 };
 
-const INITIAL: WorldState = { hovered: null };
+const INITIAL: WorldState = { hovered: null, aiCoreHovered: false };
 
 let state: WorldState = INITIAL;
 const listeners = new Set<() => void>();
@@ -16,6 +17,12 @@ function emit(): void {
 export function setHoveredStation(slug: RouteKey | null): void {
   if (state.hovered === slug) return;
   state = { ...state, hovered: slug };
+  emit();
+}
+
+export function setAiCoreHovered(value: boolean): void {
+  if (state.aiCoreHovered === value) return;
+  state = { ...state, aiCoreHovered: value };
   emit();
 }
 

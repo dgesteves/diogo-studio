@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 
 import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
+import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/constants/routes";
 import { useWorldPalette } from "@/hooks/use-world-palette";
@@ -21,6 +22,7 @@ import { useExplore } from "../hooks/use-explore";
 import { useExploreHandoff } from "../hooks/use-explore-handoff";
 import { useExploreInput } from "../hooks/use-explore-input";
 import { useOrbitInput } from "../hooks/use-orbit-input";
+import { AiCore } from "./ai-core";
 import { BootProgressReporter } from "./boot-progress-reporter";
 import { ExploreController } from "./explore-controller";
 import { Lounge } from "./lounge/lounge";
@@ -39,6 +41,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   const home = getStation("home");
   const palette = useWorldPalette();
   const router = useRouter();
+  const { openWithMode } = useCommandMenu();
   const explore = useExplore();
   const orbitEnabled = active === "home" && !explore;
   const orbitInput = useOrbitInput(orbitEnabled);
@@ -70,6 +73,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
         <WorldInteract
           input={orbitInput}
           onSelect={(slug) => router.push(getDestination(slug).href)}
+          onAskAi={() => openWithMode("ask")}
         />
       )}
 
@@ -78,6 +82,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       <Lounge />
       <WorldNeon />
       <WorldPortals active={active} />
+      <AiCore />
 
       <EffectComposer enableNormalPass={false} multisampling={0}>
         <Bloom
