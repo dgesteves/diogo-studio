@@ -8,16 +8,19 @@ export type ShelfBook = {
 };
 
 const SPINE_COLORS = [
-  "#18282f",
-  "#1b2630",
-  "#172430",
-  "#1d2c2c",
-  "#202b32",
-  "#16272d",
-  "#1e2a30",
-  "#252f36",
-  "#2a3a3e",
+  "#243440",
+  "#2b3a46",
+  "#22323a",
+  "#31424c",
+  "#3a4b53",
+  "#26343f",
+  "#2e3d45",
+  "#3f505a",
+  "#465862",
 ] as const;
+
+const ACCENT_COLORS = ["#1d6a7c", "#2c5a74", "#7c3554", "#8f652f"] as const;
+const ACCENT_CHANCE = 0.07;
 
 const SHELF_HALF = 0.5;
 const MARGIN = 0.02;
@@ -59,8 +62,9 @@ export function buildShelfBooks(seed: number, maxHeight: number): ShelfBook[] {
     if (z + thickness > end) break;
     const height = Math.min(MIN_HEIGHT + random() * HEIGHT_RANGE, maxHeight);
     const depth = MIN_DEPTH + random() * DEPTH_RANGE;
-    const index = Math.floor(random() * SPINE_COLORS.length);
-    const color = SPINE_COLORS[index] ?? fallback;
+    const pool = random() < ACCENT_CHANCE ? ACCENT_COLORS : SPINE_COLORS;
+    const index = Math.floor(random() * pool.length);
+    const color = pool[index] ?? fallback;
     const lean = random() < LEAN_CHANCE ? (random() - 0.5) * MAX_LEAN : 0;
     books.push({ z: z + thickness / 2, height, thickness, depth, color, lean });
     z += thickness + BOOK_SPACING;
