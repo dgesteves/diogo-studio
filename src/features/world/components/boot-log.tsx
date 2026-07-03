@@ -40,7 +40,7 @@ export function BootLog({ pct, ready }: BootLogProps): ReactElement {
                 />
               )}
             </span>
-            <span className="tabular text-[9px] opacity-50">
+            <span className="tabular text-brand-magenta/60 text-[9px]">
               {`0x${(index + 1).toString(16).toUpperCase().padStart(2, "0")}`}
             </span>
             <span className="flex-1 text-left">

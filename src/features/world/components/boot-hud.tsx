@@ -16,7 +16,7 @@ export function BootHud(): ReactElement {
       <span className={cn(CORNER, "bottom-5 left-5 border-b border-l")} />
       <span className={cn(CORNER, "right-5 bottom-5 border-r border-b")} />
       <span className={cn(LABEL, "top-6 left-14 flex items-center gap-1.5")}>
-        <span className="bg-brand-cyan boot-caret size-1.5 rounded-full shadow-[0_0_8px_var(--brand-cyan)]" />
+        <span className="bg-brand-magenta boot-caret size-1.5 rounded-full shadow-[0_0_8px_var(--brand-magenta)]" />
         SYS · BOOT
       </span>
       <span className={cn(LABEL, "top-6 right-14")}>RENDER · WEBGL2</span>

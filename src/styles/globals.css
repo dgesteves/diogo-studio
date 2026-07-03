@@ -430,7 +430,9 @@
 
 .scene-horizon {
   background: var(--brand-cyan);
-  box-shadow: 0 0 96px 20px color-mix(in srgb, var(--brand-cyan) 62%, transparent);
+  box-shadow:
+    0 0 96px 20px color-mix(in srgb, var(--brand-cyan) 62%, transparent),
+    0 22px 140px 30px color-mix(in srgb, var(--brand-magenta) 16%, transparent);
   animation: scene-pulse 5s ease-in-out infinite;
 }
 
@@ -500,14 +502,21 @@
   }
 }
 .boot-sun {
-  background: radial-gradient(
-    circle at 50% 50%,
-    var(--brand-cyan-bright) 0%,
-    color-mix(in srgb, var(--brand-cyan) 92%, white) 24%,
-    var(--brand-cyan) 46%,
-    color-mix(in srgb, var(--brand-cyan) 28%, transparent) 66%,
-    transparent 74%
-  );
+  background:
+    radial-gradient(
+      circle at 50% 44%,
+      var(--brand-cyan-bright) 0%,
+      color-mix(in srgb, var(--brand-cyan) 92%, white) 22%,
+      var(--brand-cyan) 42%,
+      color-mix(in srgb, var(--brand-cyan) 28%, transparent) 62%,
+      transparent 72%
+    ),
+    radial-gradient(
+      circle at 50% 72%,
+      color-mix(in srgb, var(--brand-magenta) 42%, transparent) 6%,
+      color-mix(in srgb, var(--brand-magenta) 20%, transparent) 38%,
+      transparent 64%
+    );
   filter: drop-shadow(0 0 44px color-mix(in srgb, var(--brand-cyan) 42%, transparent));
   animation: boot-sun-pulse 5s ease-in-out infinite;
 }
@@ -781,7 +790,7 @@
     var(--brand-cyan-bright) 50deg,
     transparent 110deg,
     transparent 230deg,
-    color-mix(in srgb, var(--brand-cyan) 90%, white) 290deg,
+    color-mix(in srgb, var(--brand-magenta) 80%, white) 290deg,
     transparent 350deg
   );
   padding: 1px;
