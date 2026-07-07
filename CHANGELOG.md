@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.11.0](https://github.com/dgesteves/diogo-studio/compare/v1.10.0...v1.11.0) (2026-07-03)
+
+
+### Features
+
+* **agent:** index all route content for RAG retrieval ([0bf8e4c](https://github.com/dgesteves/diogo-studio/commit/0bf8e4c980035623bb94a7503b4c33210c7eb36e))
+* **boot:** add work-in-progress notice to boot overlay ([f9a0810](https://github.com/dgesteves/diogo-studio/commit/f9a081035fc9e9aab69fa0647fcaf0833bcaa86b))
+* rewrite all route content from real career record ([8a91b13](https://github.com/dgesteves/diogo-studio/commit/8a91b135e2fa3480fd7eb65779a4ce72ca09adfc))
+* **scene:** add desk rug and redesign lounge area with updated materials and positioning ([80f424e](https://github.com/dgesteves/diogo-studio/commit/80f424e9f390e9add2bda29b82564fcac56d56c3))
+* **world:** add interactive AI core orb with hover animations and command menu integration ([b8539f3](https://github.com/dgesteves/diogo-studio/commit/b8539f34f95d7bd9394dc7036c78cdfdb87ae8c7))
+
+
+### Code Refactoring
+
+* **boot:** redesign boot screen UI with magenta accents and refined styling ([69256cc](https://github.com/dgesteves/diogo-studio/commit/69256cc80876ef98287ac6d4f5d35f7354d4af22))
+* **lounge:** add soundbar and table items with redesigned coffee table surface ([9f551fa](https://github.com/dgesteves/diogo-studio/commit/9f551fa04f5b68860edbd1ae75ed7ebe1ad698b2))
+* **world:** redesign bookshelf with magenta accent books and cool LED strip lighting ([76b870c](https://github.com/dgesteves/diogo-studio/commit/76b870c18ec16de165c7db9ea6496028af56698f))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump knip from 6.20.0 to 6.22.0 ([#119](https://github.com/dgesteves/diogo-studio/issues/119)) ([f915463](https://github.com/dgesteves/diogo-studio/commit/f9154636024569f6fa2bef3df13c88854d316a8e))
+* **deps-dev:** bump prettier from 3.8.4 to 3.9.1 in the linting group across 1 directory ([#115](https://github.com/dgesteves/diogo-studio/issues/115)) ([39b8def](https://github.com/dgesteves/diogo-studio/commit/39b8def871cbb89e7c12e3d6f5c38fbeedea2a4c))
+* **deps:** bump @sentry/nextjs from 10.61.0 to 10.62.0 ([#117](https://github.com/dgesteves/diogo-studio/issues/117)) ([35b212e](https://github.com/dgesteves/diogo-studio/commit/35b212eb339cf46adeb87ca07d707f0eafbd53f6))
+* **deps:** bump ai from 6.0.211 to 7.0.11 ([#118](https://github.com/dgesteves/diogo-studio/issues/118)) ([1dda328](https://github.com/dgesteves/diogo-studio/commit/1dda3288d25f3dec1578e5de3a932a4765400f71))
+* **deps:** bump lenis from 1.3.24 to 1.3.25 ([#116](https://github.com/dgesteves/diogo-studio/issues/116)) ([e012b9b](https://github.com/dgesteves/diogo-studio/commit/e012b9b45d5bf625db771ac1e0e412928be24a67))
+* **deps:** bump three and @types/three ([#120](https://github.com/dgesteves/diogo-studio/issues/120)) ([8c3c5f2](https://github.com/dgesteves/diogo-studio/commit/8c3c5f222aaac63e63f7b8b669412dcb162de532))
+
 ## [1.10.0](https://github.com/dgesteves/diogo-studio/compare/v1.9.0...v1.10.0) (2026-06-27)
 
 
