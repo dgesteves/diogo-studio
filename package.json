@@ -93,7 +93,7 @@
     "knip": "^6.24.0",
     "lint-staged": "^17.0.8",
     "prettier": "^3.9.4",
-    "prettier-plugin-tailwindcss": "^0.8.0",
+    "prettier-plugin-tailwindcss": "^0.8.1",
     "schema-dts": "^2.0.0",
     "size-limit": "^12.1.0",
     "tailwindcss": "^4",
