@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.11.1](https://github.com/dgesteves/diogo-studio/compare/v1.11.0...v1.11.1) (2026-07-21)
+
+
+### Build System
+
+* **deps:** override sharp and fast-uri to patched versions ([73001da](https://github.com/dgesteves/diogo-studio/commit/73001daba70e98612d313ce73c87e3f6bb16ae50))
+
+
+### Continuous Integration
+
+* **deps:** bump actions/setup-node from 6 to 7 ([#150](https://github.com/dgesteves/diogo-studio/issues/150)) ([af9bbbe](https://github.com/dgesteves/diogo-studio/commit/af9bbbe153a300b2cf5757b99a2a2d98bc501b98))
+* **deps:** bump github/codeql-action from 4 to 4.37.1 ([#160](https://github.com/dgesteves/diogo-studio/issues/160)) ([f63dc7e](https://github.com/dgesteves/diogo-studio/commit/f63dc7e1fe48e6a3672e3a9ab9ebe5a599f5dca9))
+* **deps:** ignore typescript major bumps until eslint toolchain supports ts 7 ([20095aa](https://github.com/dgesteves/diogo-studio/commit/20095aa9198025f6572f2800fd3ebac5096f88e4))
+* pin actions to commit shas and scope workflow token permissions ([919efcf](https://github.com/dgesteves/diogo-studio/commit/919efcfd9b23faa2b5e9cf6cd3f18054903dbfb3))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @testing-library/jest-dom from 6.9.1 to 7.0.0 in the testing group across 1 directory ([#161](https://github.com/dgesteves/diogo-studio/issues/161)) ([38c4192](https://github.com/dgesteves/diogo-studio/commit/38c419277efd80589de5fb27ece0300ccb92e13f))
+* **deps-dev:** bump knip from 6.24.0 to 6.27.0 ([#155](https://github.com/dgesteves/diogo-studio/issues/155)) ([2fb0af5](https://github.com/dgesteves/diogo-studio/commit/2fb0af597184bc17a616a76ff40b8281b0b8f8c1))
+* **deps-dev:** bump the linting group across 1 directory with 4 updates ([#152](https://github.com/dgesteves/diogo-studio/issues/152)) ([6f9f910](https://github.com/dgesteves/diogo-studio/commit/6f9f9105b9545ce2f55c0888cf7d1dd33bac7afb))
+* **deps-dev:** bump the tailwind group with 3 updates ([#151](https://github.com/dgesteves/diogo-studio/issues/151)) ([4801ce2](https://github.com/dgesteves/diogo-studio/commit/4801ce27cf2cb7c59f78e844043b1c77240b8a14))
+* **deps-dev:** bump the testing group with 2 updates ([#140](https://github.com/dgesteves/diogo-studio/issues/140)) ([b684829](https://github.com/dgesteves/diogo-studio/commit/b68482922dc1dca052282124c6755b28d0768204))
+* **deps-dev:** bump the types group across 1 directory with 2 updates ([#142](https://github.com/dgesteves/diogo-studio/issues/142)) ([cd57611](https://github.com/dgesteves/diogo-studio/commit/cd57611fc66177bf534ca9edab17b672e7323f65))
+* **deps-dev:** bump tsx from 4.23.0 to 4.23.1 ([#153](https://github.com/dgesteves/diogo-studio/issues/153)) ([b780e66](https://github.com/dgesteves/diogo-studio/commit/b780e66d5e4efec2355c58fc40285ddcf9a5abbc))
+* **deps:** bump @ai-sdk/openai from 3.0.75 to 4.0.8 ([#138](https://github.com/dgesteves/diogo-studio/issues/138)) ([6e1e400](https://github.com/dgesteves/diogo-studio/commit/6e1e400e49e777c1ee5980cf459907c7bd18749a))
+* **deps:** bump @ai-sdk/openai from 4.0.8 to 4.0.16 ([#156](https://github.com/dgesteves/diogo-studio/issues/156)) ([c0ce712](https://github.com/dgesteves/diogo-studio/commit/c0ce71253f088281542e5c8344c989027f377cdc))
+* **deps:** bump @radix-ui/react-dialog from 1.1.18 to 1.1.19 ([#149](https://github.com/dgesteves/diogo-studio/issues/149)) ([c73930e](https://github.com/dgesteves/diogo-studio/commit/c73930e59933b7b8752b1cd14d79cfa0ea2e89f5))
+* **deps:** bump @radix-ui/react-dialog from 1.1.19 to 1.1.20 ([#164](https://github.com/dgesteves/diogo-studio/issues/164)) ([049d5ba](https://github.com/dgesteves/diogo-studio/commit/049d5baaf8032d974e0f533bda2247d740b17392))
+* **deps:** bump @radix-ui/react-visually-hidden from 1.2.7 to 1.2.8 ([#162](https://github.com/dgesteves/diogo-studio/issues/162)) ([7124657](https://github.com/dgesteves/diogo-studio/commit/7124657b96db4269f7d74cfeec44e4ae69384480))
+* **deps:** bump @sentry/nextjs from 10.63.0 to 10.66.0 ([#154](https://github.com/dgesteves/diogo-studio/issues/154)) ([fadfb0c](https://github.com/dgesteves/diogo-studio/commit/fadfb0c2244640bb8a2b7ec91fa601c398f78c52))
+* **deps:** bump @sentry/nextjs from 10.66.0 to 10.67.0 ([#163](https://github.com/dgesteves/diogo-studio/issues/163)) ([dc37520](https://github.com/dgesteves/diogo-studio/commit/dc375208c40883f548a319153ac4a878f773ed64))
+* **deps:** bump ai from 7.0.15 to 7.0.31 ([#145](https://github.com/dgesteves/diogo-studio/issues/145)) ([b938797](https://github.com/dgesteves/diogo-studio/commit/b938797e6af4f68d51fb3434996087e493a372df))
+* **deps:** bump ai from 7.0.15 to 7.0.31 ([#157](https://github.com/dgesteves/diogo-studio/issues/157)) ([2e6f5a5](https://github.com/dgesteves/diogo-studio/commit/2e6f5a5b85257f80aefedb92bbbe5c2b9a0e4d61))
+* **deps:** bump ai from 7.0.31 to 7.0.32 ([#165](https://github.com/dgesteves/diogo-studio/issues/165)) ([6d32e73](https://github.com/dgesteves/diogo-studio/commit/6d32e73ea3fe123928e09aae8cb5b6c5280f1bda))
+* **deps:** bump lucide-react from 1.23.0 to 1.25.0 ([#148](https://github.com/dgesteves/diogo-studio/issues/148)) ([c09a378](https://github.com/dgesteves/diogo-studio/commit/c09a378d3280a48b9459ce5a6379f8fd692edc43))
+* **deps:** bump multiple dependencies including webpack, vite, and typescript-eslint ([9e67de0](https://github.com/dgesteves/diogo-studio/commit/9e67de03577696902c3c41b780f2d3f62606e7a1))
+
 ## [1.11.0](https://github.com/dgesteves/diogo-studio/compare/v1.10.0...v1.11.0) (2026-07-03)
 
 
