@@ -30,6 +30,11 @@ updates:
       # adds ESLint 10 support.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # typescript-eslint does not support TypeScript 7 yet (lint crashes with
+      # "Cannot read properties of undefined (reading 'Cjs')"). Block TS major
+      # bumps until the ESLint toolchain supports TS 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       next:
         patterns:
