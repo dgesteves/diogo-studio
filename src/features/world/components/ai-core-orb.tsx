@@ -67,9 +67,8 @@ export function AiCoreOrb({
           toneMapped={false}
         />
       </mesh>
-      <mesh ref={hitRef}>
+      <mesh ref={hitRef} visible={false}>
         <sphereGeometry args={[AI_CORE_HITBOX_RADIUS, 12, 12]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <pointLight ref={lightRef} color={AI_CORE_ACCENT} intensity={1.2} distance={4.5} decay={2} />
       <NeonLabel

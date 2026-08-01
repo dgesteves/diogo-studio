@@ -53,16 +53,14 @@ export function FurnitureHotspot({
 
   return (
     <group>
-      <mesh ref={meshRef} position={[cx, cy, cz]}>
+      <mesh ref={meshRef} position={[cx, cy, cz]} visible={false}>
         <boxGeometry args={[sx, sy, sz]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
       <HotspotFocus
         focus={focus}
         accent={station.accent}
         label={label}
-        lightPosition={station.anchor}
         glowPosition={glowPosition}
         glowRotation={glowRotation}
         glowSize={glowSize}
