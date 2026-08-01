@@ -8,8 +8,8 @@ import type { RetrievalResult } from "./retrieve-types";
 
 export { cosine, retrieveByCosine } from "./retrieve-cosine";
 export { retrieveByKeyword } from "./retrieve-keyword";
-export { TOP_K, MIN_COSINE_SCORE, MIN_KEYWORD_SCORE } from "./retrieve-tunables";
-export type { RetrievalHit, RetrievalResult } from "./retrieve-types";
+export { TOP_K } from "./retrieve-tunables";
+export type { RetrievalResult } from "./retrieve-types";
 
 export function retrieve(
   index: AgentChunk[],

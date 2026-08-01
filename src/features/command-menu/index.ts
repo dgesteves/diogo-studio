@@ -1,6 +1,2 @@
 export { CommandMenu } from "./components/command-menu";
-export {
-  CommandMenuProvider,
-  useCommandMenu,
-  type CommandMenuMode,
-} from "./stores/command-menu-store";
+export { CommandMenuProvider, useCommandMenu } from "./stores/command-menu-store";
