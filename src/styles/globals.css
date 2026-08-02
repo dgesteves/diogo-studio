@@ -783,6 +783,14 @@
     --boot-angle: 360deg;
   }
 }
+/* The default ring sits exactly on top of `.boot-cta-frame` and hides the
+   animated border, so the focus indicator is pushed outside the corner
+   brackets instead of being dropped. */
+.boot-cta:focus-visible {
+  outline: 2px solid var(--brand-cyan-bright);
+  outline-offset: 8px;
+}
+
 .boot-cta-frame {
   background: conic-gradient(
     from var(--boot-angle),

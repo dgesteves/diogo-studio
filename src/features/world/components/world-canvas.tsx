@@ -2,13 +2,13 @@
 
 import "@/components/r3f/silence-clock-deprecation";
 
-import { useState, type ReactElement } from "react";
+import { useCallback, useState, type ReactElement } from "react";
 import { Canvas } from "@react-three/fiber";
-import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera, Preload } from "@react-three/drei";
-import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
+import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 
 import { PerfReporter } from "@/components/r3f/perf-reporter";
+import { ScenePrecompile } from "@/components/r3f/scene-precompile";
 import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
@@ -17,6 +17,7 @@ import { useWorldPalette } from "@/hooks/use-world-palette";
 import { markWorldReady } from "@/stores/boot-store";
 
 import { getDestination } from "../constants/destinations";
+import { DPR_MIN, dprForFactor } from "../constants/render";
 import { getStation } from "../constants/stations";
 import { useExplore } from "../hooks/use-explore";
 import { useExploreHandoff } from "../hooks/use-explore-handoff";
@@ -30,6 +31,7 @@ import { WorldCamera } from "./world-camera";
 import { WorldInteract } from "./world-interact";
 import { WorldNeon } from "./world-neon";
 import { WorldPortals } from "./world-portals";
+import { WorldPostprocessing } from "./world-postprocessing";
 import { WorldProps } from "./world-props";
 
 type WorldCanvasProps = {
@@ -47,17 +49,15 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   const orbitInput = useOrbitInput(orbitEnabled);
   const exploreInput = useExploreInput(explore);
   useExploreHandoff(active, explore);
-  const [dpr, setDpr] = useState(1.5);
+  const [dpr, setDpr] = useState(DPR_MIN);
+
+  const handleCompiled = useCallback(() => {
+    markWorldReady();
+    onReady?.();
+  }, [onReady]);
 
   return (
-    <Canvas
-      dpr={dpr}
-      gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-      onCreated={() => {
-        markWorldReady();
-        onReady?.();
-      }}
-    >
+    <Canvas dpr={dpr} gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}>
       <color attach="background" args={[palette.background]} />
       <fog attach="fog" args={[palette.fogColor, palette.fogNear, palette.fogFar]} />
 
@@ -84,27 +84,15 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       <WorldPortals active={active} />
       <AiCore />
 
-      <EffectComposer enableNormalPass={false} multisampling={0}>
-        <Bloom
-          intensity={palette.bloomIntensity}
-          luminanceThreshold={palette.bloomLuminanceThreshold}
-          luminanceSmoothing={palette.bloomLuminanceSmoothing}
-          mipmapBlur
-        />
-        <Vignette
-          offset={palette.vignetteOffset}
-          darkness={palette.vignetteDarkness}
-          eskil={false}
-        />
-      </EffectComposer>
+      <WorldPostprocessing />
 
       <PerformanceMonitor
-        onChange={({ factor }) => setDpr(Math.round((1 + 0.5 * factor) * 10) / 10)}
+        onChange={({ factor }) => setDpr(dprForFactor(factor))}
         flipflops={3}
-        onFallback={() => setDpr(1)}
+        onFallback={() => setDpr(DPR_MIN)}
       />
       <AdaptiveEvents />
-      <Preload all />
+      <ScenePrecompile onCompiled={handleCompiled} />
     </Canvas>
   );
 }

@@ -1,0 +1,27 @@
+name: Audit
+
+# Advisories are published independently of any pull request, so auditing on the
+# PR path turns unrelated branches red. This runs against main on a schedule
+# instead, where a failure means "act now", not "your diff is broken".
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 24
+
+jobs:
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Audit production dependencies
+        run: pnpm audit --prod --audit-level high
