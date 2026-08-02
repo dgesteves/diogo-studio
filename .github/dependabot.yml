@@ -70,6 +70,22 @@ updates:
       types:
         patterns:
           - "@types/*"
+      # Catch-alls, matched last. Every minor/patch bump not claimed by a group
+      # above lands in one PR per dependency type instead of one per package,
+      # which keeps the "require branches up to date" rebase churn bounded.
+      # Majors stay ungrouped so they can be reviewed and reverted on their own.
+      production-minor-patch:
+        applies-to: version-updates
+        dependency-type: production
+        update-types:
+          - minor
+          - patch
+      development-minor-patch:
+        applies-to: version-updates
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
 
   - package-ecosystem: github-actions
     directory: "/"
@@ -94,3 +110,6 @@ updates:
       codeql-action:
         patterns:
           - "github/codeql-action*"
+      actions:
+        patterns:
+          - "*"
