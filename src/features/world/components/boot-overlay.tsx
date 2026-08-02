@@ -40,7 +40,9 @@ export function BootOverlay({
   }, [canEnter]);
 
   useEffect(() => {
-    if (canEnter) primaryRef.current?.focus();
+    // Move focus for keyboard/screen-reader users without painting the focus
+    // ring over the CTA's animated border; Tab still reveals it.
+    if (canEnter) primaryRef.current?.focus({ focusVisible: false });
   }, [canEnter]);
 
   const pct = canEnter ? 100 : Math.min(96, Math.max(progress, faux));

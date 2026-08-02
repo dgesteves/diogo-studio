@@ -63,7 +63,7 @@ export function BootActions({
           ref={primaryRef}
           type="button"
           onClick={() => handleEnter(soundOn)}
-          className="border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 focus-visible:ring-offset-brand-ink relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)]"
+          className="boot-cta border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)] focus-visible:ring-0 focus-visible:ring-offset-0"
         >
           <span
             aria-hidden="true"
