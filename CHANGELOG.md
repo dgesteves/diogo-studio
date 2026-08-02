@@ -1,5 +1,45 @@
 # Changelog
 
+## [1.11.2](https://github.com/dgesteves/diogo-studio/compare/v1.11.1...v1.11.2) (2026-08-02)
+
+
+### Bug Fixes
+
+* **ci:** stop dependabot branches from creating vercel deployments ([#198](https://github.com/dgesteves/diogo-studio/issues/198)) ([80a659a](https://github.com/dgesteves/diogo-studio/commit/80a659a4ac364b1c0833dc0438feab695d15158d))
+* **deps:** resolve high-severity next and brace-expansion advisories ([#188](https://github.com/dgesteves/diogo-studio/issues/188)) ([85f8697](https://github.com/dgesteves/diogo-studio/commit/85f869716068fa50b215bc5036d182ba8e0b785b))
+
+
+### Performance Improvements
+
+* optimize 3D scene rendering and shader compilation ([4f38302](https://github.com/dgesteves/diogo-studio/commit/4f38302e8eff6b0216298f8bbbdf932fc1e462a4))
+
+
+### Continuous Integration
+
+* **deps:** bump actions/checkout from 6.1.0 to 7.0.1 ([#167](https://github.com/dgesteves/diogo-studio/issues/167)) ([e0f9691](https://github.com/dgesteves/diogo-studio/commit/e0f96911770f0f572b944ec13be951a982545c70))
+* **deps:** bump github/codeql-action/upload-sarif from 4.37.1 to 4.37.3 ([#171](https://github.com/dgesteves/diogo-studio/issues/171)) ([8784006](https://github.com/dgesteves/diogo-studio/commit/878400644b91e7c261a4d8be52e7d1af8152390d))
+* **deps:** bump ossf/scorecard-action from 2.4.3 to 2.4.4 ([#166](https://github.com/dgesteves/diogo-studio/issues/166)) ([e584acb](https://github.com/dgesteves/diogo-studio/commit/e584acb102366014bc9eaed4101efba87e25492d))
+* **deps:** bump the codeql-action group with 3 updates ([#196](https://github.com/dgesteves/diogo-studio/issues/196)) ([bc30c83](https://github.com/dgesteves/diogo-studio/commit/bc30c83f9f1fb9694a84930052a60ece0c094755))
+* pair codeql-action bumps and adopt knip 6.31 ([#193](https://github.com/dgesteves/diogo-studio/issues/193)) ([2cfe143](https://github.com/dgesteves/diogo-studio/commit/2cfe143bbe13cbaf40a7cfeadd77736b14a59402))
+* reduce dependabot PR failure surface ([#194](https://github.com/dgesteves/diogo-studio/issues/194)) ([fdffb25](https://github.com/dgesteves/diogo-studio/commit/fdffb2556ef4f6f3a4504fc6d6fcf37b5d8e80fd))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @playwright/test from 1.61.1 to 1.62.1 ([#186](https://github.com/dgesteves/diogo-studio/issues/186)) ([a623953](https://github.com/dgesteves/diogo-studio/commit/a623953cf447c0fb5b439499c5619f888eba42db))
+* **deps-dev:** bump jsdom from 29.1.1 to 30.0.1 in the testing group across 1 directory ([#200](https://github.com/dgesteves/diogo-studio/issues/200)) ([883f00f](https://github.com/dgesteves/diogo-studio/commit/883f00f4ae7f23c50d937c32b937cd68dfc28ff0))
+* **deps-dev:** bump size-limit and @size-limit/file ([#190](https://github.com/dgesteves/diogo-studio/issues/190)) ([694f198](https://github.com/dgesteves/diogo-studio/commit/694f198f5d88b460947f60e48ed4fc1208078dcb))
+* **deps-dev:** bump the development-minor-patch group across 1 directory with 3 updates ([#199](https://github.com/dgesteves/diogo-studio/issues/199)) ([fb09975](https://github.com/dgesteves/diogo-studio/commit/fb09975d19fc21345d00ce932775a2debabc21a5))
+* **deps-dev:** bump the linting group across 1 directory with 2 updates ([#173](https://github.com/dgesteves/diogo-studio/issues/173)) ([99d769e](https://github.com/dgesteves/diogo-studio/commit/99d769e874802e8cb86472e73f35aec19fd8843f))
+* **deps:** bump @ai-sdk/openai from 4.0.16 to 4.0.26 ([#177](https://github.com/dgesteves/diogo-studio/issues/177)) ([ba45980](https://github.com/dgesteves/diogo-studio/commit/ba459808221b1a67ec3be4b350ddc157ffb445e8))
+* **deps:** bump @radix-ui/react-dialog from 1.1.20 to 1.1.23 ([#178](https://github.com/dgesteves/diogo-studio/issues/178)) ([5ab304d](https://github.com/dgesteves/diogo-studio/commit/5ab304ddd9da05f8551a0b057a8c2205508b0020))
+* **deps:** bump @radix-ui/react-visually-hidden from 1.2.8 to 1.2.11 ([#180](https://github.com/dgesteves/diogo-studio/issues/180)) ([def560f](https://github.com/dgesteves/diogo-studio/commit/def560f36082d46ad40a3a80ddc23b064ef218e2))
+* **deps:** bump @sentry/nextjs from 10.67.0 to 10.69.0 ([#179](https://github.com/dgesteves/diogo-studio/issues/179)) ([f53ea78](https://github.com/dgesteves/diogo-studio/commit/f53ea78cb0bf0305c052037fdaa2378462445bdb))
+* **deps:** bump ai from 7.0.32 to 7.0.46 ([#182](https://github.com/dgesteves/diogo-studio/issues/182)) ([daef88f](https://github.com/dgesteves/diogo-studio/commit/daef88ff0b2033cb77104459016a10c9ac8099c4))
+* **deps:** bump lucide-react from 1.25.0 to 1.28.0 ([#176](https://github.com/dgesteves/diogo-studio/issues/176)) ([1018f8e](https://github.com/dgesteves/diogo-studio/commit/1018f8e280e66ead9eb12044ab30ba4d93c5d9f5))
+* **deps:** bump the react group across 1 directory with 4 updates ([#191](https://github.com/dgesteves/diogo-studio/issues/191)) ([c0c083f](https://github.com/dgesteves/diogo-studio/commit/c0c083f26934d1cb317670a503a2db489f76360f))
+* **deps:** bump web-vitals from 5.3.0 to 6.0.1 ([#185](https://github.com/dgesteves/diogo-studio/issues/185)) ([f6e360e](https://github.com/dgesteves/diogo-studio/commit/f6e360e59298c5e1d69e99da915825492165b0df))
+
 ## [1.11.1](https://github.com/dgesteves/diogo-studio/compare/v1.11.0...v1.11.1) (2026-07-21)
 
 
