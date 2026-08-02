@@ -16,26 +16,26 @@ importers:
   .:
     dependencies:
       '@ai-sdk/openai':
-        specifier: ^4.0.26
-        version: 4.0.26(zod@4.4.3)
+        specifier: ^4.0.27
+        version: 4.0.27(zod@4.4.3)
       '@radix-ui/react-dialog':
         specifier: ^1.1.23
         version: 1.1.23(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@radix-ui/react-slot':
-        specifier: ^1.3.0
-        version: 1.3.0(@types/react@19.2.18)(react@19.2.8)
+        specifier: ^1.3.3
+        version: 1.3.3(@types/react@19.2.18)(react@19.2.8)
       '@radix-ui/react-visually-hidden':
         specifier: ^1.2.11
         version: 1.2.11(@types/react-dom@19.2.4(@types/react@19.2.18))(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@react-three/drei':
         specifier: ^10.7.7
-        version: 10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/react@19.2.18)(@types/three@0.185.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
+        version: 10.7.7(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/react@19.2.18)(@types/three@0.185.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       '@react-three/fiber':
-        specifier: ^9.6.1
-        version: 9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
+        specifier: ^9.7.0
+        version: 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       '@react-three/postprocessing':
         specifier: ^3.0.4
-        version: 3.0.4(@react-three/fiber@9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.3)(react@19.2.8)(three@0.185.1)
+        version: 3.0.4(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.3)(react@19.2.8)(three@0.185.1)
       '@sentry/nextjs':
         specifier: ^10.69.0
         version: 10.69.0(@opentelemetry/core@2.10.0(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@2.10.0(@opentelemetry/api@1.9.1))(next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.1.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(webpack@5.108.4(esbuild@0.28.1))
@@ -44,10 +44,10 @@ importers:
         version: 0.13.11(typescript@6.0.3)(zod@4.4.3)
       '@upstash/ratelimit':
         specifier: ^2.0.8
-        version: 2.0.8(@upstash/redis@1.38.0)
+        version: 2.0.8(@upstash/redis@1.38.1)
       '@upstash/redis':
-        specifier: ^1.38.0
-        version: 1.38.0
+        specifier: ^1.38.1
+        version: 1.38.1
       '@vercel/analytics':
         specifier: ^2.0.1
         version: 2.0.1(next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.1.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
@@ -55,8 +55,8 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0(next@16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.1.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       ai:
-        specifier: ^7.0.46
-        version: 7.0.46(zod@4.4.3)
+        specifier: ^7.0.47
+        version: 7.0.47(zod@4.4.3)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -73,8 +73,8 @@ importers:
         specifier: ^1.28.0
         version: 1.28.0(react@19.2.8)
       motion:
-        specifier: ^12.42.2
-        version: 12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^12.43.0
+        version: 12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next:
         specifier: 16.2.12
         version: 16.2.12(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@26.1.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -217,20 +217,20 @@ packages:
   '@adobe/css-tools@4.5.0':
     resolution: {integrity: sha512-6OzddxPio9UiWTCemp4N8cYLV2ZN1ncRnV1cVGtve7dhPOtRkleRyx32GQCYSwDYgaHU3USMm84tNsvKzRCa1Q==}
 
-  '@ai-sdk/gateway@4.0.35':
-    resolution: {integrity: sha512-57/kQ+SmbQ6ZttSdy0pRZMbG2aaLOF3vtUeFBSAfq7ALCNzZP6PcPXFHiLrcgzIYmXzyO+c+YR2N3pDnHPfVGA==}
+  '@ai-sdk/gateway@4.0.36':
+    resolution: {integrity: sha512-N1P6bdW/aC5rxLeuGYgx3X4el3DoZy8UWlky+g+AeIZSmxaEi/AToHJL4cmZ6nCPHk1byqJWwC+PaOZG0hK0dw==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/openai@4.0.26':
-    resolution: {integrity: sha512-WS8HhCu360mVOTh684uAFHUCAblDuzb9o/QQbWXFXQ7k4UELld6UdhlnCoptlP06D2rr81Ocaaa+zaEmVCGvfg==}
+  '@ai-sdk/openai@4.0.27':
+    resolution: {integrity: sha512-6MsWnbNG0ZjZgzYimNNjnTAlOFXn+jdLMFB47dDVUsRNjxdUoTSduCQPZZeTKoUl0ZNwCjsJ31of49l/t1r9MA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/provider-utils@5.0.17':
-    resolution: {integrity: sha512-U3h3xgaga1OOELBxhtwTfgfr0z++kHCD4YSFm4pfcqzUWolntINS0/21ktZ/5k2A1ozAiRPYqkCg90iwiYrwyw==}
+  '@ai-sdk/provider-utils@5.0.18':
+    resolution: {integrity: sha512-UBNCrkxS5llgN2/RXLBRkjCFTIuL6YB1Goq5c+yRecnznhtX4XPjTwLHz2hrsTltTVZ0rqVegtnwFXdPBkjDHA==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -1524,8 +1524,8 @@ packages:
       react-dom:
         optional: true
 
-  '@react-three/fiber@9.6.1':
-    resolution: {integrity: sha512-zF0rsKcVYpcJwbFEnv2HkHX9cvOEgsfQo/X8lwmR2dn13S4qEQJXir9fxf5js2LQFoXqxOY7MDkOkYx2uZ4gSg==}
+  '@react-three/fiber@9.7.0':
+    resolution: {integrity: sha512-EWm9FwcaOZQu/ExFW5rggoCMM1NJet5YbxVxKaOE+KSncrjU0Wx7017qSyGFvupviK89nMYGCWU3BIK4dI1clw==}
     peerDependencies:
       expo: '>=43.0'
       expo-asset: '>=8.4'
@@ -2392,8 +2392,8 @@ packages:
     peerDependencies:
       '@upstash/redis': ^1.34.3
 
-  '@upstash/redis@1.38.0':
-    resolution: {integrity: sha512-wu+dZBptlLy0+MCUEoHmzrY/TnmgDey3+c7EbIGwrLqAvkP8yi5MWZHYGIFtAygmL4Bkz2TdFu+eU0vFPncIcg==}
+  '@upstash/redis@1.38.1':
+    resolution: {integrity: sha512-hVqkWmhqobH7hpdzSCSrOwK7gWNASOAdf85l6/yxdB+giCYNYfl8FkSKxnqW2sqCdLDP7HzRTvy/ILC1AjBMUA==}
 
   '@use-gesture/core@10.3.1':
     resolution: {integrity: sha512-WcINiDt8WjqBdUXye25anHiNxPc0VOrlT8F6LLkU6cycrOGUDyY/yyFmsg3k8i5OLvv25llc0QC45GhR/C8llw==}
@@ -2596,8 +2596,8 @@ packages:
     resolution: {integrity: sha512-RZNwNclF7+MS/8bDg70amg32dyeZGZxiDuQmZxKLAlQjr3jGyLx+4Kkk58UO7D2QdgFIQCovuSuZESne6RG6XQ==}
     engines: {node: '>= 6.0.0'}
 
-  ai@7.0.46:
-    resolution: {integrity: sha512-+flQSK9Bk+phvJeXEegWwbU9D5Q2ghoe5PziUBtxypAFwXdxv/TINt7gNo620MTcxfFx66UBQLi1jr4GC0kxwg==}
+  ai@7.0.47:
+    resolution: {integrity: sha512-e0MpNtufu6JmcmwMUTgM1smCRkP5z014iPaKgnCm7kmMsTSIZbOJN2vglhPq0WIj/6x7ewVi6W0FyIR0pjaE3Q==}
     engines: {node: '>=22'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -3300,8 +3300,8 @@ packages:
     engines: {node: '>=18.3.0'}
     hasBin: true
 
-  framer-motion@12.42.2:
-    resolution: {integrity: sha512-5XY9luDiu0oHfHBjpDthFMh0ES+122w6p/papSJBweMkO8Sn+PW2QaEgRblQBpWFnuvZS5qvarpt/hO2pjGmnw==}
+  framer-motion@12.43.0:
+    resolution: {integrity: sha512-1eaL3RvR/kAlbG7UYcpMptEyzPoENO0c6w7ZnB3/hh2vSAz/6uGAFn6fdoqTBguNstf3MsFhJHsD/0DHiclG+g==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -4073,14 +4073,14 @@ packages:
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
 
-  motion-dom@12.42.2:
-    resolution: {integrity: sha512-5gIMWLp/PycBtJRJWRgjxke5n8dlvkSn2DrYW+tr3XcqAZY1xZh6BJyooJXCM8wdfM7wfMjkBJNLge1CKPUIRA==}
+  motion-dom@12.43.0:
+    resolution: {integrity: sha512-azKON4d9S65PEoFUiQTMTgPheEmzf2QngdRc50AKfJp9Q9mmcBVw22c8eMq9k8kxOFHdL7+WZY7N/5F/lwiDag==}
 
   motion-utils@12.39.0:
     resolution: {integrity: sha512-8nadJAJjTtqRkmRF36FoJTrywK9nnFmnPwnSMyxaOCU7GDjN9RTMJIxx9De8ErM+vpPhMccr/6fo5WciyQLnMQ==}
 
-  motion@12.42.2:
-    resolution: {integrity: sha512-Atvv11yUKIid41cVrRBDVX5m8tF8kNpExRSlbpt6APClhDjtwQssgFHhQzejxw7/7YYbjHSPKBVbHo05BuJT5Q==}
+  motion@12.43.0:
+    resolution: {integrity: sha512-BQgQbSa9Hn3/mtbib0MK53y6JSANa+YKUKlaYnWzAVDH424RYQ5LVpV3pNiWH00BA2z4ojsSdMzqT7g2FQwjuQ==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -5205,20 +5205,20 @@ snapshots:
 
   '@adobe/css-tools@4.5.0': {}
 
-  '@ai-sdk/gateway@4.0.35(zod@4.4.3)':
+  '@ai-sdk/gateway@4.0.36(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
-      '@ai-sdk/provider-utils': 5.0.17(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.18(zod@4.4.3)
       '@vercel/oidc': 3.2.0
       zod: 4.4.3
 
-  '@ai-sdk/openai@4.0.26(zod@4.4.3)':
+  '@ai-sdk/openai@4.0.27(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
-      '@ai-sdk/provider-utils': 5.0.17(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.18(zod@4.4.3)
       zod: 4.4.3
 
-  '@ai-sdk/provider-utils@5.0.17(zod@4.4.3)':
+  '@ai-sdk/provider-utils@5.0.18(zod@4.4.3)':
     dependencies:
       '@ai-sdk/provider': 4.0.4
       '@standard-schema/spec': 1.1.0
@@ -6294,12 +6294,12 @@ snapshots:
       '@types/react': 19.2.18
       '@types/react-dom': 19.2.4(@types/react@19.2.18)
 
-  '@react-three/drei@10.7.7(@react-three/fiber@9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/react@19.2.18)(@types/three@0.185.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)':
+  '@react-three/drei@10.7.7(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/react@19.2.18)(@types/three@0.185.3)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@mediapipe/tasks-vision': 0.10.17
       '@monogrid/gainmap-js': 3.4.0(three@0.185.1)
-      '@react-three/fiber': 9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
+      '@react-three/fiber': 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       '@use-gesture/react': 10.3.1(react@19.2.8)
       camera-controls: 3.1.2(three@0.185.1)
       cross-env: 7.0.3
@@ -6327,7 +6327,7 @@ snapshots:
       - '@types/three'
       - immer
 
-  '@react-three/fiber@9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)':
+  '@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@types/webxr': 0.5.24
@@ -6347,9 +6347,9 @@ snapshots:
       - '@types/react'
       - immer
 
-  '@react-three/postprocessing@3.0.4(@react-three/fiber@9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.3)(react@19.2.8)(three@0.185.1)':
+  '@react-three/postprocessing@3.0.4(@react-three/fiber@9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1))(@types/three@0.185.3)(react@19.2.8)(three@0.185.1)':
     dependencies:
-      '@react-three/fiber': 9.6.1(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
+      '@react-three/fiber': 9.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(three@0.185.1)
       maath: 0.6.0(@types/three@0.185.3)(three@0.185.1)
       n8ao: 1.10.3(postprocessing@6.39.3(three@0.185.1))(three@0.185.1)
       postprocessing: 6.39.3(three@0.185.1)
@@ -7058,14 +7058,14 @@ snapshots:
 
   '@upstash/core-analytics@0.0.10':
     dependencies:
-      '@upstash/redis': 1.38.0
+      '@upstash/redis': 1.38.1
 
-  '@upstash/ratelimit@2.0.8(@upstash/redis@1.38.0)':
+  '@upstash/ratelimit@2.0.8(@upstash/redis@1.38.1)':
     dependencies:
       '@upstash/core-analytics': 0.0.10
-      '@upstash/redis': 1.38.0
+      '@upstash/redis': 1.38.1
 
-  '@upstash/redis@1.38.0':
+  '@upstash/redis@1.38.1':
     dependencies:
       uncrypto: 0.1.3
 
@@ -7254,11 +7254,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  ai@7.0.46(zod@4.4.3):
+  ai@7.0.47(zod@4.4.3):
     dependencies:
-      '@ai-sdk/gateway': 4.0.35(zod@4.4.3)
+      '@ai-sdk/gateway': 4.0.36(zod@4.4.3)
       '@ai-sdk/provider': 4.0.4
-      '@ai-sdk/provider-utils': 5.0.17(zod@4.4.3)
+      '@ai-sdk/provider-utils': 5.0.18(zod@4.4.3)
       zod: 4.4.3
 
   ajv-formats@2.1.1(ajv@8.20.0):
@@ -8118,9 +8118,9 @@ snapshots:
     dependencies:
       fd-package-json: 2.0.0
 
-  framer-motion@12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  framer-motion@12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
-      motion-dom: 12.42.2
+      motion-dom: 12.43.0
       motion-utils: 12.39.0
       tslib: 2.8.1
     optionalDependencies:
@@ -8786,15 +8786,15 @@ snapshots:
 
   module-details-from-path@1.0.4: {}
 
-  motion-dom@12.42.2:
+  motion-dom@12.43.0:
     dependencies:
       motion-utils: 12.39.0
 
   motion-utils@12.39.0: {}
 
-  motion@12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  motion@12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
-      framer-motion: 12.42.2(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      framer-motion: 12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       tslib: 2.8.1
     optionalDependencies:
       react: 19.2.8
