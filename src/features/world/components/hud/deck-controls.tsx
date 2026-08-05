@@ -39,8 +39,6 @@ export function DeckControls(): ReactElement {
         <Sparkles aria-hidden="true" />
       </DeckButton>
 
-      <span className="bg-border/70 mx-0.5 h-5 w-px" aria-hidden="true" />
-
       <DeckButton
         onClick={toggleSound}
         active={soundOn}
