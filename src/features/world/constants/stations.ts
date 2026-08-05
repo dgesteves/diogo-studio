@@ -15,7 +15,7 @@ const RAW: Record<RouteKey, RawStation> = {
   playground: ["arcade", "PLAYGROUND", "#facc15", [0.86, 1.7, 1.6], [1.56, 1.12, -2.18]],
   resume: ["frame", "RESUME", "#22d3ee", [-0.86, 1.7, 1.6], [-1.56, 1.12, -2.18]],
   now: ["coffee", "NOW", "#fbbf24", [0.8, 1.35, 1.8], [0.95, 0.96, 0.3]],
-  contact: ["door", "CONTACT", "#5eead4", [-1.2, 1.6, 3.5], [-2.1, 1.2, 2.4]],
+  contact: ["door", "CONTACT", "#5eead4", [-1.2, 1.6, 3.38], [-2.1, 1.2, 2.28]],
   principles: ["poster", "PRINCIPLES", "#c084fc", [0, 1.7, 1.6], [0, 1.12, -2.18]],
   stack: ["whiteboard", "STACK", "#7dd3fc", [0.43, 1.7, 1.6], [0.78, 1.12, -2.18]],
   uses: ["monitor-center", "USES", "#67e8f9", [0, 1.85, 3.2], [-0.05, 0.95, 0.32]],

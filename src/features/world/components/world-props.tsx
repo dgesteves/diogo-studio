@@ -1,9 +1,9 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors } from "@/config/brand";
 
 import { Bookshelf } from "./props/bookshelf";
+import { ContactDoor } from "./props/contact-door";
 import { WallScreens } from "./props/wall-screens";
 
 export function WorldProps(): ReactElement {
@@ -22,16 +22,7 @@ export function WorldProps(): ReactElement {
         </mesh>
       </group>
 
-      <group position={[-2.27, 0, 2.4]} rotation={[0, Math.PI / 2, 0]}>
-        <mesh position={[0, 1.05, 0]}>
-          <boxGeometry args={[0.9, 2.1, 0.06]} />
-          <meshStandardMaterial color="#0b1116" roughness={0.6} metalness={0.3} />
-        </mesh>
-        <mesh position={[0, 1.05, 0.04]}>
-          <boxGeometry args={[0.7, 1.9, 0.02]} />
-          <meshBasicMaterial color={brandColors.ink} toneMapped={false} />
-        </mesh>
-      </group>
+      <ContactDoor />
 
       <WallScreens />
     </group>

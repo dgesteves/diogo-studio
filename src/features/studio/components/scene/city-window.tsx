@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors } from "@/config/brand";
+import { brandColors, frameMaterial } from "@/config/brand";
 
 import { CITY_WINDOW, LEFT_WALL } from "./constants";
 import { Cityscape } from "./cityscape";
@@ -11,7 +11,6 @@ const H = CITY_WINDOW.height;
 const FRAME = 0.07;
 const FRAME_DEPTH = 0.14;
 const MULLION = 0.035;
-const FRAME_COLOR = "#0b1016";
 
 type Bar = { size: [number, number, number]; position: [number, number, number] };
 
@@ -51,7 +50,7 @@ export function CityWindow(): ReactElement {
       {[...FRAME_BARS, ...MULLION_BARS].map((bar) => (
         <mesh key={`${bar.position.join(",")}:${bar.size.join(",")}`} position={bar.position}>
           <boxGeometry args={bar.size} />
-          <meshStandardMaterial color={FRAME_COLOR} roughness={0.5} metalness={0.6} />
+          <meshStandardMaterial {...frameMaterial} />
         </mesh>
       ))}
 
