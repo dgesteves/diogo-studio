@@ -7,3 +7,5 @@ export const brandColors = {
 } as const;
 
 export const frameMaterial = { color: "#0b1016", roughness: 0.5, metalness: 0.6 } as const;
+
+export const darkMetalMaterial = { color: "#11161b", roughness: 0.5, metalness: 0.6 } as const;

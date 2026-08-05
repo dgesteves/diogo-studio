@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { frameMaterial } from "@/config/brand";
+import { darkMetalMaterial, frameMaterial } from "@/config/brand";
 
 import type { Vec3 } from "../../types";
 
@@ -13,7 +13,6 @@ const REVEAL_DEPTH = 0.14;
 const REVEAL_CENTER_Z = 0.005;
 
 const LEAF = { color: "#17212b", roughness: 0.45, metalness: 0.4 } as const;
-const PULL = { color: "#4a5b66", roughness: 0.35, metalness: 0.9 } as const;
 
 const JAMBS: readonly { position: Vec3; args: Vec3 }[] = [
   {
@@ -53,12 +52,12 @@ export function ContactDoor(): ReactElement {
       {STANDOFF_YS.map((y) => (
         <mesh key={y} position={[PULL_X, y, 0.048]} rotation={[Math.PI / 2, 0, 0]}>
           <cylinderGeometry args={[0.008, 0.008, 0.048, 10]} />
-          <meshStandardMaterial {...PULL} />
+          <meshStandardMaterial {...darkMetalMaterial} />
         </mesh>
       ))}
       <mesh position={[PULL_X, PULL_Y, 0.072]}>
         <cylinderGeometry args={[0.013, 0.013, PULL_LENGTH, 12]} />
-        <meshStandardMaterial {...PULL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
     </group>
   );
