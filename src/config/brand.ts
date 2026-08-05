@@ -4,6 +4,8 @@ export const brandColors = {
   accentSoft: "#7dd3fc",
   edge: "#262b33",
   ink: "#0d0f12",
+  coolLight: "#bfe9f5",
+  coolLightCore: "#f2fbff",
 } as const;
 
 export const frameMaterial = { color: "#0b1016", roughness: 0.5, metalness: 0.6 } as const;

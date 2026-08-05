@@ -4,7 +4,6 @@ import { useState, type ReactElement } from "react";
 import { Object3D } from "three";
 import { brandColors } from "@/config/brand";
 
-const COOL_LIGHT = "#bfe9f5";
 const HOUSING = { color: "#10151b", roughness: 0.5, metalness: 0.6 } as const;
 const BAR_POS: [number, number, number] = [0.12, 2.34, 0];
 const TARGET_POS: [number, number, number] = [0.03, 0.7, 0];
@@ -39,7 +38,7 @@ export function ShelfLight(): ReactElement {
         intensity={3}
         distance={4}
         decay={2}
-        color={COOL_LIGHT}
+        color={brandColors.coolLight}
       />
       <pointLight
         position={[0.5, 1.15, 0]}
