@@ -5,5 +5,5 @@ export const EXPLORE = {
   pitchMinRad: -0.62,
   pitchMaxRad: 0.62,
   positionDamp: 9,
-  bounds: { minX: -2.0, maxX: 4.6, minZ: 0.9, maxZ: 5.6 },
+  bounds: { minX: -2.0, maxX: 4.6, minZ: 0.9, maxZ: 4.6 },
 } as const;

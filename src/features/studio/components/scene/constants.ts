@@ -8,13 +8,6 @@ export const METAL = darkMetalMaterial;
 export const ANODIZED = anodizedMetalMaterial;
 export const PORT = portMaterial;
 
-export const LEFT_WALL = {
-  x: -2.3,
-  centerY: 3,
-  width: 22,
-  height: 10,
-} as const;
-
 export const CITY_WINDOW = {
   centerZ: -0.5,
   centerY: 2,

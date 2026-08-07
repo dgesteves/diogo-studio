@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { ROOM } from "@/constants/room";
 import { EXPLORE } from "../constants/explore";
 import { clampPitch, clampToBounds, derivePitch, deriveYaw, moveVector } from "./explore";
 
@@ -15,6 +16,15 @@ describe("clampToBounds", () => {
     const { minX, maxX, minZ, maxZ } = EXPLORE.bounds;
     expect(clampToBounds(-999, 999)).toEqual([minX, maxZ]);
     expect(clampToBounds(999, -999)).toEqual([maxX, minZ]);
+  });
+
+  it("keeps the walkable area inside the room shell", () => {
+    const { minX, maxX, minZ, maxZ } = EXPLORE.bounds;
+    expect(minX).toBeGreaterThan(ROOM.minX);
+    expect(maxX).toBeLessThan(ROOM.maxX);
+    expect(minZ).toBeGreaterThan(ROOM.minZ);
+    expect(maxZ).toBeLessThan(ROOM.maxZ);
+    expect(EXPLORE.eyeHeight).toBeLessThan(ROOM.ceilingY);
   });
 });
 

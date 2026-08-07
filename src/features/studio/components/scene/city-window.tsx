@@ -2,8 +2,9 @@
 
 import { type ReactElement } from "react";
 import { brandColors, frameMaterial } from "@/config/brand";
+import { ROOM } from "@/constants/room";
 
-import { CITY_WINDOW, LEFT_WALL } from "./constants";
+import { CITY_WINDOW } from "./constants";
 import { Cityscape } from "./cityscape";
 
 const W = CITY_WINDOW.width;
@@ -30,7 +31,7 @@ const MULLION_BARS: Bar[] = [
 export function CityWindow(): ReactElement {
   return (
     <group
-      position={[LEFT_WALL.x, CITY_WINDOW.centerY, CITY_WINDOW.centerZ]}
+      position={[ROOM.minX, CITY_WINDOW.centerY, CITY_WINDOW.centerZ]}
       rotation={[0, Math.PI / 2, 0]}
     >
       <Cityscape />
