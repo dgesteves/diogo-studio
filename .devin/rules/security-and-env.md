@@ -6,8 +6,15 @@ description: Apply when handling environment variables, secrets, authentication/
 # Security & environment
 
 - **Secrets stay server-side.** Only `NEXT_PUBLIC_`-prefixed variables reach the
-  client. Keep `.env*` files out of git. Read env through a single validated
-  module (e.g. Zod-checked) instead of scattered `process.env` access.
+  client. Keep `.env*` files out of git.
+- **Read env through `@/config/env` only** — never `process.env` elsewhere. This
+  is lint-enforced: a `no-restricted-syntax` rule errors on any `process.env`
+  access outside `src/config/env.ts` (except `NODE_ENV`). Env is validated with
+  `@t3-oss/env-nextjs` + Zod.
+- **Every env var is optional and features degrade** rather than crash: no
+  `OPENAI_API_KEY` → `/api/chat` returns `503`; no `UPSTASH_*` → in-memory rate
+  limiting; no Sentry DSN → Sentry is skipped. Preserve that property when adding
+  a variable — never make a missing key break the build or a route.
 - **Authorize every mutation.** Verify authentication AND authorization inside
   each Server Action / Route Handler — never rely on middleware, layout, or page
   checks alone. Use `import "server-only"` to keep sensitive modules off the client.
@@ -20,9 +27,14 @@ description: Apply when handling environment variables, secrets, authentication/
   uploads (type, size) before processing.
 - Use parameterized queries / an ORM — never string-build SQL. Avoid
   `dangerouslySetInnerHTML`; if unavoidable, sanitize the HTML first.
-- Add baseline **security headers** and a **Content-Security-Policy** (nonce-based
-  where possible). Consider React **taint** APIs to prevent accidental exposure
-  of sensitive data to the client.
+- **Security headers and CSP already exist** in `next.config.ts` (CSP, HSTS with
+  preload, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`)
+  applied to `/:path*`. Extend that list — do not add a competing middleware or
+  `vercel.json` header block. Known gap: `script-src`/`style-src` still use
+  `'unsafe-inline'`; moving to a nonce-based CSP is the improvement worth making,
+  and any new inline script or third-party origin must be added deliberately.
+- Consider React **taint** APIs to prevent accidental exposure of sensitive data
+  to the client.
 - Never log secrets or PII. Surface user-facing errors without leaking stack
   traces or internal details; report real errors to your observability tool.
 - Keep dependencies patched (automated updates + audit in CI); pin the

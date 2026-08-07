@@ -41,12 +41,19 @@ security by default. Prefer the smallest, clearest solution that ships.
 - **Functional and declarative.** Prefer pure functions and composition; avoid
   classes. Iterate and modularize over copy-paste (DRY).
 - **Single-purpose modules, short functions.** Keep **functions** short and
-  focused (~50 lines is a good ceiling, lint-enforced). A file should do one job —
-  but **length is not the signal**: split when a file mixes concerns, never to hit
-  a line count. Shaders, procedural geometry, draw routines, and static data are
+  focused (~50 lines is a good ceiling). A file should do one job — but **length
+  is not the signal**: split when a file mixes concerns, never to hit a line
+  count. Shaders, procedural geometry, draw routines, and static data are
   legitimately long; leave them whole rather than fragmenting them into modules
   that only exist to import each other. See the project-structure rule for the
   seams worth splitting along.
+- **Caveat: lint currently contradicts the rule above.** `eslint.config.mjs`
+  enforces `max-lines: 100` on all of `src/**` and does **not** enforce
+  `max-lines-per-function`. That per-file cap is the documented cause of the
+  file-shredding in [`docs/restructure-plan.md`](../../docs/restructure-plan.md),
+  whose Phase 0 replaces it. Until that lands: respect the cap, and when a
+  genuinely cohesive module cannot fit, raise it as the Phase 0 change — do not
+  shred the file, and do not add an inline `eslint-disable`.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
   booleans (`isLoading`, `hasError`, `canSubmit`).

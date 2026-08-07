@@ -32,8 +32,9 @@ globs: app/**, src/app/**, **/app/**
   unpublished/draft content out of production.
 - **Keep `app/` to routing only** — route segments + Next.js special files.
   Import UI/logic/data from outside `app/` (`src/features`, `src/components`,
-  `src/server`, `src/lib`); keep `page.tsx`/`layout.tsx` as thin composition
-  layers. (See the project-structure rule.)
+  `src/config`, `src/lib`); keep `page.tsx`/`layout.tsx` as thin composition
+  layers. There is no `src/server/` in this repo — the project-structure rule is
+  the authority on placement, and it puts server-only modules in `src/lib`.
 - Keep **middleware** lean and fast: optimistic checks (session cookie
   presence, redirects, headers) only — no data fetching or heavy work. Real
   authorization happens in the data layer and inside each action/handler.
@@ -61,9 +62,12 @@ globs: app/**, src/app/**, **/app/**
 - Prefer **Server Actions** for mutations and forms. Validate input with a schema
   inside the action, and **authenticate + authorize inside every action** — never
   rely on middleware/layout/page checks alone.
-- Keep data access in `src/server/` (a server-only Data Access Layer,
-  `import "server-only"`). After a mutation, revalidate affected caches and
-  return typed, `useActionState`-friendly results.
+- Keep server-only modules marked with `import "server-only"`. After a mutation,
+  revalidate affected caches and return typed, `useActionState`-friendly results.
+- **Reality check for this repo:** there are currently **no Server Actions and no
+  database**. The only server surface is the `/api/chat` and `/api/health` Route
+  Handlers plus the retrieval/embedding modules. Treat this section as guidance
+  for when a mutation is first introduced, not as a description of existing code.
 
 ## Metadata & SEO
 

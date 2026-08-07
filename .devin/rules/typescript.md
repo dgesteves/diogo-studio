@@ -10,6 +10,9 @@ globs: **/*.ts, **/*.tsx, **/*.mts, **/*.cts
   `forceConsistentCasingInFileNames`. Code must pass `tsc --noEmit`.
 - **No `any`** and no `// @ts-ignore`/`// @ts-expect-error` to silence real
   errors. Use precise types, generics, or `unknown` + narrowing.
+- **No non-null assertions (`!`)** — lint-enforced as an error in `src/**`
+  (relaxed only in `*.test.ts(x)`). With `noUncheckedIndexedAccess` on, indexed
+  access is `T | undefined`: narrow it, don't assert it away.
 - Avoid `as` casts; never double-cast (`as unknown as T`). Type values, don't
   assert them.
 - **Validate external data with Zod** (env vars, route params/searchParams, form

@@ -80,7 +80,9 @@ justify them. One level of grouping, not two.
 ## File and function size
 
 - **Functions** carry the complexity budget: keep them short and single-purpose
-  (~50 lines is a good ceiling; `max-lines-per-function` enforces it).
+  (~50 lines is a good ceiling). Note `max-lines-per-function` is **not** enabled
+  today — lint enforces `max-lines: 100` per file instead, which is the cap
+  `docs/restructure-plan.md` Phase 0 replaces.
 - **File length is not a design signal.** Do not split a cohesive module to hit a
   line count. Shaders, procedural geometry, canvas draw routines, and static data
   are legitimately long — leave them whole.

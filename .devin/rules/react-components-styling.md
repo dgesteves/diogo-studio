@@ -21,9 +21,12 @@ globs: **/*.tsx, **/*.jsx, **/*.css
   Minimize client-side state — derive from props/server data first.
 - Build composable APIs (slot / `asChild`, `forwardRef` when wrapping a DOM node).
   Prefer accessible primitives (e.g. Radix UI) over hand-rolled interactive widgets.
-- Build forms with **`react-hook-form` + a `zod` resolver**; submit via Server
-  Actions and surface validation errors accessibly (`aria-invalid`, linked
-  message ids).
+- **Forms: there is no form library here.** `react-hook-form` is not installed and
+  the repo has exactly one `<form>` (the command-menu ask input). Use a native
+  `<form>` with Zod validation at the boundary and accessible errors
+  (`aria-invalid`, linked message ids). Only reach for `react-hook-form` + a `zod`
+  resolver if a genuinely multi-field form arrives — and justify the dependency
+  per the core rule.
 
 ## Styling (Tailwind)
 
@@ -41,8 +44,13 @@ globs: **/*.tsx, **/*.jsx, **/*.css
   interactive element must be keyboard-operable with a visible `:focus-visible`
   ring — never remove focus outlines without an equivalent replacement.
 - Icon-only controls need an `aria-label`; associate inputs with a `<label>`.
-  Set `aria-current="page"` on the active nav link. Respect
-  `eslint-plugin-jsx-a11y` — fix violations instead of disabling the rule.
+  Set `aria-current="page"` on the active nav link.
+- **Lint is not an a11y safety net.** `eslint-config-next` enables only **6**
+  `jsx-a11y` rules (`alt-text`, `aria-props`, `aria-proptypes`,
+  `aria-unsupported-elements`, `role-has-required-aria-props`,
+  `role-supports-aria-props`). Fix those rather than disabling them, but a clean
+  `pnpm lint` says almost nothing about accessibility — `@axe-core/playwright`
+  and keyboard-only testing are the real gate.
 
 ## Performance
 
