@@ -10,7 +10,6 @@ import { DeskExtras } from "./desk-extras";
 import { DeskHardware } from "./desk-hardware";
 import { DeskProps } from "./desk-props";
 import { DeskRug } from "./desk-rug";
-import { DustMotes } from "./dust-motes";
 import { GridFloor } from "./grid-floor";
 import { Lighting } from "./lighting";
 import { MonitorRig } from "./monitor-rig";
@@ -46,7 +45,6 @@ export function StudioScene(): ReactElement {
         color="#02060a"
         frames={1}
       />
-      <DustMotes />
     </>
   );
 }

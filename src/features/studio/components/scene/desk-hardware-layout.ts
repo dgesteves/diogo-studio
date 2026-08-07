@@ -13,7 +13,6 @@ export const MAC_STUDIO_HEIGHT = 0.13;
 export const HUB_WIDTH = 0.13;
 export const HUB_HEIGHT = 0.034;
 export const HUB_DEPTH = 0.23;
-export const HUB_BACK_Z = HARDWARE_CENTER_Z - HUB_DEPTH / 2;
 
 const CLUSTER_WIDTH = SERVER_WIDTH + MAC_STUDIO_WIDTH + HUB_WIDTH + HARDWARE_GAP * 2;
 const CLUSTER_LEFT = -CLUSTER_WIDTH / 2;
