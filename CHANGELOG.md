@@ -1,5 +1,55 @@
 # Changelog
 
+## [1.12.0](https://github.com/dgesteves/diogo-studio/compare/v1.11.2...v1.12.0) (2026-08-07)
+
+
+### Features
+
+* **studio:** add ceiling light fixtures with day/night intensity control ([e12acfd](https://github.com/dgesteves/diogo-studio/commit/e12acfdcc5c5265a2d38ce0cea0a01c31eb64129))
+* **studio:** add detailed desk hardware with Mac Studio, server node, and USB hub ([4dbe889](https://github.com/dgesteves/diogo-studio/commit/4dbe8894cdf5b975323ff181114f6e44e2339956))
+* **world:** add detailed contact door with frame and pull handle ([4594a74](https://github.com/dgesteves/diogo-studio/commit/4594a74fb769479a78421d100f6392ce58005d72))
+
+
+### Code Refactoring
+
+* **env:** drop Resend and contact vars for a feature that no longer exists ([5f8084a](https://github.com/dgesteves/diogo-studio/commit/5f8084a5b931930be78980bfe9cabf3fadb79468))
+* **studio:** extract room dimensions to shared constants and add ceiling ([7248584](https://github.com/dgesteves/diogo-studio/commit/7248584c15755d4ee5798b844fe25a1756271a4d))
+* **studio:** redesign desk props with improved detail and organization ([77a9561](https://github.com/dgesteves/diogo-studio/commit/77a9561db2a56668749941ff8614c55289ee558b))
+* **studio:** redesign mouse with parametric geometry and enhanced lighting ([971940c](https://github.com/dgesteves/diogo-studio/commit/971940ca310b9149aed801e41b8a903a801714e6))
+* **studio:** remove unused dust motes effect and clean up desk hardware layout ([d00686f](https://github.com/dgesteves/diogo-studio/commit/d00686f57f08959006e250709cfe38fc67a732cc))
+* **world:** extract dark metal material to shared config for reuse ([77bf529](https://github.com/dgesteves/diogo-studio/commit/77bf529461f19962d2105090efec92d674db84d6))
+* **world:** remove waypoints navigation from command deck ([f609517](https://github.com/dgesteves/diogo-studio/commit/f6095177c868a8ddeaa6e2f500f0f961c906f8a7))
+* **world:** reorient wall screens to hang on right wall facing into room ([a69c7c7](https://github.com/dgesteves/diogo-studio/commit/a69c7c7be5eca368b144e64ad4b39d473b07d5f9))
+* **world:** update lighting to use cool tones from brand config ([b82c121](https://github.com/dgesteves/diogo-studio/commit/b82c1210d312172c18ec0ccc3c6ea06a622bc32b))
+
+
+### Documentation
+
+* correct architecture drift and record the private-repo constraints ([17560bf](https://github.com/dgesteves/diogo-studio/commit/17560bffd7c9e088353a7a811a646280c3a70aab))
+* drop public-repo scaffolding and rewrite the README ([0d1d8fd](https://github.com/dgesteves/diogo-studio/commit/0d1d8fd924f65c37ac993d80b3f763674e58fbfe))
+
+
+### Build System
+
+* declare minimumReleaseAge so the supply-chain policy is enforced ([feb42c7](https://github.com/dgesteves/diogo-studio/commit/feb42c7c07b7c706905f04ccc120725d0f9a9ae8))
+
+
+### Continuous Integration
+
+* remove workflows that cannot run on a private repo ([46e43e9](https://github.com/dgesteves/diogo-studio/commit/46e43e9ddc1ae25ab9796b33d8233481f3d9cd70))
+* stop spending the artifact quota on reports nobody reads ([0a6b0f0](https://github.com/dgesteves/diogo-studio/commit/0a6b0f05d8d4b4df38b16c5a973cd5c7fea5747f))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump the development-minor-patch group across 1 directory with 5 updates ([#206](https://github.com/dgesteves/diogo-studio/issues/206)) ([013ce66](https://github.com/dgesteves/diogo-studio/commit/013ce669210761ff89a58041a2c5aba19bb35ebb))
+* **deps-dev:** bump tsx from 4.23.1 to 4.23.4 in the development-minor-patch group ([#202](https://github.com/dgesteves/diogo-studio/issues/202)) ([e573704](https://github.com/dgesteves/diogo-studio/commit/e573704df4257908d7f4f9d12966b062d8b2af0c))
+* **deps:** bump ai from 7.0.47 to 7.0.48 in the production-minor-patch group ([#201](https://github.com/dgesteves/diogo-studio/issues/201)) ([33c3d4e](https://github.com/dgesteves/diogo-studio/commit/33c3d4ef48fde4d3c38a6cdee4a08140a543de1b))
+* **deps:** bump motion from 12.43.0 to 13.0.0 ([#207](https://github.com/dgesteves/diogo-studio/issues/207)) ([30bd74a](https://github.com/dgesteves/diogo-studio/commit/30bd74abbdf6c5d9414a469a6f9fd8942b26a632))
+* **deps:** bump the next group with 2 updates ([#204](https://github.com/dgesteves/diogo-studio/issues/204)) ([2220e12](https://github.com/dgesteves/diogo-studio/commit/2220e123d4cc61cc2a33d5cf205ac569db7f72c4))
+* **deps:** bump the production-minor-patch group across 1 directory with 7 updates ([#205](https://github.com/dgesteves/diogo-studio/issues/205)) ([419621d](https://github.com/dgesteves/diogo-studio/commit/419621d35d9eab0501178091231f85ee9ca7a8f1))
+* point .prettierignore at paths that still exist ([819681a](https://github.com/dgesteves/diogo-studio/commit/819681a786298fc08ac245a75d707b703de61b55))
+
 ## [1.11.2](https://github.com/dgesteves/diogo-studio/compare/v1.11.1...v1.11.2) (2026-08-02)
 
 
