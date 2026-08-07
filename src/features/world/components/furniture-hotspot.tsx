@@ -6,6 +6,7 @@ import { useHoveredStation } from "../hooks/use-hovered-station";
 import { registerHotspot, unregisterHotspot } from "../utils/hotspot-registry";
 import type { WorldStation } from "../types";
 import type { FurnitureHotspot as Hotspot } from "../constants/hotspots";
+import { WALL_SCREEN } from "../constants/wall-screen-layout";
 import { HotspotFocus } from "./hotspot-focus";
 
 const GLOW_SPREAD = 1.6;
@@ -34,11 +35,13 @@ export function FurnitureHotspot({
   const [ax, ay, az] = station.anchor;
   const isWall = hotspot.glow === "wall";
   const floorY = hotspot.glow === "wall" ? 0 : hotspot.groundY;
-  const glowSize = Math.max(sx, isWall ? sy : sz) * GLOW_SPREAD + GLOW_PADDING;
+  const glowSize = (isWall ? Math.max(sy, sz) : Math.max(sx, sz)) * GLOW_SPREAD + GLOW_PADDING;
   const glowPosition: [number, number, number] = isWall
-    ? [cx, cy, cz - WALL_GLOW_OFFSET]
+    ? [cx + WALL_GLOW_OFFSET, cy, cz]
     : [cx, floorY, cz];
-  const glowRotation: [number, number, number] = isWall ? [0, 0, 0] : [-Math.PI / 2, 0, 0];
+  const glowRotation: [number, number, number] = isWall
+    ? [0, WALL_SCREEN.rotationY, 0]
+    : [-Math.PI / 2, 0, 0];
   const labelPosition: [number, number, number] = isWall
     ? [cx, cy + sy / 2 + LABEL_GAP, cz]
     : [ax, ay + 0.24, az];

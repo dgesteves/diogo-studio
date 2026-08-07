@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { framingPullback } from "./framing";
+import { ROOM } from "@/constants/room";
+import { clampCameraX, framingPullback } from "./framing";
 
 describe("framingPullback", () => {
   it("keeps the authored framing at or above the reference aspect", () => {
@@ -24,5 +25,19 @@ describe("framingPullback", () => {
     expect(framingPullback(-2)).toBe(1);
     expect(framingPullback(Number.NaN)).toBe(1);
     expect(framingPullback(Number.POSITIVE_INFINITY)).toBe(1);
+  });
+});
+
+describe("clampCameraX", () => {
+  it("leaves the authored framing untouched", () => {
+    expect(clampCameraX(4.4)).toBe(4.4);
+    expect(clampCameraX(0)).toBe(0);
+  });
+
+  it("keeps a pulled-back camera clear of both side walls", () => {
+    expect(clampCameraX(20)).toBeLessThan(ROOM.maxX);
+    expect(clampCameraX(20)).toBeGreaterThan(ROOM.maxX - 1);
+    expect(clampCameraX(-20)).toBeGreaterThan(ROOM.minX);
+    expect(clampCameraX(-20)).toBeLessThan(ROOM.minX + 1);
   });
 });

@@ -1,7 +1,28 @@
 import type { RouteKey } from "@/constants/routes";
 import type { Vec3, WorldObjectKind, WorldStation } from "../types";
+import { WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "./wall-screen-layout";
 
 type RawStation = readonly [WorldObjectKind, string, string, Vec3, Vec3];
+
+const WALL_TARGET_INSET = 0.09;
+const WALL_TARGET_Y = 1.12;
+const WALL_CAMERA_Y = 1.7;
+const WALL_CAMERA_DISTANCE = 3.78;
+const WALL_CAMERA_FAN = 0.45;
+
+/**
+ * Frames a right-wall screen head-on from inside the room, fanning the camera
+ * back towards the row's centre so neighbouring panels stay in shot.
+ */
+function wallFraming(slug: WallScreenSlug): readonly [Vec3, Vec3] {
+  const z = WALL_SCREEN_Z[slug];
+  const targetX = WALL_SCREEN.x - WALL_TARGET_INSET;
+  const cameraZ = z - (z - WALL_SCREEN.centerZ) * WALL_CAMERA_FAN;
+  return [
+    [targetX - WALL_CAMERA_DISTANCE, WALL_CAMERA_Y, cameraZ],
+    [targetX, WALL_TARGET_Y, z],
+  ];
+}
 
 const RAW: Record<RouteKey, RawStation> = {
   home: ["neon-sign", "STUDIO", "#22d3ee", [4.4, 2.7, 5.4], [0, 1.05, -0.3]],
@@ -12,14 +33,14 @@ const RAW: Record<RouteKey, RawStation> = {
   writing: ["bookshelf", "WRITING", "#f472b6", [-0.7, 1.7, 4.6], [-2.0, 1.4, 3.7]],
   speaking: ["speaker-stack", "SPEAKING", "#fb7185", [1.7, 1.4, 2.1], [1.38, 1.12, -0.1]],
   openSource: ["tv", "OPEN SOURCE", "#34d399", [1.8, 1.85, 2.0], [3.6, 1.05, -1.5]],
-  playground: ["arcade", "PLAYGROUND", "#facc15", [0.86, 1.7, 1.6], [1.56, 1.12, -2.18]],
-  resume: ["frame", "RESUME", "#22d3ee", [-0.86, 1.7, 1.6], [-1.56, 1.12, -2.18]],
+  playground: ["arcade", "PLAYGROUND", "#facc15", ...wallFraming("playground")],
+  resume: ["frame", "RESUME", "#22d3ee", ...wallFraming("resume")],
   now: ["coffee", "NOW", "#fbbf24", [0.8, 1.35, 1.8], [0.95, 0.96, 0.3]],
   contact: ["door", "CONTACT", "#5eead4", [-1.2, 1.6, 3.38], [-2.1, 1.2, 2.28]],
-  principles: ["poster", "PRINCIPLES", "#c084fc", [0, 1.7, 1.6], [0, 1.12, -2.18]],
-  stack: ["whiteboard", "STACK", "#7dd3fc", [0.43, 1.7, 1.6], [0.78, 1.12, -2.18]],
+  principles: ["poster", "PRINCIPLES", "#c084fc", ...wallFraming("principles")],
+  stack: ["whiteboard", "STACK", "#7dd3fc", ...wallFraming("stack")],
   uses: ["monitor-center", "USES", "#67e8f9", [0, 1.85, 3.2], [-0.05, 0.95, 0.32]],
-  timeline: ["timeline-strip", "TIMELINE", "#a78bfa", [-0.43, 1.7, 1.6], [-0.78, 1.12, -2.18]],
+  timeline: ["timeline-strip", "TIMELINE", "#a78bfa", ...wallFraming("timeline")],
   lab: ["plant", "LAB", "#4ade80", [-0.7, 1.35, 2.5], [-1.8, 0.95, 1.4]],
 };
 

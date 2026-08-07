@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { ROOM } from "@/constants/room";
 import { routes } from "@/constants/routes";
 import { furnitureHotspots, isFurnitureRoute } from "./hotspots";
+import { WALL_SCREEN_Z, type WallScreenSlug } from "./wall-screen-layout";
+
+const wallScreenSlugs = Object.keys(WALL_SCREEN_Z) as WallScreenSlug[];
 
 describe("furniture hotspots", () => {
   it("references only known routes", () => {
@@ -28,8 +32,18 @@ describe("furniture hotspots", () => {
   });
 
   it("gives every wall-screen route a wall-oriented glow", () => {
-    for (const slug of ["resume", "timeline", "principles", "stack", "playground"] as const) {
+    for (const slug of wallScreenSlugs) {
       expect(furnitureHotspots[slug].glow).toBe("wall");
+    }
+  });
+
+  it("hangs the wall screens flat on the inside face of the right wall", () => {
+    for (const slug of wallScreenSlugs) {
+      const { center, size } = furnitureHotspots[slug];
+      expect(center[0]).toBeLessThan(ROOM.maxX);
+      expect(center[0]).toBeGreaterThan(ROOM.maxX - 0.1);
+      expect(center[2]).toBeCloseTo(WALL_SCREEN_Z[slug]);
+      expect(size[0]).toBeLessThan(size[2]);
     }
   });
 });

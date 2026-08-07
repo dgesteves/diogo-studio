@@ -1,5 +1,6 @@
 import type { RouteKey } from "@/constants/routes";
 import type { Vec3 } from "../types";
+import { WALL_SCREEN, WALL_SCREEN_Z } from "./wall-screen-layout";
 
 export type FurnitureHotspot =
   | { center: Vec3; size: Vec3; glow: "floor"; groundY: number }
@@ -7,9 +8,9 @@ export type FurnitureHotspot =
 
 const FLOOR_Y = 0.02;
 const DESK_Y = 0.74;
-const WALL_Y = 1.5;
-const WALL_Z = -2.27;
-const WALL_SIZE = [0.58, 0.74, 0.12] as const satisfies Vec3;
+const WALL_X = WALL_SCREEN.x;
+const WALL_Y = WALL_SCREEN.y;
+const WALL_SIZE = [0.12, 0.74, 0.58] as const satisfies Vec3;
 
 export const furnitureHotspots = {
   about: { center: [0, 1.2, -0.34], size: [1.1, 0.7, 0.22], glow: "floor", groundY: FLOOR_Y },
@@ -43,11 +44,11 @@ export const furnitureHotspots = {
     groundY: FLOOR_Y,
   },
   uses: { center: [0, 0.78, 0.32], size: [0.7, 0.16, 0.34], glow: "floor", groundY: DESK_Y },
-  resume: { center: [-1.56, WALL_Y, WALL_Z], size: WALL_SIZE, glow: "wall" },
-  timeline: { center: [-0.78, WALL_Y, WALL_Z], size: WALL_SIZE, glow: "wall" },
-  principles: { center: [0, WALL_Y, WALL_Z], size: WALL_SIZE, glow: "wall" },
-  stack: { center: [0.78, WALL_Y, WALL_Z], size: WALL_SIZE, glow: "wall" },
-  playground: { center: [1.56, WALL_Y, WALL_Z], size: WALL_SIZE, glow: "wall" },
+  resume: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.resume], size: WALL_SIZE, glow: "wall" },
+  timeline: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.timeline], size: WALL_SIZE, glow: "wall" },
+  principles: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.principles], size: WALL_SIZE, glow: "wall" },
+  stack: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.stack], size: WALL_SIZE, glow: "wall" },
+  playground: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.playground], size: WALL_SIZE, glow: "wall" },
 } as const satisfies Partial<Record<RouteKey, FurnitureHotspot>>;
 
 type FurnitureRoute = keyof typeof furnitureHotspots;

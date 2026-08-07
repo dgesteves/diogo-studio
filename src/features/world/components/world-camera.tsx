@@ -7,7 +7,7 @@ import type { RouteKey } from "@/constants/routes";
 import { getExploreSnapshot } from "@/stores/explore-store";
 import { getStation } from "../constants/stations";
 import { consumeIntro, introStartPosition } from "../utils/intro";
-import { framingPullback } from "../utils/framing";
+import { clampCameraX, framingPullback } from "../utils/framing";
 import { ORBIT } from "../constants/orbit";
 import { damp, isOrbitIdle } from "../utils/orbit";
 import type { OrbitInputState } from "../hooks/use-orbit-input";
@@ -68,12 +68,13 @@ export function WorldCamera({ active, input }: WorldCameraProps): null {
 
     const distance = baseDistance * framingPullback(size.width / size.height) * a.zoom;
     desired.current.copy(lookTarget.current).addScaledVector(direction.current, distance);
+    desired.current.x = clampCameraX(desired.current.x);
 
     if (!ready.current) {
       intro.current = consumeIntro(active === "home");
       if (intro.current) {
         const [sx, sy, sz] = introStartPosition(station);
-        camera.position.set(sx, sy, sz);
+        camera.position.set(clampCameraX(sx), sy, sz);
       } else {
         camera.position.copy(desired.current);
       }
