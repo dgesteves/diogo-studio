@@ -40,11 +40,13 @@ security by default. Prefer the smallest, clearest solution that ships.
 
 - **Functional and declarative.** Prefer pure functions and composition; avoid
   classes. Iterate and modularize over copy-paste (DRY).
-- **Small, single-purpose files.** Keep every file focused and short — aim for
-  **~100 lines** per file and **~50 lines** per function (enforce via lint where
-  possible). One file = one responsibility: split sub-components, hooks, and
-  helpers into their own files instead of growing one big file. See the
-  project-structure rule for how to separate each concern.
+- **Single-purpose modules, short functions.** Keep **functions** short and
+  focused (~50 lines is a good ceiling, lint-enforced). A file should do one job —
+  but **length is not the signal**: split when a file mixes concerns, never to hit
+  a line count. Shaders, procedural geometry, draw routines, and static data are
+  legitimately long; leave them whole rather than fragmenting them into modules
+  that only exist to import each other. See the project-structure rule for the
+  seams worth splitting along.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
   booleans (`isLoading`, `hasError`, `canSubmit`).

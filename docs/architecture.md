@@ -1,15 +1,20 @@
 # Architecture
 
-The **gold-standard, production-grade** structure for a modern Next.js (App
-Router) codebase, tailored to **diogo-studio**. It encodes `.devin/rules/` and
-is the structure the codebase follows. When in doubt, this document wins.
+Reference for how the codebase is laid out today, tailored to **diogo-studio**.
 
-The codebase has **migrated onto this structure** — the tree below is the
-realized blueprint. **[present]** folders exist with real files today; **[new]** marks
-a planned home that isn't created yet (add the folder when its first real file lands);
-**[optional]** marks a capability folder (auth, db, i18n, etc.) added only when that
-capability exists. We **don't commit empty `.gitkeep` placeholders** — this document is
-the source of truth for where new code belongs.
+> **This document does not win.** The code wins, and this file tracks it. Where
+> they disagree, the code is right and this file is stale.
+>
+> **A restructure is in progress** — see [`restructure-plan.md`](./restructure-plan.md),
+> which supersedes this file for anything structural, and
+> [`.devin/rules/project-structure.md`](../.devin/rules/project-structure.md),
+> which is the rule new code follows. This file will be rewritten to ~80 lines
+> describing the settled tree once those phases land; until then, treat the
+> `[new]` / `[optional]` markers below as **speculation that was never built**,
+> not as planned work.
+
+**[present]** folders exist with real files today. We **don't commit empty
+`.gitkeep` placeholders**.
 
 ## Core ideas
 
@@ -56,13 +61,13 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
 
 ```
 .
-├── .github/                    CI workflows, issue/PR templates, CODEOWNERS, dependabot   [present]
+├── .github/                    CI workflows + dependabot (no CODEOWNERS — see below)      [present]
 ├── .husky/                     git hooks (pre-commit, commit-msg)                          [present]
 ├── .vscode/                    shared settings + recommended extensions                    [present]
 ├── docs/
-│   ├── adr/                    Architecture Decision Records (0001-title.md)               [new]
 │   ├── architecture.md         this file                                                   [present]
-│   └── design-system.md                                                                    [present]
+│   ├── restructure-plan.md     in-flight restructure — supersedes this file structurally   [present]
+│   └── decisions.md            dated decision log                                          [new]
 ├── public/                     static assets served as-is (images, icons, fonts)           [present]
 ├── scripts/                    build/maintenance scripts (tsx)                             [present]
 ├── tests/
@@ -92,7 +97,7 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │       ├── queries/         server-side reads composing server integrations             [optional]
     │       ├── hooks/           feature-scoped hooks
     │       ├── schemas/         zod schemas (input/output contracts)
-    │       ├── stores/          feature-scoped client state (zustand) — only if needed
+    │       ├── stores/          feature-scoped client state (useSyncExternalStore) — if needed
     │       ├── emails/          feature email templates (React Email)                       [optional]
     │       ├── utils/           feature-private pure helpers
     │       ├── constants/       feature-owned constants, static data & authored content (world destinations, nodes…)
@@ -160,8 +165,9 @@ logic, data access, or shared components here.
 Everything for one capability, colocated. Crossing a feature boundary means
 importing from its **`index.ts`** only — internals stay private. A feature may
 contain UI, hooks, server actions, server-only data access, schemas,
-constants & static data, authored content, and tests. Keep each file small (~100 lines, lint-enforced);
-split aggressively.
+constants & static data, authored content, and tests. Keep **functions** short and
+split on mixed concerns — not on line count. See
+[`project-structure.md`](../.devin/rules/project-structure.md).
 
 Authored content follows the same rule: a feature owns its content as typed
 static data under its own `constants/` — e.g. `features/world/constants/` holds
@@ -185,8 +191,9 @@ logic/state, it belongs in a feature, not here.
 - `providers/` — client context providers (theme, motion, lenis, reduced
   motion) composed into one `<Providers>` in `providers/index.tsx`, mounted by
   the root layout.
-- `stores/` — global zustand stores (perf, web-vitals, reduced motion);
-  feature-scoped stores live in `features/<feature>/stores/`.
+- `stores/` — global client state as hand-rolled external stores read via
+  `useSyncExternalStore`. **There is no store library** — `zustand` is not a
+  dependency. Feature-scoped stores live in `features/<feature>/stores/`.
 
 ### Infrastructure & integrations — named top-level folders
 
@@ -225,7 +232,7 @@ with an explicit server/client boundary:
 ```
 features/inspector/
 ├── components/
-│   ├── inspector-overlay.tsx     "use client"  (the ⌘K surface; POSTs to the route)
+│   ├── inspector-overlay.tsx     "use client"  (the perf / web-vitals overlay)
 │   ├── inspector-panels.tsx      panel composition
 │   └── inspector-format.ts       feature-private pure helpers
 ├── stores/
@@ -284,7 +291,8 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 - **Boundaries**: `"use client"` only on interactive leaves; `import "server-only"`
   on every server module. Feature data/content collections only via the owning
   feature's public API (`@/features/<feature>`).
-- **Files small** (~100 lines, lint-enforced). Split into sub-components/hooks/helpers first.
+- **Short functions**, and split files on mixed concerns rather than line count.
+  The legacy `max-lines: 100` rule is being replaced — see the restructure plan.
 - **Tests** colocate with source (`*.test.ts(x)`); E2E in `tests/e2e/`.
 
 ## Quality gates

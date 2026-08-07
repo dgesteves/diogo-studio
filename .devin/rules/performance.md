@@ -10,8 +10,9 @@ description: Apply when working on performance, bundle size, Core Web Vitals (LC
 - Optimize against **measurements**, not hunches: Lighthouse / Core Web Vitals
   (LCP ≤ 2.5s, CLS ≤ 0.1, INP ≤ 200ms), `@next/bundle-analyzer` for bundle
   composition, and React DevTools Profiler for render hotspots.
-- Enforce **bundle budgets** in CI (e.g. `size-limit`) so regressions fail the
-  build instead of shipping. Track Web Vitals from real users in production.
+- Track **bundle budgets** in CI (`size-limit`) and Web Vitals from real users in
+  production. In this repo the budget is a **review signal, not a hard gate** —
+  use it to notice regressions; Core Web Vitals are the real bar.
 
 ## Ship less JavaScript
 

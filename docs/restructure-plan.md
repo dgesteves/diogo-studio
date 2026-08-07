@@ -5,6 +5,10 @@ phased plan to fix it without changing behaviour.
 
 Status: proposal. Nothing here has been applied.
 
+Baseline: commit `b72c1e5` ("remove career-graph feature and consolidate career
+data"). Verified green — `pnpm validate` passes (76 tests, knip clean). Every
+number below was re-measured against that commit.
+
 ---
 
 ## 1. Verdict
@@ -14,9 +18,14 @@ clean (cross-feature coupling is tiny), the `@/` alias is used consistently, and
 routing is thin. The problem is that every cohesive unit of code has been
 shredded into 3–6 tiny files, and then those files were stacked into folders
 named after technical kinds at two different levels. The result reads like a
-codebase with 350 modules and no modules.
+codebase with 300 modules and no modules.
 
 You are not misreading it. The numbers below say the structure is the problem.
+
+Deleting `career-graph` removed 32 files and ~2,200 lines. It did **not** change
+the shape of the problem — average file size moved from 47 to 45 lines, and the
+proportion of files under 30 lines actually went _up_. The remaining mess is
+concentrated in `world` + `studio`, which is now 60% of the codebase.
 
 ---
 
@@ -24,16 +33,16 @@ You are not misreading it. The numbers below say the structure is the problem.
 
 | Metric                      | Value                                                                                      |
 | --------------------------- | ------------------------------------------------------------------------------------------ |
-| TS/TSX files in `src/`      | **345**                                                                                    |
-| Lines of TS/TSX in `src/`   | ~16,400                                                                                    |
-| **Average file size**       | **~47 lines**                                                                              |
-| Files under 30 lines        | **118** (34% of the codebase)                                                              |
-| Smallest "module"           | `career-graph-svg-viewport.ts` — **5 lines**                                               |
-| Top-level folders in `src/` | **13**                                                                                     |
+| TS/TSX files in `src/`      | **313**                                                                                    |
+| Lines of TS/TSX in `src/`   | 14,209                                                                                     |
+| **Average file size**       | **~45 lines**                                                                              |
+| Files under 30 lines        | **108** (35% of the codebase)                                                              |
+| Smallest "modules"          | `telemetry/constants.ts` — **1 line**; `world/constants/focus.ts` — **5 lines**            |
+| Top-level entries in `src/` | **15 folders** + a loose `rate-limit.ts`                                                   |
 | Deepest path                | **7 segments** (`src/features/world/components/lounge/lounge-tv-channels/wave-channel.ts`) |
 | Largest flat folder         | `features/studio/components/scene/` — **40 files**                                         |
 | Second largest              | `features/world/components/` — **38 files**                                                |
-| Barrel files                | 11                                                                                         |
+| Barrel files                | 10                                                                                         |
 | Empty folders               | 1 (`src/components/layout`)                                                                |
 
 ### Prefix-namespaced clusters — folders pretending to be filenames
@@ -44,18 +53,18 @@ doing the job a folder should do:
 
 | Cluster                | Files | Lines | Location                                                           |
 | ---------------------- | ----- | ----- | ------------------------------------------------------------------ |
-| `boot-*`               | 16    | 622   | `features/world/components/` (flat, mixed with 22 unrelated files) |
+| `boot-*`               | 15    | 622   | `features/world/components/` (flat, mixed with 23 unrelated files) |
 | `deck-*` + hud         | 12    | 574   | `features/world/components/hud/`                                   |
-| `career-graph-*`       | 10    | 512   | `features/career-graph/components/`                                |
-| `lounge-*`             | 11    | ~500  | `features/world/components/lounge/`                                |
-| `pixelated-portrait-*` | 6     | 436   | `features/about/components/`                                       |
+| `lounge-*`             | 14    | 545   | `features/world/components/lounge/` (+ `lounge-tv-channels/`)      |
+| `destinations-*`       | 10    | 748   | `features/world/constants/`                                        |
+| `pixelated-portrait-*` | 6     | 417   | `features/about/components/`                                       |
 | `mouse-*`              | 5     | 369   | `features/studio/components/scene/`                                |
-| `destinations-*`       | 11    | ~900  | `features/world/constants/`                                        |
-| `retrieve-*`           | 7     | ~400  | `src/ai/`                                                          |
+| `retrieve-*`           | 6     | 226   | `src/ai/`                                                          |
 
-`features/career-graph/components/career-graph-svg.tsx` is imported as
-`@/features/career-graph/components/career-graph-svg` — the concept is repeated
-three times in one path.
+`features/world/components/lounge/lounge-tv-channels/wave-channel.ts` says
+"lounge" twice and "channel" twice in one path. `boot-wordmark.tsx`,
+`boot-backdrop.tsx`, `boot-wip-notice.tsx` and `boot-progress-reporter.tsx` are
+20, 20, 20 and 15 lines respectively — four files, 75 lines, one concept.
 
 ---
 
@@ -67,21 +76,20 @@ fixing #1 will not stick — the structure will re-shred itself.
 ### Cause 1 — the 100-line cap is manufacturing files
 
 `eslint.config.mjs` enforces `max-lines: ["error", { max: 100 }]` on all of
-`src/**`, and `.devin/rules/00-core.md` restates it as a target. This is the
-single largest driver of the mess.
+`src/**`. This is the single largest driver of the mess.
 
-The consequence is visible everywhere: a 436-line canvas portrait becomes six
-files (`-canvas`, `-engine`, `-engine-config`, `-frame`, `-sampler`, plus the
-component); a procedural mouse shell becomes five. These splits are not
-conceptual boundaries — `pixelated-portrait-frame.ts` imports nine constants
-from `pixelated-portrait-engine-config.ts` and a type from
+The consequence is visible everywhere: a 417-line canvas portrait is six files
+(`-canvas`, `-engine`, `-engine-config`, `-frame`, `-sampler`, plus the
+component); a procedural mouse shell is five. These splits are not conceptual
+boundaries — `pixelated-portrait-frame.ts` imports nine constants from
+`pixelated-portrait-engine-config.ts` and a type from
 `pixelated-portrait-sampler.ts` purely to stay under the cap. Cohesive code was
-cut along an arbitrary line, and the seams became import graphs you now have to
-navigate.
+cut along an arbitrary line, and the seams became an import graph you now have
+to navigate.
 
 A 100-line cap is reasonable for React components. It is actively harmful for
 shaders, procedural geometry, canvas draw routines, and content data — which is
-most of this repo.
+most of what is left in this repo.
 
 **Fix:** raise the cap to `250` for `src/**`, keep a tighter `120` for `.tsx`
 where it reflects real component hygiene, and exempt data/shader/draw modules.
@@ -89,31 +97,38 @@ Keep "small files" as a value, drop it as a mechanical gate.
 
 ### Cause 2 — layering by technical kind, twice
 
-`src/` has 13 top-level buckets, then most features repeat the same buckets
+`src/` has 15 top-level folders, then most features repeat the same buckets
 inside themselves (`components/`, `constants/`, `hooks/`, `stores/`, `utils/`).
 So finding the boot overlay means traversing kind → feature → kind → cluster.
 
-Several top-level buckets do not earn their existence:
+Several top-level folders do not earn their existence:
 
 - `src/types/` — one file, and it is a **pure re-export** of `src/schemas/agent.ts`. 17 files import the indirection.
-- `src/telemetry/` — one file, containing **one constant**.
-- `src/utils/` — one file (`cn.ts`).
+- `src/telemetry/` — one file, **one line**, one constant.
+- `src/utils/` — one file (`cn.ts`, 6 lines).
 - `src/schemas/` — one file.
-- `src/rate-limit.ts` — sits loose at the root of `src/`, in no bucket at all.
+- `src/hooks/` — three files, and two of them are **not shared**: `use-in-view` has exactly one importer (`about`), `use-world-palette` has five and all are `world`/`studio`. Only `use-is-client` is genuinely cross-feature.
+- `src/rate-limit.ts` — sits loose at the root of `src/`, in no folder at all.
 
 And the `components/` level inside a feature is pure noise:
 `features/studio/components/scene/` has exactly one child, and
-`features/about/components/about.tsx` is a feature whose entire content _is_ the
-component.
+`features/about/components/` is a feature whose entire content _is_ a component.
 
 ### Cause 3 — ownership is wrong, so names lie
 
-- **`src/stores/` holds feature state.** Six of its nine files (`boot`, `explore`, `world`, `world-theme`, `perf`) are owned exclusively by the `world` feature. Meanwhile `command-menu` and `inspector` correctly keep stores feature-local. Two conventions, no rule.
-- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`). It has **39 importers** — the most-imported module in the repo after `routes` — under a name that tells you nothing.
+- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`, `color`). With **39 importers** it is the second-most-imported module in the repo, under a name that tells you nothing.
+- **`src/stores/` holds feature state.** Ownership analysis says it can be dissolved almost entirely: `boot`, `explore`, `world-theme` are world-only; `world-store` is world + one audio file; `web-vitals` is inspector-only (4 importers); `reduced-motion` has one importer (its own provider). Only **`perf-store` is genuinely cross-feature** — world writes it, inspector reads it. Meanwhile `command-menu` and `inspector` correctly keep their own stores local. Two conventions, no rule.
+- **`src/components/r3f/` is no longer shared.** `career-graph` was its second consumer; now **all four of its modules are imported by exactly one file**, `features/world/components/world-canvas.tsx`. It is world plumbing living in the shared folder.
+- **`src/constants/career.ts` (90 lines) has zero runtime consumers.** Its only importers are `scripts/agent-index/virtual-chunks.ts` (build-time) and its own test. It is RAG source content, not app constants — and `constants/` gives no hint that editing it requires re-running `pnpm agent:index`.
+- **`src/constants/patterns.ts` is now mostly content taxonomy too** — down to 3 importers, of which one is UI (`hero-section`) and the rest feed the agent index.
 - **`src/constants/room.ts` is world geometry**, used by studio scene meshes and world camera framing, but lives in global constants.
 - **`src/constants/agent-index.json` is generated** (3,367 lines) and sits in a hand-authored folder.
-- **`features/home` is not home.** `/work` imports `OperatingSection` and `TrustSection` from it. `Home` itself is an 8-line `sr-only` wrapper. `features/about` is a 19-line wrapper. These are page sections, not features.
-- **`features/studio` is not a feature.** It is the 3D desk/room content rendered inside `world`'s `<Canvas>`. `world` imports it 12 times, and **11 of those bypass the barrel** to reach `studio/components/screens/canvas-texture` — the boundary is already fictional.
+- **`features/studio` is not a feature.** It is the 3D desk/room content rendered inside `world`'s `<Canvas>`. `world` imports it 12 times, and **11 of those bypass the barrel** to reach `studio/components/screens/canvas-texture`. Two more files inside `studio` import `studio` _through the `@/` alias_ rather than relatively. The boundary is already fictional.
+- **`features/home` and `features/about` are thin wrappers.** `home` is 5 files / 146 lines whose public API is a single 10-line `sr-only` component; `about` is 7 files / 431 lines exporting one 13-line component. They are page sections, not capabilities.
+
+Your commit fixed one item that was on this list: `/work` no longer imports
+`OperatingSection`/`TrustSection` from `@/features/home`, so `features/home` is
+at least honestly named now.
 
 ---
 
@@ -128,34 +143,36 @@ src/
   features/
     world/                  # absorbs studio/ — one 3D scene, one owner
       index.ts              # public API
-      world-stage.tsx  world-canvas.tsx  world-camera.tsx  ...
-      boot/                 # was 16 boot-* files → ~5
+      world-stage.tsx  world-camera.tsx  world-interact.tsx  ...
+      canvas/               # was src/components/r3f (no longer shared)
+      boot/                 # was 15 boot-* files → ~5
       hud/                  # was deck-* → drop prefix
-      lounge/
+      lounge/               # channels/ nested one level, not two
       props/
       scene/                # was features/studio/components/scene
-      stores/               # was src/stores/{boot,explore,world,world-theme,perf}
+        screens/
+      stores/               # was src/stores/{boot,explore,world,world-theme}
       hooks/  utils/
-      data/                 # destinations-*, stations, sectors, work-timeline
+      data/                 # destinations, stations, sectors, work-timeline
       types.ts
     agent/                  # was src/ai + src/schemas/agent
       index.ts
-      retrieval.ts          # was 7 retrieve-* files
+      retrieval.ts          # was 6 retrieve-* files
       stream.ts  response.ts  system-prompt.ts  schema.ts
+      content/              # career.ts, patterns.ts — RAG source data
       generated/agent-index.json
-    career-graph/           # prefix dropped: graph.tsx, node.tsx, axis.tsx, svg.tsx
     command-menu/
-    inspector/
+    inspector/              # owns web-vitals store
     audio/
 
-  components/               # cross-feature presentational (shadcn-compatible)
+  components/               # genuinely cross-feature (13 importers, 4 features)
     ui/                     # unchanged — components.json points here
-    r3f/                    # canvas plumbing + canvas-texture + materials.ts
-    sections/               # was features/home + features/about page sections
+    sections/               # was features/home + features/about
+    seo/
 
-  config/                   # env, site, routes, navigation, seo, telemetry
+  config/                   # env, site, routes, navigation, seo metadata
   lib/                      # cn.ts, rate-limit.ts (server-only)
-  stores/                   # only genuinely cross-cutting: reduced-motion, web-vitals
+  stores/                   # perf-store.ts only — world writes, inspector reads
   providers/
   styles/
 ```
@@ -164,12 +181,12 @@ Rules that make it self-maintaining:
 
 1. **One level of grouping inside a feature, and only when a real cluster exists** (≥5 related files). No `components/` passthrough level.
 2. **The folder name is the namespace — never repeat it in filenames.** `world/boot/splash.tsx`, not `world/components/boot-splash.tsx`.
-3. **A feature owns its state, data, hooks, and utils.** `src/stores/` is for state used by two or more features, nothing else.
-4. **Cross-feature imports go through `index.ts`.** Enforced by lint, not habit.
-5. **Generated files live in a `generated/` folder** so they are obviously not hand-authored.
+3. **A feature owns its state, data, hooks, and utils.** Something is only promoted to a shared folder when **two or more features actually import it** — a rule that would have caught `components/r3f` and two of the three `src/hooks/`.
+4. **Cross-feature imports go through `index.ts`; same-feature imports are relative.** Enforced by lint, not habit.
+5. **Generated and build-time-only content lives in `generated/` or `content/`**, never in `constants/`.
 
-Expected outcome: **~345 files → ~230**, max depth 7 → 5, and the two 40-file
-folders gone.
+Estimated outcome: **~313 files → ~240**, top-level folders 15 → 9, max depth
+7 → 5, and both 40-file folders gone.
 
 ---
 
@@ -183,77 +200,86 @@ Do this on a branch, one commit per phase, on a clean tree.
 
 ### Phase 0 — unblock (prerequisite)
 
-- Raise `max-lines` to 250 for `src/**`; 120 for `src/**/*.tsx`; off for `**/*-{draw,shaders,geometry,layout,data}.ts` and `**/data/**`.
-- Update `.devin/rules/00-core.md` to match, reframing "~100 lines" as guidance.
+- Raise `max-lines` to 250 for `src/**`; 120 for `src/**/*.tsx`; off for `**/*-{draw,shaders,geometry,layout,data,textures}.ts`, `**/data/**`, `**/content/**`.
 - Delete the empty `src/components/layout/`.
 
 Nothing moves yet. This phase only removes the pressure that caused the mess.
 
-### Phase 1 — kill the one-file buckets
+### Phase 1 — kill the one-file folders
 
 - Delete `src/types/agent.ts`; repoint its 17 importers at the schema module.
 - `src/utils/cn.ts` → `src/lib/cn.ts`; `src/rate-limit.ts` → `src/lib/rate-limit.ts`.
 - `src/telemetry/constants.ts` → fold into `src/config/`.
-- `src/constants/routes.ts` → `src/config/routes.ts` (53 importers; it is config).
+- `src/constants/routes.ts` → `src/config/routes.ts` (51 importers; it is config).
 - `src/seo/*` → `src/config/seo/*`.
-- Update `components.json` `aliases.utils` to `@/lib`.
+- `src/hooks/use-in-view.ts` → `features/about/`; `use-world-palette.ts` → `features/world/hooks/`. Keep `use-is-client.ts` shared.
+- Update `components.json` `aliases.utils` → `@/lib`, `aliases.hooks` → drop or repoint.
 
-Removes 4 top-level folders. Mechanical, wide, zero risk.
+Removes 5 top-level folders. Mechanical, wide, zero risk.
 
-### Phase 2 — rename the lies
+### Phase 2 — rename the lies, move content to the agent
 
-- `src/config/brand.ts` → `src/components/r3f/materials.ts` (39 importers; it is 3D material tokens).
-- `src/constants/patterns.ts` → `src/config/patterns.ts` (content taxonomy).
-- `src/constants/agent-index.json` → `src/features/agent/generated/agent-index.json`; update `scripts/agent-index/paths.ts`.
-- `src/constants/room.ts` → moves with the scene in phase 4.
+- `src/config/brand.ts` → `features/world/scene/materials.ts` (39 importers, all world/studio after the career-graph deletion).
+- `src/constants/career.ts` + `career.test.ts` → `features/agent/content/`.
+- `src/constants/patterns.ts` → `features/agent/content/patterns.ts`; `hero-section` imports it via the agent barrel.
+- `src/constants/agent-index.json` → `features/agent/generated/`; update `scripts/agent-index/paths.ts`.
+- Add a header comment to the generated index and a note that `content/` edits require `pnpm agent:index`.
 
 ### Phase 3 — flatten features, drop the `components/` level
 
 For each feature: `features/X/components/*` → `features/X/*`, then group the
 prefix clusters into folders and strip the prefix.
 
-- `world/components/boot-*` (16 files) → `world/boot/` and **merge to ~5**: the four 20-line files (`wordmark`, `backdrop`, `wip-notice`, `progress-reporter`) collapse into their consumers.
+- `world/components/boot-*` (15 files) → `world/boot/` and **merge to ~5**: the four 15–20-line files (`wordmark`, `backdrop`, `wip-notice`, `progress-reporter`) collapse into their consumers.
 - `world/components/hud/deck-*` → `world/hud/{button,comms,controls,radar,radar-plot,map-overlay,sector-list,station-map}.tsx`.
-- `world/components/lounge/lounge-*` → `world/lounge/{sofa,tv,lamp,rug,...}.tsx`; `lounge-tv-channels/` → `world/lounge/channels/` (kills the 7-segment path).
-- `career-graph/components/career-graph-*` → `career-graph/{graph,node,axis,svg,defs,canvas,showcase}.tsx`; merge the 5-line `career-graph-svg-viewport.ts` into `svg.tsx`.
-- `about/components/pixelated-portrait-*` (6 files, 436 lines) → **2 files** under `components/sections/portrait/`, now that phase 0 allows it.
-- `world/constants/destinations-*` → `world/data/destinations/`.
+- `world/components/lounge/lounge-*` → `world/lounge/{sofa,tv,lamp,rug,coffee-table,soundbar,table-items}.tsx`; `lounge-tv-channels/` → `world/lounge/channels/` (kills the 7-segment path).
+- `world/constants/destinations-*` (10 files, 748 lines) → `world/data/destinations/`; merge the smallest.
+- `world/constants/*` (26 files, several under 10 lines) → merge `focus.ts`, `orbit.ts`, `render.ts`, `explore.ts` into a smaller set of tunables modules.
+- `about/components/pixelated-portrait-*` (6 files, 417 lines) → **2 files**, now that phase 0 allows it.
 
 Tests stay co-located and move with their subjects.
 
 ### Phase 4 — merge `studio` into `world`
 
-- `features/studio/components/scene/*` → `features/world/scene/*`; group `mouse-*` (5 files) → `world/scene/mouse/` and merge to 2–3.
+- `features/studio/components/scene/*` → `features/world/scene/*`; group `mouse-*` (5 files, 369 lines) → `world/scene/mouse.ts` + `mouse-controls.tsx`.
 - `features/studio/components/screens/*` → `features/world/scene/screens/*`.
-- Promote `canvas-texture.ts` → `src/components/r3f/canvas-texture.ts`, resolving all **11 barrel-bypassing imports**.
+- `canvas-texture.ts` → `features/world/scene/screens/canvas-texture.ts`, resolving all **11 barrel-bypassing imports** and the 2 alias self-imports. **Note:** an earlier draft of this plan proposed promoting it to `src/components/r3f/`. That is now wrong — see the next bullet.
+- `src/components/r3f/*` → `features/world/canvas/*`. It has a single importer and is no longer shared.
 - `src/constants/room.ts` → `features/world/scene/room-dimensions.ts`.
 - Delete `features/studio/`.
 
-Highest-value phase: eliminates a fake boundary and 12 cross-feature imports.
+Highest-value phase: eliminates a fake boundary and all 12 cross-feature imports.
 Run `pnpm e2e` — this touches the 3D scene.
 
-### Phase 5 — move state to its owner
+### Phase 5 — dissolve `src/stores/`
 
-- `src/stores/{boot,explore,world,world-theme,perf}-store.ts` → `features/world/stores/`.
+- `src/stores/{boot,explore,world,world-theme}-store.ts` → `features/world/stores/`.
+- `src/stores/web-vitals-store.ts` → `features/inspector/stores/` (all 4 importers are inspector).
+- `src/stores/reduced-motion-store.ts` → `src/providers/` (its only importer).
 - `src/config/world-theme.ts` → `features/world/theme.ts`.
-- `src/hooks/use-world-palette.ts` → `features/world/hooks/`.
-- Keep `src/stores/{reduced-motion,web-vitals}-store.ts` — genuinely cross-cutting.
-- Note: `inspector` reads world stores. Export what it needs from `features/world/index.ts` rather than letting it deep-import.
+- **Keep `src/stores/perf-store.ts`** — world writes it, inspector reads it. This is the one genuinely shared store, and being alone in the folder makes that obvious.
+- `features/audio/components/world-audio.tsx` reads `world-store`: either move that file into `world`, or export the selector from `features/world/index.ts`.
 
 ### Phase 6 — consolidate the agent
 
 - `src/ai/` → `src/features/agent/`.
-- Merge the 7 `retrieve-*` files into `retrieval.ts` + `retrieval/types.ts`.
+- Merge the 6 `retrieve-*` files (226 lines total) into `retrieval.ts` + `retrieval/types.ts`.
 - `src/schemas/agent.ts` → `features/agent/schema.ts`.
 - Drop `agent-` prefixes: `stream.ts`, `response.ts`, `index-loader.ts`.
-- Add `features/agent/index.ts` as the only entry point for `app/api/chat/route.ts`.
+- Add `features/agent/index.ts` as the only entry point for `app/api/chat/route.ts` and `command-menu`.
 
 ### Phase 7 — sections, and lock it in
 
-- `features/home` + `features/about` → `src/components/sections/` (`hero`, `operating`, `trust`, `portrait`). Deletes two features that were never features and fixes `/work` importing from `@/features/home`.
-- Fix the two files that self-import via `@/features/home/constants/operating` instead of a relative path.
+- `features/home` + `features/about` → `src/components/sections/` (`hero`, `hero-ask-cta`, `portrait`). Deletes two features that are 12 files and 577 lines wrapping two small components.
 - Add the guardrails in §6.
 - Full `pnpm validate && pnpm build && pnpm e2e && pnpm size`.
+
+### Phase 8 — the docs (do this alongside Phase 0, not last)
+
+See §8 for the full audit. The two rewrites in that section are **prerequisites**,
+not cleanup: `.devin/rules/project-structure.md` and `.devin/rules/00-core.md`
+both mandate the ~100-line cap and the folder layering this plan removes. Left
+untouched, they instruct every future contributor and agent to undo phases 0–7.
 
 ---
 
@@ -262,12 +288,14 @@ Run `pnpm e2e` — this touches the 3D scene.
 Add to `eslint.config.mjs`:
 
 1. **No deep imports across features.** `no-restricted-imports` with pattern `@/features/*/*` outside the owning feature — forces the barrel. This alone would have caught all 11 `canvas-texture` violations.
-2. **No `@/features/*` imports from inside the same feature** — use relative paths. Catches the `features/home` self-import inconsistency.
+2. **No `@/features/X` imports from inside `features/X`** — use relative paths. Catches the two `studio` self-imports.
 3. **`app/` may not be imported from** — routing is a leaf.
 4. **Replace `max-lines` with `max-lines-per-function`** as the primary signal. Function length tracks complexity; file length tracks nothing.
 
-Document the five structure rules from §4 in `.devin/rules/project-structure.md`
-so agents and humans follow the same convention.
+Also worth adding as a periodic check, not a lint rule: **anything in a shared
+folder with fewer than two importing features should move down.** That single
+question is what surfaced `components/r3f`, `use-in-view`, `use-world-palette`,
+and five of the seven stores.
 
 ---
 
@@ -279,20 +307,169 @@ rename.
 
 **What makes this safe:**
 
+- Baseline `b72c1e5` is verified green, so any breakage is attributable to a phase.
 - Every import already goes through the `@/` alias, so moves are mechanical.
 - `pnpm validate` runs lint + typecheck + format + test + knip; TypeScript catches every broken path immediately.
 - `knip` will flag any barrel export orphaned by a merge.
-- 19 unit tests and 6 Playwright specs cover boot, command menu, inspector, content pages, and a11y.
+- 76 unit tests across 16 files, plus 6 Playwright specs covering boot, command menu, inspector, content pages, and a11y.
 - Phases are independent — any one can be shipped or reverted alone.
 
 **Real risks:**
 
-1. **Merging files can change module init order.** Matters for the R3F scene modules that build geometry at module scope. Mitigation: phases 3–4 merge only files already imported together, and `pnpm e2e` runs after each.
+1. **Merging files can change module init order.** Matters for the R3F scene modules that build geometry and canvas textures at module scope. Mitigation: phases 3–4 merge only files already imported together, and `pnpm e2e` runs after each.
 2. **`git mv` at this volume will make `git blame` noisier.** Mitigation: one commit per phase, moves separated from edits, and add a `.git-blame-ignore-revs` entry.
-3. **`components.json` alias changes affect `shadcn add`.** Phase 1 updates it; keeping `components/ui` in place is deliberate for exactly this reason.
-4. **Bundle size could shift** when merging modules changes tree-shaking boundaries. `pnpm size` guards the 1.3 MB budget; check it after phases 3, 4, and 6.
+3. **Moving `career.ts`/`patterns.ts` touches the agent index build.** `prebuild` runs `agent:index:check`, which fails the build if the committed index goes stale. Re-run `pnpm agent:index` in phase 2 and commit the result — expect the JSON to be byte-identical, since only import paths change.
+4. **`components.json` alias changes affect `shadcn add`.** Phase 1 updates it; keeping `components/ui` in place is deliberate for exactly this reason.
+5. **Bundle size could shift** when merging modules changes tree-shaking boundaries. `pnpm size` guards the 1.3 MB budget; check it after phases 3, 4, and 6.
 
 **Suggested order if you want value fastest:** Phase 0 → 3 → 4. Those three
-remove the two 40-file folders, the 7-segment paths, the worst prefix clusters,
-and the fake `studio` boundary — the bulk of the "I can't find anything"
-problem. Phases 1, 2, 5, 6, 7 are cleanup that can land incrementally.
+remove both 40-file folders, the 7-segment paths, the worst prefix clusters, and
+the fake `studio` boundary — the bulk of the "I can't find anything" problem.
+Phases 1, 2, 5, 6, 7 are cleanup that can land incrementally.
+
+Given that `world` + `studio` is now ~60% of `src/`, phases 3 and 4 are where
+almost all of the remaining benefit lives.
+
+---
+
+## 8. Documentation audit
+
+2,609 lines of prose across 18 files. Verified claim-by-claim against the code.
+**No doc is consumed by the build or the RAG index** — `virtual-chunks.ts` reads
+only `src/constants/career.ts`, `patterns.ts`, `routes.ts` and `config/site.ts`,
+so every file below was safe to delete without touching `pnpm build`.
+
+> **Landed 2026-08-07.** Everything in this section is done except the full
+> `architecture.md` rewrite and `decisions.md`, which are deliberately deferred to
+> after Phase 7 — `architecture.md`'s job is to describe the settled tree, so
+> writing it before the moves means writing it twice. It received a minimal patch
+> instead: the "this document wins" claim is gone, it points here for structural
+> questions, and the zustand / `CODEOWNERS` / inspector-example errors are fixed.
+>
+> Excluding this file (which is temporary), prose went from **2,285 → ~1,065
+> lines** and `docs/` from 7 files to 3. The remaining `architecture.md` rewrite
+> takes it to roughly 700.
+
+| File                                | Lines | Verdict     | Why                                                                    |
+| ----------------------------------- | ----- | ----------- | ---------------------------------------------------------------------- |
+| `.devin/rules/project-structure.md` | 141   | **Rewrite** | Mandates the ~100-line cap and the layering this plan removes          |
+| `docs/architecture.md`              | 366   | **Rewrite** | Prescriptive, self-contradictory, "when in doubt this document wins"   |
+| `.devin/rules/00-core.md`           | 75    | **Amend**   | Same ~100-line rule                                                    |
+| `docs/design-system.md`             | 182   | **Delete**  | Documents a folder and 7 components that do not exist                  |
+| `docs/audio-assets.md`              | 93    | **Delete**  | Task brief for work that shipped; says "no audio code ships right now" |
+| `docs/immersive-world-roadmap.md`   | 378   | **Deleted** | A roadmap nobody works from; drifted 7 weeks                           |
+| `docs/diogo-esteves-resume.md`      | 379   | **Deleted** | Unsynced duplicate of shipped `/resume` content                        |
+| `docs/immersive-world-vision.md`    | 271   | **Deleted** | Self-declared "not a plan"; harmless but read as spec                  |
+| `AGENTS.md`                         | 46    | **Keep**    | Accurate and operational; 3 small additions                            |
+| `README.md`                         | 55    | **Keep**    | Accurate; one pointer to fix                                           |
+| 7 other `.devin/rules/*.md`         | ~300  | **Keep**    | Generic best practice, no structural claims, verified accurate         |
+
+### Delete — actively misleading
+
+**`docs/design-system.md`** is the worst offender. Its §5 documents
+`src/components/site/*` with seven components — `SiteNav`, `SiteFooter`,
+`CommandTrigger`, `ThemeToggle`, … — and **none of them exist**; `grep` finds
+zero references to the first three anywhere in `src/`. It also points at
+`temp-docs/diogo-studio-blueprint.md` (does not exist), locates tokens in
+`src/app/globals.css` (they are in `src/styles/globals.css`), and documents the
+deleted career graph. An agent reading it will try to import `SiteNav`.
+**Salvage:** §1 (visual language) and §2.4 (`signal-*` semantics) are the only
+durable content — fold ~15 lines into the rewritten `architecture.md`. The token
+tables are already SSOT in `globals.css`.
+
+**`docs/audio-assets.md`** opens with "No audio code ships right now; once you
+drop files into `public/audio/`, tell me and I'll wire up an opt-in player" and
+closes with a to-do list. All of it shipped: `features/audio/` has four modules
+and all five assets exist. **Salvage:** the licensing rule (commercial-use-free
+only, record attribution per file) → `AGENTS.md`. That is the one durable
+constraint and it is invisible from the code.
+
+### Deleted — duplicated or non-normative
+
+**`docs/immersive-world-roadmap.md`** (378 lines) was first rewritten to a
+67-line honest version, then deleted outright — the better call. Its session log
+stopped on **2026-06-20** while work continued for seven more weeks, leaving
+shipped features (explore mode, free-explore, the command deck, the mobile map,
+boot, day/night, the lounge) marked "Not started". That drift was not an accident
+of neglect: **this project is built exploratively, not from a roadmap**, so any
+phase tracker here will always be fiction. The two salvageable halves went where
+they belong — the non-negotiables and the no-cropping requirement to `AGENTS.md`,
+and the "what shipped" inventory nowhere, because `src/features/world/` already
+tells you that and inventories rot.
+
+Do not reintroduce a roadmap doc. Track intent in issues, or nowhere.
+
+**`docs/diogo-esteves-resume.md`** (379 lines) was a second copy of content the
+site already ships in `features/world/constants/destinations-reach.ts`, not wired
+into the RAG index, so the two could drift silently. Removed; the `/resume` route
+is the single source of truth. If the ⌘K agent should answer from a fuller résumé
+later, the right move is to extend `src/constants/career.ts` — which already feeds
+`agent:index` — not to reintroduce a parallel markdown copy.
+
+**`docs/immersive-world-vision.md`** (271 lines) was honest about itself: "idea
+board + creative brief… intentionally **not** a committed plan", "raw
+inspiration, not requirements". Removed — it sat next to normative files and got
+read as spec.
+
+### Rewrite — the prerequisites
+
+**`.devin/rules/project-structure.md`** is where the mess is specified:
+
+- Line 69: "**Keep files small** (~100 lines). When a component, route, or module grows past that, **split it**" — this is the instruction, and `max-lines: 100` is its enforcement. Cause 1 of this plan is written down as a rule.
+- Line 50: "`src/stores/` — global client state (**Zustand**)." Zustand is **not a dependency** — the repo uses hand-rolled `useSyncExternalStore`.
+- It explicitly forbids three of this plan's fixes: "there is no catch-all `src/lib/`", "there is no `content/` directory (top-level **or per-feature**)", and `src/stores/` as global state.
+
+**`docs/architecture.md`** claims authority it has not earned — "it **is** the
+structure the codebase follows. **When in doubt, this document wins.**" Verified
+problems:
+
+- **Contradicts itself in one file.** The Stack table says state is "hand-rolled external stores read via `useSyncExternalStore` (**no store library**)"; the layer section says "`stores/` — global **zustand** stores".
+- **Wrong worked example.** "Anatomy of a feature (example: `inspector`)" describes `inspector-overlay.tsx` as "the ⌘K surface; POSTs to the route". It is a perf/vitals overlay; ⌘K is `command-menu`.
+- **~14 speculative folders** marked `[new]`/`[optional]` that a portfolio will never need: `components/{common,article,og}/`, `src/{api,db,auth,payments,email}/`, `src/errors.ts`, `messages/`, `middleware.ts`, `app/(legal)/`, `manifest.ts`, `tests/mocks/`, `docs/adr/`.
+- **False `[present]` markers.** `CODEOWNERS` is listed as present in `.github/`; it does not exist (and `AGENTS.md` correctly notes it cannot work on this plan). The tree says `docs/` holds three entries; it holds seven.
+- **Dead references.** The 44-row "Migration map (complete — historical record)" documents a finished migration and cites `features/contact/emails/…` — there is no `contact` feature. Git history already holds this.
+
+**Target:** ~80 lines that describe what _is_ — the dependency direction, the
+feature list, where each kind of thing lives, and the quality gates — with no
+`[new]` speculation and no migration archaeology. Drop the "this document wins"
+framing; the code wins, and the doc tracks it.
+
+### Amend — small, high value
+
+- **`.devin/rules/00-core.md`** — replace "aim for ~100 lines per file and ~50 lines per function" with a function-level target only (§6 rule 4).
+- **`.devin/rules/performance.md`** — says bundle budgets should "**fail the build**"; the roadmap treats `size-limit` as "a review signal, not a hard blocker", and CI matches the roadmap. Pick one; the current CI behaviour is the honest one.
+- **`AGENTS.md`** — three additions: the audio licensing rule salvaged above; that `src/constants/career.ts` has **no runtime consumers** and is read only by `scripts/agent-index/` (a genuine trap — it looks dead); and the `agent-index.json` path once Phase 2 moves it.
+- **`README.md`** — it sends readers to `docs/architecture.md` and `.devin/rules/` as the authority that "wins". Keep the pointer, drop the supremacy claim.
+
+### Add — one file, not a folder
+
+There are real decisions with real rationale currently buried in prose: no store
+library; `size-limit` as signal not gate; the `e2e` job rebuilds rather than
+sharing `.next` (artifact quota); every env var optional so features degrade.
+These deserve a home, but `docs/adr/` with numbered files is too much ceremony
+for a solo repo. **Add `docs/decisions.md`** — one short dated entry per
+decision, newest first. That is the whole thing.
+
+Do **not** add: a docs index, a CONTRIBUTING.md, or per-feature READMEs. The
+repo's problem is too much prose, not too little.
+
+### End state
+
+```
+AGENTS.md               operational facts + the world's non-negotiables (~75 lines)
+README.md               getting started (~58 lines)
+docs/
+  architecture.md       what is, not what might be (~80 lines)
+  decisions.md          dated decision log
+  restructure-plan.md   this file — delete when phases 0–8 land
+.devin/rules/           9 files, 2 rewritten
+```
+
+Four documents plus the rule set. No roadmap, no vision board, no design-system
+doc, no migration archaeology — every one of those rotted because nothing forced
+it to stay true. What survives is either enforced by a tool (`.devin/rules/`,
+verification commands) or is a fact that cannot drift (repo constraints, the
+`career.ts` trap, licensing).
+
+From ~2,285 lines of durable prose to roughly 700, with nothing left that
+contradicts the code.

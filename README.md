@@ -35,8 +35,11 @@ Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
 
 ## Conventions
 
-- Architecture and file placement: [`docs/architecture.md`](./docs/architecture.md)
-  and [`.devin/rules/`](./.devin/rules). When in doubt, those win.
+- Coding standards and file placement: [`.devin/rules/`](./.devin/rules).
+  A restructure is in flight — [`docs/restructure-plan.md`](./docs/restructure-plan.md)
+  is authoritative for structural questions;
+  [`docs/architecture.md`](./docs/architecture.md) describes the current tree and
+  lags behind it.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/) —
   `release-please` derives the version and [`CHANGELOG.md`](./CHANGELOG.md) from
   them. The `commit-msg` hook enforces this locally via `commitlint`.
