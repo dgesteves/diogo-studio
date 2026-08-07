@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/constants/routes";
-import { OperatingSection, TrustSection } from "@/features/home";
 import { DestinationView } from "@/features/world";
 
 export const metadata: Metadata = {
@@ -12,12 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function WorkPage(): ReactElement {
-  return (
-    <DestinationView slug="work">
-      <div className="bg-background relative z-10">
-        <OperatingSection />
-        <TrustSection />
-      </div>
-    </DestinationView>
-  );
+  return <DestinationView slug="work" />;
 }

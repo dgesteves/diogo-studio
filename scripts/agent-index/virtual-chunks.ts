@@ -1,9 +1,8 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry } from "./types";
 
-import { nodes as careerNodes } from "../../src/features/career-graph/constants/career-graph-nodes";
+import { careerEngagements, operatingCompanies } from "../../src/constants/career";
 import { patterns as careerPatterns } from "../../src/constants/patterns";
-import { operatingCompanies } from "../../src/features/home/constants/operating";
 import { routes } from "../../src/constants/routes";
 import { siteConfig } from "../../src/config/site";
 
@@ -26,25 +25,25 @@ export function buildCareerChunks(): IndexEntry[] {
     }),
   );
 
-  for (const node of careerNodes) {
-    const patternLabels = node.patterns
+  for (const engagement of careerEngagements) {
+    const patternLabels = engagement.patterns
       .map((p) => careerPatterns[p]?.label ?? p)
       .filter(Boolean)
       .join(", ");
     const permalink = routes.home;
     out.push(
       finalizeEntry({
-        sourceId: `career:${node.id}`,
+        sourceId: `career:${engagement.id}`,
         sourceKind: "career",
-        sourceTitle: node.fullName,
+        sourceTitle: engagement.name,
         permalink,
         anchor: undefined,
-        heading: node.role,
-        tags: [...node.patterns],
+        heading: engagement.role,
+        tags: [...engagement.patterns],
         ordinal: 0,
         content:
-          `${node.fullName} (${node.years}) — ${node.role}. ` +
-          `${node.summary} Patterns: ${patternLabels}.`,
+          `${engagement.name} (${engagement.years}) — ${engagement.role}. ` +
+          `${engagement.summary} Patterns: ${patternLabels}.`,
       }),
     );
   }

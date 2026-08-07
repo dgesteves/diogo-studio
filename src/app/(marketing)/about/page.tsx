@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/constants/routes";
-import { About } from "@/features/about";
+import { AboutPortrait } from "@/features/about";
+import { DestinationView } from "@/features/world";
 
 export const metadata: Metadata = {
   title: "About",
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
 };
 
 export default function AboutPage(): ReactElement {
-  return <About />;
+  return <DestinationView slug="about" media={<AboutPortrait />} />;
 }

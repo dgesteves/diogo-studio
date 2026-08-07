@@ -1,6 +1,5 @@
 import type { ReactElement } from "react";
 import { siteConfig } from "@/config/site";
-import { DestinationView } from "@/features/world";
 
 import { PixelatedPortrait } from "./pixelated-portrait";
 
@@ -9,11 +8,6 @@ const PORTRAIT = {
   alt: `Pixelated portrait of ${siteConfig.name}`,
 } as const;
 
-export function About(): ReactElement {
-  return (
-    <DestinationView
-      slug="about"
-      media={<PixelatedPortrait src={PORTRAIT.src} alt={PORTRAIT.alt} className="w-40 sm:w-48" />}
-    />
-  );
+export function AboutPortrait(): ReactElement {
+  return <PixelatedPortrait src={PORTRAIT.src} alt={PORTRAIT.alt} className="w-40 sm:w-48" />;
 }
