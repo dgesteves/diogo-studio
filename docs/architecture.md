@@ -32,22 +32,21 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
 
 ## Stack
 
-| Concern             | Choice                                                             |
-| ------------------- | ------------------------------------------------------------------ |
-| Framework / runtime | Next.js 16 (App Router), React 19                                  |
-| Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                |
-| Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)              |
-| UI primitives       | Radix UI, `cmdk`, `vaul`, `sonner`, `lucide-react`                 |
-| Content             | Typed static data + TSX bodies in each feature's `constants/`      |
-| 3D / motion         | `three` + React Three Fiber + drei, `motion`, `lenis`              |
-| Forms / validation  | `react-hook-form` + `zod` (`@hookform/resolvers`)                  |
-| AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)       |
-| Email               | Resend + React Email                                               |
-| State (client)      | URL state first; `zustand` for cross-component UI state            |
-| Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/config/env.ts`         |
-| Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`            |
-| Rate limiting       | Upstash Redis + Ratelimit                                          |
-| Tooling             | pnpm, ESLint, Prettier, Vitest, Playwright + axe, knip, size-limit |
+| Concern             | Choice                                                                                          |
+| ------------------- | ----------------------------------------------------------------------------------------------- |
+| Framework / runtime | Next.js 16 (App Router), React 19                                                               |
+| Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                                             |
+| Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)                                           |
+| UI primitives       | Radix UI, `cmdk`, `sonner`, `lucide-react`                                                      |
+| Content             | Typed static data + TSX bodies in each feature's `constants/`                                   |
+| 3D / motion         | `three` + React Three Fiber + drei + postprocessing, `motion`, `lenis`                          |
+| Validation          | `zod`                                                                                           |
+| AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)                                    |
+| State (client)      | URL state first; hand-rolled external stores read via `useSyncExternalStore` (no store library) |
+| Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/config/env.ts`                                      |
+| Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`                                         |
+| Rate limiting       | Upstash Redis + Ratelimit                                                                       |
+| Tooling             | pnpm, ESLint, Prettier, Vitest, Playwright + axe, knip, size-limit                              |
 
 ## Path aliases
 
@@ -78,15 +77,16 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │   ├── (marketing)/        public pages route group: /, about, work, writing, uses…    [present]
     │   │   ├── layout.tsx       group-level chrome
     │   │   └── <segment>/page.tsx
-    │   ├── (legal)/            colophon (privacy, terms when needed)                        [present]
-    │   ├── api/                Route Handlers — <name>/route.ts                             [present]
+    │   ├── api/                Route Handlers — chat/route.ts, health/route.ts              [present]
     │   ├── layout.tsx           root layout (fonts, providers, <html>)                      [present]
     │   ├── error.tsx • global-error.tsx • not-found.tsx • loading.tsx                       [present]
-    │   ├── icon.tsx • apple-icon.tsx • favicon.ico                                          [present]
-    │   └── manifest.ts • robots.ts • sitemap.ts                                             [present]
+    │   ├── icon.tsx • apple-icon.tsx                                                        [present]
+    │   ├── robots.ts • sitemap.ts                                                           [present]
+    │   ├── (legal)/            colophon (privacy, terms when needed)                        [new]
+    │   └── manifest.ts          PWA manifest                                                [new]
     │
     ├── features/               ── VERTICAL SLICES (one folder per capability) ───────────  [present]
-    │   └── <feature>/          e.g. work, writing, career-graph, studio, command-menu, contact
+    │   └── <feature>/          today: about, audio, career-graph, command-menu, home, inspector, studio, world
     │       ├── components/      feature UI (server + client)
     │       ├── actions/         Server Actions ("use server")                               [optional]
     │       ├── queries/         server-side reads composing server integrations             [optional]
@@ -101,13 +101,13 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │       └── index.ts         ★ curated public API — the ONLY import surface
     │
     ├── components/              ── SHARED, REUSABLE UI (presentational, 2+ features) ─────
-    │   ├── ui/                  design-system primitives (button, badge, input, kbd…)      [present]
-    │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [present]
-    │   ├── common/              cross-feature composites (cards, empty/error states)        [present]
+    │   ├── ui/                  design-system primitives (button, badge, kbd, status-dot)  [present]
     │   ├── r3f/                 shared React Three Fiber infra (perf reporter, ctx guard)  [present]
-    │   ├── article/             article building blocks (prose, headings, toc, diagrams…)   [present]
     │   ├── seo/                 json-ld / structured-data UI                               [present]
-    │   └── og/                  Open Graph image templates                                 [present]
+    │   ├── layout/              app shell: header, site-nav, mobile-nav, footer            [new]
+    │   ├── common/              cross-feature composites (cards, empty/error states)        [new]
+    │   ├── article/             article building blocks (prose, headings, toc, diagrams…)   [new]
+    │   └── og/                  Open Graph image templates                                 [new]
     │
     │                            ── CORE INFRASTRUCTURE & INTEGRATIONS (named top-level, no `lib/`) ──
     │                            server-only modules start with `import "server-only"`; rest stays isomorphic
@@ -124,11 +124,12 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │
     ├── hooks/                   SHARED client hooks (use-in-view, use-is-client, …)        [present]
     ├── providers/               client providers + composed <Providers> (theme, motion…)   [present]
-    ├── stores/                  GLOBAL client state — zustand (perf, web-vitals, motion)    [present]
+    ├── stores/                  GLOBAL client state — external stores (boot, world, perf…)  [present]
     │
     ├── constants/               ── GLOBAL constants, enums & static data ─────────────────
     │   ├── routes.ts            typed route map + path builders — SSOT for every URL         [present]
     │   ├── patterns.ts          patterns taxonomy — tags every article                       [present]
+    │   ├── room.ts              shared studio room dimensions                                [present]
     │   ├── agent-index.json     prebuilt RAG index (generated by scripts/)                   [present]
     │   └── app.constants.ts     limits, defaults, feature flags                              [new]
     │
@@ -138,7 +139,7 @@ app/  →  features/  →  components/ • hooks/ • providers/ • stores/
     │   ├── brand.ts             brand colors for non-CSS contexts (OG, icons, R3F, email)    [present]
     │   └── env.ts               Zod-validated environment (t3-env)                           [present]
     │
-    ├── styles/                  globals.css, system-diagram.css (tokens in globals.css)     [present]
+    ├── styles/                  globals.css (design tokens live here)                       [present]
     ├── types/                   global/ambient types (*.d.ts, shared domain types)         [present]
     └── middleware.ts            edge middleware (headers, redirects, rate-limit gate)      [optional]
 ```
@@ -218,27 +219,30 @@ with an explicit server/client boundary:
 - shared test setup, render helpers, mocks/fixtures, and MSW handlers live in
   `tests/` at the repo root, next to `tests/e2e/`.
 
-## Anatomy of a feature (example: `contact`)
+## Anatomy of a feature (example: `inspector`)
 
 ```
-features/contact/
+features/inspector/
 ├── components/
-│   └── contact-form.tsx          "use client"  (RHF + zod resolver; POSTs to the route)
-├── emails/
-│   └── contact-notification.tsx  React Email template (rendered server-side by Resend)
-├── schemas/
-│   └── contact.ts                zod schema (shared by the form AND the route handler)
-└── index.ts                      export { ContactForm, ContactNotification, contactSchema }
+│   ├── inspector-overlay.tsx     "use client"  (the ⌘K surface; POSTs to the route)
+│   ├── inspector-panels.tsx      panel composition
+│   └── inspector-format.ts       feature-private pure helpers
+├── stores/
+│   └── inspector-overlay-store.tsx  feature-scoped client state
+└── index.ts                      export { InspectorOverlay, InspectorOverlayProvider, useInspectorOverlay }
 ```
 
-Submission is handled by a thin **Route Handler** at `app/api/contact/route.ts`
-(Node runtime — Resend + react-email): validate → honeypot → rate-limit → send,
-degrading to `503 { fallback }` so the form can show a `mailto:` when email isn't
-configured. The feature-specific sender lives beside its template
-(`emails/send-contact-notification.ts`, server-only) so the shared infra folders
-never import from `features/`. Shared cross-route concerns (e.g. the IP
-rate-limiter shared with `api/chat`) belong in `src/rate-limit.ts` (server-only),
-not the route file.
+Its query is handled by a thin **Route Handler** at `app/api/chat/route.ts`
+(edge runtime): parse → validate with `@/schemas/agent` → rate-limit → retrieve →
+stream. Every step delegates: retrieval and prompting live in `src/ai/`
+(server-only), the shared IP rate-limiter in `src/rate-limit.ts` (server-only),
+and the request/response contracts in `src/schemas/agent.ts`. The route itself
+holds no business logic.
+
+It degrades in layers rather than failing: no `OPENAI_API_KEY` returns `503` with
+the top index matches, no embeddings falls back to the keyword/BM25 tier, and no
+`UPSTASH_*` falls back to an in-memory token bucket. Cross-route concerns belong
+in the shared infra folders, never in the route file.
 
 ## Where does X go? (decision guide)
 
@@ -286,7 +290,33 @@ Reuse rule: used by **one** feature → keep it there; used by **2+** → promot
 
 `pnpm validate` = lint + typecheck + `format:check` + tests + `knip`. Plus
 `pnpm test` / `e2e` (Vitest + Playwright/axe), `pnpm size` (size-limit),
-`pnpm analyze` (bundle analyzer). Every structural PR must pass `pnpm validate`.
+`pnpm analyze` (bundle analyzer). Every structural change must pass `pnpm validate`.
+
+CI (`.github/workflows/ci.yml`) runs the same gates plus `build` and `e2e`;
+`audit.yml` audits production dependencies daily; `release-please.yml` maintains
+the release PR. Nothing else runs, deliberately.
+
+This repository is **private on a GitHub Free plan**, which removes capabilities
+the workflows used to rely on. Keep this in mind before adding CI:
+
+| Capability                   | Status on private + Free                                |
+| ---------------------------- | ------------------------------------------------------- |
+| Branch protection / rulesets | Unavailable — `main` is unprotected, no required checks |
+| Code scanning (CodeQL)       | Unavailable — needs the paid Code Security add-on       |
+| OSSF Scorecard               | Public repositories only                                |
+| PR auto-merge                | Needs a required check to wait on, so unusable          |
+| `CODEOWNERS`                 | Inactive (needs Pro or higher)                          |
+| Actions minutes              | 2,000/month (public repositories are unlimited)         |
+| Artifact storage             | 500 MB shared quota                                     |
+
+Because minutes and artifact storage are now finite, CI uploads artifacts only on
+failure and with short retention. `pnpm validate` locally is the cheap gate;
+treat CI as confirmation, not as the first place a problem is found.
+
+One known inefficiency is deliberate: the `e2e` job builds the app again rather
+than consuming the `build` job's output. Sharing `.next` would mean either
+artifact upload (a multi-hundred-MB write against a 500 MB quota) or cache-key
+contention between the two jobs, both worse than one extra build.
 
 ## Migration map (complete — historical record)
 
