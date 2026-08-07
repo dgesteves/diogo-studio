@@ -23,5 +23,8 @@ describe("worldPalettes", () => {
       worldPalettes.night.ambientIntensity,
     );
     expect(worldPalettes.day.neonIntensity).toBeLessThan(worldPalettes.night.neonIntensity);
+    expect(worldPalettes.day.ceilingLightIntensity).toBeLessThan(
+      worldPalettes.night.ceilingLightIntensity,
+    );
   });
 });

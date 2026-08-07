@@ -16,6 +16,7 @@ export type WorldPalette = {
   hemisphereIntensity: number;
   keyLightColor: string;
   keyLightIntensity: number;
+  ceilingLightIntensity: number;
   neonIntensity: number;
 };
 
@@ -36,6 +37,7 @@ export const worldPalettes: Record<WorldMode, WorldPalette> = {
     hemisphereIntensity: 0.55,
     keyLightColor: "#f6efe1",
     keyLightIntensity: 1.15,
+    ceilingLightIntensity: 1,
     neonIntensity: 1,
   },
   day: {
@@ -54,6 +56,7 @@ export const worldPalettes: Record<WorldMode, WorldPalette> = {
     hemisphereIntensity: 0.9,
     keyLightColor: "#fff4e0",
     keyLightIntensity: 1.9,
+    ceilingLightIntensity: 0.5,
     neonIntensity: 0.45,
   },
 };

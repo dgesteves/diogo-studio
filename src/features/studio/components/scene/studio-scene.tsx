@@ -3,6 +3,7 @@
 import { Suspense, type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
 
+import { CeilingLights } from "./ceiling-lights";
 import { Chair } from "./chair";
 import { CityWindow } from "./city-window";
 import { Desk } from "./desk";
@@ -23,6 +24,7 @@ export function StudioScene(): ReactElement {
 
       <Suspense fallback={null}>
         <Room />
+        <CeilingLights />
         <CityWindow />
         <GridFloor />
         <DeskRug />
