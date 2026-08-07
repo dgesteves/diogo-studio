@@ -5,7 +5,6 @@ import { DoubleSide } from "three";
 import { brandColors } from "@/config/brand";
 
 import { DESK_TOP_Y, METAL } from "./constants";
-import { ServerNode } from "./desk-fixtures";
 import { Headphones } from "./headphones";
 
 export function DeskExtras(): ReactElement {
@@ -13,7 +12,6 @@ export function DeskExtras(): ReactElement {
     <group>
       <DeskLamp />
       <Headphones />
-      <ServerNode />
     </group>
   );
 }

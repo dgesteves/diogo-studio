@@ -7,6 +7,7 @@ import { Chair } from "./chair";
 import { CityWindow } from "./city-window";
 import { Desk } from "./desk";
 import { DeskExtras } from "./desk-extras";
+import { DeskHardware } from "./desk-hardware";
 import { DeskProps } from "./desk-props";
 import { DeskRug } from "./desk-rug";
 import { DustMotes } from "./dust-motes";
@@ -30,6 +31,7 @@ export function StudioScene(): ReactElement {
         <Chair />
         <DeskProps />
         <DeskExtras />
+        <DeskHardware />
         <Speakers />
         <MonitorRig />
       </Suspense>
