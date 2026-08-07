@@ -4,53 +4,7 @@ import { useEffect, useState, type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
 
-import { DESK_TOP_Y, METAL } from "./constants";
-
-export function Headphones(): ReactElement {
-  return (
-    <group position={[1.12, DESK_TOP_Y, 0.05]}>
-      <mesh position={[0, 0.009, 0]}>
-        <cylinderGeometry args={[0.088, 0.098, 0.018, 24]} />
-        <meshStandardMaterial {...METAL} />
-      </mesh>
-      <mesh position={[0, 0.019, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.072, 0.0024, 10, 32]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
-      </mesh>
-      <mesh position={[0, 0.2, 0]}>
-        <cylinderGeometry args={[0.015, 0.018, 0.38, 14]} />
-        <meshStandardMaterial {...METAL} />
-      </mesh>
-      <mesh position={[0, 0.39, 0]}>
-        <torusGeometry args={[0.11, 0.016, 12, 32, Math.PI]} />
-        <meshStandardMaterial color="#0c1116" roughness={0.55} metalness={0.45} />
-      </mesh>
-      <mesh position={[-0.11, 0.27, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.048, 0.048, 0.052, 24]} />
-        <meshStandardMaterial color="#0c1116" roughness={0.55} metalness={0.45} />
-      </mesh>
-      <mesh position={[0.11, 0.27, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.048, 0.048, 0.052, 24]} />
-        <meshStandardMaterial color="#0c1116" roughness={0.55} metalness={0.45} />
-      </mesh>
-      <mesh position={[-0.11, 0.27, 0.028]}>
-        <torusGeometry args={[0.042, 0.0032, 10, 28]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
-      </mesh>
-      <mesh position={[0.11, 0.27, 0.028]}>
-        <torusGeometry args={[0.042, 0.0032, 10, 28]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
-      </mesh>
-      <pointLight
-        position={[0, 0.28, 0.2]}
-        intensity={0.12}
-        distance={0.6}
-        decay={2}
-        color={brandColors.accent}
-      />
-    </group>
-  );
-}
+import { DESK_TOP_Y } from "./constants";
 
 export function ServerNode(): ReactElement {
   const [active, setActive] = useState(false);

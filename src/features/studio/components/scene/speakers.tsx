@@ -25,7 +25,7 @@ function Speaker({ position }: { position: [number, number, number] }): ReactEle
         <cylinderGeometry args={[0.044, 0.044, 0.006, 24]} />
         <meshStandardMaterial color="#040608" roughness={0.7} metalness={0.4} />
       </mesh>
-      <mesh position={[0, -0.04, 0.073]} rotation={[Math.PI / 2, 0, 0]}>
+      <mesh position={[0, -0.04, 0.073]}>
         <torusGeometry args={[0.04, 0.005, 8, 24]} />
         <meshStandardMaterial color="#1a2530" roughness={0.5} metalness={0.55} />
       </mesh>

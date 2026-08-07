@@ -7,37 +7,76 @@ import { brandColors } from "@/config/brand";
 import { DESK_TOP_Y } from "./constants";
 
 const WEBCAM_Y = DESK_TOP_Y + 0.78;
+const BODY_WIDTH = 0.168;
+const BODY_HEIGHT = 0.052;
+const BODY_DEPTH = 0.062;
+const BODY_Y = 0.03;
+const BODY_Z = 0.008;
+const BODY_FRONT = BODY_Z + BODY_DEPTH / 2;
+const MIC_SLOT_OFFSETS = [-0.062, -0.05];
+const SHELL_MATERIAL = { color: "#0a0e12", roughness: 0.5, metalness: 0.5 } as const;
 
 export function Webcam(): ReactElement {
   return (
     <group position={[0, WEBCAM_Y, -0.34]}>
       <RoundedBox
-        args={[0.12, 0.04, 0.05]}
-        radius={0.01}
-        smoothness={2}
-        position={[0, 0.022, 0.006]}
+        args={[BODY_WIDTH, BODY_HEIGHT, BODY_DEPTH]}
+        radius={0.012}
+        smoothness={3}
+        position={[0, BODY_Y, BODY_Z]}
       >
-        <meshStandardMaterial color="#0a0e12" roughness={0.5} metalness={0.5} />
+        <meshStandardMaterial {...SHELL_MATERIAL} />
       </RoundedBox>
-      <mesh position={[0, 0.022, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.015, 0.017, 0.014, 24]} />
-        <meshStandardMaterial color="#05080a" roughness={0.55} metalness={0.5} />
+      <RoundedBox
+        args={[BODY_WIDTH - 0.014, BODY_HEIGHT - 0.01, 0.006]}
+        radius={0.003}
+        smoothness={2}
+        position={[0, BODY_Y, BODY_FRONT]}
+      >
+        <meshStandardMaterial color="#05080a" roughness={0.62} metalness={0.35} />
+      </RoundedBox>
+      <mesh position={[0, BODY_Y, BODY_FRONT + 0.007]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.022, 0.025, 0.02, 28]} />
+        <meshStandardMaterial color="#070b0e" roughness={0.45} metalness={0.6} />
       </mesh>
-      <mesh position={[0, 0.022, 0.038]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.009, 0.009, 0.003, 24]} />
-        <meshStandardMaterial color="#0a2630" roughness={0.18} metalness={0.75} />
+      <mesh position={[0, BODY_Y, BODY_FRONT + 0.014]} scale={[1, 1, 0.45]}>
+        <sphereGeometry args={[0.017, 24, 16]} />
+        <meshStandardMaterial color="#04141c" roughness={0.08} metalness={0.9} />
       </mesh>
-      <mesh position={[0, 0.022, 0.0395]}>
-        <torusGeometry args={[0.013, 0.0016, 8, 28]} />
+      <mesh position={[0, BODY_Y, BODY_FRONT + 0.0155]}>
+        <torusGeometry args={[0.0185, 0.0016, 8, 32]} />
         <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
-      <mesh position={[0.045, 0.022, 0.031]}>
-        <sphereGeometry args={[0.0035, 10, 10]} />
+      <mesh position={[0.004, BODY_Y + 0.004, BODY_FRONT + 0.021]}>
+        <sphereGeometry args={[0.0026, 10, 10]} />
+        <meshBasicMaterial color={brandColors.accentBright} toneMapped={false} />
+      </mesh>
+      {MIC_SLOT_OFFSETS.map((x) => (
+        <mesh key={x} position={[x, BODY_Y, BODY_FRONT + 0.0025]}>
+          <boxGeometry args={[0.004, 0.02, 0.002]} />
+          <meshStandardMaterial color="#030608" roughness={0.9} metalness={0.1} />
+        </mesh>
+      ))}
+      <mesh position={[0.058, BODY_Y, BODY_FRONT + 0.002]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.005, 0.005, 0.004, 16]} />
+        <meshStandardMaterial color="#030608" roughness={0.85} metalness={0.15} />
+      </mesh>
+      <mesh position={[0.058, BODY_Y, BODY_FRONT + 0.0035]}>
+        <sphereGeometry args={[0.0028, 10, 10]} />
         <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
       </mesh>
-      <mesh position={[0, 0.003, -0.028]} rotation={[0.35, 0, 0]}>
-        <boxGeometry args={[0.085, 0.055, 0.008]} />
-        <meshStandardMaterial color="#0a0e12" roughness={0.6} metalness={0.4} />
+      <RoundedBox
+        args={[0.11, 0.07, 0.008]}
+        radius={0.003}
+        smoothness={2}
+        position={[0, 0.004, -0.03]}
+        rotation={[0.32, 0, 0]}
+      >
+        <meshStandardMaterial {...SHELL_MATERIAL} />
+      </RoundedBox>
+      <mesh position={[0, -0.026, -0.016]}>
+        <boxGeometry args={[0.09, 0.006, 0.026]} />
+        <meshStandardMaterial color="#0d1216" roughness={0.8} metalness={0.2} />
       </mesh>
     </group>
   );

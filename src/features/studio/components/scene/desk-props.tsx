@@ -2,8 +2,10 @@
 
 import { type ReactElement } from "react";
 
-import { CoffeeMug, Notebook, PlantPot } from "./desk-decor";
-import { Keyboard, Mouse } from "./desk-input-devices";
+import { CoffeeMug, PlantPot } from "./desk-decor";
+import { Mouse } from "./desk-input-devices";
+import { GraphicsTablet } from "./graphics-tablet";
+import { Keyboard } from "./keyboard";
 
 export function DeskProps(): ReactElement {
   return (
@@ -12,7 +14,7 @@ export function DeskProps(): ReactElement {
       <Mouse />
       <CoffeeMug />
       <PlantPot />
-      <Notebook />
+      <GraphicsTablet />
     </group>
   );
 }
