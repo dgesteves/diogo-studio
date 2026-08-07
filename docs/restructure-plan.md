@@ -5,6 +5,22 @@ phased plan to fix it without changing behaviour.
 
 Status: proposal. Nothing here has been applied.
 
+> **Blocked on the test suite. Do not start any phase below — including Phase 0 —
+> until [`testing-plan.md`](./testing-plan.md) is complete.**
+>
+> Every phase here claims to be a "pure move/merge with no behaviour change."
+> At **10.71% statement coverage** that claim cannot be verified, and several
+> phases do not merely move code — they merge it. Phase 3 collapses 15 `boot-*`
+> files into ~5 and 6 `pixelated-portrait-*` into 2; Phase 4 dissolves 40 scene
+> files into `world` and repoints 39 importers of `config/brand.ts`. The failure
+> mode of a merge is silent: a component dropped, a constant changed, a mesh or
+> material lost. `pnpm validate && pnpm build` cannot catch any of that — it
+> proves the imports still resolve, not that the product still behaves.
+>
+> The test suite is therefore a **prerequisite, not parallel work**. Its Phase 2
+> (E2E) is deliberately structure-immune so it survives every move below and acts
+> as the harness that makes "no behaviour change" a checkable statement.
+
 Baseline: commit `b72c1e5` ("remove career-graph feature and consolidate career
 data"). Verified green — `pnpm validate` passes (76 tests, knip clean). Every
 number below was re-measured against that commit.
@@ -193,10 +209,33 @@ Estimated outcome: **~313 files → ~240**, top-level folders 15 → 9, max dept
 ## 5. Phased plan
 
 Every phase is a pure move/merge with no behaviour change, independently
-shippable, and verified by `pnpm validate && pnpm build`. Run `pnpm e2e` at the
-end of phases 3, 4, and 7. Use `git mv` so history follows.
+shippable, and verified by `pnpm validate && pnpm build && pnpm e2e`. Use
+`git mv` so history follows.
 
 Do this on a branch, one commit per phase, on a clean tree.
+
+**Run `pnpm e2e` at the end of every phase, not just 3, 4 and 7.** The original
+rule was written when the E2E suite was 6 specs covering 3 of 17 routes, so it
+was cheap to skip and worth little. Once `testing-plan.md` Phase 2 lands it
+covers all 17 routes plus the `AGENTS.md` non-negotiables, and it is the only
+gate that observes behaviour rather than resolution.
+
+Which testing phase covers which restructure phase — the true minimum, should
+this ever need to be interleaved rather than done in full first:
+
+| Restructure phase                        | Requires testing phase                              |
+| ---------------------------------------- | --------------------------------------------------- |
+| 0 (lint caps), 1 (one-file folders)      | 1–2 (contract + E2E)                                |
+| 2 (renames, content moves)               | 1–2, plus 5 for the `patterns`/`career` RAG sources |
+| 3 (flatten features, **merge** clusters) | 2, 4 (DOM components), 5 (canvas/portrait)          |
+| 4 (**merge** `studio` → `world`)         | 5 (draw/layout) **and** 6 (scene graph)             |
+| 5 (dissolve `src/stores`)                | 3 (stores, hooks, providers)                        |
+| 6 (consolidate the agent)                | 1 (server + AI contract)                            |
+| 7 (sections, guardrails)                 | 2, 4                                                |
+
+Phases 3 and 4 are the dangerous ones and they depend on the _last_ testing
+phases to land. That dependency is why the default is simply: finish the tests
+first.
 
 ### Phase 0 — unblock (prerequisite)
 

@@ -2,10 +2,16 @@
 
 Coding standards live in [`.devin/rules/`](./.devin/rules); file placement in
 [`.devin/rules/project-structure.md`](./.devin/rules/project-structure.md). A
-restructure is in flight — [`docs/restructure-plan.md`](./docs/restructure-plan.md)
-is authoritative for anything structural, and `docs/architecture.md` is a
-descriptive reference that lags it. This file only records operational facts that
-aren't obvious from the code.
+restructure is planned but **not started** —
+[`docs/restructure-plan.md`](./docs/restructure-plan.md) is authoritative for
+anything structural, and `docs/architecture.md` is a descriptive reference that
+lags it. This file only records operational facts that aren't obvious from the
+code.
+
+**The restructure is blocked on [`docs/testing-plan.md`](./docs/testing-plan.md).**
+Coverage is 10.71%, so "pure move, no behaviour change" is currently unverifiable.
+Build the test suite first; do not start moving files, and do not treat a green
+`pnpm validate` as evidence that a refactor preserved behaviour.
 
 ## Verification
 

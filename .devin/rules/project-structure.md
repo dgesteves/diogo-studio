@@ -8,10 +8,12 @@ description: Apply when creating files or folders, organizing modules, naming th
 Feature-first vertical slices, one dependency direction, and **ownership decided
 by who imports it**. Never import upward.
 
-> **Migration in progress.** `docs/restructure-plan.md` is moving the tree toward
-> the layout below. Where this rule and the current folders disagree, follow this
-> rule for **new** code and let the plan's phases move the old code. Do not
-> "fix" new code to match the old shape.
+> **Migration planned, not started — and blocked on `docs/testing-plan.md`.**
+> `docs/restructure-plan.md` will move the tree toward the layout below, but no
+> phase may begin until the test suite can prove a move changed no behaviour.
+> Where this rule and the current folders disagree, follow this rule for **new**
+> code and let the plan's phases move the old code. Do not "fix" new code to match
+> the old shape, and do not start moving old code yourself.
 
 ## `app/` is the routing layer only
 
@@ -57,7 +59,7 @@ features/<feature>/
   data/                typed static data / authored content owned by this feature
   generated/           build-generated artifacts — never hand-edited
   types.ts
-  *.test.ts(x)         colocated beside the file under test
+  *.test.ts(x)         colocated at the cluster root — one per concept
 ```
 
 Do **not** add a `components/` passthrough folder inside a feature, and do not
