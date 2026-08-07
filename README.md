@@ -1,19 +1,55 @@
 # diogo-studio
 
-[![CI](https://github.com/dgesteves/diogo-studio/actions/workflows/ci.yml/badge.svg)](https://github.com/dgesteves/diogo-studio/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/dgesteves/diogo-studio/actions/workflows/codeql.yml/badge.svg)](https://github.com/dgesteves/diogo-studio/actions/workflows/codeql.yml)
-[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/dgesteves/diogo-studio/badge)](https://securityscorecards.dev/viewer/?uri=github.com/dgesteves/diogo-studio)
-[![Release Please](https://github.com/dgesteves/diogo-studio/actions/workflows/release-please.yml/badge.svg)](https://github.com/dgesteves/diogo-studio/actions/workflows/release-please.yml)
-[![Dependabot auto-merge](https://github.com/dgesteves/diogo-studio/actions/workflows/dependabot-auto-merge.yml/badge.svg)](https://github.com/dgesteves/diogo-studio/actions/workflows/dependabot-auto-merge.yml)
-
 The portfolio + digital studio of **Diogo Esteves** — Staff / Principal
 Frontend & Platform Engineer.
 
-## License
+Private repository. Copyright (c) 2026 Diogo Esteves. All rights reserved —
+not licensed for use, copying, or distribution.
 
-Copyright (c) 2026 Diogo Esteves. **All Rights Reserved.**
+## Getting started
 
-This is **not** open source. The source is published for portfolio and
-reference (read-only) viewing only. You may not use, copy, modify, distribute,
-or create derivative works from any part of it without prior written
-permission. See [`LICENSE`](./LICENSE) for the full terms.
+Requires **Node.js 24+** (see [`.nvmrc`](./.nvmrc)) and **pnpm 11+** (see
+`packageManager` in [`package.json`](./package.json)).
+
+```bash
+pnpm install
+cp .env.example .env.local   # every variable is optional; features degrade gracefully
+pnpm dev
+```
+
+## Scripts
+
+| Script             | What it does                                          |
+| ------------------ | ----------------------------------------------------- |
+| `pnpm dev`         | Next.js dev server                                    |
+| `pnpm build`       | Production build (runs `agent:index:check` first)     |
+| `pnpm validate`    | lint + typecheck + `format:check` + unit tests + knip |
+| `pnpm test`        | Vitest unit tests (`test:watch`, `test:coverage`)     |
+| `pnpm e2e`         | Playwright + axe (`e2e:ui`, `e2e:install`)            |
+| `pnpm size`        | size-limit bundle budget (`size:why`)                 |
+| `pnpm analyze`     | Build with the bundle analyzer                        |
+| `pnpm agent:index` | Rebuild the ⌘K agent retrieval index                  |
+
+Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
+`e2e`.
+
+## Conventions
+
+- Architecture and file placement: [`docs/architecture.md`](./docs/architecture.md)
+  and [`.devin/rules/`](./.devin/rules). When in doubt, those win.
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org/) —
+  `release-please` derives the version and [`CHANGELOG.md`](./CHANGELOG.md) from
+  them. The `commit-msg` hook enforces this locally via `commitlint`.
+- Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer.
+- Tests colocate with source as `*.test.ts(x)`; E2E specs live in `tests/e2e/`.
+
+## CI
+
+`ci.yml` runs lint, typecheck, unit tests, knip, build + size-limit, and E2E.
+`audit.yml` audits production dependencies on a daily schedule.
+`release-please.yml` maintains the release PR.
+
+This repo is private on a GitHub Free plan, which means **no branch protection,
+no code scanning, 2,000 Actions minutes/month, and a 500 MB artifact quota**.
+Workflows are kept deliberately lean to stay inside those limits — see
+[`docs/architecture.md`](./docs/architecture.md) before adding a new one.
