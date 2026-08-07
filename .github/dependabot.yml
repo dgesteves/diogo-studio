@@ -9,9 +9,9 @@ updates:
       timezone: Etc/UTC
     open-pull-requests-limit: 20
     versioning-strategy: increase
-    # Wait for new releases to age before opening PRs.
-    # Matches the pnpm `minimum-release-age` supply-chain policy so auto-merged
-    # bumps don't land in the lockfile faster than the policy allows.
+    # Wait for new releases to age before opening PRs. Kept in step with
+    # `minimumReleaseAge` in pnpm-workspace.yaml, so Dependabot never proposes a
+    # version that pnpm would then refuse to resolve.
     cooldown:
       default-days: 1
       semver-major-days: 1
@@ -72,8 +72,8 @@ updates:
           - "@types/*"
       # Catch-alls, matched last. Every minor/patch bump not claimed by a group
       # above lands in one PR per dependency type instead of one per package,
-      # which keeps the "require branches up to date" rebase churn bounded.
-      # Majors stay ungrouped so they can be reviewed and reverted on their own.
+      # which keeps review and CI cost bounded. Majors stay ungrouped so they
+      # can be reviewed and reverted on their own.
       production-minor-patch:
         applies-to: version-updates
         dependency-type: production
@@ -104,12 +104,6 @@ updates:
       prefix: ci
       include: scope
     groups:
-      # codeql-action/init and codeql-action/analyze must run the same version;
-      # separate PRs leave the pair mismatched and fail with
-      # "Loaded a configuration file for version X, but running version Y".
-      codeql-action:
-        patterns:
-          - "github/codeql-action*"
       actions:
         patterns:
           - "*"

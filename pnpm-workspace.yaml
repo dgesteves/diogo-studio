@@ -1,3 +1,9 @@
+# Declared explicitly rather than relying on the pnpm 11 default: an explicit
+# value also turns on minimumReleaseAgeStrict, so resolution fails instead of
+# silently falling back to a version younger than the policy allows. Kept in
+# step with the Dependabot cooldown in .github/dependabot.yml.
+minimumReleaseAge: 1440
+
 allowBuilds:
   sharp: true
   unrs-resolver: true
