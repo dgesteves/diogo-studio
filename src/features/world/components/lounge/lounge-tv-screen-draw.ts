@@ -1,4 +1,5 @@
 import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { mulberry32 } from "@/utils/mulberry32";
 
 import { CHANNELS } from "./lounge-tv-channels";
 
@@ -21,11 +22,11 @@ function drawScanlines(ctx: CanvasRenderingContext2D): void {
   for (let y = 0; y < height; y += 3) ctx.fillRect(0, y, width, 1);
 }
 
-function drawStatic(ctx: CanvasRenderingContext2D): void {
+function drawStatic(ctx: CanvasRenderingContext2D, rand: () => number): void {
   const { width, height } = ctx.canvas;
   for (let i = 0; i < 900; i += 1) {
-    ctx.fillStyle = `rgba(160, 220, 240, ${Math.random() * 0.4})`;
-    ctx.fillRect(Math.random() * width, Math.random() * height, 2, 2);
+    ctx.fillStyle = `rgba(160, 220, 240, ${rand() * 0.4})`;
+    ctx.fillRect(rand() * width, rand() * height, 2, 2);
   }
 }
 
@@ -84,7 +85,7 @@ export function drawLoungeTv(ctx: CanvasRenderingContext2D, state: LoungeTvState
   const channel = CHANNELS[index];
   if (!channel) return;
   channel.draw(ctx, state.tick);
-  if (state.tick % CHANNEL_TICKS < 2) drawStatic(ctx);
+  if (state.tick % CHANNEL_TICKS < 2) drawStatic(ctx, mulberry32(state.tick));
   drawScanlines(ctx);
   drawOverlay(ctx, state.tick, channel.name);
 }

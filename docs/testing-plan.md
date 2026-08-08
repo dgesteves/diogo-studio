@@ -4,7 +4,13 @@ A phased plan to take `src/` from 10.71% to a real, trustworthy regression net �
 built specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: proposal. Nothing here has been applied.
+Status: proposal. No phase has been applied — but three things it depended on landed
+early: the `Math.random()` seeding fix in §5.1, `mulberry32` promoted to
+`src/utils/mulberry32.ts`, and **the existing E2E suite made green**. It was 16/18:
+the `/work` spec asserted content that no longer exists, and the ⌘K Ask-mode spec was
+flaky ~1 in 12 because it raced hydration. Both are fixed. This plan calls E2E "the
+actual harness" for the restructure (§3), so it had to be trustworthy before anything
+could be built on it.
 
 Baseline: measured on the current tree (version 1.12.0). `pnpm validate` passes.
 
@@ -35,35 +41,36 @@ measurement, not the goal. Section 5 sets a layered target that lands at
 
 ## 2. Baseline (measured, not guessed)
 
-| Metric                       | Value                                                  |
-| ---------------------------- | ------------------------------------------------------ |
-| Non-test source files        | **297** (156 `.tsx`, 141 `.ts`)                        |
-| Unit test files / tests      | **16 / 76**                                            |
-| E2E specs / lines            | **6 / 243**                                            |
-| Statements / branches        | **10.71% / 9.23%**                                     |
-| Functions / lines            | **10.24% / 11.02%**                                    |
-| Files at 0% coverage         | **~230**                                               |
-| Routes in `config/routes.ts` | **17**, all with a `(marketing)` page                  |
-| E2E route coverage           | 3 of 17 asserted (`/`, plus content pages spot-checks) |
+| Metric                          | Value                                                  |
+| ------------------------------- | ------------------------------------------------------ |
+| Non-test source files           | **297** (156 `.tsx`, 141 `.ts`)                        |
+| Unit test files / tests         | **16 / 76**                                            |
+| E2E specs / lines               | **6 / 258** (18 tests, green since 2026-08-08)         |
+| Statements / branches           | **10.71% / 9.23%**                                     |
+| Functions / lines               | **10.24% / 11.02%**                                    |
+| Files at 0% coverage            | **~230**                                               |
+| Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
+| E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
 
 ### Coverage by layer today
 
-| Layer              | Statements | Note                                               |
-| ------------------ | ---------- | -------------------------------------------------- |
-| `src/schemas`      | 100%       | one file                                           |
-| `src/utils`        | 100%       | `cn.ts`                                            |
-| `world/constants`  | 77%        | the existing data-invariant tests                  |
-| `src/ai`           | 71%        | retrieval math only; stream/embed/prompt at **0%** |
-| `world/utils`      | 45%        | 3 of 8 files at 0%                                 |
-| `src/stores`       | 29%        | 5 of 7 stores at **0%**                            |
-| `src/providers`    | 14%        | —                                                  |
-| `src/hooks`        | 4%         | —                                                  |
-| `src/app`          | **0%**     | every route, `sitemap`, `robots`, icons            |
-| `rate-limit.ts`    | **0%**     | security-relevant                                  |
-| `command-menu`     | **0%**     | the primary interactive feature                    |
-| `inspector`        | **0%**     | —                                                  |
-| `world` components | **~5%**    | 3D scene, boot, HUD                                |
-| `studio` (all)     | **0%**     | 40-file scene folder                               |
+| Layer              | Statements | Note                                                                                |
+| ------------------ | ---------- | ----------------------------------------------------------------------------------- |
+| `src/schemas`      | 100%       | one file                                                                            |
+| `src/utils`        | 100%       | `cn.ts`                                                                             |
+| `world/constants`  | 77%        | the existing data-invariant tests                                                   |
+| `src/ai`           | 71%        | retrieval math only; stream/embed/prompt at **0%**                                  |
+| `world/utils`      | 45%        | 3 of 8 files at 0%                                                                  |
+| `src/stores`       | 29%        | 5 of 7 stores at **0%**                                                             |
+| `src/providers`    | 14%        | —                                                                                   |
+| `src/hooks`        | 4%         | —                                                                                   |
+| `src/app`          | **0%**     | every route, `sitemap`, `robots`, icons                                             |
+|                    |            | (`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`) |
+| `rate-limit.ts`    | **0%**     | security-relevant                                                                   |
+| `command-menu`     | **0%**     | the primary interactive feature                                                     |
+| `inspector`        | **0%**     | —                                                                                   |
+| `world` components | **~5%**    | 3D scene, boot, HUD                                                                 |
+| `studio` (all)     | **0%**     | 40-file scene folder                                                                |
 
 The three highest-risk zeros are `rate-limit.ts` (abuse protection),
 `app/api/chat/route.ts` (7 distinct response branches, all unverified), and
@@ -97,6 +104,14 @@ follow, and they are what make this plan cheap rather than expensive:
    mandates colocation; put the file at the directory the cluster will collapse
    into (`world/components/hud/hud.test.tsx`), so `git mv` of the folder carries
    it.
+
+   Where the collapse target does not exist yet, write the test at the **current**
+   cluster root and let the phase move it — do not create the future folder early.
+   Concretely: `features/studio/components/scene/scene.test.tsx`, not
+   `features/world/scene/`, since Phase 4 `git mv`s that whole directory and will
+   carry the spec with it. The same applies to `src/ai/` (Phase 6) and the
+   `boot-*` cluster, which has no folder at all today — put `boot.test.tsx` in
+   `features/world/components/` beside the files it covers.
 
 Sequencing consequence: **E2E and contract tests come first** (Phases 1–2). They
 are 100% structure-immune and they are the actual harness that verifies "pure
@@ -173,19 +188,36 @@ Three layers, in descending order of value:
 Rejected: pixel-diffing the whole scene. It would be the flakiest part of CI and
 would train everyone to re-baseline on red, which destroys the signal.
 
-**Prerequisite defect:** `lounge-tv-screen-draw.ts` (`drawStatic`) and
-`lounge-tv-channels/grid-channel.ts` call `Math.random()` directly, so they are
-not reproducible. They must take a seeded RNG (the codebase already has
-`mulberry32` in `city-textures.ts`) before either snapshot or visual tests can be
-trusted. This is a small production change and it is on the critical path.
+**Prerequisite defect — ✅ fixed 2026-08-08.** `lounge-tv-screen-draw.ts`
+(`drawStatic`) called `Math.random()` directly, so it was not reproducible. It now
+takes a seeded RNG — `mulberry32(state.tick)`, so the static still differs per tick
+but is reproducible for a given one.
+
+Two corrections to an earlier draft of this section. It also named
+`lounge-tv-channels/grid-channel.ts`; that file does **not** call `Math.random()` —
+there were only ever two calls in all of `src/`, both in `drawStatic`. And it located
+`mulberry32` in `city-textures.ts`; there were in fact **two** independent copies
+(the other private to `world/…/bookshelf-layout.ts`), verified bit-identical before
+being merged into **`src/utils/mulberry32.ts`**. Import it from there. `src/` now
+contains zero `Math.random()` calls.
 
 ### 5.2 R3F: add `@react-three/test-renderer`
 
 Yes. It converts 79 files (27% of the codebase) from "E2E-only, uncoverable" to
 "unit-testable with meaningful assertions", which is the difference between ~65%
 and ~90% achievable coverage. One well-maintained pmndrs devDependency, same
-org as the `@react-three/fiber` already in use, 54k weekly downloads. Verify the
-published version is ≥7 days old at install time per `00-core.md`.
+org as the `@react-three/fiber` already in use, 54k weekly downloads. The release-age
+policy is **24 hours**, enforced by `minimumReleaseAge: 1440` in
+`pnpm-workspace.yaml` — installation simply fails if the version is younger, so there
+is nothing to check by hand. (An earlier draft of this section said ≥7 days and
+attributed it to `00-core.md`, which said no such thing; the real policy is now
+recorded there.)
+
+**The 75% target below is an estimate, not a measurement — and it governs the largest
+block of work in this plan (79 files).** Phase 0's spike must report the statement
+coverage it actually achieves on `studio-scene.tsx`, and this number must be replaced
+with that figure before Phase 6 is planned in detail. "Declarative, so smoke tests
+reach most lines" is a plausible argument, not evidence.
 
 ### 5.3 Coverage: ratcheted per-layer thresholds
 
@@ -203,11 +235,19 @@ on a lighting rig mean different things. Use **per-directory thresholds** in
 | R3F components                                                      | **75%**  | declarative; smoke + graph assertions reach most lines |
 | `src/app/**` pages                                                  | **90%**  | static compositions, cheap to render                   |
 
-Honest projection: **~88–92% statements overall**, not 100%. Files that should be
-_excluded from the denominator_ rather than faked: `instrumentation*.ts`,
-`global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori `ImageResponse`, asserted
-via E2E HTTP status instead), and `world-postprocessing.tsx` (pure effect-pass
-config with no observable behaviour headlessly).
+Projection: **~88–92% statements overall**, not 100% — but be clear that this is a
+sum of seven estimated per-layer numbers, not a derived figure. The R3F row is the
+one that moves it materially, so treat the whole projection as provisional until
+Phase 0's spike replaces that row with a measurement.
+
+Files that should be _excluded from the denominator_ rather than faked:
+`instrumentation*.ts`, `global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori
+`ImageResponse`, asserted via E2E HTTP status instead), and
+`world-postprocessing.tsx` (pure effect-pass config with no observable behaviour
+headlessly). `vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
+error,not-found}.tsx`; fold these into that existing list rather than starting a new
+one, and drop the `layout`/`loading` entries if the Phase 4 work makes them
+assertable after all.
 
 Never fail CI on coverage _downward drift alone_ while a phase is in flight —
 ratchet on merge to `main`.
@@ -231,9 +271,12 @@ commit per logical group, `test:` type per Conventional Commits.
 - Add `@react-three/test-renderer`; prove it with one spike test rendering
   `studio-scene.tsx` headlessly. **If the spike fails, stop and re-plan** — the
   R3F strategy depends on it.
-- Add `src/test/` helpers: `recording-ctx.ts` (Proxy draw recorder),
+- Add helpers in **`tests/`** at the repo root (not `src/test/` — see
+  [`decisions.md`](./decisions.md)): `recording-ctx.ts` (Proxy draw recorder),
   `r3f.ts` (RTTR render + scene-graph query helpers), `stores.ts` (reset all
-  external stores between tests), `env.ts` (env-var override helper).
+  external stores between tests), `env.ts` (env-var override helper). Add a
+  `@tests/*` path to `tsconfig.json` at the same time; `vitest.config.ts` already
+  globs `tests/**` and resolves tsconfig paths.
 - Split vitest into `node` / `jsdom` projects; fix the `vitest.config.ts`
   ESM-loaded-as-CJS warning.
 - Fix the existing `act(...)` warning in `deck-explore-toggle.test.tsx`.
@@ -342,7 +385,9 @@ Per-layer coverage thresholds enabled and ratcheted; `pnpm validate` switched to
 the coverage run; coverage-exclusion list from §5.3 applied; `AGENTS.md` updated
 with the testing conventions and helper locations.
 
-**Only then start `restructure-plan.md` Phase 0.**
+**Only then start `restructure-plan.md` Phase 1.** (Its Phase 0 — the lint caps and
+the import guardrails — was deliberately unblocked and has already landed: relaxing a
+cap moves no code, so there is nothing for this suite to verify.)
 
 ---
 
@@ -355,7 +400,8 @@ roughly doubles E2E wall time, so:
 - Keep Playwright on **chromium only**; do not add browsers for coverage's sake.
 - Run the **visual job paths-filtered** to `src/features/world/**`,
   `src/features/studio/**` and `src/config/brand.ts`, so it is skipped on most PRs.
-- Upload traces/screenshots **only on failure**, always with `retention-days: 3`.
+- Upload traces/screenshots **only on failure**, always with `retention-days` set —
+  match the existing `e2e` job's `7` rather than introducing a second convention.
 - Snapshot baselines live in git, not artifacts.
 - Unit tests stay fast: the whole vitest run should remain well under a minute,
   so keep RTTR tests free of real timers.

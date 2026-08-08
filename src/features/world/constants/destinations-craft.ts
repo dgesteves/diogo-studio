@@ -1,12 +1,10 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import { siteConfig } from "@/config/site";
 import type { Destination } from "../types";
 
 export const craftDestinations: readonly Destination[] = [
   {
-    slug: "writing",
-    href: routes.writing,
-    label: "Writing",
+    ...getStationEntry("writing"),
     eyebrow: "Field notes",
     title: "Notes on platforms, AI, and engineering leadership.",
     summary:
@@ -48,9 +46,7 @@ export const craftDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "speaking",
-    href: routes.speaking,
-    label: "Speaking",
+    ...getStationEntry("speaking"),
     eyebrow: "Stage & community",
     title: "Sharing the craft with the community.",
     summary: "Talks, mentoring, and community leadership by Diogo Esteves.",

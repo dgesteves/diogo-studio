@@ -1,11 +1,10 @@
+import { getStationEntry } from "./station-index";
 import { routes } from "@/constants/routes";
 import type { Destination } from "../types";
 
 export const coreDestinations: readonly Destination[] = [
   {
-    slug: "home",
-    href: routes.home,
-    label: "Studio",
+    ...getStationEntry("home"),
     eyebrow: "Enter the studio",
     title: "Engineering the systems behind ambitious products.",
     summary:
@@ -35,9 +34,7 @@ export const coreDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "about",
-    href: routes.about,
-    label: "About",
+    ...getStationEntry("about"),
     eyebrow: "Background · philosophy",
     title: "The senior engineering voice on the surfaces users touch.",
     summary:

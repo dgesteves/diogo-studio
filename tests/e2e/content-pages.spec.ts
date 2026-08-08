@@ -17,14 +17,24 @@ test.describe("/about", () => {
 });
 
 test.describe("/work", () => {
-  test("operating-altitudes section shows the three most recent engagements", async ({ page }) => {
+  test("timeline shows the three most recent engagements, newest first", async ({ page }) => {
     await page.goto("/work");
     await expect(
-      page.getByRole("heading", { level: 2, name: /equally comfortable/i }),
+      page.getByRole("heading", { level: 1, name: /eleven years on the surfaces users touch/i }),
     ).toBeVisible();
-    await expect(page.getByText(/fueled · current/i)).toBeVisible();
-    await expect(page.getByText(/moment · 2025/i)).toBeVisible();
-    await expect(page.getByText(/eino\.ai · 2023[\u2013-]2025/i)).toBeVisible();
+
+    const entries = page
+      .getByRole("listitem")
+      .filter({ has: page.getByRole("heading", { level: 3 }) });
+    await expect(entries.nth(0).getByRole("heading", { level: 3 })).toHaveText(
+      /lead engineer, web applications/i,
+    );
+    await expect(entries.nth(0)).toContainText(/fueled/i);
+    await expect(entries.nth(1).getByRole("heading", { level: 3 })).toHaveText(
+      /vp of engineering/i,
+    );
+    await expect(entries.nth(1)).toContainText(/moment/i);
+    await expect(entries.nth(2)).toContainText(/eino\.ai/i);
   });
 });
 

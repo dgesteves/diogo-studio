@@ -1,4 +1,4 @@
-import { mulberry32 } from "./city-textures";
+import { mulberry32 } from "@/utils/mulberry32";
 
 type Building = {
   x: number;

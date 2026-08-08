@@ -1,4 +1,5 @@
 import type { RouteKey } from "@/constants/routes";
+import { STATION_ORDER } from "./station-index";
 import type { Destination } from "../types";
 import { coreDestinations } from "./destinations-core";
 import { craftDestinations } from "./destinations-craft";
@@ -24,29 +25,9 @@ const all: readonly Destination[] = [
   ...timelineDestinations,
 ];
 
-const ORDER: readonly RouteKey[] = [
-  "home",
-  "about",
-  "work",
-  "projects",
-  "caseStudies",
-  "writing",
-  "speaking",
-  "openSource",
-  "playground",
-  "resume",
-  "now",
-  "contact",
-  "principles",
-  "stack",
-  "uses",
-  "timeline",
-  "lab",
-];
-
 const bySlug = new Map<RouteKey, Destination>(all.map((d) => [d.slug, d]));
 
-export const worldDestinations: readonly Destination[] = ORDER.map((slug) => {
+export const worldDestinations: readonly Destination[] = STATION_ORDER.map((slug) => {
   const destination = bySlug.get(slug);
   if (!destination) throw new Error(`Missing world destination for "${slug}".`);
   return destination;

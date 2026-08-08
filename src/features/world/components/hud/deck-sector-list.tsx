@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { RouteKey } from "@/constants/routes";
 import { setHoveredStation } from "@/stores/world-store";
 import { cn } from "@/utils/cn";
-import { worldSectors } from "../../constants/sectors";
+import { stationSectors } from "../../constants/station-index";
 import { getStation } from "../../constants/stations";
 
 type DeckSectorListProps = {
@@ -17,13 +17,13 @@ type DeckSectorListProps = {
 export function DeckSectorList({ active, hovered, onSelect }: DeckSectorListProps): ReactElement {
   return (
     <nav aria-label="All studio destinations" className="grid grid-cols-2 gap-x-5 gap-y-3.5">
-      {worldSectors.map((sector) => (
+      {stationSectors.map((sector) => (
         <section key={sector.label}>
           <h3 className="text-subtle-foreground font-mono text-[9px] tracking-[0.22em] uppercase">
             {sector.label}
           </h3>
           <ul className="mt-1.5 flex flex-col gap-0.5">
-            {sector.destinations.map((destination) => {
+            {sector.stations.map((destination) => {
               const isActive = destination.slug === active;
               const isHovered = destination.slug === hovered;
               const { accent } = getStation(destination.slug);

@@ -1,4 +1,4 @@
-import type { RouteKey, RoutePath } from "@/constants/routes";
+import type { InternalHref, RouteKey, RoutePath } from "@/constants/routes";
 import type { WorldObjectKind } from "./constants/object-kinds";
 
 export type Vec3 = readonly [number, number, number];
@@ -26,8 +26,12 @@ export type ContentBlock =
     }
   | {
       kind: "links";
-      items: readonly { label: string; href: string; external?: boolean }[];
+      items: readonly ContentLink[];
     };
+
+export type ContentLink =
+  | { label: string; href: string; external: true }
+  | { label: string; href: InternalHref; external?: false };
 
 export type Destination = {
   slug: RouteKey;

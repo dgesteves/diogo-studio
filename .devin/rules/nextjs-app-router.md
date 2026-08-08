@@ -32,9 +32,12 @@ globs: app/**, src/app/**, **/app/**
   unpublished/draft content out of production.
 - **Keep `app/` to routing only** — route segments + Next.js special files.
   Import UI/logic/data from outside `app/` (`src/features`, `src/components`,
-  `src/config`, `src/lib`); keep `page.tsx`/`layout.tsx` as thin composition
-  layers. There is no `src/server/` in this repo — the project-structure rule is
-  the authority on placement, and it puts server-only modules in `src/lib`.
+  `src/config`, `src/utils`); keep `page.tsx`/`layout.tsx` as thin composition
+  layers. Nothing may import **from** `app/` — it is a leaf, and that is
+  lint-enforced. There is no `src/server/` and no `src/lib/` in this repo:
+  server-only modules live in named top-level folders (`src/ai/`,
+  `src/rate-limit.ts`) marked `import "server-only"`. The project-structure rule is
+  the authority on placement.
 - Keep **middleware** lean and fast: optimistic checks (session cookie
   presence, redirects, headers) only — no data fetching or heavy work. Real
   authorization happens in the data layer and inside each action/handler.
@@ -43,11 +46,16 @@ globs: app/**, src/app/**, **/app/**
 
 - Fetch data in **Server Components** (async components / `fetch`), close to
   where it is used. **Fetch in parallel** (`Promise.all`) to avoid waterfalls.
-- Treat data as **dynamic by default** and opt into caching **explicitly**. With
-  Cache Components (`cacheComponents: true`), mark cacheable data or UI with the
-  **`use cache`** directive and set lifetimes/tags via `cacheLife` / `cacheTag`.
-  Otherwise use `fetch(url, { cache, next: { revalidate, tags } })` + React
-  `cache()`. Invalidate with `revalidateTag` / `revalidatePath` after mutations.
+- **`cacheComponents` is enabled**, so data is **dynamic by default** and you opt into
+  caching **explicitly**: mark cacheable data or UI with **`use cache`** and set
+  lifetimes/tags via `cacheLife` / `cacheTag`. Invalidate with `revalidateTag` /
+  `revalidatePath` after mutations.
+- **Route segment configs `runtime`, `revalidate` and `dynamic` are incompatible with
+  `cacheComponents`** and will fail the build. Don't reach for them; express intent
+  with `use cache` instead.
+- **Any uncached dynamic API silently de-optimises a route** — `new Date()`,
+  `headers()`, `cookies()`, an env read. `pnpm prerender:check` (`postbuild`) is what
+  catches it; see `src/app/sitemap.ts` for the pattern.
 - **Stream, don't block.** Lean on **Partial Prerendering**: serve a static shell
   instantly and wrap dynamic/async subtrees in `<Suspense>` with a fallback that
   matches the final layout (no CLS). `loading.tsx` is the route-level fallback.

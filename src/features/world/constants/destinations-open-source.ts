@@ -1,12 +1,11 @@
+import { getStationEntry } from "./station-index";
 import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 import type { Destination } from "../types";
 
 export const openSourceDestinations: readonly Destination[] = [
   {
-    slug: "openSource",
-    href: routes.openSource,
-    label: "Open source",
+    ...getStationEntry("openSource"),
     eyebrow: "In the open",
     title: "Where the patterns get distilled.",
     summary: "Open-source work and experiments by Diogo Esteves.",

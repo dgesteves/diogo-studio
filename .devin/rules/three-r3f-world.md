@@ -68,10 +68,14 @@ the axe/E2E specs. They are hard requirements, not preferences:
   the **draw routine pure** — take `ctx` plus a state object, return nothing, and
   read no globals.
 - **Draw routines must be deterministic.** Never call `Math.random()` — take a
-  seeded PRNG (`mulberry32`) so output is reproducible; the test suite snapshots
-  these transcripts and non-determinism makes them useless.
-- Draw and layout modules are legitimately long. Do **not** split them to satisfy
-  a line cap (see the core rule's `max-lines` caveat).
+  seeded PRNG from `@/utils/mulberry32` so output is reproducible; the test suite
+  snapshots these transcripts and non-determinism makes them useless. There are
+  currently **zero** `Math.random()` calls in `src/`; don't be the one to add one.
+  `mulberry32` lives in `utils/` because two features use it — never re-declare it
+  locally.
+- Draw and layout modules are legitimately long, and `max-lines` is **off** for
+  `*-{draw,layout,geometry,textures,shaders,data}.ts`. Never split one to satisfy a
+  line cap.
 
 ## Boundaries
 

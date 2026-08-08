@@ -1,11 +1,9 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import type { Destination } from "../types";
 
 export const toolingDestinations: readonly Destination[] = [
   {
-    slug: "stack",
-    href: routes.stack,
-    label: "Stack",
+    ...getStationEntry("stack"),
     eyebrow: "The toolkit",
     title: "The technical stack behind the work.",
     summary: "Languages, frameworks, and platforms Diogo Esteves builds with.",
@@ -62,9 +60,7 @@ export const toolingDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "uses",
-    href: routes.uses,
-    label: "Uses",
+    ...getStationEntry("uses"),
     eyebrow: "The rig",
     title: "Three monitors, one focus.",
     summary: "The hardware, software, and rig Diogo Esteves ships the work from.",

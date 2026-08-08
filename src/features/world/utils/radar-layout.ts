@@ -1,5 +1,5 @@
 import type { RouteKey, RoutePath } from "@/constants/routes";
-import { worldDestinations } from "../constants/destinations";
+import { stationIndex } from "../constants/station-index";
 import { getStation } from "../constants/stations";
 
 export type RadarPoint = {
@@ -18,7 +18,7 @@ function normalize(value: number, min: number, span: number): number {
 }
 
 export function buildRadarPoints(): readonly RadarPoint[] {
-  const projected = worldDestinations.map((destination) => {
+  const projected = stationIndex.map((destination) => {
     const station = getStation(destination.slug);
     const [x, , z] = station.position;
     return { destination, station, x, z };

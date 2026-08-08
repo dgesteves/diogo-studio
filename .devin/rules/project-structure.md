@@ -8,12 +8,16 @@ description: Apply when creating files or folders, organizing modules, naming th
 Feature-first vertical slices, one dependency direction, and **ownership decided
 by who imports it**. Never import upward.
 
-> **Migration planned, not started — and blocked on `docs/testing-plan.md`.**
+> **Phase 0 has landed; Phases 1–7 are blocked on `docs/testing-plan.md`.**
 > `docs/restructure-plan.md` will move the tree toward the layout below, but no
-> phase may begin until the test suite can prove a move changed no behaviour.
-> Where this rule and the current folders disagree, follow this rule for **new**
-> code and let the plan's phases move the old code. Do not "fix" new code to match
-> the old shape, and do not start moving old code yourself.
+> further phase may begin until the test suite can prove a move changed no
+> behaviour. Where this rule and the current folders disagree, follow this rule for
+> **new** code and let the plan's phases move the old code. Do not "fix" new code to
+> match the old shape, and do not start moving old code yourself.
+>
+> Everything in this rule is writable **today** — no instruction here depends on a
+> folder that does not exist yet. If you find one that does, that is a bug in this
+> file, not a task for you.
 
 ## `app/` is the routing layer only
 
@@ -41,13 +45,21 @@ the importing features. One → it belongs inside that feature.
 src/
   app/                 routing only
   features/<feature>/  vertical slice — see below
-  components/          UI imported by 2+ features (ui/ = primitives, sections/, seo/)
-  config/              env.ts, site.ts, routes.ts, navigation.ts, seo/
-  lib/                 pure isomorphic helpers (cn) + server-only modules (rate-limit)
+  components/          UI imported by 2+ features (ui/ = primitives, seo/, r3f/)
+  config/              env.ts, site.ts, navigation.ts, brand.ts, world-theme.ts
+  constants/           routes.ts (URL SSOT), and global static data
+  utils/               pure isomorphic helpers (cn, mulberry32)
+  ai/ • rate-limit.ts  server-only integrations, named for what they are
+  seo/ • schemas/ • telemetry/   isomorphic platform modules
   stores/              state written by one feature and read by another — nothing else
-  providers/           client context providers, composed in providers/index.tsx
+  hooks/ • providers/  shared client hooks; providers composed in providers/index.tsx
   styles/              globals.css + design tokens
 ```
+
+**There is no `src/lib/`, and don't add one.** Infrastructure goes in a folder
+named after what it does. A `lib/` would mix isomorphic helpers with server-only
+modules under a name that hides the distinction `import "server-only"` exists to
+make visible — see [`docs/decisions.md`](../../docs/decisions.md).
 
 A feature owns everything it alone uses:
 
@@ -80,12 +92,14 @@ justify them. One level of grouping, not two.
 ## File and function size
 
 - **Functions** carry the complexity budget: keep them short and single-purpose
-  (~50 lines is a good ceiling). Note `max-lines-per-function` is **not** enabled
-  today — lint enforces `max-lines: 100` per file instead, which is the cap
-  `docs/restructure-plan.md` Phase 0 replaces.
+  (~50 lines is a good target). `max-lines-per-function` is lint-enforced at
+  **100** — the target is prose, the cap is real.
 - **File length is not a design signal.** Do not split a cohesive module to hit a
-  line count. Shaders, procedural geometry, canvas draw routines, and static data
-  are legitimately long — leave them whole.
+  line count. `max-lines` is a loose backstop at **250** (**120** for `.tsx`, where
+  it does reflect component hygiene) and is **off** for
+  `*-{draw,shaders,geometry,layout,textures,data}.ts` and anything under
+  `data/`, `generated/` or `constants/` — shaders, procedural geometry, canvas draw
+  routines and static data are legitimately long, so leave them whole.
 - Split a file when it mixes **concerns**, not when it crosses a threshold. Good
   seams: rendering vs. state, pure helpers vs. effects, data vs. behaviour.
 - Prefer one 200-line module with a clear job over four 50-line fragments that
@@ -97,16 +111,31 @@ justify them. One level of grouping, not two.
   feature. Never `../../../`, and never `@/features/X` from inside `features/X`.
 - Cross-feature imports go through the target's `index.ts` — no deep imports
   (`@/features/world`, never `@/features/world/scene/screens/canvas-texture`).
-- Shared folders (`components/`, `lib/`, `config/`, `providers/`) never import
+- Both of the above are **lint-enforced as warnings** (`no-restricted-imports`), as
+  is "nothing imports from `app/`". The 11 open warnings are pre-existing reaches
+  into `features/studio` that restructure Phase 4 removes — never add to them, and
+  never silence one with an inline `eslint-disable`. When a new feature folder is
+  added, add it to `FEATURES` in `eslint.config.mjs` so the same-feature rule
+  covers it.
+- Shared folders (`components/`, `utils/`, `config/`, `providers/`) never import
   from `features/` or `app/`.
 - Mark server-only modules `import "server-only"`; client files start with
   `"use client"`, pushed to the leaves. Never mix the two in one module.
 - **No magic values.** Name them at the narrowest useful scope: file-local
   `const` → the feature's `data/` or a feature constants module → `config/` when
-  genuinely global. `config/routes.ts` is the typed SSOT for every internal URL.
+  genuinely global. `constants/routes.ts` is the typed SSOT for every internal URL.
+
+## Tests
+
+Colocate `*.test.ts(x)` with the source at the **cluster root** — one file per
+concept. Shared helpers, fixtures and render utils go in **`tests/`** at the repo
+root (not under `src/`, so they stay out of the coverage denominator and the
+`src/**` lint block); E2E specs in `tests/e2e/`. See
+[`.devin/rules/testing.md`](./testing.md).
 
 ## State
 
 Client state uses hand-rolled external stores read via `useSyncExternalStore` —
-there is **no store library** in this repo, and adding one needs a decision entry.
-Keep server state on the server; do not mirror it into a store.
+there is **no store library** in this repo, and adding one needs an entry in
+[`docs/decisions.md`](../../docs/decisions.md). Keep server state on the server; do
+not mirror it into a store.

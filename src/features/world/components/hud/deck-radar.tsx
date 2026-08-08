@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Maximize2 } from "lucide-react";
-import { getDestination, worldDestinations } from "../../constants/destinations";
+import { getStationEntry, stationIndex } from "../../constants/station-index";
 import { useActiveStation } from "../../hooks/use-active-station";
 import { useHoveredStation } from "../../hooks/use-hovered-station";
 import { DeckRadarPlot } from "./deck-radar-plot";
@@ -12,12 +12,12 @@ type DeckRadarProps = {
   onOpenMap: () => void;
 };
 
-const destinationCount = worldDestinations.length;
+const destinationCount = stationIndex.length;
 
 export function DeckRadar({ mapOpen, onOpenMap }: DeckRadarProps): ReactElement {
   const active = useActiveStation();
   const hovered = useHoveredStation();
-  const current = getDestination(active);
+  const current = getStationEntry(active);
 
   return (
     <button

@@ -1,11 +1,9 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import type { Destination } from "../types";
 
 export const explorationDestinations: readonly Destination[] = [
   {
-    slug: "playground",
-    href: routes.playground,
-    label: "Playground",
+    ...getStationEntry("playground"),
     eyebrow: "Interactive toys",
     title: "Where the interface gets to play.",
     summary: "Interactive experiments powering this studio — 3D, motion, and command-driven UX.",
@@ -42,9 +40,7 @@ export const explorationDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "lab",
-    href: routes.lab,
-    label: "Lab",
+    ...getStationEntry("lab"),
     eyebrow: "R&D",
     title: "Half-finished ideas, in the open.",
     summary:

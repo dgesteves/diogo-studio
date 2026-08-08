@@ -1,14 +1,25 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+const modifier = process.platform === "darwin" ? "Meta" : "Control";
+
+// The ⌘K listener is attached in a useEffect, so it does not exist until React
+// has hydrated — and no DOM state distinguishes "server markup" from "hydrated"
+// here. Retry the keypress until it registers rather than pressing once into a
+// page that cannot yet hear it.
+async function openWithShortcut(page: Page) {
+  const dialog = page.getByRole("dialog");
+  await expect(async () => {
+    await page.keyboard.press(`${modifier}+KeyK`);
+    await expect(dialog).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  return dialog;
+}
 
 test.describe("⌘K Command Menu", () => {
   test("opens with the keyboard shortcut and navigates to /about", async ({ page }) => {
     await page.goto("/");
 
-    const modifier = process.platform === "darwin" ? "Meta" : "Control";
-    await page.keyboard.press(`${modifier}+KeyK`);
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
+    const dialog = await openWithShortcut(page);
 
     const input = dialog.getByPlaceholder(/type a command, page, or question/i);
     await expect(input).toBeFocused();
@@ -45,11 +56,7 @@ test.describe("⌘K Command Menu", () => {
   test("Phase 4: switches to Ask mode and surfaces pre-seeded suggestions", async ({ page }) => {
     await page.goto("/");
 
-    const modifier = process.platform === "darwin" ? "Meta" : "Control";
-    await page.keyboard.press(`${modifier}+KeyK`);
-
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible();
+    const dialog = await openWithShortcut(page);
 
     const navigateTab = dialog.getByRole("tab", { name: /navigate/i });
     const askTab = dialog.getByRole("tab", { name: /ask/i });

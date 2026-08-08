@@ -9,7 +9,6 @@ import { buildCitations, jsonResponse, REFUSAL_TEXT, textResponse } from "@/ai/a
 import { embedQuery } from "@/ai/embed-query";
 import { streamAgentResponse } from "@/ai/agent-stream";
 
-export const runtime = "edge";
 export const maxDuration = 30;
 
 const allow = createRateLimiter({ prefix: "agent-chat", limit: 10, windowMs: 60_000 });

@@ -1,12 +1,11 @@
+import { getStationEntry } from "./station-index";
 import { routes } from "@/constants/routes";
 import { siteConfig } from "@/config/site";
 import type { Destination } from "../types";
 
 export const reachDestinations: readonly Destination[] = [
   {
-    slug: "contact",
-    href: routes.contact,
-    label: "Contact",
+    ...getStationEntry("contact"),
     eyebrow: "Say hello",
     title: "Let's build something out of this world.",
     summary:
@@ -39,9 +38,7 @@ export const reachDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "resume",
-    href: routes.resume,
-    label: "Résumé",
+    ...getStationEntry("resume"),
     eyebrow: "The full record",
     title: "Staff / Principal Frontend & Platform Engineer.",
     summary:

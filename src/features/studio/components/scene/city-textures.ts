@@ -1,21 +1,11 @@
 import type { CanvasTexture } from "three";
-import { createCanvasTexture } from "@/features/studio/components/screens/canvas-texture";
+import { mulberry32 } from "@/utils/mulberry32";
+import { createCanvasTexture } from "../screens/canvas-texture";
 
 const LIT_WINDOW_COLORS = ["#22d3ee", "#67e8f9", "#7dd3fc", "#fbbf24", "#f6efe1"] as const;
 const FACADE_BASE = "#070b10";
 const FACADE_WIDTH = 128;
 const FACADE_HEIGHT = 256;
-
-export function mulberry32(seed: number): () => number {
-  let a = seed;
-  return () => {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 export function createCityFacadeTexture(seed: number): CanvasTexture {
   const { canvas, texture } = createCanvasTexture(FACADE_WIDTH, FACADE_HEIGHT);

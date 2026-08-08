@@ -1,6 +1,6 @@
 ---
 trigger: glob
-globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, tests/**, src/test/**
+globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, tests/**
 ---
 
 # Testing
@@ -36,7 +36,12 @@ per _concept_, not per source file. `hud.test.tsx` beside the `hud/` folder, not
 one spec per `deck-*.tsx`. Cluster-level files survive the merges in
 `docs/restructure-plan.md`; per-file specs do not.
 
-E2E specs go in `tests/e2e/*.spec.ts`. Shared helpers go in `src/test/`.
+E2E specs go in `tests/e2e/*.spec.ts`. Shared helpers, fixtures and render utils go
+in **`tests/`** at the repo root — deliberately _not_ under `src/`, so they stay out
+of the coverage denominator (`include: ["src/**"]`) and out of the `src/**` lint
+block, whose test relaxations only match `*.test.ts(x)`. `vitest.config.ts` already
+globs `tests/**`; add a `@tests/*` path to `tsconfig.json` when the first helper
+lands.
 
 ## Non-negotiables
 
@@ -50,19 +55,32 @@ E2E specs go in `tests/e2e/*.spec.ts`. Shared helpers go in `src/test/`.
   via `useSyncExternalStore`; without a reset they leak across test files and
   cause order-dependent failures.
 - **Determinism.** No wall-clock, no real network, no unseeded `Math.random()` in
-  the code under test — use fake timers and seed PRNGs (`mulberry32`). Prefer
-  `findBy*` / `waitFor` and Playwright web-first assertions over fixed timeouts.
-- **No `any`** — `@typescript-eslint/no-explicit-any` is an error. `max-lines` and
-  non-null assertions are already relaxed for `*.test.ts(x)`.
+  the code under test — use fake timers and seed PRNGs with `mulberry32` from
+  `@/utils/mulberry32`. Prefer `findBy*` / `waitFor` and Playwright web-first
+  assertions over fixed timeouts.
+- **No `any`** — `@typescript-eslint/no-explicit-any` is an error. `max-lines`,
+  `max-lines-per-function` and non-null assertions are already relaxed for
+  `*.test.ts(x)`.
 - **A regression test with every bug fix.** Never weaken or delete a test to make
-  a change pass. Fix flakes at the root; never `retry` around nondeterminism.
+  a change pass.
+- **Fix flakes at the root.** Retrying an _action_ until a precondition holds is a
+  web-first wait and is correct — `expect(async () => {…}).toPass()` around a
+  keypress that needs React to have hydrated, for example. Leaning on
+  `playwright.config.ts` `retries` so a spec eventually passes is masking. Retries
+  exist for infrastructure flake; a test that needs them is a bug.
+- **`⌘K` needs `openWithShortcut()`** — currently spec-local in
+  `tests/e2e/command-menu.spec.ts`; promote it to `tests/` when a second spec needs
+  it. The listener is attached in a `useEffect`, so a bare `keyboard.press` right
+  after `goto` races hydration and fails roughly 1 run in 12.
 - A test that would still pass if the feature were deleted is not a test.
 
 ## This codebase specifically
 
 - **jsdom cannot rasterise canvas** — `getContext("2d")` returns `null`. Never
   assert pixels in Vitest. Test draw routines by passing a `Proxy` that records
-  every call and property set, and snapshot that transcript.
+  every call and property set, and snapshot that transcript. Every draw routine in
+  `src/` is deterministic today (zero `Math.random()` calls), so those snapshots are
+  trustworthy — keep it that way.
 - **Every env var is optional and features degrade** — so the degraded paths are
   real behaviour and must be tested: no `OPENAI_API_KEY` → `/api/chat` returns
   `503`; no `UPSTASH_*` → in-memory rate limiting.

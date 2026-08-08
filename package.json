@@ -12,6 +12,8 @@
     "prebuild": "pnpm agent:index:check",
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "pnpm prerender:check",
+    "prerender:check": "tsx scripts/check-prerender.ts",
     "start": "next start",
     "agent:index": "tsx scripts/build-agent-index.ts",
     "agent:index:check": "tsx scripts/build-agent-index.ts --check",

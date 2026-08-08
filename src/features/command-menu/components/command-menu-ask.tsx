@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, type SyntheticEvent, useEffect, useRef } from "react";
 
 import { Kbd } from "@/components/ui/kbd";
+import { asInternalHref } from "@/constants/routes";
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 
 import { useAskAgent } from "../hooks/use-ask-agent";
@@ -41,8 +42,10 @@ export function CommandMenuAsk({ onNavigate, openTick }: Props): ReactElement {
   }
 
   function onCitationClick(href: string): void {
+    const target = asInternalHref(href);
+    if (!target) return;
     onNavigate();
-    requestAnimationFrame(() => router.push(href));
+    requestAnimationFrame(() => router.push(target));
   }
 
   const isStreaming = status === "streaming";

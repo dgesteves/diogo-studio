@@ -1,11 +1,9 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import type { Destination } from "../types";
 
 export const timelineDestinations: readonly Destination[] = [
   {
-    slug: "timeline",
-    href: routes.timeline,
-    label: "Timeline",
+    ...getStationEntry("timeline"),
     eyebrow: "The long arc",
     title: "From law school to leading AI-native platforms.",
     summary: "The chronological career and education timeline of Diogo Esteves.",

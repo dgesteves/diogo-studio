@@ -1,7 +1,7 @@
 import type { CanvasTexture } from "three";
 
-import { createCanvasTexture } from "@/features/studio/components/screens/canvas-texture";
-import { mulberry32 } from "./city-textures";
+import { mulberry32 } from "@/utils/mulberry32";
+import { createCanvasTexture } from "../screens/canvas-texture";
 
 export function createGlowTexture(): CanvasTexture {
   const { canvas, texture } = createCanvasTexture(128, 128);

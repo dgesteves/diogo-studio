@@ -1,11 +1,10 @@
+import { getStationEntry } from "./station-index";
 import { routes } from "@/constants/routes";
 import type { Destination } from "../types";
 
 export const projectDestinations: readonly Destination[] = [
   {
-    slug: "projects",
-    href: routes.projects,
-    label: "Projects",
+    ...getStationEntry("projects"),
     eyebrow: "Highlighted work",
     title: "Platforms, design systems, and AI-native products.",
     summary: "Highlighted projects spanning AI platforms, design systems, and streaming media.",
@@ -52,9 +51,7 @@ export const projectDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "caseStudies",
-    href: routes.caseStudies,
-    label: "Case studies",
+    ...getStationEntry("caseStudies"),
     eyebrow: "Deeper dives",
     title: "How the hard problems got solved.",
     summary: "In-depth case studies on design systems, streaming scale, and agentic UX.",

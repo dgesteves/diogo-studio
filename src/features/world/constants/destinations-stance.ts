@@ -1,11 +1,9 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import type { Destination } from "../types";
 
 export const stanceDestinations: readonly Destination[] = [
   {
-    slug: "now",
-    href: routes.now,
-    label: "Now",
+    ...getStationEntry("now"),
     eyebrow: "Present tense",
     title: "What I'm focused on right now.",
     summary: "A snapshot of what Diogo Esteves is building, learning, and optimizing for today.",
@@ -35,9 +33,7 @@ export const stanceDestinations: readonly Destination[] = [
     ],
   },
   {
-    slug: "principles",
-    href: routes.principles,
-    label: "Principles",
+    ...getStationEntry("principles"),
     eyebrow: "How I build",
     title: "The non-negotiables behind the work.",
     summary:

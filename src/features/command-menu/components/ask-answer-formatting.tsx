@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { asInternalHref } from "@/constants/routes";
 
 export function renderFormatting(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];
@@ -30,14 +31,23 @@ export function renderFormatting(text: string, keyPrefix: string): ReactNode[] {
       const label = m[3];
       const key = `${keyPrefix}-l${idx++}`;
       const safeHref = sanitizeHref(m[4]);
+      const internalHref = safeHref ? asInternalHref(safeHref) : null;
       if (!safeHref) {
         out.push(label);
-      } else if (safeHref.startsWith("/") || safeHref.startsWith("#")) {
+      } else if (internalHref) {
         out.push(
-          <Link key={key} href={safeHref} className="text-accent hover:underline">
+          <Link key={key} href={internalHref} className="text-accent hover:underline">
             {label}
           </Link>,
         );
+      } else if (safeHref.startsWith("#")) {
+        out.push(
+          <a key={key} href={safeHref} className="text-accent hover:underline">
+            {label}
+          </a>,
+        );
+      } else if (safeHref.startsWith("/")) {
+        out.push(label);
       } else {
         out.push(
           <a

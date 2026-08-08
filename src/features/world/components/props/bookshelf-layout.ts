@@ -1,3 +1,5 @@
+import { mulberry32 } from "@/utils/mulberry32";
+
 export type ShelfBook = {
   z: number;
   height: number;
@@ -34,17 +36,6 @@ const MIN_DEPTH = 0.11;
 const DEPTH_RANGE = 0.045;
 const BOOK_SPACING = 0.003;
 const MAX_LEAN = 0.14;
-
-function mulberry32(seed: number): () => number {
-  let state = seed >>> 0;
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let t = state;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
 
 export function buildShelfBooks(seed: number, maxHeight: number): ShelfBook[] {
   const random = mulberry32(seed);

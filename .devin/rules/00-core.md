@@ -15,9 +15,18 @@ security by default. Prefer the smallest, clearest solution that ships.
 - Validate runtime/external data with a schema library (e.g. **Zod**).
 - Detect the repo's package manager from the lockfile (pnpm / npm / yarn / bun)
   and use it consistently — never mix package managers.
-- Embrace modern defaults where available: **Turbopack**, **React Compiler**
-  (automatic memoization), **typed routes**, and explicit caching via the
-  **`use cache`** directive.
+- **`next.config.ts` enables `reactCompiler`, `typedRoutes` and `cacheComponents`.**
+  - Automatic memoization is in effect: don't add `useMemo`/`useCallback`/`React.memo`
+    (three.js object creation is the sanctioned exception).
+  - Routes are **typed**: `Link href` and `router.push` take a real route, not a
+    `string`. Never widen back to `string` and never cast — narrow an untrusted href
+    with `asInternalHref()` from `@/constants/routes`.
+  - Rendering is **dynamic-by-default**: any uncached dynamic API (`new Date()`,
+    `headers()`, `cookies()`, an env read) silently drops a route out of static
+    rendering. Wrap the work in `"use cache"` + `cacheLife()`. `pnpm prerender:check`
+    runs on `postbuild` and fails if a route that must be static no longer is —
+    it is the guard that makes this model safe, so never "fix" it by deleting a
+    route from its list without a [`docs/decisions.md`](../../docs/decisions.md) entry.
 
 ## Non-negotiables
 
@@ -41,19 +50,14 @@ security by default. Prefer the smallest, clearest solution that ships.
 - **Functional and declarative.** Prefer pure functions and composition; avoid
   classes. Iterate and modularize over copy-paste (DRY).
 - **Single-purpose modules, short functions.** Keep **functions** short and
-  focused (~50 lines is a good ceiling). A file should do one job — but **length
-  is not the signal**: split when a file mixes concerns, never to hit a line
-  count. Shaders, procedural geometry, draw routines, and static data are
-  legitimately long; leave them whole rather than fragmenting them into modules
-  that only exist to import each other. See the project-structure rule for the
-  seams worth splitting along.
-- **Caveat: lint currently contradicts the rule above.** `eslint.config.mjs`
-  enforces `max-lines: 100` on all of `src/**` and does **not** enforce
-  `max-lines-per-function`. That per-file cap is the documented cause of the
-  file-shredding in [`docs/restructure-plan.md`](../../docs/restructure-plan.md),
-  whose Phase 0 replaces it. Until that lands: respect the cap, and when a
-  genuinely cohesive module cannot fit, raise it as the Phase 0 change — do not
-  shred the file, and do not add an inline `eslint-disable`.
+  focused (~50 lines is a good target; `max-lines-per-function` is lint-enforced at
+  100). A file should do one job — but **length is not the signal**: split when a
+  file mixes concerns, never to hit a line count. Shaders, procedural geometry,
+  draw routines, and static data are legitimately long; leave them whole rather
+  than fragmenting them into modules that only exist to import each other.
+  `max-lines` is a loose backstop only (250, 120 for `.tsx`, off for
+  draw/layout/geometry/texture/data modules). See the project-structure rule for
+  the seams worth splitting along.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
   booleans (`isLoading`, `hasError`, `canSubmit`).
@@ -82,3 +86,8 @@ security by default. Prefer the smallest, clearest solution that ships.
   — one logical change each, not one squashed mega-commit.
 - Don't add a dependency for something the framework already solves. Justify new
   dependencies by need, maintenance, and bundle cost.
+- **New releases must age before they can be installed.** The policy is **24
+  hours**, enforced by `minimumReleaseAge: 1440` in `pnpm-workspace.yaml` (which
+  also turns on `minimumReleaseAgeStrict`, so resolution fails rather than silently
+  falling back) and mirrored by the Dependabot `cooldown`. Never raise, bypass, or
+  exclude a package from that policy to get a build green — escalate instead.

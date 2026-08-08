@@ -16,7 +16,7 @@ import type { RouteKey } from "@/constants/routes";
 import { useWorldPalette } from "@/hooks/use-world-palette";
 import { markWorldReady } from "@/stores/boot-store";
 
-import { getDestination } from "../constants/destinations";
+import { getStationEntry } from "../constants/station-index";
 import { DPR_MIN, dprForFactor } from "../constants/render";
 import { getStation } from "../constants/stations";
 import { useExplore } from "../hooks/use-explore";
@@ -72,7 +72,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       ) : (
         <WorldInteract
           input={orbitInput}
-          onSelect={(slug) => router.push(getDestination(slug).href)}
+          onSelect={(slug) => router.push(getStationEntry(slug).href)}
           onAskAi={() => openWithMode("ask")}
         />
       )}

@@ -1,12 +1,10 @@
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "./station-index";
 import type { Destination } from "../types";
 import { workTimeline } from "./work-timeline";
 
 export const experienceDestinations: readonly Destination[] = [
   {
-    slug: "work",
-    href: routes.work,
-    label: "Work",
+    ...getStationEntry("work"),
     eyebrow: "Selected experience",
     title: "Eleven years on the surfaces users touch.",
     summary:

@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import type { RouteKey } from "@/constants/routes";
-import { worldDestinations } from "../constants/destinations";
+import { stationIndex } from "../constants/station-index";
 import { furnitureHotspots, isFurnitureRoute } from "../constants/hotspots";
 import { getStation } from "../constants/stations";
 import { useHoveredStation } from "../hooks/use-hovered-station";
@@ -17,7 +17,7 @@ export function WorldPortals({ active }: { active: RouteKey }): ReactElement {
       <HotspotFocusLight slug={hovered} />
       <HotspotFocusLight slug={isFurnitureRoute(active) ? active : null} />
 
-      {worldDestinations.map((destination) => {
+      {stationIndex.map((destination) => {
         if (!isFurnitureRoute(destination.slug)) return null;
         return (
           <FurnitureHotspot

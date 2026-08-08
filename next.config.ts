@@ -43,6 +43,8 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   reactCompiler: true,
+  typedRoutes: true,
+  cacheComponents: true,
   poweredByHeader: false,
   allowedDevOrigins: ["127.0.0.1", "localhost", "192.168.1.87"],
   async headers() {
