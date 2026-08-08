@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, WCAG_TAGS } from "./fixtures";
 
 test.describe("/about", () => {
   test("renders the pixelated portrait", async ({ page }) => {
@@ -7,11 +7,9 @@ test.describe("/about", () => {
     await expect(page.getByRole("img", { name: /pixelated portrait of/i })).toBeVisible();
   });
 
-  test("has no detectable WCAG 2.1 A/AA violations", async ({ page }) => {
+  test("has no detectable WCAG 2.2 A/AA violations", async ({ page }) => {
     await page.goto("/about");
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze();
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });
 });

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const overlay = (name = /performance inspector overlay/i) => ({ name });
 

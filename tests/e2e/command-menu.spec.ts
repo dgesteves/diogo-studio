@@ -1,19 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
-
-const modifier = process.platform === "darwin" ? "Meta" : "Control";
-
-// The ⌘K listener is attached in a useEffect, so it does not exist until React
-// has hydrated — and no DOM state distinguishes "server markup" from "hydrated"
-// here. Retry the keypress until it registers rather than pressing once into a
-// page that cannot yet hear it.
-async function openWithShortcut(page: Page) {
-  const dialog = page.getByRole("dialog");
-  await expect(async () => {
-    await page.keyboard.press(`${modifier}+KeyK`);
-    await expect(dialog).toBeVisible({ timeout: 1_000 });
-  }).toPass({ timeout: 15_000 });
-  return dialog;
-}
+import { expect, openWithShortcut, test, MODIFIER as modifier } from "./fixtures";
 
 test.describe("⌘K Command Menu", () => {
   test("opens with the keyboard shortcut and navigates to /about", async ({ page }) => {
