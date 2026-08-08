@@ -6,6 +6,62 @@ not for every change.
 
 ---
 
+## 2026-08-08 — Real work shipped under `docs:` commits; the changelog is incomplete
+
+Recording this because the history now lies and nothing else will say so.
+
+`b72c1e5` and `ce66ecc` are both typed `docs:`. The first deletes the whole
+`career-graph` feature (47 files). The second is **74 files / 1,384 insertions** and
+contains `typedRoutes` + `cacheComponents`, `scripts/check-prerender.ts`, the
+`(marketing)` → `(world)` rename, the station-index split, `mulberry32`, the
+`Math.random()` seeding fix, the Phase 0 lint caps, two rewritten E2E specs, a CI
+change, and three real bug fixes in `command-menu-ask.tsx` /
+`ask-answer-formatting.tsx` — one of which is a **user-visible behaviour change**
+(an internal-looking href that is not a real route now renders as plain text).
+
+`release-please-config.json` maps `docs` to a Documentation section, so the next
+release cuts a patch bump whose Features, Bug Fixes and Performance sections are all
+empty. None of the above appears in `CHANGELOG.md`, and the behaviour change ships
+unannounced. The `commit-msg` hook cannot catch this — `docs:` is a valid type, so
+commitlint passes. Only the author choosing the right type catches it.
+
+Not rewritten: `main` is unprotected but shared history, and a force-push to relabel
+two commits is a worse trade than a note. The rule that was already written in
+`00-core.md` ("the **accurate** type so the changelog stays complete… one logical
+change each, not one squashed mega-commit") stands; these two commits are the
+counter-example, not the precedent.
+
+## 2026-08-08 — RTTR adopted, and the R3F coverage estimate replaced with a measurement
+
+`@react-three/test-renderer@9.1.1` is installed and testing-plan Phase 0's spike
+exists at `features/studio/components/scene/scene.test.tsx` — the current cluster
+root, so restructure Phase 4 carries it with `git mv`.
+
+**It did not work out of the box, and the failure is worth writing down** because the
+error names the wrong library. Every render died on `Cannot assign to read only
+property 'position' of object '#<Mesh>'`, preceded by `THREE.WARNING: Multiple
+instances of Three.js being imported`. There is only one physical copy of three in the
+store: the duplication is **format**, not version. `@react-three/fiber` ships no
+`exports` field, so vitest resolved its CJS `main`, that copy required `three.cjs`,
+and `src/` imported `three.module.js`. Two `Mesh` identities means fiber's
+`applyProps` assigns instead of calling `.copy()`, and `Object3D.position` is a
+read-only accessor. Fixed with `resolve.mainFields` preferring `module` plus
+`server.deps.inline` for the three `@react-three/*` packages. `deps.inline` alone does
+**not** fix it — the upstream issues (vitest#4207, r3f#2856, three#32142) are full of
+people who tried only that.
+
+**The measurement the plan demanded.** §5.2 flagged its own 75% R3F target as "an
+estimate, not a measurement" governing 79 files, and required the spike to report what
+it actually achieves. Rendering `StudioScene` headlessly gives **100% statements on
+`studio-scene.tsx`** and **84.65% statements / 53.06% branches / 98.09% functions**
+across the whole 40-file `scene/` cluster, from four tests. Repo-wide statements went
+**11.39% → 28.82%**.
+
+So the statement target was conservative and the strategy is validated. The honest
+caveat is the branch number: declarative smoke rendering reaches statements almost for
+free and conditional branches barely at all, so **branches are the real work in Phase
+6**, not statements. Plan against 53%, not 84%.
+
 ## 2026-08-08 — Destination content split from its scalar index
 
 `constants/station-index.ts` now owns the scalar projection of every destination —
@@ -35,7 +91,9 @@ collection still agree, which is the guard that keeps the split honest.
 
 `sectors.ts` was deleted: after the repoint its only importer was its own test — the
 same trap `constants/career.ts` is flagged for in `AGENTS.md`, and `knip` does not
-catch it. Its invariants moved to `station-index.test.ts` (81 tests, up from 76).
+catch it. Its invariants moved to `station-index.test.ts` (7 tests). An earlier
+version of this entry said "81 tests, up from 76" as if that were the suite total; the
+suite was **92** after this commit, so the number was wrong on both readings.
 
 ## 2026-08-08 — `app/(marketing)` renamed to `app/(world)`
 
@@ -155,7 +213,7 @@ Two docs disagreed. Root `tests/` wins on three counts, all free: it sits outsid
 the coverage `include` (`src/**`), so helpers never dilute the per-layer targets
 the testing plan is built on; it sits outside the `src/**` ESLint block, so a
 recording-context `Proxy` isn't fighting `no-explicit-any` and `max-lines` (note
-the existing relaxations only match `src/**/*.test.ts`, so `src/test/helpers.ts`
+the existing relaxations only match `src/**/*.test.{ts,tsx}`, so `src/test/helpers.ts`
 would have got the _strict_ rules); and it keeps all test infrastructure next to
 `tests/e2e/`. Cost: no `@/` alias — add a `@tests/*` path to `tsconfig.json` when
 testing-plan Phase 0 creates the first helper. `vitest.config.ts` already globs
