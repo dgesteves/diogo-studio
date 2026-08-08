@@ -18,9 +18,30 @@ const ROUTING_IS_A_LEAF = {
   message: "app/ is the routing layer and a leaf — nothing may import from it.",
 };
 
+// eslint-config-next's `next` entry globs every file in the repo and brings the react,
+// react-hooks and jsx-a11y plugins with it — 40 enabled rules that also reach tests/ and
+// scripts/, where there is no React at all. There they can only misfire: rules-of-hooks
+// reads Playwright's `use` fixture callback as React's `use()` and errors, which invites
+// renaming the parameter away from the documented API to appease a rule that should never
+// have applied. React rules belong where React is. Derived from the shared configs rather
+// than hardcoded, so a new upstream rule is covered without editing this list.
+const REACT_FAMILY = ["react", "react-hooks", "jsx-a11y"];
+
+const NO_REACT_OUTSIDE_SRC = {
+  name: "no-react-outside-src",
+  files: ["tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
+  rules: Object.fromEntries(
+    [...nextVitals, ...nextTs]
+      .flatMap((entry) => Object.keys(entry.rules ?? {}))
+      .filter((rule) => REACT_FAMILY.some((plugin) => rule.startsWith(`${plugin}/`)))
+      .map((rule) => [rule, "off"]),
+  ),
+};
+
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  NO_REACT_OUTSIDE_SRC,
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {

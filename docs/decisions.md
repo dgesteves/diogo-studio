@@ -6,6 +6,34 @@ not for every change.
 
 ---
 
+## 2026-08-08 — React lint rules are scoped to `src/`, where React actually is
+
+`eslint-config-next`'s `next` entry globs `**/*.{js,jsx,mjs,ts,tsx,mts,cts}` and brings
+the `react`, `react-hooks` and `jsx-a11y` plugins with it, so **40 React rules were
+enabled on `tests/e2e/fixtures.ts`** — a file containing no React. They cannot find a
+real defect there; they can only misfire.
+
+One did. Playwright's fixture signature is
+`(args, use: (r: R) => Promise<void>, testInfo)`, so `await use(page)` is a call to a
+positional callback — and `react-hooks/rules-of-hooks` read it as React's `use()` hook,
+erroring with "React Hook `use` is called in function `page`".
+
+The first fix was to rename the parameter to `provide`. That is behaviour-identical (the
+name is a local binding) but it is a **patch on the wrong layer**: it leaves 39 other
+irrelevant rules linting `tests/` and `scripts/`, guarantees the next person writing a
+fixture hits the same error, and trades the documented API name for lint appeasement.
+Reverted.
+
+Now `eslint.config.mjs` carries a `no-react-outside-src` entry that turns the
+React-family rules off for `tests/**` and `scripts/**`, with the rule list **derived from
+the shared configs** so an upstream addition is covered without editing anything.
+Verified: 44 rules off in `tests/`, 39 still enabled in `src/` with
+`react-hooks/rules-of-hooks` still an error, and the warning count unchanged at 11.
+
+Deliberately not done: narrowing `nextVitals` itself to `src/**`. Its rule-bearing entry
+also carries `import/*` and `@next/next` rules that are worth keeping repo-wide; scoping
+the whole config would have silently dropped them.
+
 ## 2026-08-08 — E2E runs both motion modes; the 3D path had never been tested
 
 `playwright.config.ts` set `contextOptions: { reducedMotion: "reduce" }` **globally**, and

@@ -18,18 +18,15 @@ type Options = {
   skipBoot: boolean;
 };
 
-// The fixture callback is conventionally named `use`, but that trips
-// react-hooks/rules-of-hooks, which reads it as React's `use()`. `provide` is the same
-// function under a name the linter does not misidentify.
 export const test = base.extend<Options>({
   skipBoot: [true, { option: true }],
-  page: async ({ page, skipBoot }, provide) => {
+  page: async ({ page, skipBoot }, use) => {
     if (skipBoot) {
       await page.addInitScript((key: string) => {
         window.sessionStorage.setItem(key, "1");
       }, BOOT_SESSION_KEY);
     }
-    await provide(page);
+    await use(page);
   },
 });
 

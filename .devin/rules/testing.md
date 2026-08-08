@@ -73,6 +73,11 @@ path to `tsconfig.json` when the first vitest helper lands.
 - **Axe scans `WCAG_TAGS` from the fixtures**, which includes `wcag22aa` to match the
   documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
   2.2 AA is not automatable, so the bar is still partly a manual claim.
+- **Write fixtures with the documented Playwright signature** — `async ({ … }, use)`.
+  `eslint.config.mjs` turns the React-family rules off for `tests/**` and `scripts/**`,
+  so `react-hooks/rules-of-hooks` no longer mistakes the `use` callback for React's
+  `use()`. If you ever see that error here again, the config regressed; do not rename
+  the parameter to dodge it.
 
 ## Non-negotiables
 
