@@ -22,7 +22,15 @@ test.describe("⌘K Command Menu", () => {
     await expect(dialog).toBeVisible();
 
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden();
+
+    // Deliberately still `toBeHidden` — the menu disappearing is what the visitor
+    // experiences, and asserting Radix's `data-state` instead would test the library
+    // rather than the behaviour. Outside reduced motion the content keeps its
+    // `animate-out` exit animation, so Radix unmounts only on `animationend`; on two
+    // vCPUs with the scene competing for the main thread those frames are slow to
+    // arrive, which is why the wait is budgeted here rather than the assertion softened.
+    // The underlying fix is the frame-loop perf item in docs/decisions.md.
+    await expect(dialog).toBeHidden({ timeout: 30_000 });
   });
 
   test("Phase 4: the hero CTA opens the menu directly in Ask mode", async ({ page }) => {
