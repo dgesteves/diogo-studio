@@ -8,9 +8,11 @@ anything structural, `docs/architecture.md` describes the tree as it is today, a
 made. This file only records operational facts that aren't obvious from the code.
 
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is ~11% (`pnpm test:coverage`), so "pure
-move, no behaviour change" is currently unverifiable. Build the test suite first; do
-not start a phase, and do not treat a green `pnpm validate` as evidence that a
+[`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is ~29% statements but only
+~14% **branches** (`pnpm test:coverage`), and almost all of the statement figure comes
+from one RTTR spec that mounts the studio scene — so "pure move, no behaviour change"
+is still unverifiable. Build the test suite first; do not start a phase, and do not
+treat a green `pnpm validate`, or the coverage number going up, as evidence that a
 refactor preserved behaviour.
 
 Two things have shipped outside that block, and they set the bar for anything else
@@ -81,11 +83,23 @@ count, and never use an inline `eslint-disable` to clear one.
   `destinations.ts`.** The latter carries every page's prose via `blocks`; importing it
   from a `"use client"` module ships all of it to the browser for nothing. The index
   holds slug/href/label/sectors only. `station-index.test.ts` asserts the two agree.
+- **`vitest.config.ts` has two entries that look like cruft and are load-bearing.**
+  `resolve.mainFields` (preferring `module`) and `server.deps.inline` for the
+  `@react-three/*` packages exist to keep **one** copy of three in the module graph.
+  `@react-three/fiber` ships no `exports` field, so without them vitest resolves its
+  CJS `main`, that copy requires `three.cjs`, `src/` imports `three.module.js`, and
+  every RTTR test dies on `Cannot assign to read only property 'position' of object
+'#<Mesh>'`. The message blames three; the cause is module resolution. Don't delete
+  them, and keep them when the `node`/`jsdom` project split lands.
 - **Draw routines must stay deterministic.** `src/` contains zero `Math.random()`
   calls; seed with `mulberry32` from `@/utils/mulberry32` (one copy, shared — don't
   re-declare it locally). The Phase 5 draw snapshots are worthless otherwise.
 - Commits must be Conventional Commits; the `commit-msg` hook enforces this and
-  `release-please` derives the version and `CHANGELOG.md` from them.
+  `release-please` derives the version and `CHANGELOG.md` from them. **The hook only
+  checks that the type is valid, not that it is right** — `b72c1e5` and `ce66ecc` both
+  shipped features, fixes and a behaviour change under `docs:`, so none of it reaches
+  the changelog. Pick the type from what the diff does, and split the commit when the
+  answer is "several things". See [`docs/decisions.md`](./docs/decisions.md).
 - **Audio assets must be free for commercial use.** Only ship tracks/SFX with an
   explicit commercial-use license (Pixabay, Mixkit, Freesound per-clip) and record
   the license + attribution. Never commercial music.

@@ -49,7 +49,7 @@ above them. Nothing imports from `app/`.
 | Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/config/env.ts`                                      |
 | Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`                                         |
 | Rate limiting       | Upstash Redis + Ratelimit                                                                       |
-| Tooling             | pnpm, ESLint, Prettier, Vitest, Playwright + axe, knip, size-limit                              |
+| Tooling             | pnpm, ESLint, Prettier, Vitest (+ RTTR for the 3D scene), Playwright + axe, knip, size-limit    |
 
 `next.config.ts` enables **`reactCompiler`**, **`typedRoutes`** and
 **`cacheComponents`**. The last one makes rendering dynamic-by-default, so static

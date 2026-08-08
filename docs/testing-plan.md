@@ -1,28 +1,35 @@
 # Testing plan
 
-A phased plan to take `src/` from 10.71% to a real, trustworthy regression net —
-built specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
+A phased plan to take `src/` to a real, trustworthy regression net — built
+specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: proposal. No phase has been applied — but three things it depended on landed
-early: the `Math.random()` seeding fix in §5.1, `mulberry32` promoted to
-`src/utils/mulberry32.ts`, and **the existing E2E suite made green**. It was 16/18:
-the `/work` spec asserted content that no longer exists, and the ⌘K Ask-mode spec was
-flaky ~1 in 12 because it raced hydration. Both are fixed. This plan calls E2E "the
-actual harness" for the restructure (§3), so it had to be trustworthy before anything
-could be built on it.
+Status: **Phase 0 is partly landed; Phases 1–7 are not started.** Four things have
+shipped: the `Math.random()` seeding fix in §5.1, `mulberry32` promoted to
+`src/utils/mulberry32.ts`, **the existing E2E suite made green** (it was 16/18 — the
+`/work` spec asserted content that no longer exists, and the ⌘K Ask-mode spec was
+flaky ~1 in 12 because it raced hydration), and **RTTR installed with its spike
+passing** (§5.2). This plan calls E2E "the actual harness" for the restructure (§3),
+so it had to be trustworthy before anything could be built on it.
 
-Baseline: measured on the current tree (version 1.12.0). `pnpm validate` passes.
+Still open in Phase 0: the `tests/` helpers, the `node`/`jsdom` project split, and the
+`vitest.config.ts` ESM-loaded-as-CJS warning.
+
+Baseline: re-measured 2026-08-08 on the current tree (version 1.12.0), **after** the
+RTTR spike. `pnpm validate` passes. Every number below is measured; where an earlier
+draft's figure has been superseded it is marked, because this plan's whole argument is
+that unverified numbers should not govern work.
 
 ---
 
 ## 1. Verdict
 
 The premise "we never started creating tests" is not accurate, and the difference
-matters. There are **16 vitest files (76 tests)** and **6 Playwright specs**, and
+matters. There are **19 vitest files (96 tests)** and **6 Playwright specs**, and
 the whole toolchain is already wired: vitest + jsdom, Testing Library (`react`,
-`dom`, `jest-dom`, `user-event`), `@vitest/coverage-v8`, Playwright, and
-`@axe-core/playwright`. Conventions exist and are good.
+`dom`, `jest-dom`, `user-event`), `@vitest/coverage-v8`, Playwright,
+`@axe-core/playwright`, and `@react-three/test-renderer`. Conventions exist and are
+good.
 
 So this is not a greenfield problem. It is a **coverage-breadth** problem: the
 existing tests cluster on pure retrieval math and world data invariants, and
@@ -30,12 +37,16 @@ almost nothing covers the server layer, client state, UI behaviour, or the 3D
 scene.
 
 The second correction is more important. **"Maximum coverage on everything" is
-the wrong objective function.** 79 of 297 files render Three.js, and coverage on
+the wrong objective function.** 79 of 298 files render Three.js, and coverage on
 them is only meaningful if you assert the scene graph; a line-coverage target
-alone would push toward tests that mount components and assert nothing. The
-target should be **behavioural fidelity per layer**, with coverage as the
-measurement, not the goal. Section 5 sets a layered target that lands at
-**~90% statements** honestly, and says which files should never be chased.
+alone would push toward tests that mount components and assert nothing. The RTTR
+spike has now demonstrated exactly that hazard from the good side: four tests took the
+40-file `scene/` cluster to **84.65% statements but only 53.06% branches**, because
+mounting a declarative scene executes almost every statement while touching almost no
+conditional. Statements are nearly free here; branches are the work. The target should
+be **behavioural fidelity per layer**, with coverage as the measurement, not the goal.
+Section 5 sets a layered target that lands at **~90% statements** honestly, and says
+which files should never be chased.
 
 ---
 
@@ -43,38 +54,50 @@ measurement, not the goal. Section 5 sets a layered target that lands at
 
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
-| Non-test source files           | **297** (156 `.tsx`, 141 `.ts`)                        |
-| Unit test files / tests         | **16 / 76**                                            |
-| E2E specs / lines               | **6 / 258** (18 tests, green since 2026-08-08)         |
-| Statements / branches           | **10.71% / 9.23%**                                     |
-| Functions / lines               | **10.24% / 11.02%**                                    |
-| Files at 0% coverage            | **~230**                                               |
+| Non-test source files           | **298** (156 `.tsx`, 142 `.ts`)                        |
+| Unit test files / tests         | **19 / 96**                                            |
+| E2E specs / lines               | **6 / 260** (18 tests, green since 2026-08-08)         |
+| Statements / branches           | **28.82% / 13.67%**                                    |
+| Functions / lines               | **28.36% / 29.67%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
 
+Before the RTTR spike this table read 297 files, 16/76, and **10.71% / 9.23%**. The
+jump to 28.82% comes from a single spec, which is the whole point of §5.2 — and the
+branch column barely moved, which is the whole point of §5.3.
+
 ### Coverage by layer today
 
-| Layer              | Statements | Note                                                                                |
-| ------------------ | ---------- | ----------------------------------------------------------------------------------- |
-| `src/schemas`      | 100%       | one file                                                                            |
-| `src/utils`        | 100%       | `cn.ts`                                                                             |
-| `world/constants`  | 77%        | the existing data-invariant tests                                                   |
-| `src/ai`           | 71%        | retrieval math only; stream/embed/prompt at **0%**                                  |
-| `world/utils`      | 45%        | 3 of 8 files at 0%                                                                  |
-| `src/stores`       | 29%        | 5 of 7 stores at **0%**                                                             |
-| `src/providers`    | 14%        | —                                                                                   |
-| `src/hooks`        | 4%         | —                                                                                   |
-| `src/app`          | **0%**     | every route, `sitemap`, `robots`, icons                                             |
-|                    |            | (`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`) |
-| `rate-limit.ts`    | **0%**     | security-relevant                                                                   |
-| `command-menu`     | **0%**     | the primary interactive feature                                                     |
-| `inspector`        | **0%**     | —                                                                                   |
-| `world` components | **~5%**    | 3D scene, boot, HUD                                                                 |
-| `studio` (all)     | **0%**     | 40-file scene folder                                                                |
+| Layer                | Stmts     | Branch    | Note                                                                                |
+| -------------------- | --------- | --------- | ----------------------------------------------------------------------------------- |
+| `src/schemas`        | 100%      | 100%      | one file                                                                            |
+| `src/utils`          | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                           |
+| `src/constants`      | 100%      | 100%      | `routes` + `career` invariants                                                      |
+| `src/config`         | 87%       | 67%       | `world-theme` only                                                                  |
+| **`studio/…/scene`** | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.           |
+| `src/components/ui`  | 82%       | 67%       | reached via `home` and the scene, not directly tested                               |
+| `world/constants`    | 80%       | 85%       | the existing data-invariant tests                                                   |
+| `src/ai`             | 71%       | 72%       | retrieval math only; stream/embed/prompt at **0%**                                  |
+| `world/utils`        | 45%       | 26%       | 3 of 8 files at 0%                                                                  |
+| `src/stores`         | 34%       | 13%       | 5 of 7 stores at **0%**                                                             |
+| `studio/…/screens`   | 24%       | 8%        | incidental — the spike mounts them, nothing asserts them                            |
+| `world/…/hud`        | 28%       | 11%       | one toggle spec                                                                     |
+| `src/hooks`          | 17%       | 0%        | —                                                                                   |
+| `src/providers`      | 14%       | 9%        | —                                                                                   |
+| `world` components   | 4%        | 0%        | boot, lounge, props all at **0%**                                                   |
+| `command-menu`       | 4%        | 0%        | the primary interactive feature                                                     |
+| `inspector`          | 5%        | 0%        | —                                                                                   |
+| `src/app`            | **0%**    | **0%**    | every route, `sitemap`, `robots`, icons                                             |
+|                      |           |           | (`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`) |
+| `rate-limit.ts`      | **0%**    | **0%**    | security-relevant                                                                   |
 
-The three highest-risk zeros are `rate-limit.ts` (abuse protection),
-`app/api/chat/route.ts` (7 distinct response branches, all unverified), and
-`command-menu` (the feature users actually touch).
+The three highest-risk zeros are unchanged by the spike: `rate-limit.ts` (abuse
+protection), `app/api/chat/route.ts` (7 distinct response branches, all unverified),
+and `command-menu` (the feature users actually touch). Note also the two rows the
+spike raised _incidentally_ — `studio/…/screens` and `components/ui`. Coverage there
+is a by-product of mounting the scene, not evidence of anything, and it is exactly the
+"tests that mount components and assert nothing" effect §1 warns about. Do not read
+those percentages as progress.
 
 ---
 
@@ -138,8 +161,8 @@ The first five rows account for every file exactly once (95 + 49 + 12 = 156
 rows, called out separately because it needs its own technique — do not add it to
 the total.
 
-So **218 of 297 files (73%) are testable with what is already installed.** The
-remaining 79 need exactly one new devDependency. No file is left without a tool.
+All **298 files are now testable with what is installed** — the 79 that need RTTR were
+the one gap, and it is closed (§5.2). No file is left without a tool.
 
 ### Two hard technical findings
 
@@ -154,15 +177,25 @@ deterministic, needs no native dependency, runs in milliseconds, and produces
 exactly the "test the exact current behaviour" characterisation you asked for. A
 draw routine's snapshot is a literal transcript of what it paints.
 
-**`@react-three/test-renderer@9.1.1` is compatible.** Peers are
-`@react-three/fiber >=9.0.0`, `react ^19.0.0`, `three >=0.156`; the repo is on
-fiber 9.7.0, React 19.2.8, three 0.185.1. It ships its own canvas/WebGL shim, so
-it runs headless in node with no GPU. This is the only way to get real assertions
-on the 3D tree, and it is precisely the right tool for restructure safety:
-Phase 3 collapses 15 boot files into 5 and Phase 4 moves 40 scene files, and the
-failure mode of both is _a mesh silently disappearing or a material changing_.
-Scene-graph assertions catch that deterministically and for free; pixel diffing
-catches it flakily and expensively.
+**`@react-three/test-renderer@9.1.1` works — but not out of the box.** Installed and
+proven: `StudioScene` renders headlessly with 228 meshes, 194 groups and 16 lights, no
+GPU. This is the only way to get real assertions on the 3D tree, and it is precisely
+the right tool for restructure safety: Phase 3 collapses 15 boot files into 5 and
+Phase 4 moves 40 scene files, and the failure mode of both is _a mesh silently
+disappearing or a material changing_. Scene-graph assertions catch that
+deterministically and for free; pixel diffing catches it flakily and expensively.
+
+The cost was one non-obvious config fix, recorded here because the error message
+blames the wrong library. Out of the box every render threw `Cannot assign to read
+only property 'position' of object '#<Mesh>'` after `THREE.WARNING: Multiple instances
+of Three.js being imported` — not two versions of three (there is one in the store)
+but two **formats**: `@react-three/fiber` ships no `exports` field, so vitest resolved
+its CJS `main`, which requires `three.cjs`, while `src/` imports `three.module.js`.
+Two `Mesh` identities makes fiber's `applyProps` assign where it should `.copy()`, and
+`Object3D.position` is a read-only accessor. Fixed in `vitest.config.ts` with
+`resolve.mainFields` preferring `module` **plus** `server.deps.inline` for the
+`@react-three/*` packages — `deps.inline` alone does not do it. See
+[`decisions.md`](./decisions.md).
 
 ---
 
@@ -201,23 +234,37 @@ there were only ever two calls in all of `src/`, both in `drawStatic`. And it lo
 being merged into **`src/utils/mulberry32.ts`**. Import it from there. `src/` now
 contains zero `Math.random()` calls.
 
-### 5.2 R3F: add `@react-three/test-renderer`
+### 5.2 R3F: `@react-three/test-renderer` — adopted ✅
 
-Yes. It converts 79 files (27% of the codebase) from "E2E-only, uncoverable" to
-"unit-testable with meaningful assertions", which is the difference between ~65%
-and ~90% achievable coverage. One well-maintained pmndrs devDependency, same
-org as the `@react-three/fiber` already in use, 54k weekly downloads. The release-age
-policy is **24 hours**, enforced by `minimumReleaseAge: 1440` in
-`pnpm-workspace.yaml` — installation simply fails if the version is younger, so there
-is nothing to check by hand. (An earlier draft of this section said ≥7 days and
-attributed it to `00-core.md`, which said no such thing; the real policy is now
-recorded there.)
+Landed 2026-08-08. It converts 79 files (27% of the codebase) from "E2E-only,
+uncoverable" to "unit-testable with meaningful assertions". One well-maintained pmndrs
+devDependency, same org as the `@react-three/fiber` already in use, 54k weekly
+downloads. The release-age policy is **24 hours**, enforced by
+`minimumReleaseAge: 1440` in `pnpm-workspace.yaml` — installation simply fails if the
+version is younger, so there is nothing to check by hand. (An earlier draft of this
+section said ≥7 days and attributed it to `00-core.md`, which said no such thing; the
+real policy is now recorded there.)
 
-**The 75% target below is an estimate, not a measurement — and it governs the largest
-block of work in this plan (79 files).** Phase 0's spike must report the statement
-coverage it actually achieves on `studio-scene.tsx`, and this number must be replaced
-with that figure before Phase 6 is planned in detail. "Declarative, so smoke tests
-reach most lines" is a plausible argument, not evidence.
+**The estimate has been replaced with a measurement, as this section demanded.** The
+spike lives at `features/studio/components/scene/scene.test.tsx` — the current cluster
+root, so restructure Phase 4 carries it with `git mv` (§3 rule 4). Four tests assert
+the mesh count, the light rig against `config/brand.ts` tokens, the day/night palette
+branch, and the room shell against `constants/room.ts`. Measured:
+
+| Target                        | Estimated | **Measured** |
+| ----------------------------- | --------- | ------------ |
+| `studio-scene.tsx` statements | —         | **100%**     |
+| `scene/` cluster statements   | 75%       | **84.65%**   |
+| `scene/` cluster branches     | —         | **53.06%**   |
+| `scene/` cluster functions    | —         | **98.09%**   |
+| Repo-wide statements          | 10.71%    | **28.82%**   |
+
+So the 75% statement estimate was **conservative** and the R3F strategy is validated.
+But the useful finding is the column that was never estimated: **branches at 53%**.
+Mounting a declarative scene executes nearly every statement and almost no conditional,
+so Phase 6's real work is the branching behaviour — palette swaps, focus state, reduced
+motion, conditional meshes — not statement count. Plan Phase 6 against the branch
+number. Raising statements there is close to free and close to meaningless.
 
 ### 5.3 Coverage: ratcheted per-layer thresholds
 
@@ -225,20 +272,24 @@ A single global number is the wrong instrument, because 90% on pure math and 90%
 on a lighting rig mean different things. Use **per-directory thresholds** in
 `vitest.config.ts`, each ratcheted upward as phases land:
 
-| Layer                                                               | Target   | Rationale                                              |
-| ------------------------------------------------------------------- | -------- | ------------------------------------------------------ |
-| `src/ai`, `src/schemas`, `src/config`, `src/constants`, `src/utils` | **100%** | pure, no excuse                                        |
-| `src/rate-limit.ts`, `src/app/api/**`                               | **100%** | security and contract surface                          |
-| `src/stores`, `src/hooks`, `src/providers`                          | **95%**  | side effects are mockable                              |
-| `world/utils`, `world/constants`, `*-draw.ts`, `*-layout.ts`        | **95%**  | pure logic                                             |
-| Pure-DOM components                                                 | **90%**  | branches on state/props                                |
-| R3F components                                                      | **75%**  | declarative; smoke + graph assertions reach most lines |
-| `src/app/**` pages                                                  | **90%**  | static compositions, cheap to render                   |
+| Layer                                                               | Target   | Rationale                                             |
+| ------------------------------------------------------------------- | -------- | ----------------------------------------------------- |
+| `src/ai`, `src/schemas`, `src/config`, `src/constants`, `src/utils` | **100%** | pure, no excuse                                       |
+| `src/rate-limit.ts`, `src/app/api/**`                               | **100%** | security and contract surface                         |
+| `src/stores`, `src/hooks`, `src/providers`                          | **95%**  | side effects are mockable                             |
+| `world/utils`, `world/constants`, `*-draw.ts`, `*-layout.ts`        | **95%**  | pure logic                                            |
+| Pure-DOM components                                                 | **90%**  | branches on state/props                               |
+| R3F components                                                      | **85%**  | measured at 84.65% from smoke rendering alone (§5.2)  |
+| R3F components — **branches**                                       | **70%**  | measured at 53%; this is the row that needs real work |
+| `src/app/**` pages                                                  | **90%**  | static compositions, cheap to render                  |
 
-Projection: **~88–92% statements overall**, not 100% — but be clear that this is a
-sum of seven estimated per-layer numbers, not a derived figure. The R3F row is the
-one that moves it materially, so treat the whole projection as provisional until
-Phase 0's spike replaces that row with a measurement.
+Projection: **~88–92% statements overall**, not 100% — still a sum of per-layer
+numbers rather than a derived figure, but the row that moved it most is no longer a
+guess: R3F statements are measured at 84.65% (§5.2), which puts the projection on
+firmer ground than when it was written. Set **branch** thresholds alongside the
+statement ones from the start; the spike showed statements can hit 85% while branches
+sit at 53%, so a statement-only ratchet would report a suite that is far healthier than
+it is.
 
 Files that should be _excluded from the denominator_ rather than faked:
 `instrumentation*.ts`, `global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori
@@ -266,23 +317,29 @@ under jsdom.
 Each phase is independently shippable and ends green on `pnpm validate`. One
 commit per logical group, `test:` type per Conventional Commits.
 
-### Phase 0 — fix the foundation (prerequisite, small)
+### Phase 0 — fix the foundation (prerequisite, small) — partly landed
 
-- Add `@react-three/test-renderer`; prove it with one spike test rendering
-  `studio-scene.tsx` headlessly. **If the spike fails, stop and re-plan** — the
-  R3F strategy depends on it.
+- ✅ **Add `@react-three/test-renderer`; prove it with one spike.** Done — see §5.2 for
+  the result and the resolution fix it needed. The "if the spike fails, stop and
+  re-plan" branch was not taken.
+- ✅ Seed the two `Math.random()` draw paths (§5.1).
 - Add helpers in **`tests/`** at the repo root (not `src/test/` — see
   [`decisions.md`](./decisions.md)): `recording-ctx.ts` (Proxy draw recorder),
   `r3f.ts` (RTTR render + scene-graph query helpers), `stores.ts` (reset all
   external stores between tests), `env.ts` (env-var override helper). Add a
   `@tests/*` path to `tsconfig.json` at the same time; `vitest.config.ts` already
-  globs `tests/**` and resolves tsconfig paths.
+  globs `tests/**` and resolves tsconfig paths. **`r3f.ts` has a first draft
+  already** — the `renderScene` / `isMesh` / `lightsOfType` helpers in
+  `scene.test.tsx` are what it should hold; promote them when a second spec needs
+  them, not before.
 - Split vitest into `node` / `jsdom` projects; fix the `vitest.config.ts`
-  ESM-loaded-as-CJS warning.
+  ESM-loaded-as-CJS warning. **Careful:** the `resolve.mainFields` and
+  `server.deps.inline` entries added for RTTR must survive the split, or every scene
+  test breaks (§5.2).
 - Fix the existing `act(...)` warning in `deck-explore-toggle.test.tsx`.
-- Seed the two `Math.random()` draw paths (§5.1).
 
-Exit: spike passes, helpers exist, suite green with no warnings.
+Exit: spike passes, helpers exist, suite green with no warnings. Two of five done; the
+suite is 19 files / 96 tests and green, but the warnings are still there.
 
 ### Phase 1 — the server and contract layer (~15 files → 100%)
 
