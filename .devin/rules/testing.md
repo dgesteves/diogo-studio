@@ -5,11 +5,12 @@ globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, tests/**
 
 # Testing
 
-Stack: **Vitest** (jsdom for DOM, node for server code), **Testing Library**
-(`react`, `dom`, `jest-dom`, `user-event`), **Playwright** +
-`@axe-core/playwright`, and **`@react-three/test-renderer`** (RTTR) for the 3D
-scene. There is no Jest and **no MSW** — mock with `vi.mock` at the module
-boundary. Do not add a testing library without checking `package.json` first.
+Stack: **Vitest** (jsdom for every test today — the node/jsdom project split is
+testing-plan Phase 0, not done yet), **Testing Library** (`react`, `dom`,
+`jest-dom`, `user-event`), **Playwright** + `@axe-core/playwright`, and
+**`@react-three/test-renderer`** (RTTR) for the 3D scene. There is no Jest and
+**no MSW** — mock with `vi.mock` at the module boundary. Do not add a testing
+library without checking `package.json` first.
 
 [`docs/testing-plan.md`](../../docs/testing-plan.md) is the authoritative plan and
 tracks per-layer coverage targets.
@@ -76,6 +77,15 @@ lands.
 
 ## This codebase specifically
 
+- **RTTR depends on there being exactly one copy of three in the module graph**, and
+  two lines in `vitest.config.ts` are what guarantee it: `resolve.mainFields`
+  (preferring `module`, because `@react-three/fiber` ships no `exports` field and
+  vitest would otherwise resolve its CJS `main`) and `server.deps.inline` for the
+  three `@react-three/*` packages. Remove either and **every** scene test fails with
+  `Cannot assign to read only property 'position' of object '#<Mesh>'` — fiber sees a
+  `Mesh` from the other three instance, so `applyProps` assigns where it should copy.
+  The symptom names three.js, so it reads like a three bug; it is a resolution bug.
+  See [`docs/decisions.md`](../../docs/decisions.md).
 - **jsdom cannot rasterise canvas** — `getContext("2d")` returns `null`. Never
   assert pixels in Vitest. Test draw routines by passing a `Proxy` that records
   every call and property set, and snapshot that transcript. Every draw routine in

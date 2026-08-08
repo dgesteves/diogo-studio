@@ -8,9 +8,12 @@ description: Apply when handling environment variables, secrets, authentication/
 - **Secrets stay server-side.** Only `NEXT_PUBLIC_`-prefixed variables reach the
   client. Keep `.env*` files out of git.
 - **Read env through `@/config/env` only** — never `process.env` elsewhere. This
-  is lint-enforced: a `no-restricted-syntax` rule errors on any `process.env`
-  access outside `src/config/env.ts` (except `NODE_ENV`). Env is validated with
-  `@t3-oss/env-nextjs` + Zod.
+  is lint-enforced across `src/**`: a `no-restricted-syntax` rule errors on any
+  `process.env` access outside `src/config/env.ts` (except `NODE_ENV`). Env is
+  validated with `@t3-oss/env-nextjs` + Zod. The rule stops at `src/`, so
+  `next.config.ts`, `instrumentation*.ts` and `scripts/` read `process.env`
+  directly — they run before or outside the validated module, which is the only
+  legitimate reason to. Do not treat them as precedent for new code.
 - **Every env var is optional and features degrade** rather than crash: no
   `OPENAI_API_KEY` → `/api/chat` returns `503`; no `UPSTASH_*` → in-memory rate
   limiting; no Sentry DSN → Sentry is skipped. Preserve that property when adding

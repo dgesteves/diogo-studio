@@ -37,8 +37,9 @@ Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
 ## Conventions
 
 - Coding standards and file placement: [`.devin/rules/`](./.devin/rules).
-  A restructure is planned — Phase 0 has landed, the rest is blocked on the test
-  suite. [`docs/restructure-plan.md`](./docs/restructure-plan.md) is authoritative
+  A restructure is planned — Phase 0 has landed, the rest is blocked on
+  [`docs/testing-plan.md`](./docs/testing-plan.md), which is the critical path.
+  [`docs/restructure-plan.md`](./docs/restructure-plan.md) is authoritative
   for structural questions, [`docs/architecture.md`](./docs/architecture.md)
   describes the tree as it is today, and
   [`docs/decisions.md`](./docs/decisions.md) records the reasoning behind the

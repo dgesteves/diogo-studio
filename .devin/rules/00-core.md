@@ -56,7 +56,8 @@ security by default. Prefer the smallest, clearest solution that ships.
   draw routines, and static data are legitimately long; leave them whole rather
   than fragmenting them into modules that only exist to import each other.
   `max-lines` is a loose backstop only (250, 120 for `.tsx`, off for
-  draw/layout/geometry/texture/data modules). See the project-structure rule for
+  `*-{draw,shaders,geometry,layout,textures,data}.ts` and anything under
+  `data/`, `generated/` or `constants/`). See the project-structure rule for
   the seams worth splitting along.
 - **Naming**: `kebab-case` for directories and files
   (`components/auth-wizard/`); descriptive names with auxiliary verbs for
