@@ -23,12 +23,25 @@ export default defineConfig({
   ],
   resolve: {
     tsconfigPaths: true,
+    // Keep exactly one copy of three in the module graph. @react-three/fiber ships
+    // no `exports` field, so vitest resolves its CJS `main` and that copy requires
+    // three.cjs while src/ imports three.module.js. Two `Mesh` identities means
+    // fiber's applyProps assigns instead of copying, and `Mesh.position` is a
+    // read-only accessor — every scene render throws. Preferring `module` gives
+    // fiber's ESM build, which shares src/'s three.
+    mainFields: ["module", "jsnext:main", "jsnext", "main"],
+    dedupe: ["three", "@react-three/fiber"],
   },
   test: {
     environment: "jsdom",
     globals: true,
     setupFiles: ["./vitest.setup.ts"],
     css: true,
+    server: {
+      deps: {
+        inline: ["@react-three/fiber", "@react-three/drei", "@react-three/test-renderer"],
+      },
+    },
     include: ["src/**/*.{test,spec}.{ts,tsx}", "tests/**/*.{test,spec}.{ts,tsx}"],
     exclude: ["node_modules", ".next", "out", "build", "coverage", "tests/e2e/**"],
     coverage: {
