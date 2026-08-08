@@ -421,10 +421,17 @@ travel intact with `git mv`.
 ### Phase 4 — pure-DOM components (~95 files → 90%)
 
 Per-cluster files, not per-source-file (§3, rule 2): `hud.test.tsx`,
-`boot.test.tsx`, `inspector.test.tsx`, `command-menu.test.tsx`,
+✅ `boot.test.tsx`, `inspector.test.tsx`, `command-menu.test.tsx`,
 `content-blocks.test.tsx`, `ui.test.tsx`, `sections.test.tsx`. Assert what the
 user sees and does — roles, labels, keyboard interaction, state transitions —
 using the established `home.test.tsx` style.
+
+`boot.test.tsx` landed early, out of phase order, because E2E could not assert it
+reliably: its three timers plus the ready signal made it the slowest and flakiest thing in
+the suite on a 2-vCPU runner. **That is the general rule this phase should follow —
+anything whose outcome depends on a timer is a component test, not an E2E test** (see
+[`decisions.md`](./decisions.md)). `command-menu.test.tsx` is the next candidate for the
+same reason: its open/close is animation-gated end-to-end and deterministic in jsdom.
 
 Also the pure formatters here: `inspector-format.ts`, `inspector-route-js.ts`,
 `ask-answer-formatting.tsx` (including the href-sanitisation branches, which are
@@ -488,6 +495,12 @@ If minutes get tight, the first thing to cut is visual regression, not E2E.
 ---
 
 ## 8. Conventions for writing these tests
+
+The durable version of this section is
+[`.devin/rules/testing.md`](../.devin/rules/testing.md) — it defines what each kind of
+test owns, what it must assert, and what makes it reliable. This plan is temporary and
+gets deleted when its phases land; that rule does not. Keep normative guidance there and
+sequencing here.
 
 - Colocate `*.test.ts(x)` at the cluster root; E2E in `tests/e2e/*.spec.ts`.
 - Follow the existing style: `makeChunk`-style fixture builders, `describe` per

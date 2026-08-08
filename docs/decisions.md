@@ -6,6 +6,63 @@ not for every change.
 
 ---
 
+## 2026-08-08 — Timing-sensitive behaviour moves to component tests; CPU starvation stays open
+
+The dual-motion E2E split turned `main` red. Three failures, one cause: **GitHub-hosted
+runners have 2 vCPUs**, and with SwiftShader software-rendering the scene continuously the
+main thread is starved for tens of seconds. The suite took **13.9m** there against 2.7m
+locally, which is the same fact measured a different way. Concretely:
+
+- Radix unmounts a dialog on `animationend`, and `command-menu.tsx` only applies
+  `animate-out` outside reduced motion, so a ~150ms exit animation exceeded a 15s wait.
+- Boot's `forceReady` fires at `BOOT_MAX_MS` (12s) and then React must re-render, so
+  "Enter the studio" needed longer than 20s to appear.
+- Boot's `BOOT_EXIT_MS` unmount is a 700ms `setTimeout` behind the same queue.
+
+**A first attempt asserted `data-state="closed"` instead of `toBeHidden()`. Rejected and
+reverted.** It tests a Radix implementation detail rather than the thing a visitor
+experiences, and `testing.md` already forbids exactly that. Softening an assertion to
+match slow hardware is not a fix.
+
+**What actually fixed it: layering.** The boot gate is a state machine over three timers
+plus a ready signal — `boot.test.tsx` now owns it with fake timers and asserts what the
+visitor sees (the step label, "Skip intro" before ready, "Enter the studio" after, the
+minimum hold, the 12s fallback, session-once, the reduced-motion branch) in **232ms**
+instead of a minute of starved E2E. Verified by mutation, not by going green: dropping the
+session and reduced-motion guards fails exactly three of the seven, and setting
+`minElapsed` true fails exactly the minimum-hold test. E2E keeps only what is genuinely
+end-to-end — a real first visit is gated, dismissing it yields a usable page, a reload
+does not gate again — so matching either dismiss control there is layering rather than
+hedging.
+
+One budgeted wait remains: the ⌘K exit animation, still asserted as `toBeHidden()`
+because that is the user-visible fact, with an explicit 30s timeout and a comment naming
+the real cause. Budgeting a wait that always completes is not the same as tolerating
+nondeterminism.
+
+**The frame-loop change was investigated and deliberately not made.** Pausing rendering
+behind a blocking overlay is the obvious way to free the main thread, and it would be a
+real INP win, but R3F's `setFrameloop` does `clock.stop(); clock.elapsedTime = 0` on every
+toggle — and four scene components read `clock.elapsedTime`, including `world-camera`'s
+idle drift, which is added straight into `spherical.theta` undamped. Toggling would snap
+the camera every time the menu closed. Doing it properly means first moving time-driven
+animation onto accumulated `delta`, which is a scene refactor and not something to rush
+into a red-CI fix. The other half — pausing on `document.hidden` — is close to worthless,
+because browsers already throttle `requestAnimationFrame` in hidden tabs.
+
+**Open work item, in priority order, to be measured rather than assumed:** (1) skip
+`WorldPostprocessing` while a blocking overlay covers the scene — 6 bloom levels is 12
+full-res passes and it is invisible behind a 70% scrim plus blur, and it needs no clock
+change; (2) move `clock.elapsedTime` consumers to accumulated `delta`; (3) only then
+consider pausing the loop. Do not land any of it without a before/after measurement.
+`inspector-panels.tsx` already tells users the canvas pauses when off-screen, which is
+not true today — that copy is a promise this work item should either keep or remove.
+
+Also added: a `matchMedia` stub in `vitest.setup.ts`. jsdom does not implement it and
+`reduced-motion-store` calls it directly, so anything rendering `ReducedMotionProvider`
+threw. It reports no preference; tests wanting reduced motion set the app's own override,
+which takes precedence.
+
 ## 2026-08-08 — React lint rules are scoped to `src/`, where React actually is
 
 `eslint-config-next`'s `next` entry globs `**/*.{js,jsx,mjs,ts,tsx,mts,cts}` and brings
