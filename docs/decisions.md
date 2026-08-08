@@ -6,6 +6,67 @@ not for every change.
 
 ---
 
+## 2026-08-08 — E2E runs both motion modes; the 3D path had never been tested
+
+`playwright.config.ts` set `contextOptions: { reducedMotion: "reduce" }` **globally**, and
+`world-stage.tsx` gates the canvas on `!reducedMotion`. So all 18 tests — including all
+four axe scans — exercised only the no-3D path. The product most visitors get had zero
+end-to-end coverage, and `AGENTS.md`'s claim that the reduced-motion non-negotiable was
+"enforced by the axe specs" was true only by accident: no spec asserted the canvas was
+absent, or that the site worked without it. Both facts were invisible because the
+suite was green.
+
+Now two projects, `reduced-motion` and `full-motion`, and **every spec runs in both**
+unless tagged `@reduced-motion` / `@full-motion`. 8 spec files, 26 tests, 44 runs.
+
+**Why it needed more than flipping the flag.** `BootSequence` renders a click-gated
+Radix dialog on a first visit when motion is allowed — so `getByRole("dialog")` in the
+⌘K and axe specs would have matched the boot overlay instead of the command menu. The
+`skipBoot` fixture in `tests/e2e/fixtures.ts` seeds the boot session key via
+`addInitScript`, which is the returning-visitor state and is what lets one spec assert
+the same behaviour in both projects. `world-3d.spec.ts` sets `skipBoot: false` to test
+boot itself.
+
+**The measurements, because the first run looked like ten product bugs and was not.**
+At the default five workers, 10 of 22 full-motion tests failed, one with
+`Protocol error: session closed`. Serialised, 21 of 22 passed. The last one was the
+budget, not the product: the `/about` portrait assertion settles in **395ms** with no
+canvas and took **9.3s** with one, against a 5s default. Five concurrent SwiftShader
+contexts starve each other, and a scene rendering at 60fps on a software renderer
+competes with the assertion loop. So: `workers: 2` locally (1 in CI, unchanged), and
+`expect.timeout: 15s` / `timeout: 90s` scoped to the `full-motion` project only —
+reduced-motion tests still run on the strict default and average under a second.
+Verified with three consecutive clean runs at `retries: 0`.
+
+Rejected: adding sleeps, and raising the global timeout. Both would have hidden real
+slowness in the cheap path. Rejected also: keeping one project and testing 3D only in a
+handful of specs — a bug that appears only with the canvas mounted is precisely what
+this suite exists to catch, so the default must be "both".
+
+**Cost:** `pnpm e2e` goes from ~20s to **2.7m** at `workers: 1`. The `e2e` CI job grows
+by roughly 2.5 minutes against a 2,000 minute monthly budget. Cheap for the first real
+coverage of the 3D path.
+
+Also folded in, since both were only reachable once the projects existed:
+`openWithShortcut` moved from spec-local to `tests/e2e/fixtures.ts` (the second
+consumer `testing.md` anticipated — `accessibility.spec.ts` was pressing ⌘K bare, the
+exact hydration race the helper exists for, and mounting the canvas makes it worse),
+and axe now scans `wcag22aa`.
+
+## 2026-08-08 — Axe scans WCAG 2.2, matching the documented bar
+
+Four docs call WCAG 2.2 AA a hard gate; all four axe call sites passed
+`["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"]`, so nothing from 2.2 was checked.
+`axe-core@4.12.1` exposes `wcag22aa`, which is **one** automatable rule — `target-size`
+(SC 2.5.8, 24×24 CSS px) — a plausible failure on a site with small HUD controls. It
+passes, in both motion modes, so the tag is now in `WCAG_TAGS` and the spec titles say
+2.2 instead of 2.1.
+
+Be honest about what this buys: one rule. The rest of 2.2 AA (3.2.6 Consistent Help,
+3.3.7 Redundant Entry, 3.3.8 Accessible Authentication) is not machine-checkable, so
+"WCAG 2.2 AA" remains partly a manual claim. Adding the tag closes the gap between the
+docs and the gate; it does not make the gate complete.
+
 ## 2026-08-08 — Real work shipped under `docs:` commits; the changelog is incomplete
 
 Recording this because the history now lies and nothing else will say so.

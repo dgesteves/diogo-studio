@@ -34,7 +34,10 @@ pnpm size       # size-limit budget, checked against .next/static/chunks
 `pnpm validate` is the gate, but it does **not** run `e2e` — so a green `validate`
 says nothing about the Playwright suite. Run `pnpm e2e` before you claim a UI or
 content change is done; the suite was silently red on `main` for weeks because
-nobody did. It is currently 18/18. `pnpm size` is a
+nobody did. It is currently **44/44** — 8 spec files, 26 tests, run across two
+projects (`reduced-motion` and `full-motion`), ~2.7 min at `workers: 1`. Expect it to
+take minutes now, not seconds: the `full-motion` project software-renders the three.js
+scene per test. `pnpm size` is a
 **review signal, not a gate** — its CI step is `continue-on-error`, deliberately, so
 that a bundle regression cannot also sink the `e2e` job via `needs: build`. Use the
 1.3 MB budget to notice regressions; Core Web Vitals are the real bar.
@@ -106,13 +109,21 @@ count, and never use an inline `eslint-disable` to clear one.
 
 ## Non-negotiables for the 3D world
 
-These gate every change to `features/world` and are enforced by the axe specs:
+These gate every change to `features/world`. They are enforced by the E2E suite —
+`reduced-motion.spec.ts`, `world-3d.spec.ts` and the axe scans, which run in **both**
+motion modes. Until 2026-08-08 the whole suite forced `reducedMotion: "reduce"`, so the
+first two below were only accidentally true and the 3D path was never tested at all;
+don't let that recur by tagging a new spec `@reduced-motion` for convenience.
 
 - **Content stays in the DOM.** Reveal-on-focus is a visual affordance, not a data
   change — server-rendered destination content stays crawlable and reachable by
   assistive tech. Never gate content behind a 3D-only interaction.
 - **Reduced-motion is a real path.** `world-stage.tsx` does not mount the canvas
   when `reducedMotion` is true. The site must be fully navigable with no 3D.
+- **E2E specs import `test` from `./fixtures`, not `@playwright/test`.** In
+  `full-motion` a first visit renders `BootSequence`'s click-gated Radix dialog, so
+  `getByRole("dialog")` would match the boot overlay instead of the ⌘K menu; the fixture
+  seeds the boot session key to put the page in the returning-visitor state.
 - **Accessibility is a hard gate** (WCAG 2.2 AA). 3D objects can't be the only
   navigation: keyboard-reachable index, visible focus, labelled controls, no focus
   traps when panels reveal.

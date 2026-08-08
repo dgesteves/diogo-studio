@@ -37,12 +37,42 @@ per _concept_, not per source file. `hud.test.tsx` beside the `hud/` folder, not
 one spec per `deck-*.tsx`. Cluster-level files survive the merges in
 `docs/restructure-plan.md`; per-file specs do not.
 
-E2E specs go in `tests/e2e/*.spec.ts`. Shared helpers, fixtures and render utils go
-in **`tests/`** at the repo root — deliberately _not_ under `src/`, so they stay out
-of the coverage denominator (`include: ["src/**"]`) and out of the `src/**` lint
-block, whose test relaxations only match `*.test.ts(x)`. `vitest.config.ts` already
-globs `tests/**`; add a `@tests/*` path to `tsconfig.json` when the first helper
-lands.
+E2E specs go in `tests/e2e/*.spec.ts`, with their shared fixtures and helpers in
+`tests/e2e/fixtures.ts` (not collected as a spec — `testMatch` only takes `*.spec.ts`).
+Vitest helpers and render utils go in **`tests/`** at the repo root — deliberately
+_not_ under `src/`, so they stay out of the coverage denominator
+(`include: ["src/**"]`) and out of the `src/**` lint block, whose test relaxations only
+match `*.test.ts(x)`. `vitest.config.ts` already globs `tests/**`; add a `@tests/*`
+path to `tsconfig.json` when the first vitest helper lands.
+
+## E2E runs in both motion modes
+
+`playwright.config.ts` defines two projects and **every spec runs in both**:
+
+| Project          | `reducedMotion` | What it exercises                      |
+| ---------------- | --------------- | -------------------------------------- |
+| `reduced-motion` | `reduce`        | no canvas at all — the accessible path |
+| `full-motion`    | `no-preference` | the 3D world, boot sequence, HUD       |
+
+- **Import `test` from `./fixtures`, never from `@playwright/test`.** The fixture seeds
+  the boot session key so `BootSequence`'s click-gated dialog does not intercept the
+  spec — without it `getByRole("dialog")` matches the boot overlay, not the ⌘K menu.
+  Opt out with `test.use({ skipBoot: false })` only to test boot itself.
+- **Only tag a spec when it is genuinely mode-specific**, with
+  `test.describe("…", { tag: "@full-motion" }, …)` or `@reduced-motion`; the projects
+  `grepInvert` the other tag. Default to untagged so it runs in both — a bug that only
+  appears with the canvas mounted is the reason this split exists.
+- **`full-motion` carries its own `expect.timeout` (15s) and `timeout` (90s)** because a
+  scene rendering on a software renderer competes with the assertion loop: the same
+  assertion settles in 395ms without a canvas and 9.3s with one. Do not "fix" a slow
+  full-motion assertion by adding a sleep, and do not raise the **global** timeout —
+  reduced-motion specs must stay on the strict default.
+- **Workers are capped at 2 locally (1 in CI).** Five concurrent SwiftShader contexts
+  starve each other badly enough to close browser sessions. If you see
+  `Protocol error … session closed`, that is the cause.
+- **Axe scans `WCAG_TAGS` from the fixtures**, which includes `wcag22aa` to match the
+  documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
+  2.2 AA is not automatable, so the bar is still partly a manual claim.
 
 ## Non-negotiables
 
@@ -69,10 +99,10 @@ lands.
   keypress that needs React to have hydrated, for example. Leaning on
   `playwright.config.ts` `retries` so a spec eventually passes is masking. Retries
   exist for infrastructure flake; a test that needs them is a bug.
-- **`⌘K` needs `openWithShortcut()`** — currently spec-local in
-  `tests/e2e/command-menu.spec.ts`; promote it to `tests/` when a second spec needs
-  it. The listener is attached in a `useEffect`, so a bare `keyboard.press` right
-  after `goto` races hydration and fails roughly 1 run in 12.
+- **`⌘K` needs `openWithShortcut()`** from `tests/e2e/fixtures.ts` — never a bare
+  `keyboard.press`. The listener is attached in a `useEffect`, so pressing right after
+  `goto` races hydration and fails roughly 1 run in 12; mounting the canvas makes the
+  window wider still.
 - A test that would still pass if the feature were deleted is not a test.
 
 ## This codebase specifically
@@ -94,8 +124,11 @@ lands.
 - **Every env var is optional and features degrade** — so the degraded paths are
   real behaviour and must be tested: no `OPENAI_API_KEY` → `/api/chat` returns
   `503`; no `UPSTASH_*` → in-memory rate limiting.
-- **Reduced motion is a real code path**, not a preference. `world-stage.tsx`
-  never mounts the canvas when it is set, so both branches need coverage.
+- **Reduced motion is a real code path**, not a preference. `world-stage.tsx` never
+  mounts the canvas when it is set, so both branches need coverage — which is what the
+  two Playwright projects above are for, plus `reduced-motion.spec.ts` (asserts the
+  canvas is absent and the site still works) and `world-3d.spec.ts` (asserts it mounts
+  and content stays in the DOM). In vitest, cover both branches explicitly.
 - The **non-negotiables in [`AGENTS.md`](../../AGENTS.md)** (content stays in the
   DOM, reduced-motion navigability, WCAG 2.2 AA, the world never crops) are the
   specification for the E2E suite — each one should map to an assertion.

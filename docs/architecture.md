@@ -71,7 +71,8 @@ if any of the 19 must-be-static routes de-optimises.
 ├── public/                     static assets served as-is (images, icons, audio)
 ├── scripts/                    build/maintenance scripts (tsx) — agent-index builder,
 │                               check-prerender
-├── tests/e2e/                  Playwright + axe specs (6 files / 18 tests today)
+├── tests/e2e/                  Playwright + axe specs (8 files / 26 tests, run in both
+│                               motion modes = 44) + fixtures.ts
 ├── instrumentation.ts          server observability register() (Sentry)
 ├── instrumentation-client.ts   client error + Web Vitals capture
 └── src/

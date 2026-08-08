@@ -56,11 +56,12 @@ which files should never be chased.
 | ------------------------------- | ------------------------------------------------------ |
 | Non-test source files           | **298** (156 `.tsx`, 142 `.ts`)                        |
 | Unit test files / tests         | **19 / 96**                                            |
-| E2E specs / lines               | **6 / 260** (18 tests, green since 2026-08-08)         |
+| E2E specs / tests               | **8 / 26** → **44 runs** across two motion projects    |
 | Statements / branches           | **28.82% / 13.67%**                                    |
 | Functions / lines               | **28.36% / 29.67%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
+| E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
 
 Before the RTTR spike this table read 297 files, 16/76, and **10.71% / 9.23%**. The
 jump to 28.82% comes from a single spec, which is the whole point of §5.2 — and the
@@ -362,32 +363,44 @@ tested through HTTP.
 - Finish `ai/retrieve-*` to 100% (bm25/cosine/keyword edges: zero vectors,
   mismatched dims, stopword-only queries, `minScore` boundaries).
 
-### Phase 2 — the E2E net (structure-immune; the actual harness)
+### Phase 2 — the E2E net (structure-immune; the actual harness) — started
 
-This is the phase that licences the restructure. Grow `tests/e2e/` from 6 specs
-to ~16, organised by user journey:
+Landed early, because it was not a coverage gap but a correctness one: the suite forced
+`reducedMotion: "reduce"` globally, so the 3D path had never been tested and two of the
+`AGENTS.md` non-negotiables were only accidentally satisfied (see
+[`decisions.md`](./decisions.md)).
+
+- ✅ **Both motion modes.** Two projects, every spec in both unless tagged. `workers`
+  capped and `full-motion` given its own timeout budget — measured, not guessed.
+- ✅ **`reduced-motion.spec.ts`** — canvas absent, site navigable, content
+  server-rendered, axe clean. This is the `reduced-motion.spec.ts` bullet below, done.
+- ✅ **`boot.spec.ts`** — landed as the `Boot sequence` describe inside
+  `world-3d.spec.ts`, which also asserts the canvas mounts and content stays in the DOM.
+- ✅ Axe extended to `wcag22aa`, and it now runs in both modes.
+
+Remaining, to grow `tests/e2e/` from 8 specs to ~16, organised by user journey:
 
 - **`routes.spec.ts`** — all 17 routes: 200, `<h1>`, title/description, canonical,
   no console errors. Currently 3 of 17 are asserted.
 - **`seo.spec.ts`** — JSON-LD parses and matches `personJsonLd`/`websiteJsonLd`,
   OG/Twitter tags, `sitemap.xml` lists all 17 routes, `robots.txt` disallows
   `/api/`.
-- **`boot.spec.ts`** — the boot sequence: progress, log, splash hiding,
-  theme/sound/inspector toggles, session-once behaviour.
+- **`world-3d.spec.ts`** (extend) — the boot sequence beyond gate-and-enter: progress,
+  log, and the theme/sound/inspector toggles.
 - **`world.spec.ts`** — explore toggle, station focus, deep links, radar, map
-  overlay, sector list.
+  overlay, sector list. Tag `@full-motion`: these only exist with the canvas up.
 - **`world-responsive.spec.ts`** — the "never crops" non-negotiable at ultrawide,
-  laptop, tablet, portrait phone.
-- **`reduced-motion.spec.ts`** — with `prefers-reduced-motion: reduce` the canvas
-  is not mounted and the entire site is still navigable.
+  laptop, tablet, portrait phone. `@full-motion`, since cropping is a camera concern.
 - **`ask-agent.spec.ts`** — the `/api/chat` journey with the route mocked:
   streaming answer, citations, retrieval badge, 429, 503, refusal, stop.
 - **`command-menu.spec.ts`** (extend) — ⌘K, ⌘1/⌘2 mode switch, navigate, theme,
   empty state.
 - **`a11y.spec.ts`** (extend) — axe on all 17 routes, plus focus-visible,
-  focus-trap-free panels, and keyboard-only traversal.
+  focus-trap-free panels, and keyboard-only traversal. Untagged, so every route is
+  scanned in both motion modes — that is 34 scans, so watch the wall time.
 - **`content-in-dom.spec.ts`** — destination content is server-rendered and
-  present without any 3D interaction (the crawlability non-negotiable).
+  present without any 3D interaction (the crawlability non-negotiable). Untagged: the
+  point is that it holds identically with and without the canvas.
 - **`visual.spec.ts`** — the ~8–10 baselines, paths-filtered job, Docker-pinned.
 
 Exit: the restructure now has a net that fails loudly on any behaviour change.
@@ -451,10 +464,17 @@ cap moves no code, so there is nothing for this suite to verify.)
 ## 7. CI budget
 
 `AGENTS.md` records the real constraints: **2,000 Actions minutes/month** and a
-**500 MB artifact quota**, with no required status checks available. This plan
-roughly doubles E2E wall time, so:
+**500 MB artifact quota**, with no required status checks available. The dual-motion
+split already cost ~2.5 min (≈20s → 2.7m at `workers: 1`), and this plan roughly
+doubles what remains, so:
 
 - Keep Playwright on **chromium only**; do not add browsers for coverage's sake.
+- **Tag deliberately.** Untagged specs run twice. That is right for anything asserting
+  behaviour that must hold in both modes, and waste for anything else — the `@full-motion`
+  / `@reduced-motion` tags are the wall-time lever, so reach for them before reaching
+  for `workers`.
+- **Do not raise `workers` above 1 in CI** to claw time back. Five concurrent
+  SwiftShader contexts closed browser sessions locally; a shared CI runner is worse.
 - Run the **visual job paths-filtered** to `src/features/world/**`,
   `src/features/studio/**` and `src/config/brand.ts`, so it is skipped on most PRs.
 - Upload traces/screenshots **only on failure**, always with `retention-days` set —

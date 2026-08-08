@@ -19,17 +19,17 @@ pnpm dev
 
 ## Scripts
 
-| Script                 | What it does                                          |
-| ---------------------- | ----------------------------------------------------- |
-| `pnpm dev`             | Next.js dev server                                    |
-| `pnpm build`           | Production build (runs `agent:index:check` first)     |
-| `pnpm validate`        | lint + typecheck + `format:check` + unit tests + knip |
-| `pnpm test`            | Vitest unit tests (`test:watch`, `test:coverage`)     |
-| `pnpm e2e`             | Playwright + axe (`e2e:ui`, `e2e:install`)            |
-| `pnpm size`            | size-limit bundle budget (`size:why`)                 |
-| `pnpm analyze`         | Build with the bundle analyzer                        |
-| `pnpm agent:index`     | Rebuild the ⌘K agent retrieval index                  |
-| `pnpm prerender:check` | Assert must-be-static routes are still prerendered    |
+| Script                 | What it does                                                  |
+| ---------------------- | ------------------------------------------------------------- |
+| `pnpm dev`             | Next.js dev server                                            |
+| `pnpm build`           | Production build (runs `agent:index:check` first)             |
+| `pnpm validate`        | lint + typecheck + `format:check` + unit tests + knip         |
+| `pnpm test`            | Vitest unit tests (`test:watch`, `test:coverage`)             |
+| `pnpm e2e`             | Playwright + axe, both motion modes (`e2e:ui`, `e2e:install`) |
+| `pnpm size`            | size-limit bundle budget (`size:why`)                         |
+| `pnpm analyze`         | Build with the bundle analyzer                                |
+| `pnpm agent:index`     | Rebuild the ⌘K agent retrieval index                          |
+| `pnpm prerender:check` | Assert must-be-static routes are still prerendered            |
 
 Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
 `e2e`.
