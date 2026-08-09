@@ -1,9 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
+import type { Options } from "./tests/e2e/fixtures";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
 
-export default defineConfig({
+export default defineConfig<Options>({
   testDir: "./tests/e2e",
   outputDir: "./test-results",
   fullyParallel: true,
@@ -38,12 +39,24 @@ export default defineConfig({
   projects: [
     {
       name: "reduced-motion",
-      use: { ...devices["Desktop Chrome"], contextOptions: { reducedMotion: "reduce" } },
+      use: {
+        ...devices["Desktop Chrome"],
+        contextOptions: { reducedMotion: "reduce" },
+        canvasMounts: false,
+      },
       grepInvert: /@full-motion/,
     },
     {
       name: "full-motion",
-      use: { ...devices["Desktop Chrome"], contextOptions: { reducedMotion: "no-preference" } },
+      use: {
+        ...devices["Desktop Chrome"],
+        contextOptions: { reducedMotion: "no-preference" },
+        // Declared rather than inferred from the project name, so an untagged spec can
+        // wait for the world where it exists and skip the wait where it never will.
+        // Without that, a DOM snapshot taken before hydration is just a second copy of
+        // the reduced-motion run — the same trap the project split was added to close.
+        canvasMounts: true,
+      },
       grepInvert: /@reduced-motion/,
       // A continuously rendering scene on a software renderer competes with the
       // assertion loop for CPU: the same `/about` portrait check settles in 395ms with

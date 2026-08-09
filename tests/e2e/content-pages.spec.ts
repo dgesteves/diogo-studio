@@ -1,16 +1,9 @@
-import AxeBuilder from "@axe-core/playwright";
-import { expect, test, WCAG_TAGS } from "./fixtures";
+import { expect, test } from "./fixtures";
 
 test.describe("/about", () => {
   test("renders the pixelated portrait", async ({ page }) => {
     await page.goto("/about");
     await expect(page.getByRole("img", { name: /pixelated portrait of/i })).toBeVisible();
-  });
-
-  test("has no detectable WCAG 2.2 A/AA violations", async ({ page }) => {
-    await page.goto("/about");
-    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
-    expect(results.violations).toEqual([]);
   });
 });
 

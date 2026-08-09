@@ -7,7 +7,8 @@ export const MODIFIER = process.platform === "darwin" ? "Meta" : "Control";
 /** Mirrors `BOOT_SESSION_KEY` in `src/stores/boot-store.ts`. */
 const BOOT_SESSION_KEY = "studio-booted";
 
-type Options = {
+/** Exported so `playwright.config.ts` can type the `use` blocks that set these. */
+export type Options = {
   /**
    * In the `full-motion` project the canvas mounts, which puts `BootSequence`'s
    * click-gated Radix dialog in front of every page load — and `getByRole("dialog")`
@@ -16,10 +17,19 @@ type Options = {
    * the same behavior in both projects. `world-3d.spec.ts` opts out to test boot.
    */
   skipBoot: boolean;
+
+  /**
+   * Whether this project's pages end up with a 3D canvas — set per project in
+   * `playwright.config.ts`, not guessed from the project name. An untagged spec that
+   * inspects the DOM needs it: in `full-motion`, anything asserted before the canvas
+   * mounts is measuring the same markup the `reduced-motion` run already measured.
+   */
+  canvasMounts: boolean;
 };
 
 export const test = base.extend<Options>({
   skipBoot: [true, { option: true }],
+  canvasMounts: [false, { option: true }],
   page: async ({ page, skipBoot }, use) => {
     if (skipBoot) {
       await page.addInitScript((key: string) => {
@@ -63,6 +73,17 @@ export async function openInspector(page: Page) {
 
 /** WCAG 2.2 AA is the documented bar, so scan for it — `wcag22aa` adds `target-size`. */
 export const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+/**
+ * A cold first visit compiles every shader before the canvas is attached, hence the
+ * budget — the same one `world-3d.spec.ts` uses for the boot gate. Call this before any
+ * assertion that should see the world as a visitor does; in `reduced-motion` it returns
+ * immediately, because there is nothing to wait for and never will be.
+ */
+export async function settleWorld(page: Page, canvasMounts: boolean): Promise<void> {
+  if (!canvasMounts) return;
+  await expect(page.locator("canvas").first()).toBeAttached({ timeout: 30_000 });
+}
 
 /**
  * `<head>` contracts are asserted over HTTP: nobody looks at this markup, so rendering
