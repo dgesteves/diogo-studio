@@ -89,6 +89,12 @@ jobs:
         continue-on-error: true
         run: pnpm size
 
+  # Deliberately one job with one worker. Two ways of parallelising this were measured and
+  # both rejected: `--workers=2` oversubscribes a 2 vCPU Free runner, because Chromium and
+  # the single `pnpm start` server share it — 3 of 26 tests needed a retry and `mobile-nav`
+  # sat on its route's `Loading` fallback for the full 15s. And `--shard=n/2` splits along
+  # the project boundary (all 22 reduced-motion in one shard, all 22 full-motion in the
+  # other), so wall time stays bounded by full-motion and only the minute bill goes up.
   e2e:
     name: E2E (Playwright)
     needs: build
@@ -114,6 +120,13 @@ jobs:
       - name: Install system deps (cache hit)
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: pnpm exec playwright install-deps chromium
+      - name: Restore Next.js build cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm build
       - run: pnpm exec playwright test
         env:

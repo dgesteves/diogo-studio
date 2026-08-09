@@ -183,9 +183,14 @@ path to `tsconfig.json` when the first vitest helper lands.
   assertion settles in 395ms without a canvas and 9.3s with one. Do not "fix" a slow
   full-motion assertion by adding a sleep, and do not raise the **global** timeout —
   reduced-motion specs must stay on the strict default.
-- **Workers are capped at 2 locally (1 in CI).** Five concurrent SwiftShader contexts
-  starve each other badly enough to close browser sessions. If you see
-  `Protocol error … session closed`, that is the cause.
+- **Workers are capped at 2 locally (1 in CI), for two unrelated reasons.** Locally, five
+  concurrent SwiftShader contexts starve each other badly enough to close browser
+  sessions — if you see `Protocol error … session closed`, that is the cause. On CI the
+  limit is the runner: 2 vCPU shared by Chromium _and_ the `pnpm start` server, so
+  `--workers=2` starves the **server** and a route hangs in its `Loading` fallback past
+  the expect budget. Do not raise CI to match local, and do not shard to work around it —
+  `--shard=n/2` splits on the project boundary and buys nothing. See
+  [`docs/decisions.md`](../../docs/decisions.md).
 - **Axe scans `WCAG_TAGS` from the fixtures**, which includes `wcag22aa` to match the
   documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
   2.2 AA is not automatable, so the bar is still partly a manual claim.

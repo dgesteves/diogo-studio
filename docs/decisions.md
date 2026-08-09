@@ -6,6 +6,48 @@ not for every change.
 
 ---
 
+## 2026-08-09 — CI E2E stays at one worker in one job; the win was a cold build, not parallelism
+
+The Actions minute budget is not the constraint — 2,000/month against ~15 minutes a push
+is ~130 pushes, far more than this repo sees. That makes it tempting to "use as many
+workers as we can", and minutes even reward it, since they bill wall-clock: finishing
+sooner costs _less_. Both ways of doing it were measured and both rejected.
+
+**`--workers=2` oversubscribes the runner.** A Free runner has 2 vCPU _total_, shared by
+Chromium and the one `pnpm start` server. At `--workers=2` in `scripts/ci-local.sh`, 3 of
+26 tests needed a retry and went green only on `retries: 2`. The three failed for three
+different reasons, and the interesting one was `mobile-nav`: its snapshot was
+
+```yaml
+- main:
+    - main "Loading":
+        - status
+```
+
+— the route's Suspense fallback, held for the entire 15s budget. The starved process was
+the **server**, not the browser, so no amount of test-side readiness work buys it back.
+This is why `workers: 1` on CI is not a copy of the local `2`; they are capped for
+unrelated reasons, and the local number does not transfer.
+
+**`--shard=n/2` splits along the project boundary.** Playwright shards by test count in
+listing order, and that order groups by project, so `--shard=1/2` took all 22
+`reduced-motion` tests and `--shard=2/2` all 22 `full-motion` ones. Since `full-motion`
+(software rendering, 15s expect budget) dominates the runtime, wall time is bounded by
+that shard and barely moves, while the fixed per-job cost — checkout, install, browsers,
+build — is paid twice. A 4-way shard would genuinely split `full-motion`, but at ~3
+minutes of setup per extra runner to save ~1.5 minutes of test time.
+
+**What actually helped**: the `e2e` job ran `pnpm build` without restoring `.next/cache`,
+unlike the `build` job, so every E2E run paid a cold production build. It now restores the
+same cache key, and because `e2e` `needs: build` the key is already warm. No added flake
+risk, no extra minutes.
+
+Sharding becomes worth revisiting only when pure test time grows well past the fixed
+setup cost — and if the `full-motion` races are ever fixed, `workers: 2` would deliver the
+same saving with no extra minutes, making it the better lever of the two.
+
+---
+
 ## 2026-08-09 — The world stops paying for itself when the renderer cannot keep up
 
 Three days of boot-gate failures were never a test problem. On CI the page was blocked

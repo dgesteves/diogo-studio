@@ -13,6 +13,14 @@ export default defineConfig({
   // per test, and at the default (cpus/2) five concurrent SwiftShader contexts starve
   // each other badly enough to close browser sessions. Measured: 10 of 22 full-motion
   // tests failed at 5 workers, 1 at 1 worker, 0 at 2 with the budgets below.
+  //
+  // CI stays at 1 for a different reason, so raising it to match the local 2 does not
+  // work: a Free runner has 2 vCPU total, shared by Chromium *and* the one `pnpm start`
+  // server. At `--workers=2` in `scripts/ci-local.sh` the server was starved and
+  // `mobile-nav` sat on `main "Loading"` — its route's Suspense fallback — for the whole
+  // 15s budget, with 3 of 26 tests needing a retry. Sharding across runners does not help
+  // either: `--shard=n/2` splits on the project boundary, so one shard takes all 22
+  // full-motion tests and wall time is unchanged. See `docs/decisions.md`.
   workers: process.env.CI ? 1 : 2,
   reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
   use: {
