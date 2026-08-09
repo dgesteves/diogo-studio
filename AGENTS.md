@@ -52,12 +52,14 @@ content change is done; the suite was silently red on `main` for weeks because
 nobody did. It is **44/44 in `pnpm e2e:runner`** — 8 spec files, 26 tests, across two
 projects (`reduced-motion` and `full-motion`), 3.7 min at `workers: 1`.
 
-**Host `pnpm e2e` is not 44/44**, and that is not a regression to chase: 2–3 of the
-`inspector-overlay` specs fail there, varying run to run. They press ``Ctrl+` `` straight
-after `goto`, so they race hydration — which `next dev` makes slow and `retries: 0`
-makes visible. Verified pre-existing by stashing all local work and re-running: the same
-test IDs fail on a clean tree. They pass in `e2e:ci` and `e2e:runner`, which is what CI
-runs. Fix the race before trusting host `pnpm e2e` as a gate again.
+**Open the ⌘K menu and the inspector through the `fixtures.ts` helpers**
+(`openWithShortcut`, `openInspector`), never a bare `keyboard.press` after `goto`. Both
+listeners are attached in a `useEffect`, so they do not exist until React hydrates, and
+nothing in the DOM distinguishes server markup from hydrated. Pressing once into a page
+that cannot yet hear it is what made 2–3 `inspector-overlay` specs fail on the host, in a
+different combination every run, while passing under `e2e:ci` and `e2e:runner` — the
+production build hydrates fast enough to hide it. `openInspector` guards on visibility
+before pressing, because ``Ctrl+` `` toggles and a blind retry closes what it opened.
 
 `pnpm size` is a **review signal, not a gate** — its CI step is `continue-on-error`,
 deliberately, so that a bundle regression cannot also sink the `e2e` job via
