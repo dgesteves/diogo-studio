@@ -39,11 +39,13 @@ export const agentSourcesPayloadSchema = z.object({
   refused: z.boolean(),
 });
 
+const MISSING_QUERY = "Missing `query` string.";
+
 export const chatRequestSchema = z.object({
   query: z
-    .string()
+    .string({ error: MISSING_QUERY })
     .trim()
-    .min(1, "Missing `query` string.")
+    .min(1, MISSING_QUERY)
     .max(600, "Query too long (max 600 chars)."),
 });
 
