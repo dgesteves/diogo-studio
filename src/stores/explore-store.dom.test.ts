@@ -1,9 +1,5 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { getExploreSnapshot, setExplore, subscribeExplore, toggleExplore } from "./explore-store";
-
-afterEach(() => {
-  setExplore(false);
-});
 
 describe("explore-store", () => {
   it("toggles and reflects the active flag", () => {

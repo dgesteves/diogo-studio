@@ -1,17 +1,11 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import {
   getBootSnapshot,
   hasBootedThisSession,
   markBootedThisSession,
   markWorldReady,
-  resetBoot,
   setBootProgress,
 } from "./boot-store";
-
-afterEach(() => {
-  resetBoot();
-  window.sessionStorage.clear();
-});
 
 describe("boot-store progress", () => {
   it("clamps and rounds reported progress", () => {

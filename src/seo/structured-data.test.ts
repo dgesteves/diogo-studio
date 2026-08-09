@@ -1,4 +1,3 @@
-// @vitest-environment node
 import { describe, expect, it } from "vitest";
 import { siteConfig } from "@/config/site";
 import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";

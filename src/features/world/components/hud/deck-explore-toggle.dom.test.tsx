@@ -1,12 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { afterEach, describe, expect, it } from "vitest";
-import { getExploreSnapshot, setExplore } from "@/stores/explore-store";
+import { describe, expect, it } from "vitest";
+import { getExploreSnapshot } from "@/stores/explore-store";
 import { DeckExploreToggle } from "./deck-explore-toggle";
-
-afterEach(() => {
-  setExplore(false);
-});
 
 describe("DeckExploreToggle", () => {
   it("toggles explore mode when the user activates it", async () => {

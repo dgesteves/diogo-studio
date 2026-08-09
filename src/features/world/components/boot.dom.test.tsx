@@ -1,13 +1,8 @@
 import { act, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
-import {
-  BOOT_SESSION_KEY,
-  hasBootedThisSession,
-  markWorldReady,
-  resetBoot,
-} from "@/stores/boot-store";
+import { BOOT_SESSION_KEY, hasBootedThisSession, markWorldReady } from "@/stores/boot-store";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import {
   BOOT_EXIT_MS,
@@ -46,6 +41,15 @@ function advance(ms: number): void {
   });
 }
 
+// Entering fires setExiting and setInspectorOpen synchronously inside the click, which
+// user-event does not wrap once fake timers are driving it.
+async function click(user: UserEvent, name: RegExp): Promise<void> {
+  const target = screen.getByRole("button", { name });
+  await act(async () => {
+    await user.click(target);
+  });
+}
+
 function reachReadyState(): void {
   advance(BOOT_MIN_MS);
   act(() => {
@@ -59,9 +63,6 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers();
-  resetBoot();
-  persistOverride(null);
-  window.sessionStorage.clear();
 });
 
 describe("Boot gate", () => {
@@ -114,7 +115,7 @@ describe("Boot gate", () => {
     const { unmount } = render(<BootSequence />);
     reachReadyState();
 
-    await user.click(screen.getByRole("button", { name: /enter the studio/i }));
+    await click(user, /enter the studio/i);
     advance(BOOT_EXIT_MS);
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
@@ -130,7 +131,7 @@ describe("Boot gate", () => {
     const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     render(<BootSequence />);
 
-    await user.click(screen.getByRole("button", { name: /skip intro/i }));
+    await click(user, /skip intro/i);
     advance(BOOT_EXIT_MS);
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();

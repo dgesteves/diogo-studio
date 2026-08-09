@@ -62,7 +62,6 @@ async function renderScene(mode: WorldMode = "night"): Promise<SceneQuery> {
 
 afterEach(async () => {
   await Promise.all(renderers.splice(0).map((renderer) => renderer.unmount()));
-  setWorldMode("night");
 });
 
 describe("StudioScene", () => {
