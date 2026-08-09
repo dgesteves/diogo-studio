@@ -46,5 +46,20 @@ export async function openWithShortcut(page: Page) {
   return dialog;
 }
 
+/**
+ * Same hydration race as `openWithShortcut`, with one difference that matters: ``Ctrl+` ``
+ * *toggles*, so retrying blindly would close the overlay it just opened. Press only when
+ * it is not already showing, which converges whether the miss was the listener or the
+ * render.
+ */
+export async function openInspector(page: Page) {
+  const region = page.getByRole("region", { name: /performance inspector overlay/i });
+  await expect(async () => {
+    if (!(await region.isVisible())) await page.keyboard.press("Control+Backquote");
+    await expect(region).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  return region;
+}
+
 /** WCAG 2.2 AA is the documented bar, so scan for it — `wcag22aa` adds `target-size`. */
 export const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];

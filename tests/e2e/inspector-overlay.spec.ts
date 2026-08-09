@@ -1,26 +1,19 @@
-import { expect, test } from "./fixtures";
-
-const overlay = (name = /performance inspector overlay/i) => ({ name });
+import { expect, openInspector, test } from "./fixtures";
 
 test("toggles with Ctrl+` and closes with Escape", async ({ page }) => {
   await page.goto("/");
-  const region = page.getByRole("region", overlay());
+  const region = await openInspector(page);
 
+  await page.keyboard.press("Escape");
   await expect(region).toBeHidden();
 
   await page.keyboard.press("Control+Backquote");
   await expect(region).toBeVisible();
-
-  await page.keyboard.press("Escape");
-  await expect(region).toBeHidden();
 });
 
 test("closes via the close button", async ({ page }) => {
   await page.goto("/");
-  await page.keyboard.press("Control+Backquote");
-
-  const region = page.getByRole("region", overlay());
-  await expect(region).toBeVisible();
+  const region = await openInspector(page);
 
   await region.getByRole("button", { name: /close inspector overlay/i }).click();
   await expect(region).toBeHidden();
@@ -28,10 +21,7 @@ test("closes via the close button", async ({ page }) => {
 
 test("surfaces web-vitals, route JS, and a live motion override", async ({ page }) => {
   await page.goto("/");
-  await page.keyboard.press("Control+Backquote");
-
-  const region = page.getByRole("region", overlay());
-  await expect(region).toBeVisible();
+  const region = await openInspector(page);
 
   await expect(region.getByText("Web Vitals")).toBeVisible();
   await expect(region.getByText("Route JS")).toBeVisible();
