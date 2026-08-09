@@ -39,19 +39,20 @@ export const rootMetadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  // Deliberately without `title`, `description` or `url`. An explicit value here is
+  // inherited verbatim by every child route rather than being overridden by that
+  // route's own `title` / `description`, so pinning them made all 17 pages share the
+  // home page's social preview and point `og:url` at `/`. Omitted, Next derives
+  // `og:title` and `og:description` per page from the resolved metadata, and Twitter's
+  // in turn from Open Graph. Asserted in `tests/e2e/seo.spec.ts`.
   openGraph: {
     type: "website",
     siteName,
-    title: siteTitle,
-    description: siteDescription,
-    url: "/",
     locale: "en_US",
     images: [ogImage],
   },
   twitter: {
     card: "summary_large_image",
-    title: siteTitle,
-    description: siteDescription,
     creator: siteConfig.twitterHandle,
     images: [ogImage],
   },

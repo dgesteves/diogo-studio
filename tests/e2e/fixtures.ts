@@ -63,3 +63,21 @@ export async function openInspector(page: Page) {
 
 /** WCAG 2.2 AA is the documented bar, so scan for it — `wcag22aa` adds `target-size`. */
 export const WCAG_TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"];
+
+/**
+ * `<head>` contracts are asserted over HTTP: nobody looks at this markup, so rendering
+ * seventeen pages to read it would buy nothing. Both readers return `null` rather than
+ * throwing, so a missing tag fails on the assertion that names it.
+ *
+ * Values come back HTML-escaped exactly as served, which is what makes comparing
+ * `og:title` to `<title>` meaningful — both sides carry the same `&amp;`.
+ */
+export function readTitle(html: string): string | null {
+  return /<title>([^<]*)<\/title>/.exec(html)?.[1] ?? null;
+}
+
+export function readMeta(html: string, key: string): string | null {
+  return (
+    new RegExp(`<meta[^>]+(?:name|property)="${key}"[^>]+content="([^"]*)"`).exec(html)?.[1] ?? null
+  );
+}

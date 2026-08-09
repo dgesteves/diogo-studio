@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site";
 import { routes, type RoutePath } from "@/constants/routes";
-import { expect, test } from "./fixtures";
+import { expect, readMeta, readTitle, test } from "./fixtures";
 
 /**
  * Every route, asserted end to end — the one thing only a browser can tell us about a
@@ -77,8 +77,8 @@ test.describe("Every route", () => {
       expect(response.status(), `${path} is served`).toBe(200);
       const html = await response.text();
 
-      const title = firstGroup(html, /<title>([^<]*)<\/title>/);
-      const description = firstGroup(html, /<meta[^>]+name="description"[^>]+content="([^"]*)"/);
+      const title = readTitle(html);
+      const description = readMeta(html, "description");
 
       expect(title, `${path} has a non-empty title`).toBeTruthy();
       expect(description, `${path} has a non-empty description`).toBeTruthy();
@@ -101,7 +101,3 @@ test.describe("Every route", () => {
     expect(descriptions.size).toBe(ROUTE_PATHS.length);
   });
 });
-
-function firstGroup(html: string, pattern: RegExp): string | null {
-  return pattern.exec(html)?.[1] ?? null;
-}
