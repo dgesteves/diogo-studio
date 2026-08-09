@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["sharp", "@commitlint/types"],
+  "ignoreDependencies": ["sharp"],
   "ignoreExportsUsedInFile": true,
   "playwright": {
     "config": ["playwright.config.ts"],

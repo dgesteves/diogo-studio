@@ -1,3 +1,4 @@
+import type { Linter } from "eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
@@ -7,16 +8,25 @@ import prettier from "eslint-config-prettier/flat";
 // guardrail below covers it.
 const FEATURES = ["about", "audio", "command-menu", "home", "inspector", "studio", "world"];
 
-const DEEP_FEATURE_IMPORT = {
+type ImportPattern = { group: string[]; message: string };
+
+const DEEP_FEATURE_IMPORT: ImportPattern = {
   group: ["@/features/*/**"],
   message:
     "Cross-feature imports go through the feature's index.ts (@/features/world), never a deep path.",
 };
 
-const ROUTING_IS_A_LEAF = {
+const ROUTING_IS_A_LEAF: ImportPattern = {
   group: ["@/app", "@/app/**"],
   message: "app/ is the routing layer and a leaf — nothing may import from it.",
 };
+
+// Rule entries only get their tuple type from context, so anything built outside a
+// defineConfig literal needs its own annotation.
+const restrictedImports = (...patterns: ImportPattern[]): Linter.RuleEntry => [
+  "warn",
+  { patterns },
+];
 
 // eslint-config-next's `next` entry globs every file in the repo and brings the react,
 // react-hooks and jsx-a11y plugins with it — 40 enabled rules that also reach tests/ and
@@ -27,15 +37,18 @@ const ROUTING_IS_A_LEAF = {
 // than hardcoded, so a new upstream rule is covered without editing this list.
 const REACT_FAMILY = ["react", "react-hooks", "jsx-a11y"];
 
+const reactFamilyRulesOff: Linter.RulesRecord = {};
+
+for (const rule of [...nextVitals, ...nextTs]
+  .flatMap((entry) => Object.keys(entry.rules ?? {}))
+  .filter((rule) => REACT_FAMILY.some((plugin) => rule.startsWith(`${plugin}/`)))) {
+  reactFamilyRulesOff[rule] = "off";
+}
+
 const NO_REACT_OUTSIDE_SRC = {
   name: "no-react-outside-src",
   files: ["tests/**/*.{ts,tsx}", "scripts/**/*.{ts,tsx}"],
-  rules: Object.fromEntries(
-    [...nextVitals, ...nextTs]
-      .flatMap((entry) => Object.keys(entry.rules ?? {}))
-      .filter((rule) => REACT_FAMILY.some((plugin) => rule.startsWith(`${plugin}/`)))
-      .map((rule) => [rule, "off"]),
-  ),
+  rules: reactFamilyRulesOff,
 };
 
 const eslintConfig = defineConfig([
@@ -55,7 +68,7 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/explicit-module-boundary-types": "error",
-      "no-restricted-imports": ["warn", { patterns: [DEEP_FEATURE_IMPORT, ROUTING_IS_A_LEAF] }],
+      "no-restricted-imports": restrictedImports(DEEP_FEATURE_IMPORT, ROUTING_IS_A_LEAF),
       "no-restricted-syntax": [
         "error",
         {
@@ -89,19 +102,14 @@ const eslintConfig = defineConfig([
   ...FEATURES.map((feature) => ({
     files: [`src/features/${feature}/**/*.{ts,tsx}`],
     rules: {
-      "no-restricted-imports": [
-        "warn",
+      "no-restricted-imports": restrictedImports(
         {
-          patterns: [
-            {
-              group: [`@/features/${feature}`, `@/features/${feature}/**`],
-              message: `Inside features/${feature}, import relatively — never through the @/features/${feature} alias.`,
-            },
-            DEEP_FEATURE_IMPORT,
-            ROUTING_IS_A_LEAF,
-          ],
+          group: [`@/features/${feature}`, `@/features/${feature}/**`],
+          message: `Inside features/${feature}, import relatively — never through the @/features/${feature} alias.`,
         },
-      ],
+        DEEP_FEATURE_IMPORT,
+        ROUTING_IS_A_LEAF,
+      ),
     },
   })),
   {
