@@ -15,6 +15,11 @@ test.describe("Reduced motion", { tag: "@reduced-motion" }, () => {
     // world-stage.tsx gates the canvas on `isClient && !reducedMotion`, so give
     // hydration a chance to mount it before asserting that it did not.
     await expect(page.locator("canvas")).toHaveCount(0);
+
+    // The other half of the pair `world-3d.spec.ts` asserts holds a real tier. Together
+    // they make the attribute meaningful rather than decorative: "off" only where there
+    // is no canvas, and never "off" where there is one.
+    await expect(page.locator("[data-world-root]")).toHaveAttribute("data-world-quality", "off");
   });
 
   test("the site is fully navigable with no 3D", async ({ page }) => {

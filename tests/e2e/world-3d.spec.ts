@@ -13,9 +13,20 @@ test.describe("The 3D world", { tag: "@full-motion" }, () => {
 
     await expect(page.locator("canvas").first()).toBeAttached({ timeout: 20_000 });
 
+    const worldRoot = page.locator("[data-world-root]");
+
     // The world is decorative: it must be hidden from assistive tech, and the page
     // content must not depend on it.
-    await expect(page.locator("[data-world-root]")).toHaveAttribute("aria-hidden", "true");
+    await expect(worldRoot).toHaveAttribute("aria-hidden", "true");
+
+    // The tier the world settled on is the first thing to read when a full-motion spec
+    // misbehaves, and nothing asserted that it is reported at all — restructure Phase 4
+    // moves this component, and the attribute is the whole diagnostic. The value is
+    // deliberately not pinned: it is `full` on a GPU and `frozen` on CI's software
+    // renderer. What must hold is that a mounted canvas is never reported as "off" —
+    // the reduced-motion value, asserted in `reduced-motion.spec.ts`. The ladder itself
+    // is pure and belongs to `frame-budget.test.ts`, not here.
+    await expect(worldRoot).toHaveAttribute("data-world-quality", /^(full|reduced|frozen)$/);
     await expect(
       page.getByRole("heading", { level: 1, name: /eleven years on the surfaces users touch/i }),
     ).toBeVisible();
