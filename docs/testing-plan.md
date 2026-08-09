@@ -573,9 +573,12 @@ browser adds and re-check no payloads.
   preferences, inverted from their defaults, and the inspector's default direction asserted
   in the existing boot test so that "off" cannot pass on a dead control.
 - ⏭️ **`visual.spec.ts`** — the ~8–10 baselines, paths-filtered job, Docker-pinned. **Not
-  done, and deliberately deferred**: §7 says visual regression is the first thing to cut if
-  minutes get tight, and this phase already took CI from ~3.7 min to ~7.4 min locally. It
-  needs its own decision, not a reflex.
+  done, and deliberately deferred**, with the reasoning now recorded in
+  [`decisions.md`](./decisions.md) rather than left as a status note. §7's minutes argument
+  holds — this phase already took CI from ~3.7 min to ~7.4 min locally — but the deciding
+  one is that **CI cannot photograph the world a visitor sees**: on SwiftShader the tier is
+  pinned to `frozen` before the canvas mounts, so a baseline records one demand-driven frame
+  at `DPR_DEGRADED` with `antialias: false`. Revisit it **DOM-only**, after Phases 5 and 6.
 
 **The boot progress bar and step log were dropped from this phase on purpose.** The bullet
 above asked for them; they are driven by three timers, `boot.dom.test.tsx` already covers

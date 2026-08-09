@@ -6,6 +6,32 @@ not for every change.
 
 ---
 
+## 2026-08-09 — Visual baselines are deferred, and the renderer is the reason
+
+`testing-plan.md` §5.1 planned ~8–10 `toHaveScreenshot()` baselines as the third layer over
+the 3D world, and Phase 2 shipped without them. §7's stated reason — visual regression is
+the first thing to cut when minutes get tight, and the phase already took the suite from
+~3.7 to ~7.4 min — is true, and it is the weaker half.
+
+The stronger half is that **CI cannot photograph the world a visitor sees.**
+`detectSoftwareRenderer()` resolves before the canvas mounts, and on SwiftShader — every CI
+run — it pins `WorldStage` to `frozen`, which `world-canvas.tsx` renders at
+`frameloop="demand"`, `DPR_DEGRADED` and `antialias: false`. A baseline captured there is a
+byte-record of the degraded tier: one painted frame, no antialiasing, fewer pixels. It would
+be perfectly stable and it would be evidence about a rendering path almost nobody gets.
+Pinning the Playwright Docker image fixes the stability, which was never the problem.
+
+What remains after that is "a mesh vanished or a material changed", and §5.1 already assigns
+it to RTTR — deterministically, in milliseconds, as a named assertion instead of a diff. So
+the layer's residual value is the **2D chrome**: HUD, deck, ⌘K, boot overlay, content pages,
+where the renderer is irrelevant and nothing today catches a design-token or CSS regression.
+
+Revisit it as a **DOM-only** baseline job, on the §7 paths filter, and only after
+testing-plan Phases 5 and 6 — draw-routine snapshots and scene-graph assertions are the
+instruments this app's 3D actually needs, and they sit at 0% and 22.3% respectively. Do not
+add whole-scene screenshots to compensate for that gap: §5.1 rejected it, and a baseline
+that gets re-approved on every red destroys its own signal.
+
 ## 2026-08-09 — `openGraph` title, description and url are not set at the root
 
 `rootMetadata` pinned all three, and Twitter's mirrored them. An explicit value in a
