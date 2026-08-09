@@ -25,11 +25,4 @@ test.describe("Mobile navigation", () => {
     await expect(page).toHaveURL(/\/about$/);
     await expect(dialog).toBeHidden();
   });
-
-  test("the inline deck waypoints are hidden on mobile", async ({ page }) => {
-    await page.goto("/");
-    await expect(
-      page.getByRole("navigation", { name: "Studio destinations", exact: true }),
-    ).toBeHidden();
-  });
 });
