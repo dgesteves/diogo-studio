@@ -66,26 +66,33 @@ for (const viewport of VIEWPORTS) {
         // Responsiveness moves the camera, not the objects — but that only holds if the
         // renderer is told the right size. A drawing buffer that does not match the element
         // is exactly what "cropped" looks like, and it survives every DOM assertion.
-        const canvas = await page
-          .locator("canvas")
-          .first()
-          .evaluate((element) => {
-            const node = element as HTMLCanvasElement;
-            return {
-              cssWidth: node.clientWidth,
-              cssHeight: node.clientHeight,
-              bufferWidth: node.width,
-              bufferHeight: node.height,
-              dpr: window.devicePixelRatio,
-            };
-          });
+        //
+        // The read is retried because attachment is not sizing: r3f hands the element to a
+        // ResizeObserver, and until that fires the canvas reports the HTML default of
+        // 300x150. Reading once passed on `pnpm dev` and measured 300 at ultrawide under
+        // `pnpm e2e:ci`, where the production build attaches sooner. Retrying the read is a
+        // web-first wait; letting `retries: 2` absorb it would have been masking.
+        await expect(async () => {
+          const canvas = await page
+            .locator("canvas")
+            .first()
+            .evaluate((element) => {
+              const node = element as HTMLCanvasElement;
+              return {
+                cssWidth: node.clientWidth,
+                cssHeight: node.clientHeight,
+                bufferWidth: node.width,
+                bufferHeight: node.height,
+              };
+            });
 
-        expect(canvas.cssWidth).toBe(viewport.width);
-        expect(canvas.cssHeight).toBe(viewport.height);
-        expect(canvas.bufferWidth / canvas.bufferHeight).toBeCloseTo(
-          canvas.cssWidth / canvas.cssHeight,
-          2,
-        );
+          expect(canvas.cssWidth).toBe(viewport.width);
+          expect(canvas.cssHeight).toBe(viewport.height);
+          expect(canvas.bufferWidth / canvas.bufferHeight).toBeCloseTo(
+            canvas.cssWidth / canvas.cssHeight,
+            2,
+          );
+        }).toPass({ timeout: 30_000 });
       },
     );
   });
