@@ -118,7 +118,8 @@ if any of the 19 must-be-static routes de-optimizes.
 ```
 
 There is no `src/lib/`, `src/db/`, `src/auth/`, `src/email/`, `src/api/`,
-`src/middleware.ts`, `messages/`, or `components/layout/`. The site currently has
+`src/proxy.ts` (nor its deprecated predecessor `src/middleware.ts`), `messages/`, or
+`components/layout/`. The site currently has
 no header, nav, or footer chrome — navigation is the 3D world plus the ⌘K menu.
 
 ## Layer responsibilities

@@ -19,8 +19,9 @@ description: Apply when handling environment variables, secrets, authentication/
   limiting; no Sentry DSN → Sentry is skipped. Preserve that property when adding
   a variable — never make a missing key break the build or a route.
 - **Authorize every mutation.** Verify authentication AND authorization inside
-  each Server Action / Route Handler — never rely on middleware, layout, or page
-  checks alone. Use `import "server-only"` to keep sensitive modules off the client.
+  each Server Action / Route Handler — never rely on `proxy.ts` (the Next.js 16
+  successor to `middleware.ts`), layout, or page checks alone. A proxy sits at the
+  network boundary and is explicitly not an authorization boundary. Use `import "server-only"` to keep sensitive modules off the client.
 - **Server Actions are public HTTP endpoints.** Treat every action like an
   exposed API: authenticate, authorize, and schema-validate its input — even
   if no UI currently calls it.
@@ -32,7 +33,7 @@ description: Apply when handling environment variables, secrets, authentication/
   `dangerouslySetInnerHTML`; if unavoidable, sanitize the HTML first.
 - **Security headers and CSP already exist** in `next.config.ts` (CSP, HSTS with
   preload, `X-Frame-Options`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`)
-  applied to `/:path*`. Extend that list — do not add a competing middleware or
+  applied to `/:path*`. Extend that list — do not add a competing `proxy.ts` or
   `vercel.json` header block. Known gap: `script-src`/`style-src` still use
   `'unsafe-inline'`; moving to a nonce-based CSP is the improvement worth making,
   and any new inline script or third-party origin must be added deliberately.

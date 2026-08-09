@@ -17,8 +17,15 @@ globs: app/**, src/app/**, **/app/**
   rendering** — use them intentionally and wrap dynamic subtrees in `<Suspense>`
   so the rest of the route can stay static.
 - Minimize `useEffect`/`useState` in favor of RSC + server data. Wrap any client
-  component that suspends in `<Suspense fallback={…}>`. Manage URL/query state
-  with a typed helper (e.g. `nuqs`) rather than ad-hoc `useState` + effects.
+  component that suspends in `<Suspense fallback={…}>`.
+- **URL state here is the pathname, not the query string.** The route-driven spine
+  means each station is its own route, read with `usePathname` and written with a
+  typed `router.push`; there is currently **no `useSearchParams`, no `searchParams`
+  prop, and no query parameter anywhere in `src/`**. Don't introduce ad-hoc
+  `useState` + effects to mirror the URL. If a genuine query parameter arrives
+  (a filter, a paginated list), `nuqs` is the pre-approved typed helper — but it is
+  **not installed**, so adding it is a dependency decision that needs an entry in
+  [`docs/decisions.md`](../../docs/decisions.md), not a default.
 
 ## Routing & file conventions
 
@@ -38,9 +45,21 @@ globs: app/**, src/app/**, **/app/**
   server-only modules live in named top-level folders (`src/ai/`,
   `src/rate-limit.ts`) marked `import "server-only"`. The project-structure rule is
   the authority on placement.
-- Keep **middleware** lean and fast: optimistic checks (session cookie
-  presence, redirects, headers) only — no data fetching or heavy work. Real
-  authorization happens in the data layer and inside each action/handler.
+- **It is `proxy.ts` now, not `middleware.ts`.** Next.js 16 renamed the convention:
+  the file is `proxy.ts` (root or `src/`), the default export is `proxy`, and it runs
+  on the **Node.js runtime only** — the runtime is not configurable. `middleware.ts`
+  still works but is deprecated and slated for removal, and `skipMiddlewareUrlNormalize`
+  is deprecated in favor of `skipProxyUrlNormalize`. It is a rename, not a new API:
+  the request/response types are still `NextRequest` / `NextResponse` from
+  `next/server`, and there is no `next/proxy` module — several migration blog posts
+  claim otherwise and are wrong.
+- Keep the **proxy** lean and fast: optimistic checks (session cookie presence,
+  redirects, headers) only — no data fetching or heavy work. It sits at the network
+  boundary and is **not an authorization boundary**; real authorization happens in the
+  data layer and inside each handler.
+- **This repo has neither file**, and security headers are set in `next.config.ts` —
+  treat the two bullets above as guidance for if one is ever added, and don't add a
+  `proxy.ts` to do something the config already does.
 
 ## Data fetching, caching & rendering
 
@@ -69,7 +88,7 @@ globs: app/**, src/app/**, **/app/**
 
 - Prefer **Server Actions** for mutations and forms. Validate input with a schema
   inside the action, and **authenticate + authorize inside every action** — never
-  rely on middleware/layout/page checks alone.
+  rely on `proxy.ts`/layout/page checks alone.
 - Keep server-only modules marked with `import "server-only"`. After a mutation,
   revalidate affected caches and return typed, `useActionState`-friendly results.
 - **Reality check for this repo:** there are currently **no Server Actions and no

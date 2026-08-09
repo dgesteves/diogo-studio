@@ -6,6 +6,37 @@ not for every change.
 
 ---
 
+## 2026-08-09 — `nuqs` is not installed; the URL state here is the pathname
+
+`.devin/rules/nextjs-app-router.md` told you to manage URL state "with a typed helper
+(e.g. `nuqs`)". `nuqs` is not a dependency and never has been, so the rule pointed at
+something no one could follow — the same class of defect the rule set corrects elsewhere
+(`react-hook-form` is explicitly flagged as absent two files away). The obvious fix is to
+install it. That is the wrong fix.
+
+**There is no query state in this repo at all.** No `useSearchParams`, no `searchParams`
+prop, no query parameter in any of the 17 routes. Navigation is entirely pathname-based —
+`usePathname` to read, typed `router.push` to write — which is the route-driven spine
+`AGENTS.md` lists as a non-negotiable: one station per route, deep-linkable, with
+`metadata`. A query-string helper has nothing to manage.
+
+Installing it anyway would have cost more than the wording did. `knip` fails on unused
+dependencies and `pnpm validate` runs `knip`, so a consumer-less `nuqs` turns the gate red
+the moment it lands; the only way to keep it green is an `ignoreDependencies` entry in
+`knip.json`, which is deliberately blinding the tool that exists to catch exactly this.
+Add the install weight and a standing upgrade obligation and the trade is plainly bad
+against `00-core.md`'s "don't add a dependency for something the framework already
+solves". Nothing needs solving yet.
+
+**So the rule was rewritten to describe the codebase, and `nuqs` is pre-approved for the
+day a real query parameter arrives** — a filter on `/work`, a paginated list. At that
+point it is a good choice and this entry is the justification; until then the bullet says
+what the repo does. The general form of the lesson: when a rule and the tree disagree,
+change whichever one is wrong, and a rule recommending an uninstalled package is almost
+always the wrong one. Do not install a dependency to make a sentence true.
+
+---
+
 ## 2026-08-09 — US English is the project language, enforced by review rather than tooling
 
 The repo was not mixed, as it appeared — it was consistently **British**. Every one of
