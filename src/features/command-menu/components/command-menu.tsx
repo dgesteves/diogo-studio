@@ -13,7 +13,7 @@ import { Footer } from "./command-menu-footer";
 import { NavigateView } from "./command-menu-navigate";
 
 export function CommandMenu(): ReactElement {
-  const { open, setOpen, mode, setMode } = useCommandMenu();
+  const { open, setOpen, mode, setMode, openerRef } = useCommandMenu();
   const { reducedMotion } = useReducedMotionPreference();
   const [openTick, setOpenTick] = useState(0);
 
@@ -42,6 +42,20 @@ export function CommandMenu(): ReactElement {
     setOpen(false);
   }
 
+  // Radix's modal content prevents FocusScope's own restore and focuses `Dialog.Trigger`
+  // instead — and this menu has no trigger, because it opens from the deck, the hero CTA
+  // and ⌘K alike. So closing it dropped focus on `<body>`, stranding a keyboard visitor
+  // at the top of the document. The store remembers the opener at the moment of the
+  // action, which is the only point early enough: by `onOpenAutoFocus` the menu has
+  // already focused its own input. Preventing the default here skips Radix's
+  // null-trigger handler, so this focus call is the last one to run.
+  function restoreOpenerFocus(event: Event): void {
+    const opener = openerRef.current;
+    if (!opener?.isConnected) return;
+    event.preventDefault();
+    opener.focus();
+  }
+
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
@@ -54,6 +68,7 @@ export function CommandMenu(): ReactElement {
         />
         <Dialog.Content
           aria-describedby={undefined}
+          onCloseAutoFocus={restoreOpenerFocus}
           className={cn(
             "border-border-strong bg-surface fixed top-[18%] left-1/2 z-50 flex w-[min(640px,calc(100vw-2rem))] -translate-x-1/2 flex-col overflow-hidden rounded-lg border shadow-2xl shadow-black/20",
             !reducedMotion &&

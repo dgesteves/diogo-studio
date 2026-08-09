@@ -48,7 +48,10 @@ test.describe("Accessibility", () => {
   });
 });
 
-/** The keyboard requirements axe cannot see: it scans markup, not what focus does. */
+/**
+ * The keyboard requirements axe cannot see: it scans markup, not what focus does. Both
+ * are WCAG AA, and the second one was broken until the commit that added it.
+ */
 test.describe("Keyboard operation", () => {
   test("focus is visible on the element the keyboard moved to", async ({ page }) => {
     await page.goto(routes.work);
@@ -75,4 +78,31 @@ test.describe("Keyboard operation", () => {
       `focused element has no visible indicator: ${JSON.stringify(indicator)}`,
     ).toBe(true);
   });
+
+  // Both entry points, because the fix lives in the store precisely so that every one of
+  // them behaves the same — testing one would not show that.
+  for (const trigger of [/open command menu/i, /ask the agent about diogo/i]) {
+    test(`dismissing the menu opened from ${trigger.source} returns focus to it`, async ({
+      page,
+    }) => {
+      await page.goto(routes.home);
+
+      const opener = page.getByRole("button", { name: trigger });
+      // Activated by keyboard, not clicked: on macOS a click does not focus a button at
+      // all, so a mouse-driven version of this test would have nothing to restore and
+      // would pass against the broken code.
+      await opener.focus();
+      await page.keyboard.press("Enter");
+      await expect(page.getByRole("dialog")).toBeVisible();
+
+      await page.keyboard.press("Escape");
+
+      // WCAG 2.4.3: dropping focus at the top of the document after a dialog closes
+      // strands a keyboard visitor, who then has to tab back through everything. Radix
+      // restores focus inside a `setTimeout(0)` after unmount, and outside reduced motion
+      // the exit animation gates that unmount — hence the budget, the same one
+      // `command-menu.spec.ts` explains for its `toBeHidden`.
+      await expect(opener).toBeFocused({ timeout: 30_000 });
+    });
+  }
 });
