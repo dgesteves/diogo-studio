@@ -15,17 +15,19 @@ so it had to be trustworthy before anything could be built on it.
 Still open in Phase 0: the `tests/` helpers, the `node`/`jsdom` project split, and the
 `vitest.config.ts` ESM-loaded-as-CJS warning.
 
-Baseline: re-measured 2026-08-08 on the current tree (version 1.12.0), **after** the
-RTTR spike. `pnpm validate` passes. Every number below is measured; where an earlier
-draft's figure has been superseded it is marked, because this plan's whole argument is
-that unverified numbers should not govern work.
+Baseline: re-measured 2026-08-09 on the current tree (version 1.12.0), after the RTTR
+spike and after `boot.test.tsx`, the two store specs and `station-index.test.ts` landed.
+`pnpm validate` passes. Every number below is measured; where an earlier draft's figure
+has been superseded it is marked, because this plan's whole argument is that unverified
+numbers should not govern work — and this table has now gone stale twice, both times
+understating progress, so re-measure rather than copying it forward.
 
 ---
 
 ## 1. Verdict
 
 The premise "we never started creating tests" is not accurate, and the difference
-matters. There are **19 vitest files (96 tests)** and **6 Playwright specs**, and
+matters. There are **22 vitest files (123 tests)** and **8 Playwright specs**, and
 the whole toolchain is already wired: vitest + jsdom, Testing Library (`react`,
 `dom`, `jest-dom`, `user-event`), `@vitest/coverage-v8`, Playwright,
 `@axe-core/playwright`, and `@react-three/test-renderer`. Conventions exist and are
@@ -54,18 +56,22 @@ which files should never be chased.
 
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
-| Non-test source files           | **298** (156 `.tsx`, 142 `.ts`)                        |
-| Unit test files / tests         | **19 / 96**                                            |
+| Non-test source files           | **301** (157 `.tsx`, 144 `.ts`)                        |
+| Unit test files / tests         | **22 / 123**                                           |
 | E2E specs / tests               | **8 / 26** → **44 runs** across two motion projects    |
-| Statements / branches           | **28.82% / 13.67%**                                    |
-| Functions / lines               | **28.36% / 29.67%**                                    |
+| Statements / branches           | **33.05% / 22.15%**                                    |
+| Functions / lines               | **36.37% / 33.63%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
 
-Before the RTTR spike this table read 297 files, 16/76, and **10.71% / 9.23%**. The
-jump to 28.82% comes from a single spec, which is the whole point of §5.2 — and the
-branch column barely moved, which is the whole point of §5.3.
+This table has been re-measured twice. Before the RTTR spike it read 297 files, 16/76 and
+**10.71% / 9.23%**; on 2026-08-08, after the spike, **28.82% / 13.67%**. The spike's jump
+was almost entirely statements from one spec — the point of §5.2 — and the branch column
+barely moved, the point of §5.3. The move since then is the opposite shape and worth
+reading carefully: **branches went 13.67% → 22.15% while statements moved only 4 points**,
+because `boot.test.tsx` and the two store specs exercise conditions rather than mounting
+trees. That is what earned coverage looks like, and it is the pattern §5.3 asks for.
 
 ### Coverage by layer today
 
@@ -74,31 +80,40 @@ branch column barely moved, which is the whole point of §5.3.
 | `src/schemas`        | 100%      | 100%      | one file                                                                            |
 | `src/utils`          | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                           |
 | `src/constants`      | 100%      | 100%      | `routes` + `career` invariants                                                      |
-| `src/config`         | 87%       | 67%       | `world-theme` only                                                                  |
+| `src/config`         | 86.7%     | 66.7%     | `world-theme` only                                                                  |
+| **`home`**           | **87.5%** | **100%**  | `home.test.tsx` — small surface, fully exercised                                    |
 | **`studio/…/scene`** | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.           |
-| `src/components/ui`  | 82%       | 67%       | reached via `home` and the scene, not directly tested                               |
-| `world/constants`    | 80%       | 85%       | the existing data-invariant tests                                                   |
-| `src/ai`             | 71%       | 72%       | retrieval math only; stream/embed/prompt at **0%**                                  |
-| `world/utils`        | 45%       | 26%       | 3 of 8 files at 0%                                                                  |
-| `src/stores`         | 34%       | 13%       | 5 of 7 stores at **0%**                                                             |
-| `studio/…/screens`   | 24%       | 8%        | incidental — the spike mounts them, nothing asserts them                            |
-| `world/…/hud`        | 28%       | 11%       | one toggle spec                                                                     |
-| `src/hooks`          | 17%       | 0%        | —                                                                                   |
-| `src/providers`      | 14%       | 9%        | —                                                                                   |
-| `world` components   | 4%        | 0%        | boot, lounge, props all at **0%**                                                   |
-| `command-menu`       | 4%        | 0%        | the primary interactive feature                                                     |
-| `inspector`          | 5%        | 0%        | —                                                                                   |
+| `src/components/ui`  | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                               |
+| `world/constants`    | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                          |
+| `src/ai`             | 71.4%     | 72.3%     | retrieval math only; stream/embed/prompt at **0%**                                  |
+| `src/stores`         | 56.9%     | 40.7%     | was 34/13 — `boot-store` + `explore-store` specs; 5 of 7 still at **0%**            |
+| `world/utils`        | 49.7%     | 35.5%     | was 45/26                                                                           |
+| `src/providers`      | 30.6%     | 45.5%     | was 14/9 — reached via the boot spec                                                |
+| `inspector`          | 30.1%     | 10.0%     | was 5/0                                                                             |
+| `src/hooks`          | 29.2%     | 0%        | branch column still untouched                                                       |
+| `world/…/hud`        | 27.7%     | 10.5%     | one toggle spec                                                                     |
+| `studio/…/screens`   | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                            |
+| `world` components   | 10.9%     | 20.5%     | was 4/0 — `boot.test.tsx` only; lounge and props still **0%**                       |
+| `command-menu`       | 8.2%      | 1.3%      | the primary interactive feature, still effectively untested                         |
+| `audio`              | 8.5%      | 0%        | —                                                                                   |
+| `about`              | **0%**    | **0%**    | the pixelated-portrait cluster                                                      |
 | `src/app`            | **0%**    | **0%**    | every route, `sitemap`, `robots`, icons                                             |
 |                      |           |           | (`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`) |
 | `rate-limit.ts`      | **0%**    | **0%**    | security-relevant                                                                   |
 
-The three highest-risk zeros are unchanged by the spike: `rate-limit.ts` (abuse
-protection), `app/api/chat/route.ts` (7 distinct response branches, all unverified),
-and `command-menu` (the feature users actually touch). Note also the two rows the
-spike raised _incidentally_ — `studio/…/screens` and `components/ui`. Coverage there
-is a by-product of mounting the scene, not evidence of anything, and it is exactly the
-"tests that mount components and assert nothing" effect §1 warns about. Do not read
-those percentages as progress.
+The three highest-risk gaps are essentially unchanged: `rate-limit.ts` (abuse
+protection) and `app/api/chat/route.ts` (7 distinct response branches) are still at a
+flat **0%**, and `command-menu` — the feature users actually touch — has moved only to
+8%. Those three remain the reason Phases 1–7 are blocked; nothing in the movement above
+touches them.
+
+Two cautions when reading the improved rows. `studio/…/screens` and `components/ui` are
+raised _incidentally_ by mounting the scene — a by-product, not evidence, and exactly the
+"tests that mount components and assert nothing" effect §1 warns about. And `world`
+components now shows the reverse oddity: **branch coverage (20.5%) exceeds statement
+coverage (10.9%)**, because `boot.test.tsx` drives many conditions inside one small
+cluster while 70-odd untouched files supply the statement denominator. Neither number
+means the feature is covered.
 
 ---
 
@@ -108,7 +123,7 @@ This suite exists to make the restructure safe, so it must not itself become
 restructure debt. The restructure moves or merges nearly every file: `src/ai` →
 `features/agent` with 6 `retrieve-*` merged into one, 15 `boot-*` → ~5, 6
 `pixelated-portrait-*` → 2, `studio` dissolved into `world`, `src/stores`
-dissolved, `config/brand.ts` → `world/scene/materials.ts` (39 importers).
+dissolved, `config/brand.ts` → `world/scene/materials.ts` (40 importers).
 
 A test that deep-imports `@/features/studio/components/scene/mouse-shell` dies in
 Phase 4. A test that drives `/` in a browser survives every phase. Four rules
@@ -260,6 +275,11 @@ branch, and the room shell against `constants/room.ts`. Measured:
 | `scene/` cluster functions    | —         | **98.09%**   |
 | Repo-wide statements          | 10.71%    | **28.82%**   |
 
+These are the spike's own figures, measured 2026-08-08 — a record of what that one
+change bought, deliberately left as-is. The `scene/` cluster is unmoved since
+(84.7% / 53.1%); the repo-wide row has since gone to 33.05%, for reasons that have
+nothing to do with the spike. §2 holds the live numbers.
+
 So the 75% statement estimate was **conservative** and the R3F strategy is validated.
 But the useful finding is the column that was never estimated: **branches at 53%**.
 Mounting a declarative scene executes nearly every statement and almost no conditional,
@@ -340,7 +360,11 @@ commit per logical group, `test:` type per Conventional Commits.
 - Fix the existing `act(...)` warning in `deck-explore-toggle.test.tsx`.
 
 Exit: spike passes, helpers exist, suite green with no warnings. Two of five done; the
-suite is 19 files / 96 tests and green, but the warnings are still there.
+suite is **22 files / 123 tests** and green, but the `act(...)` warnings are still there
+— **26 of them** as of 2026-08-09, now coming from `boot.test.tsx` as well as
+`deck-explore-toggle.test.tsx`. The `vitest.config.ts` ESM-loaded-as-CJS warning no
+longer appears in the run and should be struck from the list above once someone confirms
+it was the toolchain bump that fixed it rather than a reporter change.
 
 ### Phase 1 — the server and contract layer (~15 files → 100%)
 

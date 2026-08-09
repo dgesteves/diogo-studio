@@ -180,7 +180,8 @@ with an explicit server/client boundary:
 
 - `config/` — static configuration: validated env (`env.ts` — never raw
   `process.env` elsewhere), site metadata, navigation, `brand.ts` (misleadingly
-  named: it is three.js material tokens, with 39 importers) and `world-theme.ts`.
+  named: it is three.js material tokens, with 40 importers — 39 modules plus the scene
+  spec) and `world-theme.ts`.
 - `constants/` — `routes.ts` is the typed SSOT for all 17 internal URLs (a plain
   `as const` map; no path builders). Also the `patterns` taxonomy, `career.ts`,
   `room.ts`, and the generated `agent-index.json`.

@@ -8,12 +8,18 @@ anything structural, `docs/architecture.md` describes the tree as it is today, a
 made. This file only records operational facts that aren't obvious from the code.
 
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is ~29% statements but only
-~14% **branches** (`pnpm test:coverage`), and almost all of the statement figure comes
-from one RTTR spec that mounts the studio scene — so "pure move, no behavior change"
-is still unverifiable. Build the test suite first; do not start a phase, and do not
-treat a green `pnpm validate`, or the coverage number going up, as evidence that a
-refactor preserved behavior.
+[`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is **33.1% statements /
+22.2% branches** (`pnpm test:coverage`, 22 files / 123 tests, measured 2026-08-09), and
+the layers a refactor would actually break are still the empty ones: `rate-limit.ts` and
+`app/api/chat` at **0%**, `command-menu` at **8%**, `world/components` at **11%**. So
+"pure move, no behavior change" remains unverifiable. Build the test suite first; do not
+start a phase, and do not treat a green `pnpm validate`, or the coverage number going up,
+as evidence that a refactor preserved behavior.
+
+Re-measure before you cite these — they have drifted twice already, and both times the
+docs understated real progress. `pnpm test:coverage` prints the current figures; the
+per-layer table in [`docs/testing-plan.md`](./docs/testing-plan.md) §2 is the one to
+update alongside this paragraph.
 
 Two things have shipped outside that block, and they set the bar for anything else
 that wants to: Phase 0 (a lint-cap relaxation — moves no code at all), and the
@@ -91,7 +97,7 @@ count, and never use an inline `eslint-disable` to clear one.
   `features/inspector` is unrelated — it's the performance / Web-Vitals overlay. This
   collision has already produced one wrong doc; don't let it produce another.
 - **`src/config/brand.ts` is not brand colors.** It's three.js material tokens
-  (`roughness`, `metalness`, `color`) and it has 39 importers. Add a token there
+  (`roughness`, `metalness`, `color`) and it has 40 importers. Add a token there
   rather than inlining a hex or a material value in the scene.
 - **Read env through `@/config/env` only** — never `process.env` elsewhere.
 - **Rendering is dynamic-by-default** (`cacheComponents`). A stray `new Date()`,

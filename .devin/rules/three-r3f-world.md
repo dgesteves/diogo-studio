@@ -33,7 +33,7 @@ the axe/E2E specs. They are hard requirements, not preferences:
 - **Never inline a hex, roughness or metalness value.** Use the shared material
   tokens and colors in `src/config/brand.ts` (misleadingly named — it is
   three.js material tokens, and the restructure renames it to
-  `world/scene/materials.ts`). It has ~39 importers; add a token rather than a
+  `world/scene/materials.ts`). It has ~40 importers; add a token rather than a
   literal.
 - Read theme colors through **`useWorldPalette()`**, never by branching on the
   store inline. Day/night is a palette swap, so both modes must be checked.

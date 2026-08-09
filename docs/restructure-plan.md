@@ -20,10 +20,10 @@ started and are blocked.**
 >
 > Everything from Phase 1 onward genuinely does need the suite. Every one of those
 > phases claims to be a "pure move/merge with no behavior change."
-> At **28.82% statement coverage** that claim still cannot be verified, and several
-> phases do not merely move code — they merge it. Phase 3 collapses 15 `boot-*`
-> files into ~5 and 6 `pixelated-portrait-*` into 2; Phase 4 dissolves 40 scene
-> files into `world` and repoints 39 importers of `config/brand.ts`. The failure
+> At **33.05% statement / 22.15% branch coverage** that claim still cannot be verified,
+> and several phases do not merely move code — they merge it. Phase 3 collapses 15
+> `boot-*` files into ~5 and 6 `pixelated-portrait-*` into 2; Phase 4 dissolves 40 scene
+> files into `world` and repoints 40 importers of `config/brand.ts`. The failure
 > mode of a merge is silent: a component dropped, a constant changed, a mesh or
 > material lost. `pnpm validate && pnpm build` cannot catch any of that — it
 > proves the imports still resolve, not that the product still behaves.
@@ -32,21 +32,26 @@ started and are blocked.**
 > (E2E) is deliberately structure-immune so it survives every move below and acts
 > as the harness that makes "no behavior change" a checkable statement.
 >
-> **Coverage moved from 10.71% to 28.82% on 2026-08-08 and this does not unblock
-> anything** — read the shape of the gain, not the number. It came from one RTTR spec
-> that mounts `StudioScene`, so it is concentrated in exactly one of the eight phases
-> (Phase 4) and it is **statement** coverage: branches went 9.23% → 13.67%, and the
-> scene cluster itself sits at 53% branches. E2E still asserts 3 of 17 routes, which is
-> the harness that actually licenses a move. What the spike does buy is narrow and
-> real: `scene.test.tsx` asserts an exact mesh count, so Phase 4 now has one guard
-> against the specific failure it was feared for. One guard is not a net.
+> **Coverage has moved twice — 10.71% → 28.82% (2026-08-08) → 33.05% (2026-08-09) — and
+> neither move unblocks anything.** Read the shape of the gain, not the number. The first
+> came from one RTTR spec mounting `StudioScene`: concentrated in exactly one of the eight
+> phases (Phase 4), and almost purely **statements**. The second is better earned —
+> branches went 13.67% → 22.15% off `boot.test.tsx` and the store specs, which exercise
+> conditions rather than mounting trees — but it lands on Phase 3's `boot-*` cluster and
+> `src/stores`, not on the phases carrying the most risk. The three that matter are still
+> flat: `rate-limit.ts` **0%**, `app/api/chat` **0%**, `command-menu` **8%**. E2E still
+> asserts 3 of 17 routes, and that harness is what actually licenses a move. What the
+> spike buys remains narrow and real: `scene.test.tsx` asserts an exact mesh count, so
+> Phase 4 has one guard against the specific failure it was feared for. One guard is not
+> a net.
 
 Baseline: commit `b72c1e5` ("remove career-graph feature and consolidate career
 data"). `pnpm validate` passed (76 tests, knip clean) and every number in §2 was
 re-measured against that commit — they are a **dated snapshot**, not live figures, and
 §2 flags the ones that have since moved. Note `pnpm e2e` was **not** green at that
-commit — two specs were broken; both are fixed as of 2026-08-08, when the suite stood
-at 19 vitest files / 96 tests and 18/18 Playwright.
+commit — two specs were broken; both are fixed, and as of 2026-08-09 the suite stands at
+**22 vitest files / 123 tests** and **44/44 Playwright** (8 spec files × two motion
+projects).
 
 ---
 
@@ -70,23 +75,28 @@ concentrated in `world` + `studio`, which is now 60% of the codebase.
 
 ## 2. Evidence (measured, not guessed)
 
-Measured at `b72c1e5`, with 2026-08-08 values in the last column where they have moved.
-The drift is small and none of it changes the verdict — but stale numbers are what this
-plan exists to argue against, so they are marked rather than quietly left.
+Measured at `b72c1e5`, with **2026-08-09** values in the last column where they have
+moved. The drift is small and none of it changes the verdict — but stale numbers are what
+this plan exists to argue against, so they are marked rather than quietly left.
 
-| Metric                      | At `b72c1e5`                                                                               | Now                |
-| --------------------------- | ------------------------------------------------------------------------------------------ | ------------------ |
-| TS/TSX files in `src/`      | **313**                                                                                    | 317 (298 non-test) |
-| Lines of TS/TSX in `src/`   | 14,209                                                                                     | 13,504 non-test    |
-| **Average file size**       | **~45 lines**                                                                              | ~45                |
-| Files under 30 lines        | **108** (35% of the codebase)                                                              | 105                |
-| Smallest "modules"          | `telemetry/constants.ts` — **1 line**; `world/constants/focus.ts` — **5 lines**            | unchanged          |
-| Top-level entries in `src/` | **15 folders** + a loose `rate-limit.ts`                                                   | unchanged          |
-| Deepest path                | **7 segments** (`src/features/world/components/lounge/lounge-tv-channels/wave-channel.ts`) | unchanged          |
-| Largest flat folder         | `features/studio/components/scene/` — **40 files**                                         | 41 (+ its spec)    |
-| Second largest              | `features/world/components/` — **38 files**                                                | **41**             |
-| Barrel files                | 10                                                                                         | unchanged          |
-| Empty folders               | 0 — an earlier draft of this table claimed `src/components/layout`; it never existed       | unchanged          |
+| Metric                      | At `b72c1e5`                                                                               | Now                  |
+| --------------------------- | ------------------------------------------------------------------------------------------ | -------------------- |
+| TS/TSX files in `src/`      | **313**                                                                                    | 323 (301 non-test)   |
+| Lines of TS/TSX in `src/`   | 14,209                                                                                     | 13,716 non-test      |
+| **Average file size**       | **~45 lines**                                                                              | ~46                  |
+| Files under 30 lines        | **108** (35% of the codebase)                                                              | 105 (35%)            |
+| Smallest "modules"          | `telemetry/constants.ts` — **1 line**; `world/constants/focus.ts` — **5 lines**            | unchanged            |
+| Top-level entries in `src/` | **15 folders** + a loose `rate-limit.ts`                                                   | unchanged            |
+| Deepest path                | **7 segments** (`src/features/world/components/lounge/lounge-tv-channels/wave-channel.ts`) | unchanged            |
+| Largest flat folder         | `features/studio/components/scene/` — **40 files**                                         | 40 (+ its spec = 41) |
+| Second largest              | `features/world/components/` — **38 files**                                                | **39** (+ its spec)  |
+| Barrel files                | 10                                                                                         | unchanged            |
+| Empty folders               | 0 — an earlier draft of this table claimed `src/components/layout`; it never existed       | unchanged            |
+
+Counts of a folder are its **direct children**, not a recursive walk — `world/components/`
+holds 39 non-test files at its own level plus the `hud/`, `lounge/` and `props/`
+subtrees. Saying which is meant matters here, because the recursive figure is 78 and a
+reader who mixes the two will conclude the table is badly wrong when it is not.
 
 ### Prefix-namespaced clusters — folders pretending to be filenames
 
@@ -168,7 +178,7 @@ And the `components/` level inside a feature is pure noise:
 
 ### Cause 3 — ownership is wrong, so names lie
 
-- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`, `color`). With **39 importers** it is the second-most-imported module in the repo, under a name that tells you nothing.
+- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`, `color`). With **40 importers** (39 modules plus `scene.test.tsx`) it is the second-most-imported module in the repo, under a name that tells you nothing.
 - **`src/stores/` holds feature state.** Ownership analysis says it can be dissolved almost entirely: `boot`, `explore`, `world-theme` are world-only; `world-store` is world + one audio file; `web-vitals` is inspector-only (4 importers); `reduced-motion` has one importer (its own provider). Only **`perf-store` is genuinely cross-feature** — world writes it, inspector reads it. Meanwhile `command-menu` and `inspector` correctly keep their own stores local. Two conventions, no rule.
 - **`src/components/r3f/` is no longer shared.** `career-graph` was its second consumer; now **all four of its modules are imported by exactly one file**, `features/world/components/world-canvas.tsx`. It is world plumbing living in the shared folder.
 - **`src/constants/career.ts` (90 lines) has zero runtime consumers.** Its only importers are `scripts/agent-index/virtual-chunks.ts` (build-time) and its own test. It is RAG source content, not app constants — and `constants/` gives no hint that editing it requires re-running `pnpm agent:index`.
@@ -289,7 +299,7 @@ Nothing moved. This phase only removed the pressure that caused the mess.
 
 - Delete `src/types/agent.ts`; repoint its 17 importers at the schema module.
 - `src/telemetry/constants.ts` → fold into `src/config/`.
-- `src/constants/routes.ts` → `src/config/routes.ts` (50 importers; it is config).
+- `src/constants/routes.ts` → `src/config/routes.ts` (48 importers; it is config).
 - `src/seo/*` → `src/config/seo/*`.
 - `src/hooks/use-in-view.ts` → `features/about/`; `use-world-palette.ts` → `features/world/hooks/`. Keep `use-is-client.ts` shared.
 - **Leave `src/utils/` and `src/rate-limit.ts` where they are** (see §4 rule 6). `utils/` is no longer a one-file folder — it holds `cn` and `mulberry32` — and `rate-limit.ts` keeps a name that states its job. `components.json` `aliases.utils` therefore stays `@/utils`, which also means `shadcn add` keeps working untouched.
@@ -298,7 +308,7 @@ Removes 4 top-level folders. Mechanical, wide, zero risk.
 
 ### Phase 2 — rename the lies, move content to the agent
 
-- `src/config/brand.ts` → `features/world/scene/materials.ts` (39 importers, all world/studio after the career-graph deletion).
+- `src/config/brand.ts` → `features/world/scene/materials.ts` (40 importers, all world/studio after the career-graph deletion, plus the two app icon routes).
 - `src/constants/career.ts` + `career.test.ts` → `features/agent/content/`.
 - `src/constants/patterns.ts` → `features/agent/content/patterns.ts`; `hero-section` imports it via the agent barrel.
 - `src/constants/agent-index.json` → `features/agent/generated/`; update `scripts/agent-index/paths.ts`.
@@ -400,7 +410,7 @@ rename.
 - Every import already goes through the `@/` alias, so moves are mechanical.
 - `pnpm validate` runs lint + typecheck + format + test + knip; TypeScript catches every broken path immediately.
 - `knip` will flag any barrel export orphaned by a merge.
-- 96 unit tests across 19 files, plus 6 Playwright specs covering boot, command menu, inspector, content pages, and a11y — **18/18 green as of 2026-08-08**. They were not: the `/work` spec had been failing deterministically since the career-data consolidation and the ⌘K Ask-mode spec was flaky ~1 in 12, both masked by `retries: 2`. Treat "the baseline is green" as a claim to re-verify with `pnpm e2e`, not to inherit — `pnpm validate` does not run it. See [`decisions.md`](./decisions.md).
+- 123 unit tests across 22 files, plus 8 Playwright spec files covering boot, command menu, inspector, content pages, mobile nav and a11y — **44/44 green as of 2026-08-09** (26 tests across two motion projects). Earlier they were not: the `/work` spec had been failing deterministically since the career-data consolidation and the ⌘K Ask-mode spec was flaky ~1 in 12, both masked by `retries: 2`. Treat "the baseline is green" as a claim to re-verify with `pnpm e2e`, not to inherit — `pnpm validate` does not run it. See [`decisions.md`](./decisions.md).
 - `features/studio/components/scene/scene.test.tsx` asserts an exact mesh count (228) for the whole studio scene. This is the only guard in the repo against Phase 4's specific failure mode — a mesh vanishing in a 40-file move — so run it, and do not relax the count to make a phase pass.
 - Phases are independent — any one can be shipped or reverted alone.
 
