@@ -282,3 +282,34 @@ One known inefficiency is deliberate: the `e2e` job builds the app again rather
 than consuming the `build` job's output. Sharing `.next` would mean either
 artifact upload (a multi-hundred-MB write against a 500 MB quota) or cache-key
 contention between the two jobs, both worse than one extra build.
+
+## Reproducing CI locally
+
+`pnpm e2e` is **not** what CI runs. Locally it starts `next dev` with 2 workers and
+no retries; CI sets `CI=1`, which switches `playwright.config.ts` to `next start`
+against a production build, 1 worker and `retries: 2`. Two commands close the gap,
+in increasing fidelity and cost:
+
+| Command                       | Mirrors                                                                                         | Cost                      |
+| ----------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- |
+| `pnpm e2e:ci`                 | The build and the Playwright flags: production `next start`, 1 worker, retries, `CI=1`          | ~4 min, no setup          |
+| `pnpm e2e:runner`             | The runner as well: Ubuntu 24.04, pinned browsers, **2 vCPU / 7 GB**, frozen install, no `.env` | ~3 min warm, needs Docker |
+| `docker run rhysd/actionlint` | Nothing at runtime — static analysis of the workflow YAML itself                                | seconds                   |
+
+`scripts/ci-local.sh` (behind `pnpm e2e:runner`) takes `playwright test` arguments,
+so `pnpm e2e:runner -g "Boot sequence"` works, and `CI_CPUS`, `CI_MEMORY` and
+`CI_IMAGE` override the defaults — `CI_CPUS=1` is the quickest way to see whether a
+spec depends on timing. It shadows `node_modules`, `.next` and `.env.local` with
+container-owned mounts, so the host install is untouched and the degraded-env paths
+(no `OPENAI_API_KEY` → `/api/chat` returns 503) are the ones under test, exactly as
+on a runner.
+
+**What no local setup reproduces: the CPU architecture.** GitHub runs x86-64; a Mac
+runs arm64, so SwiftShader timings are indicative, not identical, and amd64 under
+emulation is too slow to be a signal. Calibration point: the two `Boot sequence`
+specs take ~12s each on the host and ~60s in the constrained container.
+
+`act` is deliberately not wired in — see `docs/decisions.md`. Run it ad hoc
+(`act -j lint`) if a workflow's _wiring_ is in question; it cannot reproduce
+`actions/cache`, secrets, or the runner's CPU budget, which is where the failures
+have actually been.

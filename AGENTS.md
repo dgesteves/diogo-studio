@@ -31,6 +31,21 @@ pnpm e2e        # Playwright + axe; needs `pnpm e2e:install` once
 pnpm size       # size-limit budget, checked against .next/static/chunks
 ```
 
+**`pnpm e2e` is not what CI runs**, and the difference has now produced two red builds
+that were green locally: it uses `next dev`, 2 workers and no retries, where CI uses a
+production build, 1 worker and `retries: 2` on 2 vCPU. Before claiming a timing- or
+3D-sensitive change is done, reproduce the runner:
+
+```bash
+pnpm e2e:ci                        # production build + CI flags; no Docker
+pnpm e2e:runner                    # + Ubuntu, pinned browsers, 2 vCPU / 7 GB, no .env.local
+pnpm e2e:runner -g "Boot sequence" # arguments pass through; CI_CPUS=1 squeezes harder
+```
+
+Expect the container to be ~5x slower than the host — that is the point, not a fault.
+`act` is deliberately not set up; `docs/architecture.md` explains what it would and
+would not catch.
+
 `pnpm validate` is the gate, but it does **not** run `e2e` — so a green `validate`
 says nothing about the Playwright suite. Run `pnpm e2e` before you claim a UI or
 content change is done; the suite was silently red on `main` for weeks because

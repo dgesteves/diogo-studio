@@ -6,6 +6,38 @@ not for every change.
 
 ---
 
+## 2026-08-09 — CI is reproduced locally with a constrained container, not with `act`
+
+Two boot-gate failures in two days had the same shape: green locally, red on CI. The
+gap was never the workflow YAML — it was that `pnpm e2e` runs `next dev` with 2 workers
+and no retries, while CI runs a production build with 1 worker and `retries: 2`, on
+2 vCPU with a software renderer. So the local mirror targets the runtime, not the
+workflow graph:
+
+- **`pnpm e2e:ci`** — the flags only (`pnpm build && CI=1 playwright test`). No setup,
+  no Docker; catches everything that differs between `next dev` and `next start`.
+- **`pnpm e2e:runner`** (`scripts/ci-local.sh`) — Ubuntu 24.04, browsers pinned to the
+  Playwright version in the lockfile, a frozen install, and `--cpus 2 --memory 7g`,
+  which is a GitHub-hosted runner for a private repo on Free. It shadows
+  `node_modules`, `.next` and `.env.local` with container-owned mounts: the host
+  install stays arm64-clean, and the degraded-env paths are the ones exercised, as on a
+  runner. Measured on this repo: the two `Boot sequence` specs run ~12s each on the
+  host and ~60s in the container — the starvation is reproduced, and the forced-click
+  fix passes under it.
+
+**`act` was considered and rejected.** It re-runs the steps, but not `actions/cache`,
+not `secrets`, and not the CPU budget — so it would have been green for both failures
+we actually had, while adding a second CI definition to keep in sync and a runner image
+that drifts from GitHub's. `docker run --rm -v "$PWD":/repo -w /repo rhysd/actionlint`
+covers the real remaining risk (workflow syntax and expressions) in seconds. Run `act`
+ad hoc if step wiring is ever the open question; do not wire it into the repo without
+a failure it would have caught.
+
+**Cost, deliberately accepted:** `e2e:runner` re-installs and rebuilds inside the
+container. Named volumes for `node_modules`, `.next`, the pnpm store and the browser
+cache keep a warm run near 3 minutes; sharing the host's would corrupt one platform's
+binaries with the other's.
+
 ## 2026-08-09 — The boot gate is dismissed with a forced click; its stability wait never settles
 
 `world-3d.spec.ts` "does not gate again in the same session" was failing on `main`, all
