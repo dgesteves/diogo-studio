@@ -8,8 +8,9 @@ anything structural, `docs/architecture.md` describes the tree as it is today, a
 made. This file only records operational facts that aren't obvious from the code.
 
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is **33.1% statements /
-22.2% branches** (`pnpm test:coverage`, 22 files / 123 tests, measured 2026-08-09), and
+[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose own Phase 0 is now complete, so
+**testing-plan Phase 1 is the next thing to start**. Coverage is **33.4% statements /
+22.8% branches** (`pnpm test:coverage`, 22 files / 123 tests, measured 2026-08-09), and
 the layers a refactor would actually break are still the empty ones: `rate-limit.ts` and
 `app/api/chat` at **0%**, `command-menu` at **8%**, `world/components` at **11%**. So
 "pure move, no behavior change" remains unverifiable. Build the test suite first; do not
@@ -79,6 +80,29 @@ count, and never use an inline `eslint-disable` to clear one.
 
 ## Gotchas
 
+- **The package is declared ESM** (`"type": "module"`) and **every authored file is
+  TypeScript** — `eslint.config.ts`, `postcss.config.ts`, `commitlint.config.ts`,
+  `vitest.config.ts`. There are **zero `.js`/`.cjs`/`.mjs`/`.mts` files** and no `require`,
+  `module.exports`, `__dirname` or `__filename` anywhere. Don't reintroduce a `.mjs` to
+  disambiguate what is no longer ambiguous, and note that `pnpm typecheck` now covers the
+  build config — a `.js` config is invisible to it, since `tsconfig.json` includes only
+  `.ts`/`.tsx`/`.mts`.
+- **`jiti` is a real dependency, not decoration.** ESLint needs it to read a TypeScript
+  config and declares it only as an _optional peer_, so before it was declared here, linting
+  worked purely because `vite` happened to supply it (`eslint@9.39.5_jiti@2.7.0` in the
+  store). Remove it and `pnpm lint` stops being able to load its own config.
+- **Two configs fail silently — verify them by behavior, never by exit code.** A
+  `postcss.config.ts` that stops loading emits unstyled CSS and still exits 0, so check the
+  built CSS for Tailwind's **87 `@property` rules**; a `commitlint.config.ts` that stops
+  loading still lints under `config-conventional`'s defaults, so check that a
+  **>100-character header passes** (ours sets `header-max-length: [0]`). More generally:
+  ESLint prints nothing both when it lints cleanly and when its config contributes no rules,
+  so assert the **11 known warnings**, not silence.
+- **`MaxListenersExceededWarning` from `[WebServer]` during `pnpm e2e` is pre-existing and
+  benign.** It is a Node listener-count advisory from Next's own server under Playwright's
+  request pattern, ~97 lines a run, and it is not reproducible with 180 plain concurrent
+  requests. Measured at **97 with `"type": "module"` and 98 without**, so it predates that
+  change — don't go hunting it as a regression, and don't let it mask a real failure.
 - **Every env var is optional.** Features degrade instead of failing: no
   `OPENAI_API_KEY` → `/api/chat` returns `503` with keyword-only matches; no
   `UPSTASH_*` → in-memory rate limiting; no Sentry DSN → Sentry is skipped
@@ -123,7 +147,15 @@ count, and never use an inline `eslint-disable` to clear one.
   CJS `main`, that copy requires `three.cjs`, `src/` imports `three.module.js`, and
   every RTTR test dies on `Cannot assign to read only property 'position' of object
 '#<Mesh>'`. The message blames three; the cause is module resolution. Don't delete
-  them, and keep them when the `node`/`jsdom` project split lands.
+  them, and keep them in **both** projects.
+- **Vitest runs node by default; jsdom is opt-in via a `*.dom.test.{ts,tsx}` filename.**
+  Name a spec for what it touches, not what the module is about — `gpu.test.ts` covers
+  WebGL detection and runs in node, because it only calls a pure string predicate. A
+  missing `.dom.` fails loudly with `document is not defined`, which is why node is the
+  default; add the suffix rather than widening a glob. `resetStores()` from
+  `@tests/stores` runs automatically in the jsdom `afterEach` after RTL's `cleanup()`, so
+  never reset a store in a spec's own `afterEach` — doing that is what produced 26
+  `act()` warnings. **A run has zero stderr output; treat new noise as a defect.**
 - **The world downgrades itself, and CI always runs it downgraded.**
   `detectSoftwareRenderer()` probes the renderer before the canvas chunk mounts, and
   `WorldQualityGuard` watches frame times after; together they walk `full → reduced →

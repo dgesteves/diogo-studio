@@ -6,6 +6,208 @@ not for every change.
 
 ---
 
+## 2026-08-09 — Vitest runs node by default; jsdom is opt-in via a `.dom.test.` filename
+
+Testing-plan Phase 0 asked for a `node`/`jsdom` project split. The question it did not
+answer is **how a file declares its environment**, and the obvious answers are both bad.
+Directory globs (`src/ai/**` → node) are restructure debt by construction: the restructure
+moves `src/ai` → `features/agent`, dissolves `src/stores`, and merges `studio` into
+`world`, so four of seven phases would have to edit `vitest.config.ts` — and forgetting
+to means a route-handler spec silently starts running against a DOM it will never have in
+production. A `// @vitest-environment node` docblock travels with the file but **cannot
+drive `projects`**, so both environments are stuck sharing one `setupFiles` list. That is
+not academic: it is exactly what broke when the global store reset landed, because
+`structured-data.test.ts` used the docblock and `resetStores()` needs `window`.
+
+So the marker is the **filename**: `*.dom.test.{ts,tsx}` runs under jsdom with
+`vitest.setup.ts`, everything else runs under node with no setup at all. A suffix survives
+`git mv`, states the environment where you cannot miss it, and lets each project own its
+setup.
+
+**Node is the default, and the direction is the whole point.** Forget the suffix on a DOM
+spec and it fails immediately with `document is not defined` — loud, local, self-fixing.
+The inverse default fails _silently_, in the direction that costs real fidelity. Choose
+the default whose failure mode is loud.
+
+Measured, on 22 files: cumulative environment time **9.66s → 2.77s**, wall **3.51s →
+2.66s**. 16 files run in node, 6 in jsdom. That gap is why this was worth doing before
+Phase 1 adds ~15 server-surface specs rather than after: environment setup was already the
+largest single bucket in the run.
+
+`gpu.test.ts` is the worked example of the judgment involved. It sounds like a DOM test —
+it covers WebGL renderer detection — but every assertion calls `isSoftwareRenderer(string)`,
+a pure predicate. It stays in node. Ask what the _test_ touches, not what the module is about.
+
+Two config notes that are load-bearing. `resolve.mainFields` and `server.deps.inline` for
+the `@react-three/*` packages are duplicated into both projects; the RTTR entry in this
+file explains why removing them breaks every scene test. And `sequence.hooks: "stack"` is
+required, not cosmetic — see the next entry.
+
+---
+
+## 2026-08-09 — Store resets are global and run after `cleanup()`, which is what silenced 26 `act()` warnings
+
+The suite carried **26 `act(...)` warnings**, which Phase 0 listed as a chore. They were
+not cosmetic; they were pointing at a real bug in the teardown, and tracing them (rather
+than wrapping things in `act` until they went away) is what produced the design above.
+
+Five came from the test files' own `afterEach` hooks — `resetBoot()`,
+`persistOverride(null)`, `setExplore(false)`. Every store here is a module singleton read
+through `useSyncExternalStore`, so resetting one **notifies subscribers**, and RTL's
+`cleanup()` lives in `vitest.setup.ts`'s own `afterEach`. Vitest's default
+`sequence.hooks: "parallel"` runs those hooks concurrently, so the reset could beat the
+unmount and update a live component outside `act`. The fix is ordering, in two parts:
+`cleanup()` and `resetStores()` in the **same callback**, and `sequence.hooks: "stack"` so
+a spec's own `afterEach` runs **before** the global one — which is what lets
+`scene.dom.test.tsx` await its RTTR unmount before the stores it subscribes to are reset.
+
+That makes the reset **global**, which is strictly better than the per-file convention
+`.devin/rules/testing.md` used to describe: 4 files reset ad hoc and between them covered
+**2 of 7** stores, so `perf`, `web-vitals`, `world`, `world-theme` and the inspector
+overlay all leaked across files. No test can forget it now.
+
+Three more came from `await user.click()` under fake timers — `setExiting` and
+`setInspectorOpen` fire synchronously inside the click, and user-event does not wrap them
+once `advanceTimers` is driving it. Wrapped at the call site in `boot.dom.test.tsx`'s
+`click()` helper, matching what `deck-explore-toggle.dom.test.tsx` already did.
+
+The remaining 18 were Radix `Presence`/`Portal`/`FocusScope` effects with no `src/` frame
+in the stack, and they disappeared once the ordering was fixed — they were downstream of
+the same race, not a separate defect.
+
+**`resetStores()` is proven load-bearing, not decorative:** stubbing it to a no-op fails a
+boot spec. Its larger value is insurance for Phases 3–6, and it deliberately reaches only
+for each store's **public** API, using the server snapshots as the canonical initial
+values. Three limits are therefore known and accepted: `perf-store` and `web-vitals-store`
+have no public reset (nothing writes to them yet), and the `hydrated` latch in
+`inspector-overlay-store` and `reduced-motion-store` stays set. Add a reset alongside the
+first test that actually needs one, driven by a failing test — not speculatively.
+
+---
+
+## 2026-08-09 — The package is declared ESM, and every config is TypeScript
+
+**This supersedes the `.mts` rename recorded below the same day, and the reasoning that
+produced it was wrong on a fact.** That entry argued `"type": "module"` "reinterprets every
+`.js` file in the repo". **There are no `.js` or `.cjs` files in this repo** — not one — and
+no `require`, `module.exports`, `__dirname` or `__filename` anywhere in `src/`, `scripts/`
+or `tests/`. Every config was already either `.mjs` or `.ts`. So the cost that argument
+rested on did not exist, and the `.mjs` extensions were only ever there **because**
+`"type": "module"` was missing.
+
+The fix is therefore the root cause, not the symptom: `package.json` declares
+`"type": "module"`, and four files lose their disambiguating extensions — the vitest config
+becomes `vitest.config.ts`, and the ESLint, PostCSS and commitlint configs become plain
+`.js`. The ESM-loaded-as-CJS warning that started this is gone
+because the package now tells the truth about what it is, rather than because one file was
+renamed around it.
+
+**Two things here fail silently, so both were verified deliberately rather than inferred
+from a green build.**
+
+- **`postcss.config.ts` not being loaded would not fail `next build`** — it would emit
+  unstyled CSS and exit 0. Confirmed loaded by the output itself: 81 KB of CSS with **87
+  `@property` rules** (Tailwind v4's signature registration of its `--tw-*` custom
+  properties) and no unresolved `@import "tailwindcss"`.
+- **`commitlint.config.ts` not being loaded would still accept and reject commits**, just
+  under `config-conventional`'s defaults. Our config sets `header-max-length: [0]`, so the
+  decisive test is a **910-character header**, which passes. Under defaults it would fail at 100.
+
+Also verified: `pnpm validate` green with the same 11 pre-existing warnings (so ESLint found
+`eslint.config.ts`), `prerender:check` still reporting 19 static routes, `pnpm size` at
+831 kB against the 1.3 MB budget, `pnpm e2e:ci` at **44/44**, and dev mode separately —
+`next dev` serves the page 200 with the same 87 `@property` rules, because PostCSS loads by
+a different path there than in a production build.
+
+One scare worth recording so nobody re-runs it: the E2E output carries ~97
+`MaxListenersExceededWarning` lines from `[WebServer]`. A/B measurement put it at **97 with
+`"type": "module"` and 98 without**, so it is pre-existing and unrelated. It is now noted in
+`AGENTS.md` as benign. Two of my own verification steps were also wrong before they were
+right, which is the more useful lesson: a stray `pnpm start` from an earlier load test held
+port 3000 so the first A/B never ran at all, and `echo "EXIT=$?"` after a pipeline reports
+`sed`'s status, not the command's — it read 0 while Playwright was erroring. Use
+`set -o pipefail`, and confirm a run actually ran before trusting its zero.
+
+The general lesson is the one this file exists for: when a warning offers a contained fix
+and a root-cause fix, price the root-cause fix against the repo in front of you instead of
+the repo you assume. The contained fix here was cheaper only under a false premise, and it
+would have left `.mjs` extensions in place permanently, each one a small standing question
+about why it is not just `.js`.
+
+`tsconfig.json` keeps its `**/*.mts` include entry. It now matches nothing, but it is
+pre-existing and harmless, and removing it would silently exclude any future `.mts` from
+typechecking.
+
+**Follow-through: there are now no `.js` files either.** All four configs are TypeScript —
+`eslint.config.ts`, `postcss.config.ts`, `commitlint.config.ts`, `vitest.config.ts` — so
+every authored file in the repo is `.ts`/`.tsx` and `pnpm typecheck` covers the build
+configuration too, which it previously did not. Three things had to be true first, and each
+was verified rather than assumed:
+
+- **Turbopack loads `postcss.config.ts`.** Next 16's own docs list `.ts`/`.mts`/`.cts` as
+  supported, and this project builds with Turbopack. Confirmed by output, not exit code —
+  87 `@property` rules in the built CSS.
+- **ESLint needs `jiti` to read a TS config, and it was working by accident.** `jiti` is an
+  _optional peer_ of ESLint (`peerDependenciesMeta: {jiti: {optional: true}}`), and pnpm was
+  satisfying it from the copy `vite` drags in — the store entry is literally
+  `eslint@9.39.5_jiti@2.7.0`. So `eslint.config.ts` would have kept working until someone
+  changed the vitest toolchain, then failed to lint at all. It is now a **declared
+  devDependency**, which is the honest statement of a dependency we already had.
+- **`@commitlint/types` had to be declared** for a real `import type`. The old `.js` file
+  carried a `/** @type {import('@commitlint/types').UserConfig} */` annotation that
+  `pnpm typecheck` **never checked**, because `.js` is not in the tsconfig `include` — the
+  types were editor-only decoration. Declaring the package let the
+  `ignoreDependencies: ["@commitlint/types"]` entry come **out** of `knip.json`: one fewer
+  blind spot, where the usual direction of this trade is one more. `jiti` needed no entry
+  either; knip resolves both.
+
+Both packages were already in the store, so `pnpm add -D` downloaded nothing and the
+`minimumReleaseAge` policy was satisfied without special handling.
+
+**`eslint.config.ts` needed real types, and they improved it.** It failed typecheck with 11
+errors at first, all of the same shape: rule entries only receive their
+`[Severity, ...unknown[]]` tuple type from the surrounding `defineConfig` literal, so the
+parts this config deliberately _derives_ — the React-family rule list, the per-feature
+`no-restricted-imports` loop — widened to `Record<string, string>` and `(string | {…})[]`.
+The fix is **not** a cast (`00-core.md` forbids unchecked casts): a `Linter.RulesRecord`
+accumulator replaces `Object.fromEntries`, and a named `restrictedImports()` helper returning
+`Linter.RuleEntry` replaces three copies of an inline tuple. Fewer repeated literals than
+before, and 0 typecheck errors. Verified the config is still _applied_, not merely found, by
+the count that only our rules produce: **11 warnings**.
+
+The general point, since "is no output good news?" came up repeatedly here: with config
+files, absence of error proves nothing. ESLint reports nothing when it lints cleanly _and_
+when a config contributes no rules; commitlint exits 0 for a valid message _and_ when it
+loaded no config at all. Every check above was chosen so that the wrong answer looks
+different from the right one.
+
+---
+
+## 2026-08-09 — ~~The vitest config renamed to a `.mts` extension~~ (superseded same day); three Phase 0 helpers deliberately not written
+
+The `.mts` half of this entry is superseded by the entry above — the config is
+`vitest.config.ts` again, and the package is declared ESM instead. Kept because the second
+half stands on its own, and because the superseded reasoning is instructive: it rejected
+`"type": "module"` on a cost that a single `find` would have shown did not exist.
+
+**Only one of the four listed `tests/` helpers was written.** `stores.ts` had real callers
+the moment it landed and fixed a live leak. `env.ts` has no consumer until Phase 1,
+`recording-ctx.ts` until Phase 5, and the plan itself says `r3f.ts` should wait for a
+second scene spec. Writing them now means untested code with no caller, and since
+`pnpm knip` fails on unused files it would need an ignore entry — blinding the tool that
+exists to catch exactly that, for the sake of speculative code. Phase 0's exit criterion
+was reworded from "helpers exist" to "the helpers with consumers exist".
+
+Related: the jsdom setup now stubs `HTMLCanvasElement.prototype.getContext` to return
+`null`. jsdom returns `null` anyway and reports "Not implemented" to its virtual console
+each time — 55 lines per run from the scene spec alone. The native `canvas` package was
+deliberately rejected, so `null` is the permanent answer and the messages carry no
+information. Behavior is unchanged; Phase 5 replaces the stub with the recording context.
+The jsdom setup also imports `silence-clock-deprecation`, which the app already applies at
+`world-canvas.tsx` — RTTR mounts the scene directly and so bypasses it.
+
+---
+
 ## 2026-08-09 — `nuqs` is not installed; the URL state here is the pathname
 
 `.devin/rules/nextjs-app-router.md` told you to manage URL state "with a typed helper
@@ -251,7 +453,7 @@ accidental animation, and this animation is the product. Verified with
 `--repeat-each=3 --workers=1` (CI's worker count): 6/6.
 
 This does not reopen the 2026-08-08 decision — matching either dismiss control stays,
-and the timing itself stays in `boot.test.tsx`. Added there: the pre-ready "Skip intro"
+and the timing itself stays in `boot.dom.test.tsx`. Added there: the pre-ready "Skip intro"
 path, which had no coverage at any layer; verified by mutation (stubbing its `onClick`
 fails exactly that test).
 
@@ -274,7 +476,7 @@ experiences, and `testing.md` already forbids exactly that. Softening an asserti
 match slow hardware is not a fix.
 
 **What actually fixed it: layering.** The boot gate is a state machine over three timers
-plus a ready signal — `boot.test.tsx` now owns it with fake timers and asserts what the
+plus a ready signal — `boot.dom.test.tsx` now owns it with fake timers and asserts what the
 visitor sees (the step label, "Skip intro" before ready, "Enter the studio" after, the
 minimum hold, the 12s fallback, session-once, the reduced-motion branch) in **232ms**
 instead of a minute of starved E2E. Verified by mutation, not by going green: dropping the
@@ -330,7 +532,7 @@ irrelevant rules linting `tests/` and `scripts/`, guarantees the next person wri
 fixture hits the same error, and trades the documented API name for lint appeasement.
 Reverted.
 
-Now `eslint.config.mjs` carries a `no-react-outside-src` entry that turns the
+Now `eslint.config.ts` carries a `no-react-outside-src` entry that turns the
 React-family rules off for `tests/**` and `scripts/**`, with the rule list **derived from
 the shared configs** so an upstream addition is covered without editing anything.
 Verified: 44 rules off in `tests/`, 39 still enabled in `src/` with
@@ -429,7 +631,7 @@ counter-example, not the precedent.
 ## 2026-08-08 — RTTR adopted, and the R3F coverage estimate replaced with a measurement
 
 `@react-three/test-renderer@9.1.1` is installed and testing-plan Phase 0's spike
-exists at `features/studio/components/scene/scene.test.tsx` — the current cluster
+exists at `features/studio/components/scene/scene.dom.test.tsx` — the current cluster
 root, so restructure Phase 4 carries it with `git mv`.
 
 **It did not work out of the box, and the failure is worth writing down** because the
@@ -612,7 +814,7 @@ the existing relaxations only match `src/**/*.test.{ts,tsx}`, so `src/test/helpe
 would have got the _strict_ rules); and it keeps all test infrastructure next to
 `tests/e2e/`. Cost: no `@/` alias — add a `@tests/*` path to `tsconfig.json` when
 testing-plan Phase 0 creates the first helper. `vitest.config.ts` already globs
-`tests/**`.
+`tests/**`. _(Both done on 2026-08-09, with `tests/stores.ts`.)_
 
 ## 2026-08-08 — `max-lines-per-function` replaces `max-lines` as the real cap
 

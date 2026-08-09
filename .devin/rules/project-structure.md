@@ -115,7 +115,7 @@ justify them. One level of grouping, not two.
   is "nothing imports from `app/`". The 11 open warnings are pre-existing reaches
   into `features/studio` that restructure Phase 4 removes — never add to them, and
   never silence one with an inline `eslint-disable`. When a new feature folder is
-  added, add it to `FEATURES` in `eslint.config.mjs` so the same-feature rule
+  added, add it to `FEATURES` in `eslint.config.ts` so the same-feature rule
   covers it.
 - Shared folders (`components/`, `utils/`, `config/`, `providers/`) never import
   from `features/` or `app/`.

@@ -36,12 +36,12 @@ started and are blocked.**
 > neither move unblocks anything.** Read the shape of the gain, not the number. The first
 > came from one RTTR spec mounting `StudioScene`: concentrated in exactly one of the eight
 > phases (Phase 4), and almost purely **statements**. The second is better earned —
-> branches went 13.67% → 22.15% off `boot.test.tsx` and the store specs, which exercise
+> branches went 13.67% → 22.15% off `boot.dom.test.tsx` and the store specs, which exercise
 > conditions rather than mounting trees — but it lands on Phase 3's `boot-*` cluster and
 > `src/stores`, not on the phases carrying the most risk. The three that matter are still
 > flat: `rate-limit.ts` **0%**, `app/api/chat` **0%**, `command-menu` **8%**. E2E still
 > asserts 3 of 17 routes, and that harness is what actually licenses a move. What the
-> spike buys remains narrow and real: `scene.test.tsx` asserts an exact mesh count, so
+> spike buys remains narrow and real: `scene.dom.test.tsx` asserts an exact mesh count, so
 > Phase 4 has one guard against the specific failure it was feared for. One guard is not
 > a net.
 
@@ -128,7 +128,7 @@ fixing #1 will not stick — the structure will re-shred itself.
 
 ### Cause 1 — the 100-line cap is manufacturing files ✅ fixed in Phase 0
 
-`eslint.config.mjs` enforced
+`eslint.config.ts` enforced
 `max-lines: ["error", { max: 100, skipBlankLines: true, skipComments: true }]` on all
 of `src/**`. This was the single largest driver of the mess. (The skip options make
 the effective cap looser than "100 lines of file" — worth stating precisely, since
@@ -178,7 +178,7 @@ And the `components/` level inside a feature is pure noise:
 
 ### Cause 3 — ownership is wrong, so names lie
 
-- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`, `color`). With **40 importers** (39 modules plus `scene.test.tsx`) it is the second-most-imported module in the repo, under a name that tells you nothing.
+- **`src/config/brand.ts` is not brand.** It is Three.js material tokens (`roughness`, `metalness`, `color`). With **40 importers** (39 modules plus `scene.dom.test.tsx`) it is the second-most-imported module in the repo, under a name that tells you nothing.
 - **`src/stores/` holds feature state.** Ownership analysis says it can be dissolved almost entirely: `boot`, `explore`, `world-theme` are world-only; `world-store` is world + one audio file; `web-vitals` is inspector-only (4 importers); `reduced-motion` has one importer (its own provider). Only **`perf-store` is genuinely cross-feature** — world writes it, inspector reads it. Meanwhile `command-menu` and `inspector` correctly keep their own stores local. Two conventions, no rule.
 - **`src/components/r3f/` is no longer shared.** `career-graph` was its second consumer; now **all four of its modules are imported by exactly one file**, `features/world/components/world-canvas.tsx`. It is world plumbing living in the shared folder.
 - **`src/constants/career.ts` (90 lines) has zero runtime consumers.** Its only importers are `scripts/agent-index/virtual-chunks.ts` (build-time) and its own test. It is RAG source content, not app constants — and `constants/` gives no hint that editing it requires re-running `pnpm agent:index`.
@@ -376,7 +376,7 @@ exists, and `decisions.md` exists.
 
 ## 6. Guardrails (so it does not rot again) ✅ landed 2026-08-08
 
-All four are in `eslint.config.mjs`. They were originally scheduled for Phase 7,
+All four are in `eslint.config.ts`. They were originally scheduled for Phase 7,
 which was backwards — their job is to stop _new_ violations while the rest of this
 plan waits, so they went in with Phase 0 instead. 1–3 are **warnings**, not errors,
 because of the pre-existing violations noted below.
@@ -411,7 +411,7 @@ rename.
 - `pnpm validate` runs lint + typecheck + format + test + knip; TypeScript catches every broken path immediately.
 - `knip` will flag any barrel export orphaned by a merge.
 - 123 unit tests across 22 files, plus 8 Playwright spec files covering boot, command menu, inspector, content pages, mobile nav and a11y — **44/44 green as of 2026-08-09** (26 tests across two motion projects). Earlier they were not: the `/work` spec had been failing deterministically since the career-data consolidation and the ⌘K Ask-mode spec was flaky ~1 in 12, both masked by `retries: 2`. Treat "the baseline is green" as a claim to re-verify with `pnpm e2e`, not to inherit — `pnpm validate` does not run it. See [`decisions.md`](./decisions.md).
-- `features/studio/components/scene/scene.test.tsx` asserts an exact mesh count (228) for the whole studio scene. This is the only guard in the repo against Phase 4's specific failure mode — a mesh vanishing in a 40-file move — so run it, and do not relax the count to make a phase pass.
+- `features/studio/components/scene/scene.dom.test.tsx` asserts an exact mesh count (228) for the whole studio scene. This is the only guard in the repo against Phase 4's specific failure mode — a mesh vanishing in a 40-file move — so run it, and do not relax the count to make a phase pass.
 - Phases are independent — any one can be shipped or reverted alone.
 
 **Real risks:**

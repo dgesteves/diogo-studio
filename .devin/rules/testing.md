@@ -5,12 +5,11 @@ globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, tests/**
 
 # Testing
 
-Stack: **Vitest** (jsdom for every test today — the node/jsdom project split is
-testing-plan Phase 0, not done yet), **Testing Library** (`react`, `dom`,
-`jest-dom`, `user-event`), **Playwright** + `@axe-core/playwright`, and
-**`@react-three/test-renderer`** (RTTR) for the 3D scene. There is no Jest and
-**no MSW** — mock with `vi.mock` at the module boundary. Do not add a testing
-library without checking `package.json` first.
+Stack: **Vitest** (two projects — see "Which environment a test runs in" below),
+**Testing Library** (`react`, `dom`, `jest-dom`, `user-event`), **Playwright** +
+`@axe-core/playwright`, and **`@react-three/test-renderer`** (RTTR) for the 3D
+scene. There is no Jest and **no MSW** — mock with `vi.mock` at the module
+boundary. Do not add a testing library without checking `package.json` first.
 
 [`docs/testing-plan.md`](../../docs/testing-plan.md) is the authoritative plan and
 tracks per-layer coverage targets.
@@ -27,7 +26,7 @@ Six things make a test good in this repo. They apply to every kind below.
    HTTP → rendered DOM → feature barrel → module path. Drop to a module path only when
    the behavior has no coarser seam (pure math, data invariants).
 2. **Prove it can fail.** Before you trust a new test, break the code it covers and watch
-   it go red — flip a guard, delete a branch, change a constant — then restore. `boot.test.tsx`
+   it go red — flip a guard, delete a branch, change a constant — then restore. `boot.dom.test.tsx`
    was validated exactly this way (dropping two guards failed 3 of 7; forcing one flag
    failed 1 of 7). This is the standard, not a nicety.
 3. **Cover every branch the product actually has**, not the happy path: reduced motion vs
@@ -83,7 +82,7 @@ The boot gate, debounces, streaming state — anything whose outcome depends on 
 - **This layer exists to keep timing out of E2E.** CI runs on two vCPUs with a software
   renderer, so a starved main thread makes wall-clock assertions unreliable there — and
   the answer is never to soften the assertion. The boot gate is the worked example: three
-  timers and a ready signal, asserted in `world/components/boot.test.tsx` in ~200ms, while
+  timers and a ready signal, asserted in `world/components/boot.dom.test.tsx` in ~200ms, while
   E2E keeps only "a first visit is gated, dismissing it yields a usable page, a reload
   does not gate again".
 - **Never** approximate a timer with `waitFor` plus a real delay.
@@ -155,11 +154,43 @@ one spec per `deck-*.tsx`. Cluster-level files survive the merges in
 
 E2E specs go in `tests/e2e/*.spec.ts`, with their shared fixtures and helpers in
 `tests/e2e/fixtures.ts` (not collected as a spec — `testMatch` only takes `*.spec.ts`).
-Vitest helpers and render utils go in **`tests/`** at the repo root — deliberately
-_not_ under `src/`, so they stay out of the coverage denominator
-(`include: ["src/**"]`) and out of the `src/**` lint block, whose test relaxations only
-match `*.test.ts(x)`. `vitest.config.ts` already globs `tests/**`; add a `@tests/*`
-path to `tsconfig.json` when the first vitest helper lands.
+Vitest helpers and render utils go in **`tests/`** at the repo root, imported through the
+`@tests/*` alias — deliberately _not_ under `src/`, so they stay out of the coverage
+denominator (`include: ["src/**"]`) and out of the `src/**` lint block, whose test
+relaxations only match `*.test.ts(x)`.
+
+**Write a helper when its second caller appears, not before.** `tests/stores.ts` exists
+because it had callers and fixed a live leak; `env.ts`, `recording-ctx.ts` and `r3f.ts`
+are named in the testing plan but deliberately unwritten, because `knip` fails on unused
+files and an ignore entry for speculative code is worse than no helper.
+
+## Which environment a test runs in
+
+**Node is the default. jsdom is opt-in, and the marker is the filename:**
+`*.dom.test.{ts,tsx}` runs under jsdom with `vitest.setup.ts`; everything else runs under
+node with no setup at all.
+
+- **Name the file for what the test touches, not what the module is about.** `gpu.test.ts`
+  covers WebGL renderer detection and runs in **node**, because every assertion calls a
+  pure string predicate. Only reach for `.dom.` when the test needs a document: RTL, RTTR,
+  storage, `matchMedia`.
+- **A missing `.dom.` fails loudly** (`document is not defined`) — that is the reason node
+  is the default, so never "fix" it by widening a glob. Add the suffix.
+- **Never key the split on a directory.** The restructure moves them; the filename travels
+  with `git mv`.
+- **`resetStores()` from `@tests/stores` runs automatically** in the jsdom project's
+  `afterEach`, right after RTL's `cleanup()`. Do not re-reset stores in a spec's own
+  `afterEach` — that is what produced 26 `act()` warnings, because resetting a store
+  notifies live subscribers. `sequence.hooks: "stack"` guarantees a spec's own `afterEach`
+  (an RTTR unmount, `vi.useRealTimers()`) runs **first**; keep teardown that is not a store
+  concern there.
+- It resets through each store's **public** API only. `perf-store`, `web-vitals-store` and
+  the `hydrated` latches have no public reset yet — add one alongside the first test that
+  needs it, driven by a failing test.
+- The jsdom setup stubs `getContext` to `null` (jsdom cannot rasterise a canvas and says so
+  55 times a run) and imports `silence-clock-deprecation`, which the app applies at
+  `world-canvas.tsx` but RTTR bypasses. **A run should have zero stderr output** — treat new
+  noise as a defect, not as background.
 
 ## E2E runs in both motion modes
 
@@ -195,7 +226,7 @@ path to `tsconfig.json` when the first vitest helper lands.
   documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
   2.2 AA is not automatable, so the bar is still partly a manual claim.
 - **Write fixtures with the documented Playwright signature** — `async ({ … }, use)`.
-  `eslint.config.mjs` turns the React-family rules off for `tests/**` and `scripts/**`,
+  `eslint.config.ts` turns the React-family rules off for `tests/**` and `scripts/**`,
   so `react-hooks/rules-of-hooks` no longer mistakes the `use` callback for React's
   `use()`. If you ever see that error here again, the config regressed; do not rename
   the parameter to dodge it.
@@ -241,7 +272,8 @@ how to write it.
 ## This codebase specifically
 
 - **RTTR depends on there being exactly one copy of three in the module graph**, and
-  two lines in `vitest.config.ts` are what guarantee it: `resolve.mainFields`
+  two entries in `vitest.config.ts` are what guarantee it — shared by **both** projects,
+  so keep them that way: `resolve.mainFields`
   (preferring `module`, because `@react-three/fiber` ships no `exports` field and
   vitest would otherwise resolve its CJS `main`) and `server.deps.inline` for the
   three `@react-three/*` packages. Remove either and **every** scene test fails with

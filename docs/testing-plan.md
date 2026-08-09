@@ -4,19 +4,20 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phase 0 is partly landed; Phases 1–7 are not started.** Four things have
+Status: **Phase 0 is complete; Phases 1–7 are not started.** Five things have
 shipped: the `Math.random()` seeding fix in §5.1, `mulberry32` promoted to
 `src/utils/mulberry32.ts`, **the existing E2E suite made green** (it was 16/18 — the
 `/work` spec asserted content that no longer exists, and the ⌘K Ask-mode spec was
-flaky ~1 in 12 because it raced hydration), and **RTTR installed with its spike
-passing** (§5.2). This plan calls E2E "the actual harness" for the restructure (§3),
-so it had to be trustworthy before anything could be built on it.
+flaky ~1 in 12 because it raced hydration), **RTTR installed with its spike
+passing** (§5.2), and **the foundation finished** — the `node`/`jsdom` split, a global
+store reset, and a run with **zero warnings** of any kind (see Phase 0 below). This plan
+calls E2E "the actual harness" for the restructure (§3), so it had to be trustworthy
+before anything could be built on it.
 
-Still open in Phase 0: the `tests/` helpers, the `node`/`jsdom` project split, and the
-`vitest.config.ts` ESM-loaded-as-CJS warning.
+**Phase 1 is the next thing to start.**
 
 Baseline: re-measured 2026-08-09 on the current tree (version 1.12.0), after the RTTR
-spike and after `boot.test.tsx`, the two store specs and `station-index.test.ts` landed.
+spike and after `boot.dom.test.tsx`, the two store specs and `station-index.test.ts` landed.
 `pnpm validate` passes. Every number below is measured; where an earlier draft's figure
 has been superseded it is marked, because this plan's whole argument is that unverified
 numbers should not govern work — and this table has now gone stale twice, both times
@@ -70,7 +71,7 @@ This table has been re-measured twice. Before the RTTR spike it read 297 files, 
 was almost entirely statements from one spec — the point of §5.2 — and the branch column
 barely moved, the point of §5.3. The move since then is the opposite shape and worth
 reading carefully: **branches went 13.67% → 22.15% while statements moved only 4 points**,
-because `boot.test.tsx` and the two store specs exercise conditions rather than mounting
+because `boot.dom.test.tsx` and the two store specs exercise conditions rather than mounting
 trees. That is what earned coverage looks like, and it is the pattern §5.3 asks for.
 
 ### Coverage by layer today
@@ -81,7 +82,7 @@ trees. That is what earned coverage looks like, and it is the pattern §5.3 asks
 | `src/utils`          | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                           |
 | `src/constants`      | 100%      | 100%      | `routes` + `career` invariants                                                      |
 | `src/config`         | 86.7%     | 66.7%     | `world-theme` only                                                                  |
-| **`home`**           | **87.5%** | **100%**  | `home.test.tsx` — small surface, fully exercised                                    |
+| **`home`**           | **87.5%** | **100%**  | `home.dom.test.tsx` — small surface, fully exercised                                |
 | **`studio/…/scene`** | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.           |
 | `src/components/ui`  | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                               |
 | `world/constants`    | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                          |
@@ -93,7 +94,7 @@ trees. That is what earned coverage looks like, and it is the pattern §5.3 asks
 | `src/hooks`          | 29.2%     | 0%        | branch column still untouched                                                       |
 | `world/…/hud`        | 27.7%     | 10.5%     | one toggle spec                                                                     |
 | `studio/…/screens`   | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                            |
-| `world` components   | 10.9%     | 20.5%     | was 4/0 — `boot.test.tsx` only; lounge and props still **0%**                       |
+| `world` components   | 10.9%     | 20.5%     | was 4/0 — `boot.dom.test.tsx` only; lounge and props still **0%**                   |
 | `command-menu`       | 8.2%      | 1.3%      | the primary interactive feature, still effectively untested                         |
 | `audio`              | 8.5%      | 0%        | —                                                                                   |
 | `about`              | **0%**    | **0%**    | the pixelated-portrait cluster                                                      |
@@ -111,7 +112,7 @@ Two cautions when reading the improved rows. `studio/…/screens` and `component
 raised _incidentally_ by mounting the scene — a by-product, not evidence, and exactly the
 "tests that mount components and assert nothing" effect §1 warns about. And `world`
 components now shows the reverse oddity: **branch coverage (20.5%) exceeds statement
-coverage (10.9%)**, because `boot.test.tsx` drives many conditions inside one small
+coverage (10.9%)**, because `boot.dom.test.tsx` drives many conditions inside one small
 cluster while 70-odd untouched files supply the statement denominator. Neither number
 means the feature is covered.
 
@@ -134,7 +135,7 @@ follow, and they are what make this plan cheap rather than expensive:
    to a module path when the behavior has no coarser seam (pure math, data
    invariants).
 2. **One test file per _concept_, not per source file.** The restructure merges
-   files; tests organized per concept merge with them for free. `boot.test.tsx`
+   files; tests organized per concept merge with them for free. `boot.dom.test.tsx`
    covering the whole boot sequence survives 15 → 5; fifteen `boot-*.test.tsx`
    files do not.
 3. **Assert behavior and contracts, never module structure.** No assertions on
@@ -146,10 +147,10 @@ follow, and they are what make this plan cheap rather than expensive:
 
    Where the collapse target does not exist yet, write the test at the **current**
    cluster root and let the phase move it — do not create the future folder early.
-   Concretely: `features/studio/components/scene/scene.test.tsx`, not
+   Concretely: `features/studio/components/scene/scene.dom.test.tsx`, not
    `features/world/scene/`, since Phase 4 `git mv`s that whole directory and will
    carry the spec with it. The same applies to `src/ai/` (Phase 6) and the
-   `boot-*` cluster, which has no folder at all today — put `boot.test.tsx` in
+   `boot-*` cluster, which has no folder at all today — put `boot.dom.test.tsx` in
    `features/world/components/` beside the files it covers.
 
 Sequencing consequence: **E2E and contract tests come first** (Phases 1–2). They
@@ -262,7 +263,7 @@ section said ≥7 days and attributed it to `00-core.md`, which said no such thi
 real policy is now recorded there.)
 
 **The estimate has been replaced with a measurement, as this section demanded.** The
-spike lives at `features/studio/components/scene/scene.test.tsx` — the current cluster
+spike lives at `features/studio/components/scene/scene.dom.test.tsx` — the current cluster
 root, so restructure Phase 4 carries it with `git mv` (§3 rule 4). Four tests assert
 the mesh count, the light rig against `config/brand.ts` tokens, the day/night palette
 branch, and the room shell against `constants/room.ts`. Measured:
@@ -324,12 +325,23 @@ assertable after all.
 Never fail CI on coverage _downward drift alone_ while a phase is in flight —
 ratchet on merge to `main`.
 
-### 5.4 Where tests run
+### 5.4 Where tests run — ✅ done
 
-Split by environment using vitest `projects`: `node` for route handlers,
-`sitemap`, `robots`, `rate-limit`, and pure logic; `jsdom` for RTL, stores, and
-RTTR. This also fixes the current setup, where node-only code is being exercised
-under jsdom.
+Two vitest `projects`, keyed on the **filename**: `*.dom.test.{ts,tsx}` runs under jsdom
+with `vitest.setup.ts`; everything else runs under node with no setup. So node takes route
+handlers, `sitemap`, `robots`, `rate-limit` and pure logic, while jsdom takes RTL, stores
+and RTTR — as intended, but declared per file rather than per directory, since the
+restructure moves the directories and a stale glob would silently run a server spec under
+a DOM.
+
+**Node is the default deliberately:** a DOM spec missing the suffix fails at once with
+`document is not defined`, where the inverse default fails silently. Judge by what the
+_test_ touches, not what the module is about — `gpu.test.ts` covers WebGL renderer
+detection but only calls a pure string predicate, so it belongs in node.
+
+`sequence.hooks: "stack"` is required alongside this, so a spec's own `afterEach` runs
+before the global one. See [`decisions.md`](./decisions.md) for both, and for the 26
+`act()` warnings that ordering fixed.
 
 ---
 
@@ -338,33 +350,45 @@ under jsdom.
 Each phase is independently shippable and ends green on `pnpm validate`. One
 commit per logical group, `test:` type per Conventional Commits.
 
-### Phase 0 — fix the foundation (prerequisite, small) — partly landed
+### Phase 0 — fix the foundation (prerequisite, small) — ✅ complete
 
-- ✅ **Add `@react-three/test-renderer`; prove it with one spike.** Done — see §5.2 for
+- ✅ **Add `@react-three/test-renderer`; prove it with one spike.** See §5.2 for
   the result and the resolution fix it needed. The "if the spike fails, stop and
   re-plan" branch was not taken.
 - ✅ Seed the two `Math.random()` draw paths (§5.1).
-- Add helpers in **`tests/`** at the repo root (not `src/test/` — see
-  [`decisions.md`](./decisions.md)): `recording-ctx.ts` (Proxy draw recorder),
-  `r3f.ts` (RTTR render + scene-graph query helpers), `stores.ts` (reset all
-  external stores between tests), `env.ts` (env-var override helper). Add a
-  `@tests/*` path to `tsconfig.json` at the same time; `vitest.config.ts` already
-  globs `tests/**` and resolves tsconfig paths. **`r3f.ts` has a first draft
-  already** — the `renderScene` / `isMesh` / `lightsOfType` helpers in
-  `scene.test.tsx` are what it should hold; promote them when a second spec needs
-  them, not before.
-- Split vitest into `node` / `jsdom` projects; fix the `vitest.config.ts`
-  ESM-loaded-as-CJS warning. **Careful:** the `resolve.mainFields` and
-  `server.deps.inline` entries added for RTTR must survive the split, or every scene
-  test breaks (§5.2).
-- Fix the existing `act(...)` warning in `deck-explore-toggle.test.tsx`.
+- ✅ **`tests/stores.ts` + the `@tests/*` tsconfig path.** `resetStores()` is wired into
+  the jsdom setup's `afterEach`, so the reset is **global** rather than per-file — the 4
+  files that reset ad hoc covered 2 of 7 stores between them. **The other three helpers
+  were deliberately not written:** `env.ts` has no consumer until Phase 1,
+  `recording-ctx.ts` until Phase 5, and `r3f.ts` should wait for a second scene spec (the
+  `renderScene` / `isMesh` / `lightsOfType` helpers in `scene.dom.test.tsx` are what it
+  will hold). `knip` fails on unused files, so writing them early buys an ignore entry and
+  nothing else. See [`decisions.md`](./decisions.md).
+- ✅ **Split vitest into `node` / `jsdom` projects.** Keyed on the **filename** —
+  `*.dom.test.{ts,tsx}` is jsdom, everything else is node — because directory globs are
+  restructure debt and a docblock cannot drive `projects`. Node is the default so that a
+  missing marker fails loudly. `resolve.mainFields` and `server.deps.inline` are duplicated
+  into both projects, as §5.2 requires. Measured: cumulative environment time **9.66s →
+  2.77s**, wall **3.51s → 2.66s**, 16 node files to 6 jsdom.
+- ✅ **The ESM-loaded-as-CJS warning was real** — it appeared on every run, contrary to an
+  earlier draft of this line. Fixed at the root: `package.json` now declares
+  `"type": "module"`, which is what the `.mjs`/`.mts` extensions were standing in for.
+  `vitest.config.ts` keeps its conventional name and the ESLint, PostCSS and commitlint
+  configs became plain `.js`. That is a `build:` change with production blast radius, so it
+  ships as its own commit and was verified past `pnpm test` — see
+  [`decisions.md`](./decisions.md) for the two silent failure modes it had to rule out.
+- ✅ **All 26 `act(...)` warnings fixed at the root.** They were not a chore: 5 came from
+  teardown store resets racing RTL's `cleanup()` under vitest's default parallel hooks, 3
+  from `await user.click()` under fake timers, and the remaining 18 were Radix effects
+  downstream of the same race. Fixed with `sequence.hooks: "stack"`, one ordered
+  `afterEach`, and an `act` wrapper at two call sites.
 
-Exit: spike passes, helpers exist, suite green with no warnings. Two of five done; the
-suite is **22 files / 123 tests** and green, but the `act(...)` warnings are still there
-— **26 of them** as of 2026-08-09, now coming from `boot.test.tsx` as well as
-`deck-explore-toggle.test.tsx`. The `vitest.config.ts` ESM-loaded-as-CJS warning no
-longer appears in the run and should be struck from the list above once someone confirms
-it was the toolchain bump that fixed it rather than a reporter change.
+Exit: **met.** Spike passes, the helpers with consumers exist, and the suite is
+**22 files / 123 tests**, green, with **zero warnings and zero stderr output** — the
+jsdom `getContext` noise (55 lines/run) and the upstream `THREE.Clock` deprecation are
+both handled in the jsdom setup. Verified by mutation, not just by passing: stubbing
+`resetStores()` to a no-op fails a boot spec, and forcing `canEnter` true fails 3 of
+`boot.dom.test.tsx`'s 8.
 
 ### Phase 1 — the server and contract layer (~15 files → 100%)
 
@@ -445,12 +469,12 @@ travel intact with `git mv`.
 ### Phase 4 — pure-DOM components (~95 files → 90%)
 
 Per-cluster files, not per-source-file (§3, rule 2): `hud.test.tsx`,
-✅ `boot.test.tsx`, `inspector.test.tsx`, `command-menu.test.tsx`,
+✅ `boot.dom.test.tsx`, `inspector.test.tsx`, `command-menu.test.tsx`,
 `content-blocks.test.tsx`, `ui.test.tsx`, `sections.test.tsx`. Assert what the
 user sees and does — roles, labels, keyboard interaction, state transitions —
-using the established `home.test.tsx` style.
+using the established `home.dom.test.tsx` style.
 
-`boot.test.tsx` landed early, out of phase order, because E2E could not assert it
+`boot.dom.test.tsx` landed early, out of phase order, because E2E could not assert it
 reliably: its three timers plus the ready signal made it the slowest and flakiest thing in
 the suite on a 2-vCPU runner. **That is the general rule this phase should follow —
 anything whose outcome depends on a timer is a component test, not an E2E test** (see
