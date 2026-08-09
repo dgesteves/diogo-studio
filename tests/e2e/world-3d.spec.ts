@@ -30,46 +30,31 @@ test.describe("The 3D world", { tag: "@full-motion" }, () => {
   });
 });
 
-/**
- * `BootActions` shows "Skip intro" until the scene finishes compiling and "Enter the
- * studio" after, so which control is on screen depends on the machine. That timing —
- * the minimum hold, the 12s forceReady fallback, the ready label, session-once — is
- * asserted deterministically in `boot.test.tsx` with fake timers. Matching either
- * control here is therefore layering, not hedging: end-to-end the only question left is
- * whether a real first visit is gated and whether dismissing it yields a usable page.
- */
-const DISMISS_BOOT = /skip intro|enter the studio/i;
-
-// A cold first visit compiles every shader before the overlay can settle, and CI runs on
-// two vCPUs with a software renderer. See docs/decisions.md for the perf work item that
-// should bring this back down.
+// A cold first visit downloads the route's JS and compiles every shader before the gate
+// can appear at all, and the gate then holds until `BOOT_MAX_MS`. One budget covers both.
 const COLD_BOOT_MS = 30_000;
 
-const DISMISS_ATTEMPT_MS = 1_000;
-
 /**
- * Dismissing the gate is a click Playwright will not make on its own terms. The splash
- * animates by design — the panel rises, the log fills, the progress bar and its sheen run
- * continuously — so the dismiss control never satisfies the *stability* half of
- * actionability: measured locally, a 30s retry loop of plain clicks never landed one.
- * That is what turned `main` red, and a slow runner only makes it more certain, because
- * the moment the scene reports ready `BootActions` swaps "Skip intro" for "Enter the
- * studio" and the element Playwright was waiting on detaches.
+ * Wait for the state the product *guarantees*, then interact with it normally.
  *
- * So assert the facts a visitor depends on — the gate is up, the control is visible and
- * enabled — then dispatch the click without the stability wait, and retry the *action*
- * until the gate is gone (the readiness idiom `docs/decisions.md` sanctions). Clicking
- * twice is harmless: `BootSequence.enter` ignores re-entry while the overlay is exiting.
+ * `BootActions` shows "Skip intro" while the scene compiles and swaps in "Enter the
+ * studio" once `canEnter` flips — which `BootSequence` promises within `BOOT_MAX_MS`
+ * (12s) on any machine, however slow, via its `forceReady` timer. So the ready CTA is
+ * not a race: it is reached by the clock, not by the hardware. Waiting for it means the
+ * panel has finished resizing around the swap, and no element can detach mid-click.
+ *
+ * Two days of red CI came from doing the opposite — racing whichever control was up,
+ * with `force: true` and a 1s cap, on a page whose main thread was blocked in 5s chunks.
+ * The cap guaranteed the failure it was meant to prevent and the force hid that the page
+ * was unusable; `WorldQualityGuard` fixes that cause. The pre-ready "Skip intro" path and
+ * the boot timing itself are asserted in `boot.test.tsx` under fake timers, where they
+ * are deterministic. End to end, the question is only whether a first visit is gated and
+ * whether dismissing it yields a usable page.
  */
 async function dismissBoot(boot: Locator): Promise<void> {
   await expect(boot).toBeVisible({ timeout: COLD_BOOT_MS });
-  await expect(boot.getByRole("button", { name: DISMISS_BOOT })).toBeEnabled();
-
-  await expect(async () => {
-    const dismiss = boot.getByRole("button", { name: DISMISS_BOOT });
-    if (await dismiss.count()) await dismiss.click({ force: true, timeout: DISMISS_ATTEMPT_MS });
-    await expect(boot).toHaveCount(0, { timeout: DISMISS_ATTEMPT_MS });
-  }).toPass({ timeout: COLD_BOOT_MS });
+  await boot.getByRole("button", { name: /enter the studio/i }).click({ timeout: COLD_BOOT_MS });
+  await expect(boot).toHaveCount(0);
 }
 
 test.describe("Boot sequence", { tag: "@full-motion" }, () => {
