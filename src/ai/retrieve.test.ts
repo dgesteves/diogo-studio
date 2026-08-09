@@ -1,19 +1,7 @@
 import { describe, expect, it } from "vitest";
+import { makeChunk } from "@tests/agent";
 import type { AgentChunk } from "@/types/agent";
 import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieve";
-
-function makeChunk(
-  overrides: Partial<AgentChunk> & Pick<AgentChunk, "id" | "content">,
-): AgentChunk {
-  return {
-    sourceId: overrides.sourceId ?? overrides.id,
-    sourceKind: overrides.sourceKind ?? "case-study",
-    sourceTitle: overrides.sourceTitle ?? overrides.id,
-    permalink: overrides.permalink ?? "/work",
-    contentHash: overrides.contentHash ?? "deadbeef",
-    ...overrides,
-  };
-}
 
 describe("cosine()", () => {
   it("returns 1 for parallel unit vectors", () => {
@@ -34,6 +22,19 @@ describe("cosine()", () => {
 
   it("clamps to the shorter dimension (cheap robustness for mixed-dim corpora)", () => {
     expect(cosine([1, 1, 999], [1, 1])).toBeCloseTo(1, 6);
+  });
+
+  it("returns 0 when both vectors are zero", () => {
+    expect(cosine([0, 0], [0, 0])).toBe(0);
+  });
+
+  it("treats a missing component on either side as zero, never NaN", () => {
+    const gappy: number[] = [1];
+    gappy[2] = 1;
+    const expected = 2 / (Math.sqrt(2) * Math.sqrt(3));
+
+    expect(cosine(gappy, [1, 1, 1])).toBeCloseTo(expected, 6);
+    expect(cosine([1, 1, 1], gappy)).toBeCloseTo(expected, 6);
   });
 });
 
@@ -67,6 +68,28 @@ describe("retrieveByCosine()", () => {
   it("respects an explicit topK", () => {
     const result = retrieveByCosine(chunks, [1, 1, 1], { topK: 2, minScore: -1 });
     expect(result.hits.length).toBeLessThanOrEqual(2);
+  });
+
+  it("caps at TOP_K without an explicit topK", () => {
+    const many = Array.from({ length: TOP_K + 4 }, (_, i) =>
+      makeChunk({ id: `c${i}`, content: "alpha", embedding: [1, 0, 0] }),
+    );
+
+    expect(retrieveByCosine(many, [1, 0, 0]).hits).toHaveLength(TOP_K);
+  });
+
+  it("refuses an empty corpus rather than answering from nothing", () => {
+    expect(retrieveByCosine([], [1, 0, 0])).toEqual({
+      hits: [],
+      retrieval: "cosine",
+      refused: true,
+    });
+  });
+
+  it("ranks by similarity, not by corpus order", () => {
+    const result = retrieveByCosine(chunks, [0.6, 0.8, 0], { minScore: -1 });
+
+    expect(result.hits.map((h) => h.chunk.id)).toEqual(["b", "a", "c"]);
   });
 });
 
@@ -131,7 +154,109 @@ describe("retrieveByKeyword()", () => {
       }),
     );
     const result = retrieveByKeyword(many, "design system", { minScore: 0 });
-    expect(result.hits.length).toBeLessThanOrEqual(TOP_K);
+    expect(result.hits).toHaveLength(TOP_K);
+  });
+
+  it("matches on the title and heading, not only the body", () => {
+    const result = retrieveByKeyword(chunks, "decisions", { minScore: 0 });
+
+    expect(result.hits[0]?.chunk.id).toBe("diligent");
+  });
+
+  it("refuses an empty corpus rather than answering from nothing", () => {
+    expect(retrieveByKeyword([], "design system")).toEqual({
+      hits: [],
+      retrieval: "keyword",
+      refused: true,
+    });
+  });
+
+  it("applies the keyword floor by default, where an explicit minScore overrides it", () => {
+    const weak = [makeChunk({ id: "weak", sourceTitle: "notes", content: "governance" })];
+
+    expect(retrieveByKeyword(weak, "governance").refused).toBe(true);
+    expect(retrieveByKeyword(weak, "governance", { minScore: 0 }).refused).toBe(false);
+  });
+});
+
+// BM25 is the ranking engine whenever there is no OPENAI_API_KEY, which is the default
+// deployment, so its three characteristics are product behavior rather than math trivia.
+describe("keyword ranking characteristics", () => {
+  const filler = "alpha bravo charlie delta echo foxtrot golf hotel india";
+
+  // Both documents match one query term once and are the same length, so only the
+  // rarity of the term they matched can separate them.
+  it("prefers a rare term over one that nearly every document shares", () => {
+    const result = retrieveByKeyword(
+      [
+        makeChunk({ id: "common", content: "engineering alpha bravo charlie" }),
+        makeChunk({ id: "rare", content: "governance delta echo foxtrot" }),
+        makeChunk({ id: "third", content: "engineering golf hotel india" }),
+        makeChunk({ id: "fourth", content: "engineering juliett kilo lima" }),
+      ],
+      "engineering governance",
+      { minScore: 0 },
+    );
+    const [first, second] = result.hits;
+
+    expect(first?.chunk.id).toBe("rare");
+    expect(second?.chunk.id).toBe("common");
+    expect(first?.score).toBeGreaterThan(second?.score ?? 0);
+  });
+
+  it("prefers the shorter document when both mention the term equally often", () => {
+    const result = retrieveByKeyword(
+      [
+        makeChunk({ id: "padded", content: `governance governance ${filler} ${filler}` }),
+        makeChunk({ id: "short", content: "governance governance" }),
+      ],
+      "governance",
+      { minScore: 0 },
+    );
+    const [first, second] = result.hits;
+
+    expect(first?.chunk.id).toBe("short");
+    expect(first?.score).toBeGreaterThan(second?.score ?? 0);
+  });
+
+  it("saturates repeats: ten mentions rank higher than one, but nowhere near ten times", () => {
+    const result = retrieveByKeyword(
+      [
+        makeChunk({ id: "ten", content: "governance ".repeat(10) }),
+        makeChunk({ id: "one", content: `governance ${filler}` }),
+      ],
+      "governance",
+      { minScore: 0 },
+    );
+    const ten = result.hits.find((h) => h.chunk.id === "ten")?.score ?? 0;
+    const one = result.hits.find((h) => h.chunk.id === "one")?.score ?? 0;
+
+    expect(ten).toBeGreaterThan(one);
+    expect(ten).toBeLessThan(one * 10);
+  });
+
+  it("drops stopwords, so a document dense with them cannot be retrieved by them", () => {
+    const corpus = [
+      makeChunk({ id: "chatter", sourceTitle: "notes", content: "the the the and or but is are" }),
+    ];
+
+    expect(retrieveByKeyword(corpus, "what is the", { minScore: 0 }).refused).toBe(true);
+  });
+
+  it("drops single characters, so an initial cannot drive retrieval", () => {
+    const corpus = [
+      makeChunk({ id: "initials", sourceTitle: "notes", content: "d e s design system" }),
+    ];
+
+    expect(retrieveByKeyword(corpus, "d e", { minScore: 0 }).refused).toBe(true);
+  });
+
+  it("ignores query terms the corpus has never seen instead of scoring them", () => {
+    const corpus = [makeChunk({ id: "a", content: "governance governance governance tokens" })];
+    const alone = retrieveByKeyword(corpus, "governance", { minScore: 0 });
+    const padded = retrieveByKeyword(corpus, "governance astronaut blob shader", { minScore: 0 });
+
+    expect(padded.hits[0]?.score).toBeCloseTo(alone.hits[0]?.score ?? 0, 10);
   });
 });
 
