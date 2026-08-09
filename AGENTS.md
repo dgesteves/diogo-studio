@@ -49,13 +49,20 @@ would not catch.
 `pnpm validate` is the gate, but it does **not** run `e2e` — so a green `validate`
 says nothing about the Playwright suite. Run `pnpm e2e` before you claim a UI or
 content change is done; the suite was silently red on `main` for weeks because
-nobody did. It is currently **44/44** — 8 spec files, 26 tests, run across two
-projects (`reduced-motion` and `full-motion`), ~2.7 min at `workers: 1`. Expect it to
-take minutes now, not seconds: the `full-motion` project software-renders the three.js
-scene per test. `pnpm size` is a
-**review signal, not a gate** — its CI step is `continue-on-error`, deliberately, so
-that a bundle regression cannot also sink the `e2e` job via `needs: build`. Use the
-1.3 MB budget to notice regressions; Core Web Vitals are the real bar.
+nobody did. It is **44/44 in `pnpm e2e:runner`** — 8 spec files, 26 tests, across two
+projects (`reduced-motion` and `full-motion`), 3.7 min at `workers: 1`.
+
+**Host `pnpm e2e` is not 44/44**, and that is not a regression to chase: 2–3 of the
+`inspector-overlay` specs fail there, varying run to run. They press ``Ctrl+` `` straight
+after `goto`, so they race hydration — which `next dev` makes slow and `retries: 0`
+makes visible. Verified pre-existing by stashing all local work and re-running: the same
+test IDs fail on a clean tree. They pass in `e2e:ci` and `e2e:runner`, which is what CI
+runs. Fix the race before trusting host `pnpm e2e` as a gate again.
+
+`pnpm size` is a **review signal, not a gate** — its CI step is `continue-on-error`,
+deliberately, so that a bundle regression cannot also sink the `e2e` job via
+`needs: build`. Use the 1.3 MB budget to notice regressions; Core Web Vitals are the
+real bar.
 
 `pnpm lint` currently reports **11 warnings and 0 errors**. All 11 are pre-existing
 deep imports into `features/studio/components/screens/canvas-texture`, which
@@ -109,6 +116,13 @@ count, and never use an inline `eslint-disable` to clear one.
   every RTTR test dies on `Cannot assign to read only property 'position' of object
 '#<Mesh>'`. The message blames three; the cause is module resolution. Don't delete
   them, and keep them when the `node`/`jsdom` project split lands.
+- **The world downgrades itself, and CI always runs it downgraded.**
+  `detectSoftwareRenderer()` probes the renderer before the canvas chunk mounts, and
+  `WorldQualityGuard` watches frame times after; together they walk `full → reduced →
+frozen` one way. CI is SwiftShader, so it starts at `frozen` (`frameloop="demand"`, one
+  painted frame). The current tier is on the world root as `data-world-quality`, which is
+  the first thing to read when a `full-motion` spec behaves oddly. Do not "fix" a slow
+  E2E by capping or forcing a click — that is what cost three days; check the tier.
 - **Draw routines must stay deterministic.** `src/` contains zero `Math.random()`
   calls; seed with `mulberry32` from `@/utils/mulberry32` (one copy, shared — don't
   re-declare it locally). The Phase 5 draw snapshots are worthless otherwise.

@@ -6,6 +6,60 @@ not for every change.
 
 ---
 
+## 2026-08-09 — The world stops paying for itself when the renderer cannot keep up
+
+Three days of boot-gate failures were never a test problem. On CI the page was blocked
+in ~5s chunks, so Playwright could not complete a click — and each "fix" (a 200ms cap,
+then `force: true`, then a 1s cap) treated the symptom and made it worse. A cap on an
+action that legitimately needs 6s **guarantees** the failure it is meant to prevent, and
+`force: true` hides that the page is unusable for a real visitor too.
+
+**Measured, in the container that reproduces CI:**
+
+|                    | before                                                                                | after                     |
+| ------------------ | ------------------------------------------------------------------------------------- | ------------------------- |
+| Renderer           | `ANGLE (Google, Vulkan 1.3.0 (SwiftShader Device (LLVM 10.0.0)), SwiftShader driver)` | same                      |
+| Frame time         | 5055ms                                                                                | not rendered continuously |
+| Boot dismiss click | timeout at 30s                                                                        | **626ms**                 |
+| Container suite    | 1 failed, 8.7m on CI                                                                  | **44/44, 3.7m**           |
+
+The perf overlay in the failure snapshot read `Calls 1 · Tris 1 · Frame 5055.4ms` — one
+fullscreen triangle taking five seconds. That is the bloom chain (`BLOOM_LEVELS = 6`,
+each level a down- and an up-pass) rasterised on the CPU, not the scene's geometry.
+
+So the world now degrades itself, one way, `full → reduced → frozen`: `reduced` drops
+postprocessing and antialiasing and pins DPR to 0.5; `frozen` switches the canvas to
+`frameloop="demand"`, so the scene is painted once and then costs nothing. Degradation
+never reverses — freeing the main thread makes frames look healthy, which would restore
+the load that broke them and oscillate.
+
+**Two detectors, because one is not enough.** `detectSoftwareRenderer()` probes a
+throwaway context _before_ the canvas chunk mounts, since asking from inside R3F is too
+late — the first frames are the most expensive of the session, and paying two of them to
+learn what a device string says outright cost 8 seconds of blocked main thread (that
+intermediate version measured a 6011ms click; probing first took it to 626ms).
+`WorldQualityGuard` is the net for hardware that is merely slow, which no device string
+predicts: three sustained frames over 250ms step down a tier, and a single frame over 2s
+skips straight to `frozen`, because waiting for confirmation costs another 5s frame.
+
+**A false positive is the real risk** — freezing the world for a visitor whose GPU is
+fine — so `isSoftwareRenderer` is tested against both sides: SwiftShader, llvmpipe and
+Microsoft Basic Render on one, Apple M3, RTX 4070, Radeon Pro, Iris Xe, Mali and Adreno
+on the other. An unreadable renderer counts as hardware.
+
+**This is the honest product answer, not a test accommodation.** Chrome falls back to a
+CPU rasterizer whenever the GPU is blocklisted — old drivers, VMs, enterprise fleets — so
+real visitors were getting a page that dropped their clicks. The world is decorative
+(`data-world-root` is `aria-hidden`, every destination reachable without it); a still
+image of it is what `WorldFallback` already shows under reduced motion. CI keeps
+exercising the 3D path: the canvas mounts, the scene builds and paints, and the tier is
+observable as `data-world-quality` on the world root.
+
+`dismissBoot()` is consequently an ordinary `click()` again — no `force`, no cap — after
+waiting for the "Enter the studio" control that `BOOT_MAX_MS` guarantees within 12s on
+any machine. If a click cannot land in the 90s test budget now, that is a real
+regression and should fail.
+
 ## 2026-08-09 — CI is reproduced locally with a constrained container, not with `act`
 
 Two boot-gate failures in two days had the same shape: green locally, red on CI. The
@@ -38,7 +92,13 @@ container. Named volumes for `node_modules`, `.next`, the pnpm store and the bro
 cache keep a warm run near 3 minutes; sharing the host's would corrupt one platform's
 binaries with the other's.
 
-## 2026-08-09 — The boot gate is dismissed with a forced click; its stability wait never settles
+## 2026-08-09 — ~~The boot gate is dismissed with a forced click~~ (superseded same day)
+
+**Superseded by "The world stops paying for itself…" above. The diagnosis below is
+wrong** and is kept only so the mistake is not repeated: the stability wait failed
+because the main thread was blocked for ~5s at a time, not because the splash animates.
+The `force: true` and the 200ms cap treated that symptom and made it worse. What follows
+is the original entry.
 
 `world-3d.spec.ts` "does not gate again in the same session" was failing on `main`, all
 three attempts with the same call log: `locator resolved to <button>… Skip intro`,
