@@ -71,6 +71,14 @@ test.describe("Boot sequence", { tag: "@full-motion" }, () => {
 
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.locator("canvas").first()).toBeAttached();
+
+    // The gate's inspector preference defaults to on, so a default entry opens the
+    // overlay. Asserted here rather than in the preferences test below because that one
+    // turns it off — and "off" is indistinguishable from a control wired to nothing.
+    // Between the two, both directions are covered for the price of one boot each.
+    await expect(
+      page.getByRole("region", { name: /performance inspector overlay/i }),
+    ).toBeVisible();
   });
 
   test("does not gate again in the same session", async ({ page }) => {
@@ -83,4 +91,49 @@ test.describe("Boot sequence", { tag: "@full-motion" }, () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(boot).toHaveCount(0);
   });
+
+  /**
+   * The gate is also a preferences screen, and nothing checked that the preferences
+   * survive it. All three are inverted from their defaults here, so a control that is
+   * wired to nothing fails rather than passing on the default it already had.
+   *
+   * The progress bar and the step log are deliberately not asserted end to end. They are
+   * driven by three timers, `boot.dom.test.tsx` already covers them under fake ones, and
+   * chasing them here is what made this the flakiest spec in the suite — see
+   * docs/decisions.md. What is left for a browser is whether the choices take effect.
+   */
+  test("the choices made at the gate are the studio you enter", async ({ page }) => {
+    await page.goto("/");
+
+    const boot = page.getByRole("dialog", { name: /entering .*studio/i });
+    await expect(boot).toBeVisible({ timeout: COLD_BOOT_MS });
+
+    // The preference controls only exist once `canEnter` flips — before that the panel
+    // offers "Skip intro" and nothing else — so waiting for the CTA is also waiting for them.
+    const enter = boot.getByRole("button", { name: /enter the studio/i });
+    await expect(enter).toBeVisible({ timeout: COLD_BOOT_MS });
+
+    await preference(boot, /theme preference/i, "Dark").click();
+    await preference(boot, /sound preference/i, "Muted").click();
+
+    const hidden = preference(boot, /inspector preference/i, "Hidden");
+    await hidden.click();
+    await expect(hidden).toHaveAttribute("aria-pressed", "true");
+
+    await enter.click();
+    await expect(boot).toHaveCount(0);
+
+    await expect(page.locator("html")).toHaveClass(/dark/);
+    await expect(page.getByRole("button", { name: /play ambient studio audio/i })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+    await expect(page.getByRole("region", { name: /performance inspector overlay/i })).toHaveCount(
+      0,
+    );
+  });
 });
+
+function preference(boot: Locator, group: RegExp, option: string): Locator {
+  return boot.getByRole("group", { name: group }).getByRole("button", { name: option });
+}
