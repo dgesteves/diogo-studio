@@ -17,7 +17,7 @@ import { useWorldPalette } from "@/hooks/use-world-palette";
 import { markWorldReady } from "@/stores/boot-store";
 
 import { getStationEntry } from "../constants/station-index";
-import { DPR_MIN, dprForFactor } from "../constants/render";
+import { DPR_DEGRADED, DPR_MIN, dprForFactor } from "../constants/render";
 import { getStation } from "../constants/stations";
 import { useExplore } from "../hooks/use-explore";
 import { useExploreHandoff } from "../hooks/use-explore-handoff";
@@ -33,13 +33,22 @@ import { WorldNeon } from "./world-neon";
 import { WorldPortals } from "./world-portals";
 import { WorldPostprocessing } from "./world-postprocessing";
 import { WorldProps } from "./world-props";
+import { WorldQualityGuard } from "./world-quality-guard";
+import type { WorldQuality } from "../utils/frame-budget";
 
 type WorldCanvasProps = {
   active: RouteKey;
+  quality: WorldQuality;
+  onQuality: (quality: WorldQuality) => void;
   onReady?: () => void;
 };
 
-export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement {
+export function WorldCanvas({
+  active,
+  quality,
+  onQuality,
+  onReady,
+}: WorldCanvasProps): ReactElement {
   const home = getStation("home");
   const palette = useWorldPalette();
   const router = useRouter();
@@ -50,6 +59,7 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   const exploreInput = useExploreInput(explore);
   useExploreHandoff(active, explore);
   const [dpr, setDpr] = useState(DPR_MIN);
+  const full = quality === "full";
 
   const handleCompiled = useCallback(() => {
     markWorldReady();
@@ -57,7 +67,15 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
   }, [onReady]);
 
   return (
-    <Canvas dpr={dpr} gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}>
+    <Canvas
+      // `demand` renders once and then only when something invalidates, so a renderer
+      // that cannot hold a frame rate still paints the scene — it just stops paying for
+      // it every frame. The world is decorative; a still image of it is the honest
+      // trade, and it is what `WorldFallback` already shows under reduced motion.
+      frameloop={quality === "frozen" ? "demand" : "always"}
+      dpr={full ? dpr : DPR_DEGRADED}
+      gl={{ antialias: full, alpha: false, powerPreference: "high-performance" }}
+    >
       <color attach="background" args={[palette.background]} />
       <fog attach="fog" args={[palette.fogColor, palette.fogNear, palette.fogFar]} />
 
@@ -84,13 +102,16 @@ export function WorldCanvas({ active, onReady }: WorldCanvasProps): ReactElement
       <WorldPortals active={active} />
       <AiCore />
 
-      <WorldPostprocessing />
+      {full ? <WorldPostprocessing /> : null}
 
-      <PerformanceMonitor
-        onChange={({ factor }) => setDpr(dprForFactor(factor))}
-        flipflops={3}
-        onFallback={() => setDpr(DPR_MIN)}
-      />
+      {full ? (
+        <PerformanceMonitor
+          onChange={({ factor }) => setDpr(dprForFactor(factor))}
+          flipflops={3}
+          onFallback={() => setDpr(DPR_MIN)}
+        />
+      ) : null}
+      <WorldQualityGuard quality={quality} onDegrade={onQuality} />
       <AdaptiveEvents />
       <ScenePrecompile onCompiled={handleCompiled} />
     </Canvas>
