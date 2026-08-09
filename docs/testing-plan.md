@@ -4,40 +4,41 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phase 0 is complete; Phases 1–7 are not started.** Five things have
-shipped: the `Math.random()` seeding fix in §5.1, `mulberry32` promoted to
-`src/utils/mulberry32.ts`, **the existing E2E suite made green** (it was 16/18 — the
-`/work` spec asserted content that no longer exists, and the ⌘K Ask-mode spec was
-flaky ~1 in 12 because it raced hydration), **RTTR installed with its spike
-passing** (§5.2), and **the foundation finished** — the `node`/`jsdom` split, a global
-store reset, and a run with **zero warnings** of any kind (see Phase 0 below). This plan
-calls E2E "the actual harness" for the restructure (§3), so it had to be trustworthy
-before anything could be built on it.
+Status: **Phases 0 and 1 are complete; Phase 2 is partly done; Phases 3–7 are not
+started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
+`mulberry32` promoted to `src/utils/mulberry32.ts`, **the existing E2E suite made green**
+(it was 16/18 — the `/work` spec asserted content that no longer exists, and the ⌘K
+Ask-mode spec was flaky ~1 in 12 because it raced hydration), **RTTR installed with its
+spike passing** (§5.2), the `node`/`jsdom` split, a global store reset, and a run with
+**zero warnings** of any kind. This plan calls E2E "the actual harness" for the restructure
+(§3), so it had to be trustworthy before anything could be built on it.
 
-**Phase 1 is the next thing to start.**
+**Phase 1 has now landed**: the server and contract layer is at 100% where it matters —
+`rate-limit.ts` and `app/api/chat` went from a flat **0%** to **100% statements**, and
+`src/ai` from 71% to **98.4%**. See Phase 1 below for the measured table and the two things
+it found. **Phase 2 is the next thing to work on**, and specifically the untagged
+route/SEO/a11y specs that grow `tests/e2e/` from 8 specs toward ~16.
 
-Baseline: re-measured 2026-08-09 on the current tree (version 1.12.0), after the RTTR
-spike and after `boot.dom.test.tsx`, the two store specs and `station-index.test.ts` landed.
-`pnpm validate` passes. Every number below is measured; where an earlier draft's figure
-has been superseded it is marked, because this plan's whole argument is that unverified
-numbers should not govern work — and this table has now gone stale twice, both times
-understating progress, so re-measure rather than copying it forward.
+Baseline: re-measured 2026-08-09 on the current tree, after Phase 1.
+`pnpm validate` passes and `pnpm e2e:ci` is 44/44. Every number below is measured; where an
+earlier draft's figure has been superseded it is marked, because this plan's whole argument
+is that unverified numbers should not govern work — and this table has now gone stale
+three times, every time understating progress, so re-measure rather than copying it forward.
 
 ---
 
 ## 1. Verdict
 
 The premise "we never started creating tests" is not accurate, and the difference
-matters. There are **22 vitest files (123 tests)** and **8 Playwright specs**, and
+matters. There are **30 vitest files (237 tests)** and **8 Playwright specs**, and
 the whole toolchain is already wired: vitest + jsdom, Testing Library (`react`,
 `dom`, `jest-dom`, `user-event`), `@vitest/coverage-v8`, Playwright,
 `@axe-core/playwright`, and `@react-three/test-renderer`. Conventions exist and are
 good.
 
-So this is not a greenfield problem. It is a **coverage-breadth** problem: the
-existing tests cluster on pure retrieval math and world data invariants, and
-almost nothing covers the server layer, client state, UI behavior, or the 3D
-scene.
+So this is not a greenfield problem. It is a **coverage-breadth** problem: the tests
+cluster on pure logic, data invariants and — since Phase 1 — the whole server surface,
+while almost nothing covers client state, UI behavior, or the 3D scene.
 
 The second correction is more important. **"Maximum coverage on everything" is
 the wrong objective function.** 79 of 298 files render Three.js, and coverage on
@@ -58,63 +59,87 @@ which files should never be chased.
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
 | Non-test source files           | **301** (157 `.tsx`, 144 `.ts`)                        |
-| Unit test files / tests         | **22 / 123**                                           |
+| Unit test files / tests         | **30 / 237**                                           |
 | E2E specs / tests               | **8 / 26** → **44 runs** across two motion projects    |
-| Statements / branches           | **33.05% / 22.15%**                                    |
-| Functions / lines               | **36.37% / 33.63%**                                    |
+| Statements / branches           | **35.92% / 27.71%**                                    |
+| Functions / lines               | **40.07% / 36.59%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
 
-This table has been re-measured twice. Before the RTTR spike it read 297 files, 16/76 and
-**10.71% / 9.23%**; on 2026-08-08, after the spike, **28.82% / 13.67%**. The spike's jump
-was almost entirely statements from one spec — the point of §5.2 — and the branch column
-barely moved, the point of §5.3. The move since then is the opposite shape and worth
-reading carefully: **branches went 13.67% → 22.15% while statements moved only 4 points**,
-because `boot.dom.test.tsx` and the two store specs exercise conditions rather than mounting
-trees. That is what earned coverage looks like, and it is the pattern §5.3 asks for.
+This table has been re-measured three times. Before the RTTR spike it read 297 files, 16/76
+and **10.71% / 9.23%**; on 2026-08-08, after the spike, **28.82% / 13.67%**; before Phase 1,
+**33.43% / 22.78%**. The spike's jump was almost entirely statements from one spec — the
+point of §5.2 — and the branch column barely moved, the point of §5.3. Every move since has
+been the opposite shape, and that is the pattern to keep: **branches 13.67% → 22.78% →
+27.71%, while statements moved 4 points and then 2.5**. Phase 0's store and boot specs and
+Phase 1's route specs both buy conditions rather than mounted trees. Read the branch column
+first; a phase that moves statements faster than branches is buying the cheap half.
 
 ### Coverage by layer today
 
-| Layer                | Stmts     | Branch    | Note                                                                                |
-| -------------------- | --------- | --------- | ----------------------------------------------------------------------------------- |
-| `src/schemas`        | 100%      | 100%      | one file                                                                            |
-| `src/utils`          | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                           |
-| `src/constants`      | 100%      | 100%      | `routes` + `career` invariants                                                      |
-| `src/config`         | 86.7%     | 66.7%     | `world-theme` only                                                                  |
-| **`home`**           | **87.5%** | **100%**  | `home.dom.test.tsx` — small surface, fully exercised                                |
-| **`studio/…/scene`** | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.           |
-| `src/components/ui`  | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                               |
-| `world/constants`    | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                          |
-| `src/ai`             | 71.4%     | 72.3%     | retrieval math only; stream/embed/prompt at **0%**                                  |
-| `src/stores`         | 56.9%     | 40.7%     | was 34/13 — `boot-store` + `explore-store` specs; 5 of 7 still at **0%**            |
-| `world/utils`        | 49.7%     | 35.5%     | was 45/26                                                                           |
-| `src/providers`      | 30.6%     | 45.5%     | was 14/9 — reached via the boot spec                                                |
-| `inspector`          | 30.1%     | 10.0%     | was 5/0                                                                             |
-| `src/hooks`          | 29.2%     | 0%        | branch column still untouched                                                       |
-| `world/…/hud`        | 27.7%     | 10.5%     | one toggle spec                                                                     |
-| `studio/…/screens`   | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                            |
-| `world` components   | 10.9%     | 20.5%     | was 4/0 — `boot.dom.test.tsx` only; lounge and props still **0%**                   |
-| `command-menu`       | 8.2%      | 1.3%      | the primary interactive feature, still effectively untested                         |
-| `audio`              | 8.5%      | 0%        | —                                                                                   |
-| `about`              | **0%**    | **0%**    | the pixelated-portrait cluster                                                      |
-| `src/app`            | **0%**    | **0%**    | every route, `sitemap`, `robots`, icons                                             |
-|                      |           |           | (`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`) |
-| `rate-limit.ts`      | **0%**    | **0%**    | security-relevant                                                                   |
+These are v8's own per-directory rows, not aggregates — the previous version of this
+table invented a few, and two of them were wrong (see below).
 
-The three highest-risk gaps are essentially unchanged: `rate-limit.ts` (abuse
-protection) and `app/api/chat/route.ts` (7 distinct response branches) are still at a
-flat **0%**, and `command-menu` — the feature users actually touch — has moved only to
-8%. Those three remain the reason Phases 1–7 are blocked; nothing in the movement above
-touches them.
+| Layer                     | Stmts     | Branch    | Note                                                                        |
+| ------------------------- | --------- | --------- | --------------------------------------------------------------------------- |
+| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.     |
+| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.     |
+| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                   |
+| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                     |
+| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                   |
+| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP             |
+| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                              |
+| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                   |
+| `home/components`         | 87.5%     | 100%      | `home.dom.test.tsx` — small surface, fully exercised                        |
+| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.   |
+| `src/components/ui`       | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                       |
+| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                  |
+| `inspector/stores`        | 68.3%     | 44.4%     | —                                                                           |
+| `src/stores`              | 60.3%     | 44.4%     | `boot-store` + `explore-store` specs; 5 of 7 still barely touched           |
+| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` at **0%**                        |
+| `world/utils`             | 49.7%     | 35.5%     | —                                                                           |
+| `command-menu/stores`     | 45.5%     | 15.4%     | —                                                                           |
+| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error` |
+| `src/providers`           | 30.6%     | 27.3%     | reached via the boot spec                                                   |
+| `src/hooks`               | 29.2%     | 0%        | branch column still untouched                                               |
+| `world/…/hud`             | 27.7%     | 10.5%     | one toggle spec                                                             |
+| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                    |
+| `world/components`        | 22.3%     | 27.1%     | **not 10.9% — that figure was never real; see below**                       |
+| `audio/components`        | 6.7%      | 0%        | —                                                                           |
+| `inspector/components`    | 4.8%      | 0%        | the Web-Vitals overlay                                                      |
+| `command-menu/components` | **4.3%**  | **0%**    | the primary interactive feature, still effectively untested                 |
+| `world/hooks`             | 2.4%      | 0%        | the input reducers                                                          |
+| `command-menu/hooks`      | **1.2%**  | **0%**    | `use-ask-agent` + `runAskRequest` — the client half of Phase 1's route      |
+| `about/components`        | **0%**    | **0%**    | the pixelated-portrait cluster                                              |
+| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                     |
+| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                          |
+| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7    |
 
-Two cautions when reading the improved rows. `studio/…/screens` and `components/ui` are
-raised _incidentally_ by mounting the scene — a by-product, not evidence, and exactly the
-"tests that mount components and assert nothing" effect §1 warns about. And `world`
-components now shows the reverse oddity: **branch coverage (20.5%) exceeds statement
-coverage (10.9%)**, because `boot.dom.test.tsx` drives many conditions inside one small
-cluster while 70-odd untouched files supply the statement denominator. Neither number
-means the feature is covered.
+`layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`.
+
+**Phase 1 closed two of the three highest-risk gaps.** `rate-limit.ts` and
+`app/api/chat/route.ts` were the two that left the security and contract surface
+unverifiable, and both now sit at 100% statements with mutation-verified assertions. The
+third is untouched and is now the largest hole in the repo: **`command-menu`** —
+components at **4.3%**, hooks at **1.2%**, and a flat **0%** branch coverage across both.
+It is the feature users actually touch, and `use-ask-agent` / `runAskRequest` is the
+client half of the route Phase 1 just covered on the server side, including its 429, 503,
+refusal and abort paths.
+
+Three cautions when reading this table:
+
+- **Two rows in the previous version were fiction.** `world/components` was recorded as
+  10.9%/20.5% and `AGENTS.md` repeated it as "11%"; v8 has been printing **22.3%/27.1%**
+  all along, before Phase 1 touched anything. `command-menu` was recorded as a single
+  8.2%/1.3% row that v8 never emits — it is four directories with very different numbers.
+  Copy the rows the tool prints; do not aggregate them by hand.
+- **`studio/…/screens` and `components/ui` are raised _incidentally_** by mounting the
+  scene — a by-product, not evidence, and exactly the "tests that mount components and
+  assert nothing" effect §1 warns about.
+- **`world/components` has higher branch than statement coverage** (27.1% vs 22.3%),
+  because `boot.dom.test.tsx` drives many conditions inside one small cluster while 70-odd
+  untouched files supply the statement denominator. Neither number means it is covered.
 
 ---
 
@@ -313,11 +338,22 @@ statement ones from the start; the spike showed statements can hit 85% while bra
 sit at 53%, so a statement-only ratchet would report a suite that is far healthier than
 it is.
 
+**Phase 1 met the 100% row for `rate-limit.ts` and `app/api/**` on statements, and came
+within a whisker on `src/ai` — 98.4%/95.2%.** The residue is worth understanding rather
+than closing: three `noUncheckedIndexedAccess` guards and two `?? 0` fallbacks that the
+surrounding `||` makes unreachable, plus a type-only module that compiles to nothing. The
+honest lesson for the remaining phases is that **a 100% target is a target for statements
+you can reach through a seam you intend to keep** — reaching the last 1.6% here means
+importing a module the restructure deletes and passing it an out-of-range index, which
+tests TypeScript rather than the product. See [`decisions.md`](./decisions.md).
+
 Files that should be _excluded from the denominator_ rather than faked:
 `instrumentation*.ts`, `global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori
-`ImageResponse`, asserted via E2E HTTP status instead), and
+`ImageResponse`, asserted via E2E HTTP status instead),
 `world-postprocessing.tsx` (pure effect-pass config with no observable behavior
-headlessly). `vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
+headlessly), and the **type-only modules** — `src/types/*.ts` and `ai/retrieve-types.ts`
+compile to nothing, so v8 scores them 0/0 and they only depress the denominator.
+`vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
 error,not-found}.tsx`; fold these into that existing list rather than starting a new
 one, and drop the `layout`/`loading` entries if the Phase 4 work makes them
 assertable after all.
@@ -390,28 +426,82 @@ both handled in the jsdom setup. Verified by mutation, not just by passing: stub
 `resetStores()` to a no-op fails a boot spec, and forcing `canEnter` true fails 3 of
 `boot.dom.test.tsx`'s 8.
 
-### Phase 1 — the server and contract layer (~15 files → 100%)
+### Phase 1 — the server and contract layer — ✅ complete
 
 Highest risk-per-line in the repo, and completely structure-immune because it is
-tested through HTTP.
+tested through HTTP. Landed 2026-08-09 as **8 new spec files and 114 new tests**, taking
+the suite from 22/123 to **30/237**. `pnpm validate` green, `pnpm e2e:ci` 44/44.
 
-- `app/api/chat/route.ts` — all 7 branches: invalid JSON → 400, schema failure →
-  400, rate limited → 429, refusal/no hits → 200 + `REFUSAL_TEXT`, no API key +
-  hits → 503 fallback, streaming success → 200, and the `x-agent-sources` /
-  `cache-control: no-store` headers.
-- `rate-limit.ts` — `x-forwarded-for` → `x-real-ip` → `anonymous` precedence,
-  local sliding-window exhaustion and refill (fake timers), Upstash path mocked.
-- `app/api/health/route.ts`, `sitemap.ts`, `robots.ts` — shape and per-route
-  priority/changefreq.
-- `ai/agent-stream.ts`, `embed-query.ts`, `agent-response.ts`,
-  `system-prompt.ts`, `agent-index.ts` — mock `ai`/`@ai-sdk/openai`; cover the
-  Sentry error paths and base64 `sourcesHeaderValue` round-trip.
-- `schemas/agent.ts`, `config/site.ts` (`getSiteUrl` precedence and
-  normalization), `config/env.ts` degradation.
-- Finish `ai/retrieve-*` to 100% (bm25/cosine/keyword edges: zero vectors,
-  mismatched dims, stopword-only queries, `minScore` boundaries).
+| Target                  | Before      | **After**           |
+| ----------------------- | ----------- | ------------------- |
+| `rate-limit.ts`         | 0% / 0%     | **100% / 100%**     |
+| `app/api/chat/route.ts` | 0% / 0%     | **100% / 93.8%**    |
+| `app/api/health`        | 0% / 100%   | **100% / 100%**     |
+| `sitemap.ts`            | 0% / 0%     | **100% / 100%**     |
+| `robots.ts`             | 0% / 100%   | **100% / 100%**     |
+| `src/ai`                | 71.4/72.3   | **98.4% / 95.2%**   |
+| `src/config`            | 86.7/66.7   | **100% / 100%**     |
+| Repo-wide               | 33.43/22.78 | **35.92% / 27.71%** |
 
-### Phase 2 — the E2E net (structure-immune; the actual harness) — started
+- ✅ **`app/api/chat/route.test.ts` — all 7 branches** plus the headers: invalid JSON →
+  400, schema failure → 400, rate limited → 429, refusal → 200 + `REFUSAL_TEXT`, no API
+  key → 503 fallback, streaming success → 200, dead stream → recovery text, and the
+  base64 `x-agent-sources` / `cache-control: no-store` pair on every one of them.
+  **The mock boundary is third-party code only** — `ai`, `@ai-sdk/openai`,
+  `@sentry/nextjs`, `@/ai/agent-index` — so `agent-stream`, `embed-query`,
+  `agent-response`, `system-prompt` and the real rate limiter all execute. That is why
+  one spec took five modules to 100% statements, and why none of it moves in Phase 6.
+  See [`decisions.md`](./decisions.md).
+- ✅ **`rate-limit.test.ts`** — `x-forwarded-for` → `x-real-ip` → `anonymous`
+  precedence, local token-bucket exhaustion and per-ms refill under fake timers, the
+  refill ceiling, per-caller and per-limiter isolation, and the Upstash path (including
+  the two half-configured cases that must fall back to in-memory).
+- ✅ **`metadata-routes.test.ts`** — the sitemap lists all 17 routes exactly once with the
+  home/station priority and cadence split and one shared timestamp; robots allows `/`,
+  disallows `/api/`, and points at an absolute sitemap URL.
+- ✅ **`agent-response.test.ts`**, **`system-prompt.test.ts`** — response construction,
+  citation numbering and anchors, the unicode-safe base64 round-trip (with the assertion
+  that plain `btoa` throws on the same payload), and prompt assembly including the
+  `(no sources retrieved)` fallback.
+- ✅ **`agent-index.test.ts`** — the corpus ↔ routes invariants, which is the drift types
+  cannot catch: every permalink resolves through `asInternalHref`, every route is covered
+  by at least one chunk, ids are unique, and `CORPUS_HAS_EMBEDDINGS` agrees with both the
+  vectors and the declared model/dimension.
+- ✅ **`config/site.test.ts`** — `getSiteUrl` precedence (`NEXT_PUBLIC_APP_URL` →
+  `VERCEL_PROJECT_PRODUCTION_URL` → `VERCEL_URL` → localhost) and normalization.
+- ✅ **`ai/retrieve.test.ts` extended** 17 → 31 tests: cosine and keyword floors, empty
+  corpora, `TOP_K` capping on both paths, and BM25's three ranking characteristics — idf,
+  length normalization and term-frequency saturation — which are product behavior, not
+  math trivia, because BM25 _is_ retrieval whenever `OPENAI_API_KEY` is unset.
+- ✅ **`tests/env.ts`** written, now that Phase 1 gave it three callers. It mocks the
+  `@/config/env` module rather than stubbing `process.env`, because `createEnv` validates
+  once at import.
+- ✅ **`tests/agent.ts`** — `makeChunk`, extracted from `retrieve.test.ts` when the route
+  spec became its second caller.
+
+**Verified by mutation, not by passing.** 33 mutations across 12 source files, each applied,
+run and reverted: IP precedence swapped, the token-bucket floor and refill ceiling relaxed,
+the 429/503/refusal gates bypassed, `no-store` and the Sentry calls deleted, citation
+markers shifted, anchors dropped, unicode-safe base64 reverted to plain `btoa`, sitemap
+priority and cadence flattened, `/api/` un-disallowed, URL precedence reversed, and BM25's
+idf, length normalization and saturation each removed. **Three survived, and two of them
+were my own tests being too weak** — the rare-term and short-document tests passed on tied
+scores, so both now assert strict inequality, and two tokenizer tests were added. The third
+class is genuine equivalent mutants (a `df === 0` guard the following `f === 0` guard
+already covers; the stopword fast path, whose removal still refuses). Do this before
+believing any of the numbers above.
+
+**It also found a real defect**, which is the point: the "Missing query string." message was
+attached to `.min(1)`, so it never fired for the far likelier `{}` — an absent key is an
+`invalid_type` issue, and the route returned zod's internal wording to the caller. Fixed at
+the schema and shipped as its own `fix:` commit; see [`decisions.md`](./decisions.md).
+
+Not done here, deliberately: `config/env.ts` degradation is asserted **through behavior**
+(no key → 503, no Upstash → in-memory) rather than by re-importing the module under stubbed
+env, and `schemas/agent.ts` is asserted through the HTTP 400s rather than by a schema spec —
+both are §3 rule 1, the coarsest seam that shows the behavior.
+
+### Phase 2 — the E2E net (structure-immune; the actual harness) — started, and next
 
 Landed early, because it was not a coverage gap but a correctness one: the suite forced
 `reducedMotion: "reduce"` globally, so the 3D path had never been tested and two of the
@@ -426,7 +516,12 @@ Landed early, because it was not a coverage gap but a correctness one: the suite
   `world-3d.spec.ts`, which also asserts the canvas mounts and content stays in the DOM.
 - ✅ Axe extended to `wcag22aa`, and it now runs in both modes.
 
-Remaining, to grow `tests/e2e/` from 8 specs to ~16, organized by user journey:
+Remaining, to grow `tests/e2e/` from 8 specs to ~16, organized by user journey. **Phase 1
+changed what two of these owe.** The sitemap's route list, the robots rules and every
+`/api/chat` response branch are now asserted in node, in milliseconds, so `seo.spec.ts` and
+`ask-agent.spec.ts` should assert only what a browser adds — that the XML and headers are
+actually served, and that the streamed bytes reach the DOM as an answer with clickable
+citations — not re-check the payloads:
 
 - **`routes.spec.ts`** — all 17 routes: 200, `<h1>`, title/description, canonical,
   no console errors. Currently 3 of 17 are asserted.

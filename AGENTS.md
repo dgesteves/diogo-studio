@@ -8,17 +8,22 @@ anything structural, `docs/architecture.md` describes the tree as it is today, a
 made. This file only records operational facts that aren't obvious from the code.
 
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose own Phase 0 is now complete, so
-**testing-plan Phase 1 is the next thing to start**. Coverage is **33.4% statements /
-22.8% branches** (`pnpm test:coverage`, 22 files / 123 tests, measured 2026-08-09), and
-the layers a refactor would actually break are still the empty ones: `rate-limit.ts` and
-`app/api/chat` at **0%**, `command-menu` at **8%**, `world/components` at **11%**. So
-"pure move, no behavior change" remains unverifiable. Build the test suite first; do not
-start a phase, and do not treat a green `pnpm validate`, or the coverage number going up,
-as evidence that a refactor preserved behavior.
+[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose Phases 0 **and 1** are now
+complete, so **testing-plan Phase 2 (the E2E net) is the next thing to work on**. Coverage
+is **35.9% statements / 27.7% branches** (`pnpm test:coverage`, 30 files / 237 tests,
+measured 2026-08-09). Phase 1 closed the two worst holes — `rate-limit.ts` and
+`app/api/chat` went from **0%** to **100%** statements, `src/ai` to **98.4%** — but the
+layers a refactor would actually break are still thin: `command-menu` at **4.3%**
+components / **1.2%** hooks with **0%** branches, `world/components` at **22.3%**,
+`world/hooks` at **2.4%**. So "pure move, no behavior change" remains unverifiable. Keep
+building the suite; do not start a restructure phase, and do not treat a green
+`pnpm validate`, or the coverage number going up, as evidence that a refactor preserved
+behavior.
 
-Re-measure before you cite these — they have drifted twice already, and both times the
-docs understated real progress. `pnpm test:coverage` prints the current figures; the
+Re-measure before you cite these. They have drifted three times, every time understating
+real progress, and two figures in the old table were **never real**: `world/components` was
+quoted as 11% when v8 had been printing 22.3% all along, and `command-menu`'s "8%" was a
+hand-rolled aggregate v8 does not emit. Copy the rows `pnpm test:coverage` prints; the
 per-layer table in [`docs/testing-plan.md`](./docs/testing-plan.md) §2 is the one to
 update alongside this paragraph.
 
@@ -123,7 +128,16 @@ count, and never use an inline `eslint-disable` to clear one.
 - **`src/config/brand.ts` is not brand colors.** It's three.js material tokens
   (`roughness`, `metalness`, `color`) and it has 40 importers. Add a token there
   rather than inlining a hex or a material value in the scene.
-- **Read env through `@/config/env` only** — never `process.env` elsewhere.
+- **Read env through `@/config/env` only** — never `process.env` elsewhere. In a test that
+  also means **`vi.stubEnv` does nothing**: `createEnv` validates and freezes its values at
+  import, so a spec that needs a different environment mocks the module against
+  `tests/env.ts` (`vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }))`).
+  Its `DEFAULTS` are typed from `typeof env`, so adding a required var fails typecheck
+  there until it is accounted for.
+- **A spec covering a `"use cache"` route must mock `next/cache`.** `cacheLife()` throws
+  outside a Next build — "only available with the `cacheComponents` config" — so
+  `sitemap.ts` is driven with `cacheLife` stubbed and the profile asserted on the mock.
+  The real guard that the route stays static is `prerender:check`, not the spec.
 - **Rendering is dynamic-by-default** (`cacheComponents`). A stray `new Date()`,
   `headers()` or env read drops a route out of static rendering _silently_ — Next does
   not warn. Wrap it in `"use cache"` + `cacheLife()`. `prerender:check` runs on

@@ -6,6 +6,75 @@ not for every change.
 
 ---
 
+## 2026-08-09 — The `/api/chat` contract is driven over HTTP, mocking only third-party modules
+
+Testing-plan Phase 1 listed nine files to cover. The tempting reading is nine specs, each
+mocking its neighbors — and it is wrong twice over. Phase 6 of the restructure merges
+`agent-stream.ts`, `embed-query.ts` and `agent-response.ts` into `features/agent/`, so
+specs pinned to those module paths are debt the day they land; and a route spec that mocks
+`streamAgentResponse` asserts nothing about the two headers that actually matter.
+
+So one spec at `src/app/api/chat/route.test.ts` posts a real `Request` and asserts the
+`Response`, with the mock boundary drawn at **third-party code only**: `ai`,
+`@ai-sdk/openai`, `@sentry/nextjs`, plus `@/ai/agent-index` (getters over a mutable fixture,
+so a spec can present a corpus with or without vectors). Everything the repo owns —
+routing, validation, rate limiting, retrieval, prompt assembly, the stream wrapper, the
+base64 sources header — runs for real. 29 tests took **five** modules from 0% to 100%
+statements, and they survive Phase 6 untouched because none of them names a file that moves.
+
+Two consequences worth knowing before editing it:
+
+- **The rate limiter is real, not mocked.** It is built at module import (10/min per
+  address), so every case posts from its own `x-forwarded-for` and only the rate-limit case
+  reuses one to spend the budget. That is what makes "the 11th request is refused" an
+  assertion about the deployed limit rather than about a `vi.fn`.
+- **`@/config/env` is mocked against `tests/env.ts`, not stubbed via `process.env`.**
+  `createEnv` validates once at import, so `vi.stubEnv` after that changes nothing. The
+  helper exports one stable object the mock returns, `setTestEnv()` resets before applying
+  overrides so each case declares the whole environment, and its `DEFAULTS` are typed from
+  `typeof env` — adding a required var to `@/config/env` fails typecheck here until it is
+  accounted for.
+
+## 2026-08-09 — The "Missing query string." message never fired for a missing query
+
+Found by the first Phase 1 spec, which is the point of writing them. `chatRequestSchema`
+attached that message to `.min(1)`, so it covered `""` and `"   "` but not the far likelier
+`{}` — an absent key is an `invalid_type` issue, and the route returned zod's
+`"Invalid input: expected string, received undefined"` to the caller.
+
+Fixed at the schema (`z.string({ error: … })`, sharing one constant with `.min(1)`) rather
+than characterized in the test, for two reasons. The intended copy plainly exists for this
+case, so the test would have been enshrining a bug; and asserting zod's internal wording
+couples the suite to a dependency's phrasing across upgrades.
+
+Blast radius is small and worth stating honestly: the ⌘K client guards `if (!trimmed)
+return` and always sends the key, and `runAskRequest` shows `The agent returned 400` for
+any non-ok status without reading the body. So this message is only ever seen by direct
+API callers. It ships as `fix:` regardless — the diff changes behavior, and
+`00-core.md` asks for the type the diff earns.
+
+## 2026-08-09 — `src/ai` stops at 98.4% statements, and the residue should stay uncovered
+
+Phase 1 targeted 100% for `src/ai` (testing-plan §5.3). It lands at **98.41% / 95.18%**,
+and the gap is five things that should not be closed:
+
+- `retrieve-bm25.ts` `if (!tf || dl === undefined) return 0`, `retrieve-keyword.ts`
+  `if (!chunk) continue` — guards that exist only because `noUncheckedIndexedAccess`
+  types an indexed read as possibly-undefined. Through `retrieveByKeyword` the indices
+  always align, so reaching them means importing a module Phase 6 deletes and passing an
+  out-of-range index: a test of the type system, not the product.
+- `(top[0]?.score ?? 0)` in both retrievers — unreachable, because the `||` on the same
+  line short-circuits whenever `top` is empty.
+- `retrieve-types.ts` — type declarations only, so it compiles to nothing and v8 scores it
+  0/0. It belongs in the §5.3 exclusion list, which Phase 7 applies; adding it early would
+  be doing Phase 7's work while claiming Phase 1's number.
+
+Do not delete a guard to color a line green — `cosine()`'s `a[i] ?? 0` is the counterexample
+that shows why. It **is** covered, by a test asserting a gappy vector scores rather than
+returning `NaN`, and a mutation removing it turns that test red. A guard with an
+articulable contract gets a test; a guard the type system forced and the code makes
+unreachable gets left alone.
+
 ## 2026-08-09 — Vitest runs node by default; jsdom is opt-in via a `.dom.test.` filename
 
 Testing-plan Phase 0 asked for a `node`/`jsdom` project split. The question it did not
