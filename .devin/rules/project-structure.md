@@ -11,7 +11,7 @@ by who imports it**. Never import upward.
 > **Phase 0 has landed; Phases 1–7 are blocked on `docs/testing-plan.md`.**
 > `docs/restructure-plan.md` will move the tree toward the layout below, but no
 > further phase may begin until the test suite can prove a move changed no
-> behaviour. Where this rule and the current folders disagree, follow this rule for
+> behavior. Where this rule and the current folders disagree, follow this rule for
 > **new** code and let the plan's phases move the old code. Do not "fix" new code to
 > match the old shape, and do not start moving old code yourself.
 >
@@ -101,7 +101,7 @@ justify them. One level of grouping, not two.
   `data/`, `generated/` or `constants/` — shaders, procedural geometry, canvas draw
   routines and static data are legitimately long, so leave them whole.
 - Split a file when it mixes **concerns**, not when it crosses a threshold. Good
-  seams: rendering vs. state, pure helpers vs. effects, data vs. behaviour.
+  seams: rendering vs. state, pure helpers vs. effects, data vs. behavior.
 - Prefer one 200-line module with a clear job over four 50-line fragments that
   only exist to import each other.
 

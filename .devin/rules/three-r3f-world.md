@@ -20,7 +20,7 @@ the axe/E2E specs. They are hard requirements, not preferences:
   canvas when `reducedMotion` is true, and the site must be fully navigable with
   no 3D at all. Anything you add to the scene needs a no-3D equivalent.
 - **Accessibility is a hard gate** (WCAG 2.2 AA). 3D objects must not be the only
-  navigation: keyboard-reachable index, visible focus, labelled controls, no focus
+  navigation: keyboard-reachable index, visible focus, labeled controls, no focus
   traps when panels reveal.
 - **The route-driven spine stays.** `/` is explore, each route is a focused
   station. Deep links and `metadata` keep working.
@@ -28,14 +28,14 @@ the axe/E2E specs. They are hard requirements, not preferences:
   the focused object stays visible and unoccluded. Responsiveness moves the
   **camera**, not the objects (`utils/framing.ts` pulls back on narrow viewports).
 
-## Materials, colour and theme
+## Materials, color and theme
 
 - **Never inline a hex, roughness or metalness value.** Use the shared material
-  tokens and colours in `src/config/brand.ts` (misleadingly named — it is
+  tokens and colors in `src/config/brand.ts` (misleadingly named — it is
   three.js material tokens, and the restructure renames it to
   `world/scene/materials.ts`). It has ~39 importers; add a token rather than a
   literal.
-- Read theme colours through **`useWorldPalette()`**, never by branching on the
+- Read theme colors through **`useWorldPalette()`**, never by branching on the
   store inline. Day/night is a palette swap, so both modes must be checked.
 - Room and object dimensions come from the shared geometry constants
   (`constants/room.ts`, `*-layout.ts`), not from numbers typed at the call site.

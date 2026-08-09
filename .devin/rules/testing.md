@@ -25,17 +25,17 @@ Six things make a test good in this repo. They apply to every kind below.
 
 1. **Assert what the user sees or does**, through the coarsest stable seam available:
    HTTP → rendered DOM → feature barrel → module path. Drop to a module path only when
-   the behaviour has no coarser seam (pure math, data invariants).
+   the behavior has no coarser seam (pure math, data invariants).
 2. **Prove it can fail.** Before you trust a new test, break the code it covers and watch
    it go red — flip a guard, delete a branch, change a constant — then restore. `boot.test.tsx`
    was validated exactly this way (dropping two guards failed 3 of 7; forcing one flag
    failed 1 of 7). This is the standard, not a nicety.
 3. **Cover every branch the product actually has**, not the happy path: reduced motion vs
    3D, day vs night palette, loading/empty/error/success, and the degraded env paths —
-   every env var is optional, so those are real behaviour.
+   every env var is optional, so those are real behavior.
 4. **Be deterministic by construction** — fake timers, seeded PRNGs, no network, no wall
    clock, no dependence on animation timing.
-5. **Name the behaviour in the title**, not the implementation. "holds the visitor for the
+5. **Name the behavior in the title**, not the implementation. "holds the visitor for the
    minimum duration", not "sets minElapsed".
 6. **Own one concept per file**, at the cluster root, so it survives the merges in
    `docs/restructure-plan.md`.
@@ -91,7 +91,7 @@ The boot gate, debounces, streaming state — anything whose outcome depends on 
 ### Canvas-2D draw routines — Vitest + recording context
 
 - **Assert** the transcript of calls and property sets, snapshotted — that is the drawing
-  expressed as behaviour.
+  expressed as behavior.
 - **Reliable because** every draw routine is deterministic (zero `Math.random()` in
   `src/`; seed with `mulberry32`). Break that and the snapshots are worthless.
 - **Never** assert pixels: jsdom's `getContext("2d")` returns `null`.
@@ -143,7 +143,7 @@ The boot gate, debounces, streaming state — anything whose outcome depends on 
 - **Branches are the honest metric.** Statements can be bought by mounting things;
   branches have to be earned by exercising the conditions the product really has.
 - **Exclude** what cannot be meaningfully asserted headlessly rather than writing a
-  mount-only test to colour a line green.
+  mount-only test to color a line green.
 - Coverage never decides whether a change is safe. The assertions do.
 
 ## Where tests live
@@ -208,7 +208,7 @@ how to write it.
 - **Query by accessible role and name.** Never class names, never DOM structure,
   test IDs only as a last resort. This is what makes a test survive a refactor,
   and it enforces a11y for free.
-- **Assert behaviour and contracts, never module structure.** No assertions about
+- **Assert behavior and contracts, never module structure.** No assertions about
   which file exports what.
 - **Reset external stores in `afterEach`.** The stores are module singletons read
   via `useSyncExternalStore`; without a reset they leak across test files and
@@ -254,7 +254,7 @@ how to write it.
   routine in `src/` is deterministic today (zero `Math.random()` calls), so those
   snapshots are trustworthy — keep it that way.
 - **Every env var is optional and features degrade** — so the degraded paths are
-  real behaviour and must be tested: no `OPENAI_API_KEY` → `/api/chat` returns
+  real behavior and must be tested: no `OPENAI_API_KEY` → `/api/chat` returns
   `503`; no `UPSTASH_*` → in-memory rate limiting.
 - **Reduced motion is a real code path**, not a preference. `world-stage.tsx` never
   mounts the canvas when it is set, so both branches need coverage — which is what the

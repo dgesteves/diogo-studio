@@ -33,7 +33,7 @@ good.
 
 So this is not a greenfield problem. It is a **coverage-breadth** problem: the
 existing tests cluster on pure retrieval math and world data invariants, and
-almost nothing covers the server layer, client state, UI behaviour, or the 3D
+almost nothing covers the server layer, client state, UI behavior, or the 3D
 scene.
 
 The second correction is more important. **"Maximum coverage on everything" is
@@ -44,7 +44,7 @@ spike has now demonstrated exactly that hazard from the good side: four tests to
 40-file `scene/` cluster to **84.65% statements but only 53.06% branches**, because
 mounting a declarative scene executes almost every statement while touching almost no
 conditional. Statements are nearly free here; branches are the work. The target should
-be **behavioural fidelity per layer**, with coverage as the measurement, not the goal.
+be **behavioral fidelity per layer**, with coverage as the measurement, not the goal.
 Section 5 sets a layered target that lands at **~90% statements** honestly, and says
 which files should never be chased.
 
@@ -116,13 +116,13 @@ follow, and they are what make this plan cheap rather than expensive:
 
 1. **Test through the seam you intend to keep.** Prefer, in order: HTTP endpoint
    → rendered DOM → feature barrel (`@/features/world`) → module path. Only drop
-   to a module path when the behaviour has no coarser seam (pure math, data
+   to a module path when the behavior has no coarser seam (pure math, data
    invariants).
 2. **One test file per _concept_, not per source file.** The restructure merges
-   files; tests organised per concept merge with them for free. `boot.test.tsx`
+   files; tests organized per concept merge with them for free. `boot.test.tsx`
    covering the whole boot sequence survives 15 → 5; fifteen `boot-*.test.tsx`
    files do not.
-3. **Assert behaviour and contracts, never module structure.** No assertions on
+3. **Assert behavior and contracts, never module structure.** No assertions on
    which file exports what, no snapshotting import graphs.
 4. **Colocate, but at the cluster root.** `.devin/rules/project-structure.md`
    mandates colocation; put the file at the directory the cluster will collapse
@@ -139,7 +139,7 @@ follow, and they are what make this plan cheap rather than expensive:
 
 Sequencing consequence: **E2E and contract tests come first** (Phases 1–2). They
 are 100% structure-immune and they are the actual harness that verifies "pure
-move, no behaviour change". Unit tests on internals come after, and the ones on
+move, no behavior change". Unit tests on internals come after, and the ones on
 soon-to-merge modules come last.
 
 ---
@@ -175,7 +175,7 @@ The better answer is a **recording context**: a `Proxy` standing in for
 `CanvasRenderingContext2D` that logs every call and property set, asserted with
 Vitest snapshots. This is strictly better than pixels for this codebase — it is
 deterministic, needs no native dependency, runs in milliseconds, and produces
-exactly the "test the exact current behaviour" characterisation you asked for. A
+exactly the "test the exact current behavior" characterization you asked for. A
 draw routine's snapshot is a literal transcript of what it paints.
 
 **`@react-three/test-renderer@9.1.1` works — but not out of the box.** Installed and
@@ -209,7 +209,7 @@ Three layers, in descending order of value:
 1. **Scene-graph tests (vitest + RTTR).** Mesh counts, positions, material
    tokens, conditional branches (day/night palette, reduced motion, focus
    state). Deterministic, no CI minutes beyond the existing test job.
-2. **Behavioural E2E (Playwright).** The `AGENTS.md` non-negotiables are already
+2. **Behavioral E2E (Playwright).** The `AGENTS.md` non-negotiables are already
    a written spec — content stays in the DOM, reduced-motion is a real path, no
    focus traps, the world never crops at ultrawide/laptop/tablet/portrait. Every
    one becomes an assertion.
@@ -263,7 +263,7 @@ branch, and the room shell against `constants/room.ts`. Measured:
 So the 75% statement estimate was **conservative** and the R3F strategy is validated.
 But the useful finding is the column that was never estimated: **branches at 53%**.
 Mounting a declarative scene executes nearly every statement and almost no conditional,
-so Phase 6's real work is the branching behaviour — palette swaps, focus state, reduced
+so Phase 6's real work is the branching behavior — palette swaps, focus state, reduced
 motion, conditional meshes — not statement count. Plan Phase 6 against the branch
 number. Raising statements there is close to free and close to meaningless.
 
@@ -295,7 +295,7 @@ it is.
 Files that should be _excluded from the denominator_ rather than faked:
 `instrumentation*.ts`, `global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori
 `ImageResponse`, asserted via E2E HTTP status instead), and
-`world-postprocessing.tsx` (pure effect-pass config with no observable behaviour
+`world-postprocessing.tsx` (pure effect-pass config with no observable behavior
 headlessly). `vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
 error,not-found}.tsx`; fold these into that existing list rather than starting a new
 one, and drop the `layout`/`loading` entries if the Phase 4 work makes them
@@ -359,7 +359,7 @@ tested through HTTP.
   `system-prompt.ts`, `agent-index.ts` — mock `ai`/`@ai-sdk/openai`; cover the
   Sentry error paths and base64 `sourcesHeaderValue` round-trip.
 - `schemas/agent.ts`, `config/site.ts` (`getSiteUrl` precedence and
-  normalisation), `config/env.ts` degradation.
+  normalization), `config/env.ts` degradation.
 - Finish `ai/retrieve-*` to 100% (bm25/cosine/keyword edges: zero vectors,
   mismatched dims, stopword-only queries, `minScore` boundaries).
 
@@ -378,7 +378,7 @@ Landed early, because it was not a coverage gap but a correctness one: the suite
   `world-3d.spec.ts`, which also asserts the canvas mounts and content stays in the DOM.
 - ✅ Axe extended to `wcag22aa`, and it now runs in both modes.
 
-Remaining, to grow `tests/e2e/` from 8 specs to ~16, organised by user journey:
+Remaining, to grow `tests/e2e/` from 8 specs to ~16, organized by user journey:
 
 - **`routes.spec.ts`** — all 17 routes: 200, `<h1>`, title/description, canonical,
   no console errors. Currently 3 of 17 are asserted.
@@ -403,7 +403,7 @@ Remaining, to grow `tests/e2e/` from 8 specs to ~16, organised by user journey:
   point is that it holds identically with and without the canvas.
 - **`visual.spec.ts`** — the ~8–10 baselines, paths-filtered job, Docker-pinned.
 
-Exit: the restructure now has a net that fails loudly on any behaviour change.
+Exit: the restructure now has a net that fails loudly on any behavior change.
 
 ### Phase 3 — client state, hooks, providers (~25 files → 95%)
 
@@ -434,7 +434,7 @@ anything whose outcome depends on a timer is a component test, not an E2E test**
 same reason: its open/close is animation-gated end-to-end and deterministic in jsdom.
 
 Also the pure formatters here: `inspector-format.ts`, `inspector-route-js.ts`,
-`ask-answer-formatting.tsx` (including the href-sanitisation branches, which are
+`ask-answer-formatting.tsx` (including the href-sanitization branches, which are
 security-relevant), `ask-agent-sources.ts`.
 
 ### Phase 5 — canvas draw routines and layout math (~31 files → 95%)
@@ -477,7 +477,7 @@ doubles what remains, so:
 
 - Keep Playwright on **chromium only**; do not add browsers for coverage's sake.
 - **Tag deliberately.** Untagged specs run twice. That is right for anything asserting
-  behaviour that must hold in both modes, and waste for anything else — the `@full-motion`
+  behavior that must hold in both modes, and waste for anything else — the `@full-motion`
   / `@reduced-motion` tags are the wall-time lever, so reach for them before reaching
   for `workers`.
 - **Do not raise `workers` above 1 in CI** to claw time back. Five concurrent

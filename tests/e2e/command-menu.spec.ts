@@ -25,7 +25,7 @@ test.describe("⌘K Command Menu", () => {
 
     // Deliberately still `toBeHidden` — the menu disappearing is what the visitor
     // experiences, and asserting Radix's `data-state` instead would test the library
-    // rather than the behaviour. Outside reduced motion the content keeps its
+    // rather than the behavior. Outside reduced motion the content keeps its
     // `animate-out` exit animation, so Radix unmounts only on `animationend`; on two
     // vCPUs with the scene competing for the main thread those frames are slow to
     // arrive, which is why the wait is budgeted here rather than the assertion softened.

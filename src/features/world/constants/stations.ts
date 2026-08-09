@@ -12,7 +12,7 @@ const WALL_CAMERA_FAN = 0.45;
 
 /**
  * Frames a right-wall screen head-on from inside the room, fanning the camera
- * back towards the row's centre so neighbouring panels stay in shot.
+ * back towards the row's center so neighboring panels stay in shot.
  */
 function wallFraming(slug: WallScreenSlug): readonly [Vec3, Vec3] {
   const z = WALL_SCREEN_Z[slug];

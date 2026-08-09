@@ -13,7 +13,7 @@ type Options = {
    * click-gated Radix dialog in front of every page load — and `getByRole("dialog")`
    * would then match the boot overlay instead of the ⌘K menu. Seeding the session flag
    * puts the page in the returning-visitor state, which is what lets one spec assert
-   * the same behaviour in both projects. `world-3d.spec.ts` opts out to test boot.
+   * the same behavior in both projects. `world-3d.spec.ts` opts out to test boot.
    */
   skipBoot: boolean;
 };

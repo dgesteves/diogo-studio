@@ -12,7 +12,7 @@ const SHELL_COLOR = new Color("#1b2630");
  * The key light sits at [3,5,3], so only +x/+z-facing normals catch it: the back and
  * left walls render at roughly ambient + 0.53, while the front wall, right wall and
  * ceiling get ambient alone. With no GI to fill them in they read ~1.8x darker, so
- * their base colour is pre-multiplied (in linear space) to land on the same value.
+ * their base color is pre-multiplied (in linear space) to land on the same value.
  */
 const AMBIENT_ONLY_GAIN = 1.8;
 const AMBIENT_ONLY_COLOR = SHELL_COLOR.clone().multiplyScalar(AMBIENT_ONLY_GAIN);

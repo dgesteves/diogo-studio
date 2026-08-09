@@ -6,6 +6,60 @@ not for every change.
 
 ---
 
+## 2026-08-09 — US English is the project language, enforced by review rather than tooling
+
+The repo was not mixed, as it appeared — it was consistently **British**. Every one of
+the 68 occurrences was en-GB prose (`behaviour` ×24, `colour`, `organised`,
+`de-optimises`, `characterisation`, `normalisation`, `sanitised`, `serialised`,
+`labelled`, `centre`, `favour`), spread over `docs/`, `.devin/rules/`, `AGENTS.md`, three
+`src/` comments and two E2E specs. What looked like the American half was not prose at
+all: `pnpm analyze`, `Optimize` in `00-core.md`, and `openGraph.locale: "en_US"` are
+identifiers and config. So this is a change of language, not a cleanup of drift.
+
+**The rule lives in `.devin/rules/language-and-copy.md`, `trigger: always_on`.** It is
+the only location agents load without being asked, and it is where every other normative
+standard already sits. `docs/` was rejected because these files are plans and records —
+write-once, describing a moment — and a live standard buried in a 38 KB decision log is a
+standard nobody reads. `AGENTS.md` was rejected because it scopes itself to "operational
+facts that aren't obvious from the code"; a writing convention is neither operational nor
+a fact about this codebase in particular. `00-core.md` and `README.md` carry a two-line
+pointer each, so the rule is discoverable from both the agent path and the human one.
+
+**All 68 were converted in the same change, `docs/` included.** Leaving the historical
+documents in British would have meant the rule was contradicted by the largest body of
+prose in the repo on the day it landed, which is how a convention becomes decorative. The
+conversion used stem rules with an `[eai]` suffix guard (`optimis[eai]` → `optimiz[eai]`)
+specifically so `optimistic` in `nextjs-app-router.md` and any `organism` survived; a
+naive `s/optimis/optimiz/` would have silently corrupted them.
+
+**One behavior change came with it.** `terminal-screen.ts` built its clock from
+`Intl.DateTimeFormat("en-GB", …)`, which is a formatting locale, not a spelling — the
+carve-out in the rule exists precisely for that class of thing. It was switched anyway,
+for consistency, after checking what actually moves: the time is unchanged (`16:41:00`
+either way, verified at midnight for the h24 rollover), and only the date reorders, `Sun
+09 Aug` → `Sun, Aug 09`. `hour12: false` became `hourCycle: "h23"` at the same time,
+because `hour12` leaves the h23/h24 choice to the locale's default and en-US has
+historically resolved it the other way. Nothing asserts on this string — it is painted
+into a canvas texture, never the DOM — so no test covers the regression if the locale is
+changed again.
+
+**No spell-check gate.** `cspell` would make this enforceable, and was declined: it is a
+dependency plus a curated wordlist for three.js, Next.js and R3F jargon, bought for a
+class of error that review catches and that cannot break the build. The honest
+consequence is written into the rule — it holds exactly as well as the person reading the
+diff.
+
+That absence is itself the reason `AGENTS.md` gets two bullets, against a first instinct
+that a writing standard is not an operational fact. It is not the standard that belongs
+there but the things a green build will not tell you: that `pnpm validate` does not check
+spelling, that `CHANGELOG.md` and `agent-index.json` are generated so prose fixes have to
+go to the source, that the suffix guard is load-bearing, and that the terminal clock is
+painted into a canvas and therefore unobservable to every test in the repo. `AGENTS.md`
+points at the rule for the convention itself rather than restating it, so there is one
+copy to keep true.
+
+---
+
 ## 2026-08-09 — CI E2E stays at one worker in one job; the win was a cold build, not parallelism
 
 The Actions minute budget is not the constraint — 2,000/month against ~15 minutes a push
@@ -170,7 +224,7 @@ and the timing itself stays in `boot.test.tsx`. Added there: the pre-ready "Skip
 path, which had no coverage at any layer; verified by mutation (stubbing its `onClick`
 fails exactly that test).
 
-## 2026-08-08 — Timing-sensitive behaviour moves to component tests; CPU starvation stays open
+## 2026-08-08 — Timing-sensitive behavior moves to component tests; CPU starvation stays open
 
 The dual-motion E2E split turned `main` red. Three failures, one cause: **GitHub-hosted
 runners have 2 vCPUs**, and with SwiftShader software-rendering the scene continuously the
@@ -239,7 +293,7 @@ One did. Playwright's fixture signature is
 positional callback — and `react-hooks/rules-of-hooks` read it as React's `use()` hook,
 erroring with "React Hook `use` is called in function `page`".
 
-The first fix was to rename the parameter to `provide`. That is behaviour-identical (the
+The first fix was to rename the parameter to `provide`. That is behavior-identical (the
 name is a local binding) but it is a **patch on the wrong layer**: it leaves 39 other
 irrelevant rules linting `tests/` and `scripts/`, guarantees the next person writing a
 fixture hits the same error, and trades the documented API name for lint appeasement.
@@ -273,12 +327,12 @@ Radix dialog on a first visit when motion is allowed — so `getByRole("dialog")
 ⌘K and axe specs would have matched the boot overlay instead of the command menu. The
 `skipBoot` fixture in `tests/e2e/fixtures.ts` seeds the boot session key via
 `addInitScript`, which is the returning-visitor state and is what lets one spec assert
-the same behaviour in both projects. `world-3d.spec.ts` sets `skipBoot: false` to test
+the same behavior in both projects. `world-3d.spec.ts` sets `skipBoot: false` to test
 boot itself.
 
 **The measurements, because the first run looked like ten product bugs and was not.**
 At the default five workers, 10 of 22 full-motion tests failed, one with
-`Protocol error: session closed`. Serialised, 21 of 22 passed. The last one was the
+`Protocol error: session closed`. Serialized, 21 of 22 passed. The last one was the
 budget, not the product: the `/about` portrait assertion settles in **395ms** with no
 canvas and took **9.3s** with one, against a 5s default. Five concurrent SwiftShader
 contexts starve each other, and a scene rendering at 60fps on a software renderer
@@ -326,12 +380,12 @@ contains `typedRoutes` + `cacheComponents`, `scripts/check-prerender.ts`, the
 `(marketing)` → `(world)` rename, the station-index split, `mulberry32`, the
 `Math.random()` seeding fix, the Phase 0 lint caps, two rewritten E2E specs, a CI
 change, and three real bug fixes in `command-menu-ask.tsx` /
-`ask-answer-formatting.tsx` — one of which is a **user-visible behaviour change**
+`ask-answer-formatting.tsx` — one of which is a **user-visible behavior change**
 (an internal-looking href that is not a real route now renders as plain text).
 
 `release-please-config.json` maps `docs` to a Documentation section, so the next
 release cuts a patch bump whose Features, Bug Fixes and Performance sections are all
-empty. None of the above appears in `CHANGELOG.md`, and the behaviour change ships
+empty. None of the above appears in `CHANGELOG.md`, and the behavior change ships
 unannounced. The `commit-msg` hook cannot catch this — `docs:` is a valid type, so
 commitlint passes. Only the author choosing the right type catches it.
 
@@ -437,8 +491,8 @@ fixed with **zero casts**:
   discriminated `ContentLink` union, per `typescript.md`.
 - `command-menu-ask.tsx` called `router.push()` on a **citation href derived from
   model output**, unvalidated. Now narrowed through `asInternalHref()`.
-- `ask-answer-formatting.tsx` rendered `<Link>` from sanitised LLM markdown. Same
-  guard. **Behaviour change:** an internal-looking href that is not a real route now
+- `ask-answer-formatting.tsx` rendered `<Link>` from sanitized LLM markdown. Same
+  guard. **Behavior change:** an internal-looking href that is not a real route now
   renders as plain text instead of a link to a 404.
 
 `asInternalHref()` in `constants/routes.ts` uses a type predicate, not an assertion,
@@ -459,7 +513,7 @@ What it cost:
 no-store` intact, real streamed completion. Vercel now steers streaming AI routes
   toward Node/Fluid Compute anyway, and the OpenAI round-trip dominates latency, so
   this is roughly neutral rather than a regression.
-- `/sitemap.xml` **silently de-optimised** from static to dynamic, because `new Date()`
+- `/sitemap.xml` **silently de-optimized** from static to dynamic, because `new Date()`
   is an uncached dynamic API. Fixed with `"use cache"` + `cacheLife("max")` — the
   content only changes on deploy. Now `○ /sitemap.xml 30d 1y`.
 
@@ -474,7 +528,7 @@ That last point is the whole risk of this model and it is why the guard below ex
 Built **before** enabling `cacheComponents`, not after, and it earned that ordering
 immediately: the first build with the flag on failed with `✗ /sitemap.xml`. Without it
 the site would have shipped a dynamic sitemap and nothing would have said so — Next
-does not warn when a route de-optimises, and static rendering is this site's main
+does not warn when a route de-optimizes, and static rendering is this site's main
 performance asset.
 
 It also closes a second gap for free: a route in `routes.ts` with no corresponding
@@ -504,7 +558,7 @@ asserted the opposite. `pnpm e2e` was **16 passed / 2 failed**:
 This mattered beyond the two tests. `AGENTS.md` claimed a green local `validate`
 meant "CI failures should be rare"; `restructure-plan.md` §7 listed the Playwright
 specs under "what makes this safe"; and `testing-plan.md` §3 calls E2E "the actual
-harness that verifies 'pure move, no behaviour change'". A harness with a
+harness that verifies 'pure move, no behavior change'". A harness with a
 permanently-red test and an unacknowledged flake cannot play that role — and the
 `retries: 2` in `playwright.config.ts` is what let the flake stay invisible.
 
@@ -544,14 +598,14 @@ no file exceeded the new caps beforehand, so this is a pure relaxation that cann
 break a build.
 
 Unblocking this ahead of the test suite is deliberate: relaxing a lint cap moves no
-code and changes no behaviour, so the "we cannot verify a pure move" argument that
+code and changes no behavior, so the "we cannot verify a pure move" argument that
 blocks Phases 1–7 does not apply to it.
 
 ## 2026-08-08 — Cross-boundary import guardrails ship as warnings, ahead of the tests
 
 `restructure-plan.md` §6 scheduled these for Phase 7 — last, after every dangerous
 merge, which is backwards: their whole job is to stop new violations appearing while
-the restructure is in flight. They are pure lint config with no behaviour risk, so
+the restructure is in flight. They are pure lint config with no behavior risk, so
 they landed now.
 
 `warn` not `error` because there are 11 pre-existing violations, all reaching into
@@ -576,7 +630,7 @@ namespace (now `cn` + `mulberry32`).
 ## 2026-08-08 — `size-limit` is a review signal, not a gate
 
 Three docs said "review signal"; CI ran `pnpm size` as a hard step in the `build`
-job. Resolved in CI's favour of the docs: the step is now `continue-on-error`.
+job. Resolved in CI's favor of the docs: the step is now `continue-on-error`.
 
 Two reasons. A breach in `build` also sinks `e2e` via `needs: build`, so a 30 KB
 bundle regression would have taken the entire accessibility suite offline. And the

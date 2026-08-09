@@ -14,15 +14,15 @@ import { drawTerminal } from "./terminal-screen-draw";
 
 const FOCUS_INTERVAL_MS = 3000;
 
-const LISBON_TIME = new Intl.DateTimeFormat("en-GB", {
+const LISBON_TIME = new Intl.DateTimeFormat("en-US", {
   timeZone: "Europe/Lisbon",
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
-  hour12: false,
+  hourCycle: "h23",
 });
 
-const LISBON_DATE = new Intl.DateTimeFormat("en-GB", {
+const LISBON_DATE = new Intl.DateTimeFormat("en-US", {
   timeZone: "Europe/Lisbon",
   weekday: "short",
   day: "2-digit",

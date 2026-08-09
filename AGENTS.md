@@ -10,10 +10,10 @@ made. This file only records operational facts that aren't obvious from the code
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
 [`docs/testing-plan.md`](./docs/testing-plan.md).** Coverage is ~29% statements but only
 ~14% **branches** (`pnpm test:coverage`), and almost all of the statement figure comes
-from one RTTR spec that mounts the studio scene — so "pure move, no behaviour change"
+from one RTTR spec that mounts the studio scene — so "pure move, no behavior change"
 is still unverifiable. Build the test suite first; do not start a phase, and do not
 treat a green `pnpm validate`, or the coverage number going up, as evidence that a
-refactor preserved behaviour.
+refactor preserved behavior.
 
 Two things have shipped outside that block, and they set the bar for anything else
 that wants to: Phase 0 (a lint-cap relaxation — moves no code at all), and the
@@ -90,14 +90,14 @@ count, and never use an inline `eslint-disable` to clear one.
   `features/command-menu`, and its agent is branded "the Inspector agent" in the UI.
   `features/inspector` is unrelated — it's the performance / Web-Vitals overlay. This
   collision has already produced one wrong doc; don't let it produce another.
-- **`src/config/brand.ts` is not brand colours.** It's three.js material tokens
+- **`src/config/brand.ts` is not brand colors.** It's three.js material tokens
   (`roughness`, `metalness`, `color`) and it has 39 importers. Add a token there
   rather than inlining a hex or a material value in the scene.
 - **Read env through `@/config/env` only** — never `process.env` elsewhere.
 - **Rendering is dynamic-by-default** (`cacheComponents`). A stray `new Date()`,
   `headers()` or env read drops a route out of static rendering _silently_ — Next does
   not warn. Wrap it in `"use cache"` + `cacheLife()`. `prerender:check` runs on
-  `postbuild` and fails the build if one of the 19 must-be-static routes de-optimises;
+  `postbuild` and fails the build if one of the 19 must-be-static routes de-optimizes;
   that guard is the only thing standing between you and a silently dynamic site.
 - **Routes are typed** (`typedRoutes`). `Link href` / `router.push` take a real route.
   Never widen to `string`, never cast — narrow untrusted hrefs (LLM output, citations)
@@ -131,12 +131,28 @@ frozen` one way. CI is SwiftShader, so it starts at `frozen` (`frameloop="demand
 - Commits must be Conventional Commits; the `commit-msg` hook enforces this and
   `release-please` derives the version and `CHANGELOG.md` from them. **The hook only
   checks that the type is valid, not that it is right** — `b72c1e5` and `ce66ecc` both
-  shipped features, fixes and a behaviour change under `docs:`, so none of it reaches
+  shipped features, fixes and a behavior change under `docs:`, so none of it reaches
   the changelog. Pick the type from what the diff does, and split the commit when the
   answer is "several things". See [`docs/decisions.md`](./docs/decisions.md).
 - **Audio assets must be free for commercial use.** Only ship tracks/SFX with an
   explicit commercial-use license (Pixabay, Mixkit, Freesound per-clip) and record
   the license + attribution. Never commercial music.
+- **US English, and nothing checks it.** The standard is
+  [`.devin/rules/language-and-copy.md`](./.devin/rules/language-and-copy.md); the repo
+  was converted wholesale on 2026-08-09 (68 occurrences, it had been uniformly British).
+  `pnpm validate` has no spell-check step and one was deliberately not added, so a green
+  validate says nothing here — this holds by review only. Three traps when fixing prose
+  in bulk: a naive `s/optimis/optimiz/` corrupts **`optimistic`** (guard the suffix,
+  `optimis[eai]`); `CHANGELOG.md` and `src/constants/agent-index.json` are **generated**,
+  so fix the source and regenerate; and identifiers, `@img/colour` and other package
+  names, and quoted upstream text are all out of scope — spelling is a copy concern, and
+  renaming an export is a refactor with real blast radius.
+- **Nothing asserts on the terminal clock.** `useCenterScreenTexture` in
+  `features/studio/components/screens/terminal-screen.ts` formats Lisbon time with
+  `Intl.DateTimeFormat("en-US", …)` and paints it into a **canvas texture**, never the
+  DOM — so no unit test or spec can see it, and a locale or format change ships
+  unverified. Check the rendered string by hand. `hourCycle: "h23"` is explicit on
+  purpose: `hour12: false` leaves the h23/h24 midnight rollover to the locale default.
 
 ## Non-negotiables for the 3D world
 
@@ -156,7 +172,7 @@ don't let that recur by tagging a new spec `@reduced-motion` for convenience.
   `getByRole("dialog")` would match the boot overlay instead of the ⌘K menu; the fixture
   seeds the boot session key to put the page in the returning-visitor state.
 - **Accessibility is a hard gate** (WCAG 2.2 AA). 3D objects can't be the only
-  navigation: keyboard-reachable index, visible focus, labelled controls, no focus
+  navigation: keyboard-reachable index, visible focus, labeled controls, no focus
   traps when panels reveal.
 - **The route-driven spine stays.** `/` is explore, each route is a focused
   station; deep links and `metadata` keep working.

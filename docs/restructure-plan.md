@@ -1,7 +1,7 @@
 # Restructure plan
 
 A review of `src/` as it actually is today, why it feels over-engineered, and a
-phased plan to fix it without changing behaviour.
+phased plan to fix it without changing behavior.
 
 Status: **Phase 0 and the §8 documentation audit have landed. Phases 1–7 are not
 started and are blocked.**
@@ -11,7 +11,7 @@ started and are blocked.**
 >
 > **Phase 0 was deliberately unblocked and shipped early** (2026-08-08), because the
 > argument below does not apply to it: relaxing a lint cap moves no code and changes
-> no behaviour, so there is nothing for a test suite to verify. Leaving it blocked
+> no behavior, so there is nothing for a test suite to verify. Leaving it blocked
 > had a real cost — two rule files had been rewritten to say "file length is not a
 > design signal" while lint still enforced `max-lines: 100`, so the documented rule
 > and the enforced rule openly contradicted each other. §6's guardrails 1–3 shipped
@@ -19,7 +19,7 @@ started and are blocked.**
 > violations appearing while the rest of this plan waits.
 >
 > Everything from Phase 1 onward genuinely does need the suite. Every one of those
-> phases claims to be a "pure move/merge with no behaviour change."
+> phases claims to be a "pure move/merge with no behavior change."
 > At **28.82% statement coverage** that claim still cannot be verified, and several
 > phases do not merely move code — they merge it. Phase 3 collapses 15 `boot-*`
 > files into ~5 and 6 `pixelated-portrait-*` into 2; Phase 4 dissolves 40 scene
@@ -30,7 +30,7 @@ started and are blocked.**
 >
 > The test suite is therefore a **prerequisite, not parallel work**. Its Phase 2
 > (E2E) is deliberately structure-immune so it survives every move below and acts
-> as the harness that makes "no behaviour change" a checkable statement.
+> as the harness that makes "no behavior change" a checkable statement.
 >
 > **Coverage moved from 10.71% to 28.82% on 2026-08-08 and this does not unblock
 > anything** — read the shape of the gain, not the number. It came from one RTTR spec
@@ -113,7 +113,7 @@ doing the job a folder should do:
 
 ## 3. Root causes
 
-There are exactly three, and they are causal. Reorganising folders without
+There are exactly three, and they are causal. Reorganizing folders without
 fixing #1 will not stick — the structure will re-shred itself.
 
 ### Cause 1 — the 100-line cap is manufacturing files ✅ fixed in Phase 0
@@ -246,7 +246,7 @@ Estimated outcome: **~313 files → ~240**, top-level folders 15 → 9, max dept
 
 ## 5. Phased plan
 
-Every phase is a pure move/merge with no behaviour change, independently
+Every phase is a pure move/merge with no behavior change, independently
 shippable, and verified by `pnpm validate && pnpm build && pnpm e2e`. Use
 `git mv` so history follows.
 
@@ -256,21 +256,21 @@ Do this on a branch, one commit per phase, on a clean tree.
 rule was written when the E2E suite was 6 specs covering 3 of 17 routes, so it
 was cheap to skip and worth little. Once `testing-plan.md` Phase 2 lands it
 covers all 17 routes plus the `AGENTS.md` non-negotiables, and it is the only
-gate that observes behaviour rather than resolution.
+gate that observes behavior rather than resolution.
 
 Which testing phase covers which restructure phase — the true minimum, should
 this ever need to be interleaved rather than done in full first:
 
-| Restructure phase                        | Requires testing phase                                 |
-| ---------------------------------------- | ------------------------------------------------------ |
-| 0 (lint caps + guardrails)               | **none — landed**; moves no code, changes no behaviour |
-| 1 (one-file folders)                     | 1–2 (contract + E2E)                                   |
-| 2 (renames, content moves)               | 1–2, plus 5 for the `patterns`/`career` RAG sources    |
-| 3 (flatten features, **merge** clusters) | 2, 4 (DOM components), 5 (canvas/portrait)             |
-| 4 (**merge** `studio` → `world`)         | 5 (draw/layout) **and** 6 (scene graph)                |
-| 5 (dissolve `src/stores`)                | 3 (stores, hooks, providers)                           |
-| 6 (consolidate the agent)                | 1 (server + AI contract)                               |
-| 7 (sections, guardrails)                 | 2, 4                                                   |
+| Restructure phase                        | Requires testing phase                                |
+| ---------------------------------------- | ----------------------------------------------------- |
+| 0 (lint caps + guardrails)               | **none — landed**; moves no code, changes no behavior |
+| 1 (one-file folders)                     | 1–2 (contract + E2E)                                  |
+| 2 (renames, content moves)               | 1–2, plus 5 for the `patterns`/`career` RAG sources   |
+| 3 (flatten features, **merge** clusters) | 2, 4 (DOM components), 5 (canvas/portrait)            |
+| 4 (**merge** `studio` → `world`)         | 5 (draw/layout) **and** 6 (scene graph)               |
+| 5 (dissolve `src/stores`)                | 3 (stores, hooks, providers)                          |
+| 6 (consolidate the agent)                | 1 (server + AI contract)                              |
+| 7 (sections, guardrails)                 | 2, 4                                                  |
 
 Phases 3 and 4 are the dangerous ones and they depend on the _last_ testing
 phases to land. That dependency is why the default is simply: finish the tests
@@ -547,7 +547,7 @@ wins" framing is gone; the code wins and the doc tracks it.
 ### Amend — small, high value (done)
 
 - **`.devin/rules/00-core.md`** — function-level target only (§6 rule 4). Also fixed a stack claim: it told readers to adopt "typed routes" and `use cache`, neither of which is enabled in `next.config.ts`. And it now states the real dependency-age policy (24h, `minimumReleaseAge: 1440`) that `testing-plan.md` had been citing it for at ≥7 days.
-- **`.devin/rules/performance.md`** — already said "review signal, not a hard gate", which was correct as documentation and false as a description of CI: `pnpm size` ran as a plain step in the `build` job. **Resolved in the docs' favour** — the step is now `continue-on-error`, so a breach no longer sinks `e2e` via `needs: build`. This section previously asserted "CI matches the roadmap"; it did not.
+- **`.devin/rules/performance.md`** — already said "review signal, not a hard gate", which was correct as documentation and false as a description of CI: `pnpm size` ran as a plain step in the `build` job. **Resolved in the docs' favor** — the step is now `continue-on-error`, so a breach no longer sinks `e2e` via `needs: build`. This section previously asserted "CI matches the roadmap"; it did not.
 - **`AGENTS.md`** — the audio licensing rule salvaged above; that `src/constants/career.ts` has **no runtime consumers** and is read only by `scripts/agent-index/` (a genuine trap — it looks dead); the `agent-index.json` path once Phase 2 moves it.
 - **`README.md`** — pointer kept, supremacy claim dropped, restructure status corrected.
 - **`.devin/rules/{nextjs-app-router,testing,three-r3f-world}.md`** — `src/lib` reference removed, `src/test/` → `tests/`, `mulberry32` repointed at `@/utils/mulberry32`.

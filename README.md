@@ -48,6 +48,9 @@ Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
   `release-please` derives the version and [`CHANGELOG.md`](./CHANGELOG.md) from
   them. The `commit-msg` hook enforces this locally via `commitlint`.
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer.
+- All human-readable text is **US English (en-US)** — prose, UI copy, error
+  messages, accessible names, commit messages. See
+  [`.devin/rules/language-and-copy.md`](./.devin/rules/language-and-copy.md).
 - Tests colocate with source as `*.test.ts(x)`; E2E specs live in `tests/e2e/`.
 
 ## CI

@@ -53,7 +53,7 @@ globs: app/**, src/app/**, **/app/**
 - **Route segment configs `runtime`, `revalidate` and `dynamic` are incompatible with
   `cacheComponents`** and will fail the build. Don't reach for them; express intent
   with `use cache` instead.
-- **Any uncached dynamic API silently de-optimises a route** — `new Date()`,
+- **Any uncached dynamic API silently de-optimizes a route** — `new Date()`,
   `headers()`, `cookies()`, an env read. `pnpm prerender:check` (`postbuild`) is what
   catches it; see `src/app/sitemap.ts` for the pattern.
 - **Stream, don't block.** Lean on **Partial Prerendering**: serve a static shell

@@ -6,7 +6,7 @@ import { type ReactElement } from "react";
  * Deliberately not `MeshReflectorMaterial`: it re-rendered the whole scene into a
  * 256px buffer every frame (~227 extra draw calls, ~47% of the frame's total) and
  * with `mirror={0}` / `mixStrength={0.45}` its only output was multiplying this
- * near-black colour by at most 1.45 — imperceptible for half the frame budget.
+ * near-black color by at most 1.45 — imperceptible for half the frame budget.
  */
 export function GridFloor(): ReactElement {
   return (

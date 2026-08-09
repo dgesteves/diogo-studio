@@ -54,7 +54,7 @@ above them. Nothing imports from `app/`.
 `next.config.ts` enables **`reactCompiler`**, **`typedRoutes`** and
 **`cacheComponents`**. The last one makes rendering dynamic-by-default, so static
 rendering is protected by `pnpm prerender:check` (`postbuild`), which fails the build
-if any of the 19 must-be-static routes de-optimises.
+if any of the 19 must-be-static routes de-optimizes.
 
 ## Path aliases
 
@@ -220,7 +220,7 @@ entirely — the performance/Web-Vitals overlay. Don't conflate them.
 | Site metadata, nav                  | `src/config/{site,navigation}.ts`                 |
 | A URL / route literal               | `src/constants/routes.ts` (typed SSOT)            |
 | A global constant / enum            | `src/constants/`                                  |
-| three.js material / colour token    | `src/config/brand.ts`                             |
+| three.js material / color token     | `src/config/brand.ts`                             |
 | Env var                             | `src/config/env.ts` — never raw `process.env`     |
 | Authored content (typed data + JSX) | the owning feature's `constants/`                 |
 | Static data owned by one feature    | `src/features/<feature>/constants/`               |

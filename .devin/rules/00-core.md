@@ -35,7 +35,7 @@ security by default. Prefer the smallest, clearest solution that ships.
 2. **Type safety end-to-end.** No `any`, no unchecked casts; model data with
    types and validate at every boundary.
 3. **A11y is a requirement, not a polish step** (WCAG 2.2 AA): semantic HTML,
-   keyboard support, visible focus, labelled controls.
+   keyboard support, visible focus, labeled controls.
 4. **Performance is a feature.** Watch the client bundle and Core Web Vitals
    (LCP, CLS, INP); avoid request waterfalls and unnecessary client JS.
 5. **Security by default.** Never leak secrets to the client, authorize every
@@ -74,6 +74,8 @@ security by default. Prefer the smallest, clearest solution that ships.
   workaround, or gotcha) that names alone can't convey. Always keep required
   machine directives (`"use client"`, `import "server-only"`) and license
   headers.
+- **US English (en-US) for all human-readable text** — prose, UI copy, error
+  messages, accessible names, commit messages. See the language-and-copy rule.
 
 ## Working agreement
 
