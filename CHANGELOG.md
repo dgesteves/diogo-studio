@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.12.1](https://github.com/dgesteves/diogo-studio/compare/v1.12.0...v1.12.1) (2026-08-09)
+
+
+### Bug Fixes
+
+* **lint:** scope React rules to src/ instead of renaming a Playwright fixture ([cedb711](https://github.com/dgesteves/diogo-studio/commit/cedb711543bef6d6109a8ca6fb5b94137df22cf9))
+* **world:** degrade the scene when the renderer cannot hold a frame rate ([17eb481](https://github.com/dgesteves/diogo-studio/commit/17eb481dd3bc8049ac378bf48fd38bd323da4f50))
+
+
+### Documentation
+
+* add comprehensive testing plan for restructure safety ([38373cf](https://github.com/dgesteves/diogo-studio/commit/38373cf9c6071f8d6d74a68018475a3c48fb595d))
+* block restructure on testing-plan.md and tighten testing rules ([ef0045a](https://github.com/dgesteves/diogo-studio/commit/ef0045a0dee6718e93c46ed796b0104f8fdd62d1))
+* clarify file-size guidance and restructure-plan authority ([14e1fec](https://github.com/dgesteves/diogo-studio/commit/14e1fecf35fd23328713d8d08e466fa6c808db80))
+* correct the boot-gate diagnosis and record the quality tiers ([6cd0846](https://github.com/dgesteves/diogo-studio/commit/6cd0846ccf65f047315e13e5a57f2924ff5c87c4))
+* correct three unfollowable claims in the rule set ([fac89f4](https://github.com/dgesteves/diogo-studio/commit/fac89f4a0d0ebb0ca523012ed0fde0bdd1f8f7be))
+* correct two unfollowable claims in the App Router rule ([13be837](https://github.com/dgesteves/diogo-studio/commit/13be837ad4064709e645ca6de395a9611b37ddcd))
+* **decisions:** record the RTTR adoption and the changelog gap ([0477850](https://github.com/dgesteves/diogo-studio/commit/0477850b382f499a64c9cb78ddcdd911b5fc4cb2))
+* re-measure the figures the restructure block rests on ([633a263](https://github.com/dgesteves/diogo-studio/commit/633a263009b6826a0685b3567d2bbb70b9b67759))
+* **readme:** document the CI-equivalent e2e commands ([fb61a04](https://github.com/dgesteves/diogo-studio/commit/fb61a04b50ff6615cfc859a14e9235d54d97aac0))
+* record the dual-motion E2E split and its measured cost ([0c1423b](https://github.com/dgesteves/diogo-studio/commit/0c1423b5ccbfe02617bfdc031df6defd6508dd3b))
+* remove career-graph feature and consolidate career data ([b72c1e5](https://github.com/dgesteves/diogo-studio/commit/b72c1e5fdaf20b632247e391b095243346ce4f3f))
+* replace stale test and coverage figures with re-measured values ([9809bf1](https://github.com/dgesteves/diogo-studio/commit/9809bf1febcfbf2c7f69c0900456471ab3fc066a))
+* standardize on US English (en-US) across all human-readable text ([4f6a182](https://github.com/dgesteves/diogo-studio/commit/4f6a182c0c8f09fc1124f9d8b83b49dfc9117307))
+* **testing:** add local CI reproduction with constrained containers ([664e6b9](https://github.com/dgesteves/diogo-studio/commit/664e6b9dce890253a8f94b45df65df63f40ec6cd))
+* **testing:** expand rules with layer-specific guidance and the boot-gate lesson ([2775c57](https://github.com/dgesteves/diogo-studio/commit/2775c57dce37a88568e5e4eee2b8e914e9399bce))
+* tighten rules with reality checks and remove stale references ([cc48418](https://github.com/dgesteves/diogo-studio/commit/cc484185494e6ddac813232c259b25d487283ce5))
+* update rules to reflect Phase 0 landing and current enforcement state ([ce66ecc](https://github.com/dgesteves/diogo-studio/commit/ce66ecc8368249e6ba8db979c2fe3868a0e7b1c2))
+
+
+### Tests
+
+* **e2e:** dismiss the boot gate with an ordinary click ([10e83f9](https://github.com/dgesteves/diogo-studio/commit/10e83f93fb3700ff2eda2846a37cdba02d496d4c))
+* **e2e:** extract openInspector fixture to handle the toggle race ([b50bf2f](https://github.com/dgesteves/diogo-studio/commit/b50bf2f83f261fdfbd8fee8d5dff82654c61f94c))
+* **e2e:** open the inspector through a hydration-safe helper ([aea5b0a](https://github.com/dgesteves/diogo-studio/commit/aea5b0a1debcb73154bc056318a4e33f2fc5b782))
+* **e2e:** restore Next.js cache in CI to skip the cold build ([46ef084](https://github.com/dgesteves/diogo-studio/commit/46ef0849faacc370a5829628965bc80bc076a778))
+* **e2e:** run every spec in both motion modes ([239821e](https://github.com/dgesteves/diogo-studio/commit/239821ecf4551de5e2522bd271b5ac4d6805c491))
+* **studio:** assert the scene graph with RTTR ([eb039d4](https://github.com/dgesteves/diogo-studio/commit/eb039d47e12c9e33c79f273df41d13744ff177a5))
+* **world:** force the boot dismiss click through the stability wait ([755c9b2](https://github.com/dgesteves/diogo-studio/commit/755c9b25e4770199d927982d177eec3a7e55243a))
+* **world:** move the boot gate off E2E onto fake timers ([f1c33bb](https://github.com/dgesteves/diogo-studio/commit/f1c33bb5bcc1bb4fdabcbf194c13d3a6082a199e))
+
+
+### Miscellaneous Chores
+
+* **deps:** bump lockfile dependencies ([2e853e9](https://github.com/dgesteves/diogo-studio/commit/2e853e92c5fe34c52294f9899d09ad83e612eb90))
+
 ## [1.12.0](https://github.com/dgesteves/diogo-studio/compare/v1.11.2...v1.12.0) (2026-08-07)
 
 
