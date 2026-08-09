@@ -4,8 +4,8 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phases 0 and 1 are complete; Phase 2 is partly done; Phases 3–7 are not
-started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
+Status: **Phases 0, 1 and 2 are complete except for the visual baselines; Phases 3–7 are
+not started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
 `mulberry32` promoted to `src/utils/mulberry32.ts`, **the existing E2E suite made green**
 (it was 16/18 — the `/work` spec asserted content that no longer exists, and the ⌘K
 Ask-mode spec was flaky ~1 in 12 because it raced hydration), **RTTR installed with its
@@ -16,14 +16,23 @@ spike passing** (§5.2), the `node`/`jsdom` split, a global store reset, and a r
 **Phase 1 has now landed**: the server and contract layer is at 100% where it matters —
 `rate-limit.ts` and `app/api/chat` went from a flat **0%** to **100% statements**, and
 `src/ai` from 71% to **98.4%**. See Phase 1 below for the measured table and the two things
-it found. **Phase 2 is the next thing to work on**, and specifically the untagged
-route/SEO/a11y specs that grow `tests/e2e/` from 8 specs toward ~16.
+it found.
 
-Baseline: re-measured 2026-08-09 on the current tree, after Phase 1.
-`pnpm validate` passes and `pnpm e2e:ci` is 44/44. Every number below is measured; where an
-earlier draft's figure has been superseded it is marked, because this plan's whole argument
-is that unverified numbers should not govern work — and this table has now gone stale
-three times, every time understating progress, so re-measure rather than copying it forward.
+**Phase 2 has now landed too**, minus `visual.spec.ts`: the E2E suite went from **8 specs /
+26 tests / 44 runs** to **14 specs / 105 tests / 210 runs**, and it found **two production
+defects and one test that could not fail** — every route was shipping the home page's social
+preview, dismissing ⌘K stranded keyboard focus on `<body>`, and a mobile spec asserted an
+element that does not exist. Those are the return on the phase, not the coverage number.
+**Phase 3 (client state, hooks, providers) is the next thing to work on** — and note that
+the two fixes above _lowered_ unit branch coverage, because they added `src/` branches that
+only E2E covers. That is the honest shape of an E2E phase; see §2.
+
+Baseline: re-measured 2026-08-09 on the current tree, after Phase 2.
+`pnpm validate` passes and `pnpm e2e:ci` is **210/210 in 7.4 min at `workers: 1`**. Every
+number below is measured; where an earlier draft's figure has been superseded it is marked,
+because this plan's whole argument is that unverified numbers should not govern work — and
+this table has now gone stale three times, every time understating progress, so re-measure
+rather than copying it forward.
 
 ---
 
@@ -60,11 +69,11 @@ which files should never be chased.
 | ------------------------------- | ------------------------------------------------------ |
 | Non-test source files           | **301** (157 `.tsx`, 144 `.ts`)                        |
 | Unit test files / tests         | **30 / 237**                                           |
-| E2E specs / tests               | **8 / 26** → **44 runs** across two motion projects    |
-| Statements / branches           | **35.92% / 27.71%**                                    |
-| Functions / lines               | **40.07% / 36.59%**                                    |
+| E2E specs / tests               | **14 / 105** → **210 runs** across two motion projects |
+| Statements / branches           | **35.90% / 27.51%**                                    |
+| Functions / lines               | **40.02% / 36.56%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
-| E2E route coverage              | 3 of 17 asserted (`/`, plus content pages spot-checks) |
+| E2E route coverage              | **17 of 17** — status, `h1`, metadata, axe, content    |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
 
 This table has been re-measured three times. Before the RTTR spike it read 297 files, 16/76
@@ -76,56 +85,64 @@ been the opposite shape, and that is the pattern to keep: **branches 13.67% → 
 Phase 1's route specs both buy conditions rather than mounted trees. Read the branch column
 first; a phase that moves statements faster than branches is buying the cheap half.
 
+**Phase 2 moved it backwards, from 27.71% to 27.51%, and that is not a regression.** Vitest
+does not instrument the browser, so 79 new E2E tests are invisible here by construction —
+while the two defects the phase found were fixed in `src/`, and their fixes added branches
+(`command-menu/stores` went 45.5% → 48.5% statements but 15.4% → **10.5%** branches). The
+lesson for Phase 7 is concrete: **do not ratchet a coverage threshold in the same commit as
+an E2E phase**, and never read this number as a measure of how well the product is tested.
+The 210-run suite is the evidence Phase 2 produced; 27.51% is just what vitest can see.
+
 ### Coverage by layer today
 
 These are v8's own per-directory rows, not aggregates — the previous version of this
 table invented a few, and two of them were wrong (see below).
 
-| Layer                     | Stmts     | Branch    | Note                                                                        |
-| ------------------------- | --------- | --------- | --------------------------------------------------------------------------- |
-| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.     |
-| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.     |
-| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                   |
-| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                     |
-| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                   |
-| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP             |
-| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                              |
-| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                   |
-| `home/components`         | 87.5%     | 100%      | `home.dom.test.tsx` — small surface, fully exercised                        |
-| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.   |
-| `src/components/ui`       | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                       |
-| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                  |
-| `inspector/stores`        | 68.3%     | 44.4%     | —                                                                           |
-| `src/stores`              | 60.3%     | 44.4%     | `boot-store` + `explore-store` specs; 5 of 7 still barely touched           |
-| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` at **0%**                        |
-| `world/utils`             | 49.7%     | 35.5%     | —                                                                           |
-| `command-menu/stores`     | 45.5%     | 15.4%     | —                                                                           |
-| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error` |
-| `src/providers`           | 30.6%     | 27.3%     | reached via the boot spec                                                   |
-| `src/hooks`               | 29.2%     | 0%        | branch column still untouched                                               |
-| `world/…/hud`             | 27.7%     | 10.5%     | one toggle spec                                                             |
-| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                    |
-| `world/components`        | 22.3%     | 27.1%     | **not 10.9% — that figure was never real; see below**                       |
-| `audio/components`        | 6.7%      | 0%        | —                                                                           |
-| `inspector/components`    | 4.8%      | 0%        | the Web-Vitals overlay                                                      |
-| `command-menu/components` | **4.3%**  | **0%**    | the primary interactive feature, still effectively untested                 |
-| `world/hooks`             | 2.4%      | 0%        | the input reducers                                                          |
-| `command-menu/hooks`      | **1.2%**  | **0%**    | `use-ask-agent` + `runAskRequest` — the client half of Phase 1's route      |
-| `about/components`        | **0%**    | **0%**    | the pixelated-portrait cluster                                              |
-| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                     |
-| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                          |
-| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7    |
+| Layer                     | Stmts     | Branch    | Note                                                                              |
+| ------------------------- | --------- | --------- | --------------------------------------------------------------------------------- |
+| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.           |
+| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.           |
+| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                         |
+| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                           |
+| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                         |
+| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP                   |
+| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                                    |
+| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                         |
+| `home/components`         | 87.5%     | 100%      | `home.dom.test.tsx` — small surface, fully exercised                              |
+| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.         |
+| `src/components/ui`       | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                             |
+| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                        |
+| `inspector/stores`        | 68.3%     | 44.4%     | —                                                                                 |
+| `src/stores`              | 60.3%     | 44.4%     | `boot-store` + `explore-store` specs; 5 of 7 still barely touched                 |
+| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature     |
+| `world/utils`             | 49.7%     | 35.5%     | —                                                                                 |
+| `command-menu/stores`     | 48.5%     | 10.5%     | the focus-restoration fix added the branch; only E2E covers it                    |
+| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`       |
+| `src/providers`           | 30.6%     | 27.3%     | reached via the boot spec                                                         |
+| `src/hooks`               | 29.2%     | 0%        | branch column still untouched                                                     |
+| `world/…/hud`             | 27.7%     | 10.5%     | one toggle spec                                                                   |
+| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                          |
+| `world/components`        | 22.3%     | 27.1%     | **not 10.9% — that figure was never real; see below**                             |
+| `audio/components`        | 6.7%      | 0%        | —                                                                                 |
+| `inspector/components`    | 4.8%      | 0%        | the Web-Vitals overlay                                                            |
+| `command-menu/components` | **4.2%**  | **0%**    | now covered end to end; still the biggest **unit** hole — Phase 4                 |
+| `world/hooks`             | 2.4%      | 0%        | the input reducers                                                                |
+| `command-menu/hooks`      | **1.2%**  | **0%**    | `use-ask-agent` + `runAskRequest`; every branch now driven by `ask-agent.spec.ts` |
+| `about/components`        | **0%**    | **0%**    | the pixelated-portrait cluster                                                    |
+| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                           |
+| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                                |
+| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7          |
 
 `layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`.
 
-**Phase 1 closed two of the three highest-risk gaps.** `rate-limit.ts` and
-`app/api/chat/route.ts` were the two that left the security and contract surface
-unverifiable, and both now sit at 100% statements with mutation-verified assertions. The
-third is untouched and is now the largest hole in the repo: **`command-menu`** —
-components at **4.3%**, hooks at **1.2%**, and a flat **0%** branch coverage across both.
-It is the feature users actually touch, and `use-ask-agent` / `runAskRequest` is the
-client half of the route Phase 1 just covered on the server side, including its 429, 503,
-refusal and abort paths.
+**Phase 1 closed two of the three highest-risk gaps** — `rate-limit.ts` and
+`app/api/chat/route.ts`, both now at 100% statements with mutation-verified assertions.
+**Phase 2 closed the third from the outside.** `command-menu` still reads 4.2% / 1.2% /
+0% branches here, and those numbers now mean something different: `ask-agent.spec.ts`
+drives every branch of `use-ask-agent` and `runAskRequest` — streaming, citations, 429,
+503, network failure and abort — in a real browser, where vitest cannot see it. The
+remaining work is a unit-level one (Phases 3 and 4), and it is now about speed and
+determinism rather than about whether the feature is verified at all.
 
 Three cautions when reading this table:
 
@@ -501,7 +518,7 @@ Not done here, deliberately: `config/env.ts` degradation is asserted **through b
 env, and `schemas/agent.ts` is asserted through the HTTP 400s rather than by a schema spec —
 both are §3 rule 1, the coarsest seam that shows the behavior.
 
-### Phase 2 — the E2E net (structure-immune; the actual harness) — started, and next
+### Phase 2 — the E2E net (structure-immune; the actual harness) — ✅ complete except the visual baselines
 
 Landed early, because it was not a coverage gap but a correctness one: the suite forced
 `reducedMotion: "reduce"` globally, so the 3D path had never been tested and two of the
@@ -516,37 +533,75 @@ Landed early, because it was not a coverage gap but a correctness one: the suite
   `world-3d.spec.ts`, which also asserts the canvas mounts and content stays in the DOM.
 - ✅ Axe extended to `wcag22aa`, and it now runs in both modes.
 
-Remaining, to grow `tests/e2e/` from 8 specs to ~16, organized by user journey. **Phase 1
-changed what two of these owe.** The sitemap's route list, the robots rules and every
-`/api/chat` response branch are now asserted in node, in milliseconds, so `seo.spec.ts` and
-`ask-agent.spec.ts` should assert only what a browser adds — that the XML and headers are
-actually served, and that the streamed bytes reach the DOM as an answer with clickable
-citations — not re-check the payloads:
+Then the rest landed, taking `tests/e2e/` from **8 specs / 26 tests / 44 runs** to
+**14 specs / 105 tests / 210 runs**, green at **210/210 in 7.4 min** under `pnpm e2e:ci`
+(production build, `workers: 1`). Phase 1 had already changed what two of these owed: the
+sitemap's route list, the robots rules and every `/api/chat` response branch are asserted
+in node in milliseconds, so `seo.spec.ts` and `ask-agent.spec.ts` assert only what a
+browser adds and re-check no payloads.
 
-- **`routes.spec.ts`** — all 17 routes: 200, `<h1>`, title/description, canonical,
-  no console errors. Currently 3 of 17 are asserted.
-- **`seo.spec.ts`** — JSON-LD parses and matches `personJsonLd`/`websiteJsonLd`,
-  OG/Twitter tags, `sitemap.xml` lists all 17 routes, `robots.txt` disallows
-  `/api/`.
-- **`world-3d.spec.ts`** (extend) — the boot sequence beyond gate-and-enter: progress,
-  log, and the theme/sound/inspector toggles.
-- **`world.spec.ts`** — explore toggle, station focus, deep links, radar, map
-  overlay, sector list. Tag `@full-motion`: these only exist with the canvas up.
-- **`world-responsive.spec.ts`** — the "never crops" non-negotiable at ultrawide,
-  laptop, tablet, portrait phone. `@full-motion`, since cropping is a camera concern.
-- **`ask-agent.spec.ts`** — the `/api/chat` journey with the route mocked:
-  streaming answer, citations, retrieval badge, 429, 503, refusal, stop.
-- **`command-menu.spec.ts`** (extend) — ⌘K, ⌘1/⌘2 mode switch, navigate, theme,
-  empty state.
-- **`a11y.spec.ts`** (extend) — axe on all 17 routes, plus focus-visible,
-  focus-trap-free panels, and keyboard-only traversal. Untagged, so every route is
-  scanned in both motion modes — that is 34 scans, so watch the wall time.
-- **`content-in-dom.spec.ts`** — destination content is server-rendered and
-  present without any 3D interaction (the crawlability non-negotiable). Untagged: the
-  point is that it holds identically with and without the canvas.
-- **`visual.spec.ts`** — the ~8–10 baselines, paths-filtered job, Docker-pinned.
+- ✅ **`routes.spec.ts`** — all 17 routes: 200, exactly one `<h1>`, canonical by path, and
+  no console or page errors. Titles and descriptions are asserted **unique** over HTTP,
+  which is what catches a page losing its `metadata` export: Next then falls back to the
+  root copy, and the home page legitimately holds it, so the fallback collides.
+- ✅ **`seo.spec.ts`** — per-page Open Graph and Twitter tags, the card image fetched and
+  200, the JSON-LD graph parsed with its `@id` cross-reference intact, `sitemap.xml` and
+  `robots.txt` served as the right content types, and the satori icons resolved from the
+  page's own hashed hrefs (the HTTP check §5.3 buys instead of coverage).
+- ✅ **`content-in-dom.spec.ts`** — **325 authored strings across all 17 routes**, over raw
+  HTTP with no browser and therefore no JavaScript, driven off `worldDestinations` and a
+  `switch` over `ContentBlock` so a new block kind fails to typecheck until it says what a
+  crawler should see. The crawlability non-negotiable, stated as literally as it can be.
+- ✅ **`accessibility.spec.ts`** (extended) — axe on **all 17 routes in both modes**, plus
+  focus-visible and focus restoration. `canvasMounts` is now a declared project option and
+  `settleWorld` uses it, because a scan taken before the canvas mounts is just a second
+  copy of the reduced-motion scan.
+- ✅ **`world.spec.ts`** — the studio map lists all 17 under their 9 sectors, `aria-current`
+  marks exactly one, navigating closes it, a deep link puts the deck on the right station,
+  and explore mode announces its controls and exits with Escape. **Mostly untagged, not
+  `@full-motion` as sketched above** — the map is plain DOM, and a reduced-motion visitor
+  has nothing else. Only explore mode is genuinely canvas-only.
+- ✅ **`world-responsive.spec.ts`** — the four viewports, with the scope written down: the
+  focused-object claim is a pixel claim only the baselines can make, `framing.test.ts` owns
+  the camera math, and what is left is the renderer's size and a fixed overlay's fit.
+- ✅ **`ask-agent.spec.ts`** — the `/api/chat` journey with the route mocked: streaming
+  answer, citation chips that navigate through `asInternalHref` with the anchor intact, the
+  retrieval badge, 429, 503, transport failure and stop. Refusal and the 400s are
+  deliberately absent, and the file says why.
+- ✅ **`command-menu.spec.ts`** (extended) — ⌘1 back from Ask, the empty state, and a theme
+  action; ✅ **`world-3d.spec.ts`** (extended) — the gate's theme, sound and inspector
+  preferences, inverted from their defaults, and the inspector's default direction asserted
+  in the existing boot test so that "off" cannot pass on a dead control.
+- ⏭️ **`visual.spec.ts`** — the ~8–10 baselines, paths-filtered job, Docker-pinned. **Not
+  done, and deliberately deferred**: §7 says visual regression is the first thing to cut if
+  minutes get tight, and this phase already took CI from ~3.7 min to ~7.4 min locally. It
+  needs its own decision, not a reflex.
 
-Exit: the restructure now has a net that fails loudly on any behavior change.
+**The boot progress bar and step log were dropped from this phase on purpose.** The bullet
+above asked for them; they are driven by three timers, `boot.dom.test.tsx` already covers
+them under fake ones, and chasing them end to end is what made that the flakiest spec in
+the suite. Phase 4's rule — anything timer-dependent is a component test — wins over this
+phase's wishlist.
+
+**What the phase actually bought was three defects, none of which coverage would have
+found.** Every route shipped the home page's `og:title`, `og:description` and `og:url`,
+so every shared link previewed as the homepage; dismissing ⌘K dropped keyboard focus on
+`<body>`, because Radix suppresses FocusScope's restore in favour of a `Dialog.Trigger`
+this menu does not have; and `mobile-nav.spec.ts` asserted that a navigation named
+"Studio destinations" was hidden, when no such element exists anywhere in `src` — a test
+that would have passed with the entire deck deleted. Both fixes ship with regression
+tests; the third spec is gone.
+
+**Every spec in this phase was verified by mutation, and three mutations failed to fail
+first.** Sizing the deck to 3000px changed nothing because `max-w-full` absorbed it;
+`documentElement.scrollWidth` cannot see fixed overlays at all; the keyword-badge
+assertion passed because the mock answer contained the word "Keyword". Each was fixed. One
+more only appeared under `e2e:ci`: the canvas aspect read measured **300px** — the HTML
+default — because `toBeAttached` is satisfied before r3f's ResizeObserver sizes the
+element. It is now a retried read, not a `retries: 2` casualty.
+
+Exit: **met.** The restructure has a net that fails loudly on any behavior change, and it
+has been shown to fail — every spec by mutation, and three of them by finding real bugs.
 
 ### Phase 3 — client state, hooks, providers (~25 files → 95%)
 

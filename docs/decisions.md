@@ -6,6 +6,77 @@ not for every change.
 
 ---
 
+## 2026-08-09 — `openGraph` title, description and url are not set at the root
+
+`rootMetadata` pinned all three, and Twitter's mirrored them. An explicit value in a
+parent's `openGraph` is inherited **verbatim** by every child route rather than being
+overridden by that route's own `title` and `description` — so all 17 pages shipped the same
+social preview and pointed `og:url` at `/`. Every link ever shared for /work, /resume or
+/contact previewed as the home page.
+
+Omitting the three lets Next derive `og:title` and `og:description` per page from the
+resolved metadata, and Twitter's in turn from Open Graph. `siteName`, `locale`, `type` and
+the card image stay at the root, where inheritance is the point. **Do not add them back to
+be explicit** — that is the bug.
+
+`og:url` is deliberately left absent rather than made per-page: Next derives no fallback
+for it, and consumers resolve a missing `og:url` to the fetched URL, which `rel=canonical`
+already confirms. Restoring it correctly means repeating the route path a second time in all
+16 page files or introducing a metadata helper — a refactor that waits for
+`docs/testing-plan.md`, and a real option if social attribution ever matters more.
+
+This is invisible to a unit test: metadata inheritance does not exist until a route is
+rendered. `tests/e2e/seo.spec.ts` asserts it over HTTP, per route, by comparing `og:title`
+to `<title>`.
+
+## 2026-08-09 — The ⌘K menu restores focus itself, because it has no `Dialog.Trigger`
+
+Radix's modal `Dialog.Content` **prevents** FocusScope's own focus restore and focuses
+`context.triggerRef.current` instead. This menu opens from the deck, the hero CTA,
+`openWithMode` and ⌘K, so it has no `Dialog.Trigger` and that ref is always null — the
+restore that would have worked by default was suppressed in favour of one that could not
+run. Dismissing the menu dropped focus on `<body>` (WCAG 2.4.3), and axe cannot see it.
+
+The opener is now remembered in `command-menu-store.tsx`, not in the dialog, for two
+reasons: the store is the only place that sees every entry point, and it is the only point
+early enough — by `onOpenAutoFocus` the menu has already focused its own input, which is
+where a first attempt at fixing this failed. `command-menu.tsx` consumes it in
+`onCloseAutoFocus` and calls `event.preventDefault()`, which skips Radix's null-trigger
+handler because `composeEventHandlers` stops on a prevented default.
+
+Two traps when re-testing it: **on macOS a click does not focus a button**, so a
+mouse-driven test has nothing to restore and passes against the broken code; and Radix
+restores inside a `setTimeout(0)` after unmount, so a single `document.activeElement` read
+is too early and reports `BODY` either way. Drive it by keyboard and assert with a retrying
+matcher.
+
+## 2026-08-09 — `canvasMounts` is a declared project option, not an inferred one
+
+An untagged E2E spec runs in both motion projects, and anything it asserts about the DOM
+before the canvas mounts is a second copy of what the `reduced-motion` run already measured
+— the same trap the project split was added to close. `playwright.config.ts` therefore
+declares `canvasMounts` per project and `settleWorld(page, canvasMounts)` waits only where
+there is something to wait for. Inferring it from `testInfo.project.name` would work and
+would also mean every spec hardcodes a project name.
+
+Attachment is not sizing: r3f hands the canvas to a ResizeObserver, so between
+`toBeAttached` and the first resize it reports the HTML default of 300x150. A spec that
+measures the canvas must retry the read; `world-responsive.spec.ts` does, and that only
+surfaced under `pnpm e2e:ci`, never under `pnpm dev`.
+
+## 2026-08-09 — Station navigation is asserted through the map, not by clicking the scene
+
+Picking a mesh by screen coordinate on a software renderer is a coin flip, and three days
+were already lost to forcing clicks at a blocked main thread. The same navigation is fully
+reachable through the studio map and ⌘K, which are plain DOM — so `world.spec.ts` owns "a
+visitor can get anywhere" and testing-plan Phase 6 owns "the hotspot is where it should be"
+through the scene graph. `world.spec.ts` is therefore mostly **untagged** rather than
+`@full-motion` as the plan sketched: the map matters more to a reduced-motion visitor, who
+has nothing else.
+
+The boot progress bar and step log stayed out of E2E for the same family of reasons — three
+timers, already covered under fake ones in `boot.dom.test.tsx`.
+
 ## 2026-08-09 — The `/api/chat` contract is driven over HTTP, mocking only third-party modules
 
 Testing-plan Phase 1 listed nine files to cover. The tempting reading is nine specs, each

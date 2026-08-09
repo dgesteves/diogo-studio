@@ -8,20 +8,28 @@ anything structural, `docs/architecture.md` describes the tree as it is today, a
 made. This file only records operational facts that aren't obvious from the code.
 
 **Restructure status: Phase 0 has landed. Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose Phases 0 **and 1** are now
-complete, so **testing-plan Phase 2 (the E2E net) is the next thing to work on**. Coverage
-is **35.9% statements / 27.7% branches** (`pnpm test:coverage`, 30 files / 237 tests,
-measured 2026-08-09). Phase 1 closed the two worst holes — `rate-limit.ts` and
-`app/api/chat` went from **0%** to **100%** statements, `src/ai` to **98.4%** — but the
-layers a refactor would actually break are still thin: `command-menu` at **4.3%**
-components / **1.2%** hooks with **0%** branches, `world/components` at **22.3%**,
-`world/hooks` at **2.4%**. So "pure move, no behavior change" remains unverifiable. Keep
-building the suite; do not start a restructure phase, and do not treat a green
-`pnpm validate`, or the coverage number going up, as evidence that a refactor preserved
-behavior.
+[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose Phases 0, 1 **and 2** are now
+complete (Phase 2 minus its visual baselines, deliberately), so **testing-plan Phase 3
+(client state, hooks, providers) is the next thing to work on**. Unit coverage is
+**35.9% statements / 27.5% branches** (`pnpm test:coverage`, 30 files / 237 tests,
+measured 2026-08-09); E2E is **210 runs across 14 specs**, green under `pnpm e2e:ci`.
 
-Re-measure before you cite these. They have drifted three times, every time understating
-real progress, and two figures in the old table were **never real**: `world/components` was
+Phase 1 closed the server holes — `rate-limit.ts` and `app/api/chat` went from **0%** to
+**100%** statements, `src/ai` to **98.4%**. Phase 2 covered every route, the whole SEO
+surface, the studio map and the ⌘K agent from the outside, and **found two production
+defects and one test that could not fail**. But the layers a refactor would break are
+still thin at the unit level: `command-menu` at **4.2%** components / **1.2%** hooks with
+**0%** branches, `world/components` at **22.3%**, `world/hooks` at **2.4%**. So "pure
+move, no behavior change" remains unverifiable — E2E proves the product works, not that a
+moved module kept its contract. Do not start a restructure phase yet.
+
+**Phase 2 lowered the branch number, from 27.7% to 27.5%, and that is correct.** Vitest
+does not instrument the browser, so 79 new E2E tests are invisible to it, while the two
+fixes added `src/` branches only E2E covers. Never read this number as how well the
+product is tested, and never ratchet a threshold in the same commit as an E2E phase.
+
+Re-measure before you cite these. They have drifted four times, every time understating
+real progress, and two figures in an old table were **never real**: `world/components` was
 quoted as 11% when v8 had been printing 22.3% all along, and `command-menu`'s "8%" was a
 hand-rolled aggregate v8 does not emit. Copy the rows `pnpm test:coverage` prints; the
 per-layer table in [`docs/testing-plan.md`](./docs/testing-plan.md) §2 is the one to
@@ -61,8 +69,19 @@ would not catch.
 `pnpm validate` is the gate, but it does **not** run `e2e` — so a green `validate`
 says nothing about the Playwright suite. Run `pnpm e2e` before you claim a UI or
 content change is done; the suite was silently red on `main` for weeks because
-nobody did. It is **44/44 in `pnpm e2e:runner`** — 8 spec files, 26 tests, across two
-projects (`reduced-motion` and `full-motion`), 3.7 min at `workers: 1`.
+nobody did. It is **210/210 under `pnpm e2e:ci`** — 14 spec files, 105 tests, across two
+projects (`reduced-motion` and `full-motion`), **7.5 min at `workers: 1`** on the host.
+Testing-plan Phase 2 roughly doubled that wall time; if CI minutes bite, the levers are the
+`@full-motion` / `@reduced-motion` tags and the 17-route axe sweep, in that order — not
+`workers`, and not the assertions.
+
+**`pnpm e2e` is not enough for anything that measures the canvas.** `toBeAttached` is
+satisfied before r3f's ResizeObserver sizes the element, so a canvas reports the HTML
+default of 300x150 for a moment — which `next dev` was always slow enough to hide and
+`e2e:ci` was not. Any spec reading canvas dimensions must retry the read. More generally,
+use **`settleWorld(page, canvasMounts)`** from `fixtures.ts` before asserting on a
+hydrated DOM: `canvasMounts` is a per-project option in `playwright.config.ts`, and
+without the wait a `full-motion` assertion just re-measures the reduced-motion markup.
 
 **Open the ⌘K menu and the inspector through the `fixtures.ts` helpers**
 (`openWithShortcut`, `openInspector`), never a bare `keyboard.press` after `goto`. Both
@@ -121,6 +140,20 @@ count, and never use an inline `eslint-disable` to clear one.
 - **`src/constants/career.ts` looks dead but isn't.** It has zero runtime
   consumers — only `scripts/agent-index/virtual-chunks.ts` (build-time) and its
   own test import it. Don't delete it as unused; `knip` won't flag it either.
+- **Never set `openGraph.title`, `description` or `url` in `rootMetadata`.** An explicit
+  value there is inherited _verbatim_ by every child route instead of being overridden by
+  that route's own title and description — which is how all 17 pages came to ship the home
+  page's social preview with `og:url` pointing at `/`. Left absent, Next derives them per
+  page. `og:url` is deliberately emitted by nothing; see
+  [`docs/decisions.md`](./docs/decisions.md). Asserted in `tests/e2e/seo.spec.ts`, because
+  metadata inheritance does not exist until a route is rendered — no unit test can see it.
+- **The ⌘K menu restores keyboard focus itself.** It has no `Dialog.Trigger` (it opens from
+  the deck, the hero CTA and ⌘K), and Radix's modal content _suppresses_ FocusScope's own
+  restore in favour of focusing a trigger that is therefore always null — so closing it used
+  to strand focus on `<body>`. `command-menu-store.tsx` remembers the opener and
+  `command-menu.tsx` restores it in `onCloseAutoFocus`. When testing it: on macOS a click
+  does not focus a button, so a mouse-driven test passes against the broken code, and Radix
+  restores inside a `setTimeout(0)`, so a single `activeElement` read is too early.
 - **"Inspector" means two different things.** The ⌘K surface is
   `features/command-menu`, and its agent is branded "the Inspector agent" in the UI.
   `features/inspector` is unrelated — it's the performance / Web-Vitals overlay. This
