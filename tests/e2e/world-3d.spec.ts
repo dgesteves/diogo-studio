@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
+import type { Locator } from "@playwright/test";
 import { expect, test, WCAG_TAGS } from "./fixtures";
 
 /**
@@ -44,6 +45,33 @@ const DISMISS_BOOT = /skip intro|enter the studio/i;
 // should bring this back down.
 const COLD_BOOT_MS = 30_000;
 
+const DISMISS_ATTEMPT_MS = 1_000;
+
+/**
+ * Dismissing the gate is a click Playwright will not make on its own terms. The splash
+ * animates by design — the panel rises, the log fills, the progress bar and its sheen run
+ * continuously — so the dismiss control never satisfies the *stability* half of
+ * actionability: measured locally, a 30s retry loop of plain clicks never landed one.
+ * That is what turned `main` red, and a slow runner only makes it more certain, because
+ * the moment the scene reports ready `BootActions` swaps "Skip intro" for "Enter the
+ * studio" and the element Playwright was waiting on detaches.
+ *
+ * So assert the facts a visitor depends on — the gate is up, the control is visible and
+ * enabled — then dispatch the click without the stability wait, and retry the *action*
+ * until the gate is gone (the readiness idiom `docs/decisions.md` sanctions). Clicking
+ * twice is harmless: `BootSequence.enter` ignores re-entry while the overlay is exiting.
+ */
+async function dismissBoot(boot: Locator): Promise<void> {
+  await expect(boot).toBeVisible({ timeout: COLD_BOOT_MS });
+  await expect(boot.getByRole("button", { name: DISMISS_BOOT })).toBeEnabled();
+
+  await expect(async () => {
+    const dismiss = boot.getByRole("button", { name: DISMISS_BOOT });
+    if (await dismiss.count()) await dismiss.click({ force: true, timeout: DISMISS_ATTEMPT_MS });
+    await expect(boot).toHaveCount(0, { timeout: DISMISS_ATTEMPT_MS });
+  }).toPass({ timeout: COLD_BOOT_MS });
+}
+
 test.describe("Boot sequence", { tag: "@full-motion" }, () => {
   // Opt out of the fixture's session seeding — this is the one place that wants a
   // genuinely first-ever visit.
@@ -52,13 +80,10 @@ test.describe("Boot sequence", { tag: "@full-motion" }, () => {
   test("gates a first visit until the visitor moves past it", async ({ page }) => {
     await page.goto("/");
 
-    const boot = page.getByRole("dialog", { name: /entering .*studio/i });
     // The overlay only exists after hydration flips `isClient`.
-    await expect(boot).toBeVisible({ timeout: COLD_BOOT_MS });
+    const boot = page.getByRole("dialog", { name: /entering .*studio/i });
+    await dismissBoot(boot);
 
-    await boot.getByRole("button", { name: DISMISS_BOOT }).click();
-
-    await expect(boot).toHaveCount(0, { timeout: COLD_BOOT_MS });
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await expect(page.locator("canvas").first()).toBeAttached();
   });
@@ -67,8 +92,7 @@ test.describe("Boot sequence", { tag: "@full-motion" }, () => {
     await page.goto("/");
 
     const boot = page.getByRole("dialog", { name: /entering .*studio/i });
-    await boot.getByRole("button", { name: DISMISS_BOOT }).click({ timeout: COLD_BOOT_MS });
-    await expect(boot).toHaveCount(0, { timeout: COLD_BOOT_MS });
+    await dismissBoot(boot);
 
     await page.reload();
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();

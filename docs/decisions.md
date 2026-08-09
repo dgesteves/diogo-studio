@@ -6,6 +6,36 @@ not for every change.
 
 ---
 
+## 2026-08-09 — The boot gate is dismissed with a forced click; its stability wait never settles
+
+`world-3d.spec.ts` "does not gate again in the same session" was failing on `main`, all
+three attempts with the same call log: `locator resolved to <button>… Skip intro`,
+`element is not stable`, then `element was detached from the DOM, retrying`, then 30s
+gone. The sibling test passed only by accident — it never passed a `timeout` to
+`click()`, so it inherited the 90s test budget instead of the 30s one.
+
+**Measured, not assumed.** Capping each attempt at 200ms and retrying plain clicks for
+the full 30s landed **zero** clicks locally, on a fast machine. The boot splash animates
+throughout by design — the panel rises, the log fills, the progress bar and its sheen
+run continuously — so the dismiss control never satisfies the _stability_ half of
+Playwright's actionability, and the wait simply expires. A starved runner adds the
+second half: at `canEnter` `BootActions` swaps "Skip intro" for "Enter the studio", so
+whatever the wait was holding detaches. Same 200ms cap with `force: true`: both tests
+pass, and faster than before (9.7s / 14.4s against 17.5s).
+
+So `dismissBoot()` asserts the facts a visitor depends on — the gate is up, the control
+is visible and enabled — and then dispatches the click without the stability wait,
+retrying the _action_ until the gate is gone. Clicking twice is safe because
+`BootSequence.enter` ignores re-entry while the overlay is exiting. **`force: true` is
+load-bearing here and is not a smell to clean up**: stability is a heuristic for
+accidental animation, and this animation is the product. Verified with
+`--repeat-each=3 --workers=1` (CI's worker count): 6/6.
+
+This does not reopen the 2026-08-08 decision — matching either dismiss control stays,
+and the timing itself stays in `boot.test.tsx`. Added there: the pre-ready "Skip intro"
+path, which had no coverage at any layer; verified by mutation (stubbing its `onClick`
+fails exactly that test).
+
 ## 2026-08-08 — Timing-sensitive behaviour moves to component tests; CPU starvation stays open
 
 The dual-motion E2E split turned `main` red. Three failures, one cause: **GitHub-hosted

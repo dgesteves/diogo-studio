@@ -126,6 +126,17 @@ describe("Boot gate", () => {
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
   });
 
+  it("lets the visitor out through the pre-ready skip control", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<BootSequence />);
+
+    await user.click(screen.getByRole("button", { name: /skip intro/i }));
+    advance(BOOT_EXIT_MS);
+
+    expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
+    expect(hasBootedThisSession()).toBe(true);
+  });
+
   it("skips the gate entirely for a returning visitor", () => {
     window.sessionStorage.setItem(BOOT_SESSION_KEY, "1");
 
