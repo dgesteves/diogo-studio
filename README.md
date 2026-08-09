@@ -26,13 +26,19 @@ pnpm dev
 | `pnpm validate`        | lint + typecheck + `format:check` + unit tests + knip         |
 | `pnpm test`            | Vitest unit tests (`test:watch`, `test:coverage`)             |
 | `pnpm e2e`             | Playwright + axe, both motion modes (`e2e:ui`, `e2e:install`) |
+| `pnpm e2e:ci`          | Production build + CI flags — what CI actually runs           |
+| `pnpm e2e:runner`      | `e2e:ci` in a 2 vCPU Ubuntu container (needs Docker)          |
 | `pnpm size`            | size-limit bundle budget (`size:why`)                         |
 | `pnpm analyze`         | Build with the bundle analyzer                                |
 | `pnpm agent:index`     | Rebuild the ⌘K agent retrieval index                          |
 | `pnpm prerender:check` | Assert must-be-static routes are still prerendered            |
 
 Run `pnpm validate` before pushing — CI runs the same gates plus `build` and
-`e2e`.
+`e2e`. Note `validate` does **not** run Playwright, and plain `pnpm e2e` uses
+`next dev` with 2 workers where CI uses a production build with 1 worker and
+retries. For anything timing- or 3D-sensitive, reproduce the runner with
+`pnpm e2e:ci` or `pnpm e2e:runner` before calling it done — see
+[`AGENTS.md`](./AGENTS.md).
 
 ## Conventions
 
