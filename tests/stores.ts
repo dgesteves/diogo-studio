@@ -1,6 +1,7 @@
 import { setInspectorOpen } from "@/features/inspector/stores/inspector-overlay-store";
 import { resetBoot } from "@/stores/boot-store";
 import { getExploreServerSnapshot, setExplore } from "@/stores/explore-store";
+import { getPerfServerSnapshot, markPerfInactive, publishPerf } from "@/stores/perf-store";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import { getWorldServerSnapshot, setAiCoreHovered, setHoveredStation } from "@/stores/world-store";
 import { getWorldModeServerSnapshot, setWorldMode } from "@/stores/world-theme-store";
@@ -19,6 +20,11 @@ export function resetStores(): void {
   setWorldMode(getWorldModeServerSnapshot());
   setInspectorOpen(false);
   persistOverride(null);
+
+  // `perf-store` has no whole-snapshot setter, and publishing implies a live scene, so the
+  // two calls together are what restores it: the server snapshot's zeroes, then inactive.
+  publishPerf(getPerfServerSnapshot());
+  markPerfInactive();
 
   window.sessionStorage.clear();
   window.localStorage.clear();
