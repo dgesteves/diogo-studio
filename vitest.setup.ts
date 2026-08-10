@@ -2,25 +2,18 @@ import "@testing-library/jest-dom/vitest";
 // The app applies this at its canvas entry point (world-canvas.tsx), which RTTR bypasses
 // by mounting the scene directly. Same upstream fiber/three deprecation, same suppression.
 import "@/components/r3f/silence-clock-deprecation";
-import { afterEach, vi } from "vitest";
+import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
+import { stubMatchMedia } from "@tests/media";
 import { resetStores } from "@tests/stores";
 
 // jsdom does not implement matchMedia, and `stores/reduced-motion-store.ts` calls it
 // directly, so anything rendering `ReducedMotionProvider` throws without this. Reports no
 // preference: tests that need reduced motion should set the app's own override
 // (`persistOverride`), which takes precedence over the media query, rather than reaching
-// into this stub.
-vi.stubGlobal("matchMedia", (query: string) => ({
-  matches: false,
-  media: query,
-  onchange: null,
-  addEventListener: () => {},
-  removeEventListener: () => {},
-  addListener: () => {},
-  removeListener: () => {},
-  dispatchEvent: () => false,
-}));
+// into this stub. The two specs that own the media-query seam itself re-stub it through the
+// same helper, so a stub this file needs can never drift from the one they install.
+stubMatchMedia(false);
 
 // jsdom cannot rasterise a canvas: it returns null and reports "Not implemented" to its
 // virtual console for every call, which the scene alone triggers 55 times per run. The

@@ -6,7 +6,28 @@ not for every change.
 
 ---
 
-## 2026-08-10 — One always-on file; `.devin/rules` stays scoped despite being undocumented
+## 2026-08-10 — A client store's SSR guard is not chased; a provably dead one is deleted
+
+Testing-plan Phase 3 took the client-state layer to 97–100% statements, and what is left in
+`src/stores` and `src/providers` is almost entirely `typeof window === "undefined"` and
+`typeof navigator === "undefined"` guards. Reaching them means deleting a global from under
+jsdom mid-file, which breaks the environment for every later test, or importing the module in
+the node project purely to prove TypeScript right. Neither tests the product, so the residue
+stays and this entry is why. The guards themselves are load-bearing: `getSystemSnapshot` and
+friends are called from module scope reachable during a prerender, and the build is what
+proves it.
+
+The exception is a guard that **cannot** run: `useEffect` never executes on the server, so
+`typeof window === "undefined"` inside one is unreachable by construction. `command-menu-store`
+had one and it was the only branch of that store no test could reach. Deleting it is better
+than either faking a test or excluding the file, and it is the rule to apply to the next such
+find — an unreachable guard is dead code, not an untested branch.
+
+Two mechanical traps from the same phase are recorded in `.devin/rules/testing.md` because
+both let a test pass while asserting nothing: jsdom's `Storage` is a proxy, so an instance-level
+`vi.spyOn` is stored as a key rather than replacing the method; and Motion's `useReducedMotion`
+ignores `MotionConfig`, so asserting reduced motion through it says nothing about
+`MotionProvider`.
 
 An audit against the shipped Devin CLI documentation found that **`.devin/rules/` appears in
 none of it.** `rules.mdx` and the configuration-import reference document `AGENTS.md` (plus
