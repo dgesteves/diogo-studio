@@ -1,15 +1,16 @@
+/**
+ * Called only from the overlay's effect, so `window` and Resource Timing are both present —
+ * the guards that used to stand in for that could not run. Entry names are absolute URLs by
+ * spec, which is what makes a prefix comparison a same-origin test.
+ */
 export function measureRouteJs(): { kb: number; count: number } {
-  if (typeof performance === "undefined" || !performance.getEntriesByType) {
-    return { kb: 0, count: 0 };
-  }
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const { origin } = window.location;
   const entries = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
   let bytes = 0;
   let count = 0;
   for (const entry of entries) {
     const isScript = entry.initiatorType === "script" || entry.name.endsWith(".js");
-    const sameOrigin = entry.name.startsWith(origin) || entry.name.startsWith("/");
-    if (isScript && sameOrigin) {
+    if (isScript && entry.name.startsWith(origin)) {
       bytes += entry.encodedBodySize || 0;
       count += 1;
     }
