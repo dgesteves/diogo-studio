@@ -1,4 +1,4 @@
-import { type ReactElement, type ReactNode } from "react";
+import { useId, type ReactElement, type ReactNode } from "react";
 
 import type { VitalSample } from "@/stores/web-vitals-store";
 import { cn } from "@/utils/cn";
@@ -14,12 +14,22 @@ export function Panel({
   title: string;
   children: ReactNode;
 }): ReactElement {
+  // The title looks like a heading and groups everything under it, so it is one (WCAG
+  // 1.3.1) — and naming the section by it makes each panel a region a screen reader can
+  // jump between, rather than four unlabelled boxes in one overlay.
+  const titleId = useId();
   return (
-    <section className="border-border bg-surface-inset/60 rounded-md border p-2.5">
-      <div className="text-subtle-foreground mb-2 flex items-center gap-1.5 font-mono text-[10px] font-medium tracking-wider uppercase">
+    <section
+      aria-labelledby={titleId}
+      className="border-border bg-surface-inset/60 rounded-md border p-2.5"
+    >
+      <h2
+        id={titleId}
+        className="text-subtle-foreground mb-2 flex items-center gap-1.5 font-mono text-[10px] font-medium tracking-wider uppercase"
+      >
         {icon}
         {title}
-      </div>
+      </h2>
       {children}
     </section>
   );
