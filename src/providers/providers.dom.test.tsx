@@ -1,8 +1,9 @@
 import type { ReactElement, ReactNode } from "react";
 import { act, render, screen } from "@testing-library/react";
-import userEvent, { type UserEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import { useReducedMotionConfig } from "motion/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { click } from "@tests/interactions";
 import { restoreMediaStubs, stubMatchMedia, stubNetworkConnection } from "@tests/media";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import { AppProviders } from "./index";
@@ -83,16 +84,6 @@ function withPreference(children: ReactNode): ReactElement {
 
 function read(testId: string): string {
   return screen.getByTestId(testId).textContent ?? "";
-}
-
-// `persistOverride` notifies its `useSyncExternalStore` subscribers synchronously inside
-// the click, which user-event does not wrap — the same reason `boot.dom.test.tsx` has this
-// helper.
-async function click(user: UserEvent, name: RegExp): Promise<void> {
-  const target = screen.getByRole("button", { name });
-  await act(async () => {
-    await user.click(target);
-  });
 }
 
 beforeEach(() => {

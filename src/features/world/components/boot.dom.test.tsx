@@ -1,6 +1,7 @@
 import { act, render, screen } from "@testing-library/react";
-import userEvent, { type UserEvent } from "@testing-library/user-event";
+import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { click } from "@tests/interactions";
 import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
 import { BOOT_SESSION_KEY, hasBootedThisSession, markWorldReady } from "@/stores/boot-store";
 import { persistOverride } from "@/stores/reduced-motion-store";
@@ -38,15 +39,6 @@ const VISIBLE_ONLY = { ignore: '[aria-hidden="true"] *' } as const;
 function advance(ms: number): void {
   act(() => {
     vi.advanceTimersByTime(ms);
-  });
-}
-
-// Entering fires setExiting and setInspectorOpen synchronously inside the click, which
-// user-event does not wrap once fake timers are driving it.
-async function click(user: UserEvent, name: RegExp): Promise<void> {
-  const target = screen.getByRole("button", { name });
-  await act(async () => {
-    await user.click(target);
   });
 }
 
