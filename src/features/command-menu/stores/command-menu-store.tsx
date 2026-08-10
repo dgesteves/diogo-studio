@@ -58,7 +58,6 @@ export function CommandMenuProvider({ children }: { children: React.ReactNode })
   }
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
     function onKeyDown(event: KeyboardEvent) {
       const isModK = (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k";
       if (!isModK) return;
