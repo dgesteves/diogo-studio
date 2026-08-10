@@ -2,7 +2,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { useEffect, useState, type ReactElement } from "react";
+import { useEffect, type ReactElement } from "react";
 
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 import { useCommandMenu } from "../stores/command-menu-store";
@@ -15,12 +15,6 @@ import { NavigateView } from "./command-menu-navigate";
 export function CommandMenu(): ReactElement {
   const { open, setOpen, mode, setMode, openerRef } = useCommandMenu();
   const { reducedMotion } = useReducedMotionPreference();
-  const [openTick, setOpenTick] = useState(0);
-
-  function handleOpenChange(next: boolean): void {
-    if (next) setOpenTick((n) => n + 1);
-    setOpen(next);
-  }
 
   useEffect(() => {
     if (!open) return;
@@ -57,7 +51,7 @@ export function CommandMenu(): ReactElement {
   }
 
   return (
-    <Dialog.Root open={open} onOpenChange={handleOpenChange}>
+    <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Portal>
         <Dialog.Overlay
           className={cn(
@@ -84,7 +78,7 @@ export function CommandMenu(): ReactElement {
           {mode === "navigate" ? (
             <NavigateView onClose={close} />
           ) : (
-            <CommandMenuAsk onNavigate={close} openTick={openTick} />
+            <CommandMenuAsk onNavigate={close} />
           )}
 
           <Footer mode={mode} setMode={setMode} />

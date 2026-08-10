@@ -6,6 +6,21 @@ not for every change.
 
 ---
 
+## 2026-08-10 — ⌘K's `openTick` deleted: state Radix could never change
+
+Phase 4's menu spec left exactly one uncovered line in `command-menu.tsx`, and the reason it
+was uncovered is that it could not run. `handleOpenChange` incremented an `openTick` whenever
+Radix reported the dialog **opening**, and `CommandMenuAsk` keyed its focus effect on it. But
+this menu deliberately has no `Dialog.Trigger` — the deck button, the hero CTA and ⌘K all open
+it through the store — so `Dialog.Root`'s `onOpenChange` only ever fires with `false`, from
+Escape or an outside click. `openTick` was `0` for the life of the page.
+
+Nothing was broken, because Radix unmounts the dialog's content on close: the effect runs on
+mount, and mounting is every arrival in Ask mode. The state, the prop and the handler are gone,
+and a unit test now asserts the input takes focus, so a future regression cannot hide behind a
+tick that never ticked. Same rule as the entry below — unreachable code is dead code, not an
+untested branch — and the same lesson: the uncovered line was the finding, not the target.
+
 ## 2026-08-10 — A client store's SSR guard is not chased; a provably dead one is deleted
 
 Testing-plan Phase 3 took the client-state layer to 97–100% statements, and what is left in

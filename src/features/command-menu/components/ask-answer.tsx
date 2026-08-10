@@ -33,8 +33,7 @@ function renderInline(
 ): ReactNode[] {
   const out: ReactNode[] = [];
   const citationSplit = text.split(/(\[\d+\])/g);
-  for (let i = 0; i < citationSplit.length; i += 1) {
-    const seg = citationSplit[i] ?? "";
+  for (const [i, seg] of citationSplit.entries()) {
     const citationMatch = seg.match(/^\[(\d+)\]$/);
     if (citationMatch) {
       const marker = Number(citationMatch[1]);

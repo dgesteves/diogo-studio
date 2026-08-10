@@ -14,20 +14,22 @@ import { AskSuggestions } from "./ask-suggestions";
 
 type Props = {
   onNavigate: () => void;
-  openTick: number;
 };
 
-export function CommandMenuAsk({ onNavigate, openTick }: Props): ReactElement {
+export function CommandMenuAsk({ onNavigate }: Props): ReactElement {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const { reducedMotion } = useReducedMotionPreference();
   const { query, setQuery, submitted, answer, citations, status, error, retrieval, ask, stop } =
     useAskAgent();
 
+  // Radix unmounts the dialog's content on close and remounts it on open, so mounting is
+  // every time the visitor arrives in Ask mode. A frame late, because the dialog moves
+  // focus to itself first.
   useEffect(() => {
     const id = requestAnimationFrame(() => inputRef.current?.focus());
     return () => cancelAnimationFrame(id);
-  }, [openTick]);
+  }, []);
 
   function onSubmit(e: SyntheticEvent<HTMLFormElement>): void {
     e.preventDefault();
