@@ -1,9 +1,17 @@
-import { act, render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { act, render, screen, within } from "@testing-library/react";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
+import { useInspectorOverlay } from "@/features/inspector";
 import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
-import { BOOT_SESSION_KEY, hasBootedThisSession, markWorldReady } from "@/stores/boot-store";
+import {
+  BOOT_SESSION_KEY,
+  BOOT_SPLASH_ID,
+  hasBootedThisSession,
+  markWorldReady,
+} from "@/stores/boot-store";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import {
   BOOT_EXIT_MS,
@@ -13,8 +21,16 @@ import {
   BOOT_STEPS,
 } from "../constants/boot";
 import { BootSequence } from "./boot-sequence";
+import { BootSplash } from "./boot-splash";
+import { BootThemeToggle } from "./boot-theme-toggle";
 
-vi.mock("@/features/audio", () => ({ useAudio: () => ({ enable: vi.fn() }) }));
+const audio = vi.hoisted(() => ({ enable: vi.fn() }));
+const theme = vi.hoisted(() => ({ resolved: "light", setTheme: vi.fn() }));
+
+vi.mock("@/features/audio", () => ({ useAudio: () => ({ enable: audio.enable }) }));
+vi.mock("next-themes", () => ({
+  useTheme: () => ({ resolvedTheme: theme.resolved, setTheme: theme.setTheme }),
+}));
 
 /**
  * The boot gate is a state machine over three timers — BOOT_MIN_MS, BOOT_MAX_MS and
@@ -49,12 +65,47 @@ function reachReadyState(): void {
   });
 }
 
+/** The overlay's inspector choice is only visible through the store it writes. */
+function InspectorProbe(): ReactElement {
+  const { open } = useInspectorOverlay();
+  return <p data-testid="inspector">{open ? "open" : "closed"}</p>;
+}
+
+function renderGate(): UserEvent {
+  const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  render(
+    <>
+      <BootSequence />
+      <InspectorProbe />
+    </>,
+  );
+  return user;
+}
+
+function preference(group: RegExp, option: RegExp): HTMLElement {
+  return within(screen.getByRole("group", { name: group })).getByRole("button", { name: option });
+}
+
+async function choose(user: UserEvent, group: RegExp, option: RegExp): Promise<void> {
+  const target = preference(group, option);
+  await act(async () => {
+    await user.click(target);
+  });
+}
+
+function inspector(): string {
+  return screen.getByTestId("inspector").textContent ?? "";
+}
+
 beforeEach(() => {
   vi.useFakeTimers();
 });
 
 afterEach(() => {
   vi.useRealTimers();
+  audio.enable.mockClear();
+  theme.setTheme.mockClear();
+  theme.resolved = "light";
 });
 
 describe("Boot gate", () => {
@@ -128,6 +179,9 @@ describe("Boot gate", () => {
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
     expect(hasBootedThisSession()).toBe(true);
+    // Skipping is not consent to sound: the sound choice is only offered on the ready
+    // screen, which a skipping visitor never sees.
+    expect(audio.enable).not.toHaveBeenCalled();
   });
 
   it("skips the gate entirely for a returning visitor", () => {
@@ -149,4 +203,134 @@ describe("Boot gate", () => {
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
   });
+
+  it("hides the server-rendered splash as soon as it takes over", () => {
+    // Two overlays at once would double the backdrop; the splash exists only to cover the
+    // gap before hydration.
+    render(
+      <>
+        <BootSplash />
+        <BootSequence />
+      </>,
+    );
+
+    expect(document.getElementById(BOOT_SPLASH_ID)?.style.display).toBe("none");
+  });
+
+  it("keeps the pre-hydration splash script free of anything but its own constants", () => {
+    // The one inline script in the app, and the reason `unsafe-inline` is tolerated: it
+    // must only ever read a session key and hide an element by id. See docs/decisions.md.
+    const { container } = render(<BootSplash />);
+    const inline = container.querySelector("script")?.innerHTML ?? "";
+
+    expect(inline).toContain(BOOT_SESSION_KEY);
+    expect(inline).toContain(BOOT_SPLASH_ID);
+    expect(inline).not.toMatch(/document\.write|innerHTML|eval|fetch|location/);
+  });
+
+  it("cannot be dismissed twice, however fast the visitor is", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    await click(user, /enter the studio/i);
+    await click(user, /enter the studio/i);
+
+    // The overlay stays on screen for its fade, so the CTA is still there to be pressed —
+    // and starting the sound twice is audible.
+    expect(audio.enable).toHaveBeenCalledOnce();
+  });
 });
+
+describe("Boot gate: the preferences it offers", () => {
+  it("hands a theme choice straight to the theme provider", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    expect(preference(/theme preference/i, /light/i)).toHaveAttribute("aria-pressed", "true");
+
+    await choose(user, /theme preference/i, /dark/i);
+
+    expect(theme.setTheme).toHaveBeenCalledWith("dark");
+  });
+
+  it("presses neither theme until it knows which one is resolved", () => {
+    // `resolvedTheme` is unknowable on the server, and a pressed segment that flips on
+    // hydration is both a mismatch and a lie about what the visitor chose.
+    theme.resolved = "dark";
+
+    const html = renderToStaticMarkup(<BootThemeToggle />);
+    expect(html).not.toContain('aria-pressed="true"');
+  });
+
+  it("enters muted when the visitor asks for silence", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    await choose(user, /sound preference/i, /muted/i);
+    expect(preference(/sound preference/i, /muted/i)).toHaveAttribute("aria-pressed", "true");
+
+    await click(user, /enter the studio/i);
+
+    // The CTA carries the sound choice, so a muted entry must never touch the engine.
+    expect(audio.enable).not.toHaveBeenCalled();
+  });
+
+  it("enters with sound when the visitor leaves it on", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    await click(user, /enter the studio/i);
+
+    expect(audio.enable).toHaveBeenCalledOnce();
+  });
+
+  it("opens the inspector overlay on a default entry", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    expect(preference(/inspector preference/i, /^inspector$/i)).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(inspector()).toBe("closed");
+
+    await click(user, /enter the studio/i);
+
+    // The preference is applied on entry, not while the gate is still up.
+    expect(inspector()).toBe("open");
+  });
+
+  it("leaves the inspector overlay closed when the visitor hides it", async () => {
+    // Asserted in both directions on purpose: "closed" is also what a control wired to
+    // nothing produces.
+    const user = renderGate();
+    reachReadyState();
+
+    await choose(user, /inspector preference/i, /hidden/i);
+    await click(user, /enter the studio/i);
+
+    expect(inspector()).toBe("closed");
+  });
+
+  it("lets Escape out of the gate, muted", async () => {
+    const user = renderGate();
+    reachReadyState();
+
+    await act(async () => {
+      await user.keyboard("{Escape}");
+    });
+    advance(BOOT_EXIT_MS);
+
+    expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
+    expect(hasBootedThisSession()).toBe(true);
+    expect(audio.enable).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * Not asserted, deliberately: the overlay's `onInteractOutside` guard. Its content is
+ * `fixed inset-0`, so a pointer has nowhere outside to land, and Radix's outside-interaction
+ * detection (a deferred `pointerdown`, then a `click`, then a macrotask, weighed against the
+ * layer's own surfaces) does not reproduce faithfully in jsdom — a version of this test
+ * passed while the guard was deleted. A test that cannot fail is worse than none.
+ */
