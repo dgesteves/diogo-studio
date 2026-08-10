@@ -23,7 +23,12 @@ export default defineConfig<Options>({
   // either: `--shard=n/2` splits on the project boundary, so one shard takes all 22
   // full-motion tests and wall time is unchanged. See `docs/decisions.md`.
   workers: process.env.CI ? 1 : 2,
-  reporter: process.env.CI ? [["github"], ["html", { open: "never" }]] : "html",
+  // `list` is explicit because neither of the other two reporters prints to stdio
+  // (`github` only emits `::error`/`::notice` annotations, `html` writes a file), and
+  // when nothing does Playwright injects its default — `dot` under CI. That is one
+  // character per test with no newline until the 80th, so a 210-test run shows two
+  // lines total and looks hung. `list` prints a line per test as it finishes.
+  reporter: process.env.CI ? [["github"], ["list"], ["html", { open: "never" }]] : "html",
   use: {
     baseURL,
     trace: "on-first-retry",
