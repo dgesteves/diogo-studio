@@ -6,7 +6,7 @@ not for every change.
 
 ---
 
-## 2026-08-10 — ⌘K's `openTick` deleted: state Radix could never change
+## 2026-08-10 — Phase 4's dead guards: ⌘K's `openTick` and route-JS's environment checks
 
 Phase 4's menu spec left exactly one uncovered line in `command-menu.tsx`, and the reason it
 was uncovered is that it could not run. `handleOpenChange` incremented an `openTick` whenever
@@ -20,6 +20,20 @@ mount, and mounting is every arrival in Ask mode. The state, the prop and the ha
 and a unit test now asserts the input takes focus, so a future regression cannot hide behind a
 tick that never ticked. Same rule as the entry below — unreachable code is dead code, not an
 untested branch — and the same lesson: the uncovered line was the finding, not the target.
+
+The same rule applied a second time in the same phase. `measureRouteJs` opened with
+`typeof performance === "undefined"` and a `typeof window !== "undefined"` fallback for the
+origin, and it is called from exactly one place: the inspector overlay's effect, where both
+are present by definition. It also treated a Resource Timing name starting with `/` as
+same-origin, which the spec does not allow — entry names are absolute URLs. All three are
+gone, leaving two real branches that the overlay's spec drives. **Do not reintroduce
+environment guards in a module that only a client effect calls;** if one ever needs to run
+during a prerender, that is a change to its call site, which the build will point at.
+
+Unrelated but from the same sweep, in case it looks like decoration: `components/seo/json-ld.tsx`
+now escapes `<` as `\u003c`. `JSON.stringify` does not, so a `</script>` anywhere in the graph
+would end the element. Nothing untrusted reaches it — the graph is built from `config/site.ts`
+— but the guarantee now lives at the sink instead of resting on every future caller.
 
 ## 2026-08-10 — A client store's SSR guard is not chased; a provably dead one is deleted
 

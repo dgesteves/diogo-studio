@@ -4,8 +4,8 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phases 0, 1, 2 and 3 are complete except for the visual baselines; Phases 4–7 are
-not started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
+Status: **Phases 0–4 are complete except for the visual baselines; Phases 5–7 are not
+started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
 `mulberry32` promoted to `src/utils/mulberry32.ts`, **the existing E2E suite made green**
 (it was 16/18 — the `/work` spec asserted content that no longer exists, and the ⌘K
 Ask-mode spec was flaky ~1 in 12 because it raced hydration), **RTTR installed with its
@@ -29,10 +29,16 @@ branches that only E2E covers. That is the honest shape of an E2E phase; see §2
 **Phase 3 has now landed**: every client store, hook and provider is at 97–100%, the ⌘K and
 inspector stores and the whole Ask pipeline went from E2E-only to 100%, and the suite is
 **42 files / 326 tests**. It found no production defect — it found **five of its own tests
-that could not fail**, plus one guard that could not run. **Phase 4 (pure-DOM components) is
-the next thing to work on.**
+that could not fail**, plus one guard that could not run.
 
-Baseline: re-measured 2026-08-10 on the current tree, after Phase 3.
+**Phase 4 has now landed**: every pure-DOM cluster the plan named is at 100% — ⌘K, the
+inspector overlay, the command deck, the content blocks, the boot gate's preferences, the
+shared atoms — and the suite is **50 files / 462 tests**. It found **one accessibility
+defect, one security hardening and two pieces of code that could not run**, plus **four of
+its own tests that could not fail**. **Phase 5 (canvas draw routines) is the next thing to
+work on.**
+
+Baseline: re-measured 2026-08-10 on the current tree, after Phase 4.
 `pnpm validate` passes and `pnpm e2e:ci` is **210/210 at `workers: 1`**. Every number below
 is measured; where an earlier draft's figure has been superseded it is marked, because this
 plan's whole argument is that unverified numbers should not govern work — and this table has
@@ -43,16 +49,17 @@ copying it forward.
 
 ## 1. Verdict
 
-The premise "we never started creating tests" is not accurate, and the difference
-matters. There are **30 vitest files (237 tests)** and **8 Playwright specs**, and
-the whole toolchain is already wired: vitest + jsdom, Testing Library (`react`,
+The premise "we never started creating tests" was not accurate, and the difference
+mattered. At the time of writing there were **16 vitest files (76 tests)** and **8 Playwright
+specs**, and the whole toolchain was already wired: vitest + jsdom, Testing Library (`react`,
 `dom`, `jest-dom`, `user-event`), `@vitest/coverage-v8`, Playwright,
-`@axe-core/playwright`, and `@react-three/test-renderer`. Conventions exist and are
-good.
+`@axe-core/playwright`, and — since Phase 0 — `@react-three/test-renderer`. Conventions
+existed and were good.
 
-So this is not a greenfield problem. It is a **coverage-breadth** problem: the tests
-cluster on pure logic, data invariants and — since Phase 1 — the whole server surface,
-while almost nothing covers client state, UI behavior, or the 3D scene.
+So this was not a greenfield problem but a **coverage-breadth** one: the tests clustered on
+pure logic and data invariants. Phase 1 added the server surface, Phase 3 client state, and
+Phase 4 the DOM. **What is left is the 3D scene and the canvas draw routines**, which is what
+the rest of this section is about.
 
 The second correction is more important. **"Maximum coverage on everything" is
 the wrong objective function.** 79 of 298 files render Three.js, and coverage on
@@ -73,10 +80,10 @@ which files should never be chased.
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
 | Non-test source files           | **301** (157 `.tsx`, 144 `.ts`)                        |
-| Unit test files / tests         | **42 / 326**                                           |
+| Unit test files / tests         | **50 / 462**                                           |
 | E2E specs / tests               | **14 / 105** → **210 runs** across two motion projects |
-| Statements / branches           | **41.82% / 35.90%**                                    |
-| Functions / lines               | **47.68% / 42.36%**                                    |
+| Statements / branches           | **51.03% / 58.70%**                                    |
+| Functions / lines               | **66.79% / 51.30%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | **17 of 17** — status, `h1`, metadata, axe, content    |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
@@ -103,68 +110,76 @@ The 210-run suite is the evidence Phase 2 produced; 27.51% is just what vitest c
 mid-session, a stream that dies, an abort — not mounted trees. It also closed the gap Phase 2
 opened: the `command-menu` rows it left at 10.5% and 1.2% branches are now 100%.
 
+**Phase 4 is the same shape, larger: branches 35.90% → 58.70%, statements 41.82% → 51.03%.**
+Branch coverage is now _ahead_ of statement coverage repo-wide, and both numbers say the same
+thing about what is left: the residue is the 3D layer, where mounting is cheap and asserting
+is not (§1). Every remaining low row is Phase 5 or 6.
+
 ### Coverage by layer today
 
 These are v8's own per-directory rows, not aggregates — the previous version of this
 table invented a few, and two of them were wrong (see below).
 
-| Layer                     | Stmts     | Branch    | Note                                                                               |
-| ------------------------- | --------- | --------- | ---------------------------------------------------------------------------------- |
-| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.            |
-| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.            |
-| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                          |
-| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                            |
-| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                          |
-| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP                    |
-| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                                     |
-| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                          |
-| **`src/hooks`**           | **100%**  | **100%**  | was 29.2/0 — Phase 3                                                               |
-| **`command-menu/hooks`**  | **100%**  | **100%**  | was 1.2/0 — Phase 3; the whole Ask pipeline, driven through `useAskAgent`          |
-| **`command-menu/stores`** | **100%**  | **100%**  | was 48.5/10.5 — Phase 3, after deleting one unreachable guard                      |
-| **`inspector/stores`**    | **100%**  | **100%**  | was 68.3/44.4 — Phase 3                                                            |
-| **`src/stores`**          | **97.7%** | **90.7%** | was 60.3/44.4 — Phase 3; the residue is SSR guards, explained below                |
-| **`src/providers`**       | **97.2%** | **90.9%** | was 30.6/27.3 — Phase 3                                                            |
-| `home/components`         | 87.5%     | 100%      | `home.dom.test.tsx` — small surface, fully exercised                               |
-| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.          |
-| `src/components/ui`       | 82.4%     | 66.7%     | reached via `home` and the scene, not directly tested                              |
-| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                         |
-| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature      |
-| `world/utils`             | 49.7%     | 35.5%     | —                                                                                  |
-| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`        |
-| `world/…/hud`             | 27.7%     | 10.5%     | one toggle spec                                                                    |
-| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                           |
-| `world/components`        | 22.3%     | 27.1%     | **not 10.9% — that figure was never real; see below**                              |
-| `audio/components`        | 6.7%      | 0%        | —                                                                                  |
-| `inspector/components`    | 4.8%      | 0%        | the Web-Vitals overlay                                                             |
-| `command-menu/components` | **4.2%**  | **0%**    | covered end to end and by its store and hooks; the biggest **unit** hole — Phase 4 |
-| `world/hooks`             | 2.4%      | 0%        | the input reducers                                                                 |
-| `about/components`        | **0%**    | **0%**    | the pixelated-portrait cluster                                                     |
-| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                            |
-| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                                 |
-| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7           |
+| Layer                     | Stmts     | Branch    | Note                                                                              |
+| ------------------------- | --------- | --------- | --------------------------------------------------------------------------------- |
+| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.           |
+| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.           |
+| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                         |
+| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                           |
+| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                         |
+| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP                   |
+| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                                    |
+| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                         |
+| **`src/hooks`**           | **100%**  | **100%**  | was 29.2/0 — Phase 3                                                              |
+| **`command-menu/hooks`**  | **100%**  | **100%**  | was 1.2/0 — Phase 3; the whole Ask pipeline, driven through `useAskAgent`         |
+| **`command-menu/stores`** | **100%**  | **100%**  | was 48.5/10.5 — Phase 3, after deleting one unreachable guard                     |
+| **`inspector/stores`**    | **100%**  | **100%**  | was 68.3/44.4 — Phase 3                                                           |
+| **`command-menu/comp…`**  | **100%**  | **99.0%** | was 4.2/0 — Phase 4. The one branch left is a regex-guaranteed pair.              |
+| **`inspector/comp…`**     | **100%**  | **100%**  | was 4.8/0 — Phase 4, overlay and formatters                                       |
+| **`world/…/hud`**         | **100%**  | **100%**  | was 27.7/10.5 — Phase 4, the whole command deck                                   |
+| **`components/ui`**       | **100%**  | **100%**  | was 82.4/66.7 — Phase 4; incidental coverage replaced by assertions               |
+| **`components/seo`**      | **100%**  | **100%**  | was 0/100 — Phase 4, plus the escaping fix it prompted                            |
+| **`home/components`**     | **100%**  | **100%**  | was 87.5/100 — Phase 4 closed the CTA's own action                                |
+| **`src/stores`**          | **97.7%** | **90.7%** | was 60.3/44.4 — Phase 3; the residue is SSR guards, explained below               |
+| **`src/providers`**       | **97.2%** | **90.9%** | was 30.6/27.3 — Phase 3                                                           |
+| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.         |
+| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                        |
+| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature     |
+| `world/utils`             | 49.7%     | 35.5%     | Phase 5                                                                           |
+| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`       |
+| **`world/components`**    | **29.5%** | **38.7%** | was 22.3/27.1; boot and the content blocks are **100%**, the rest is the 3D layer |
+| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                          |
+| **`about/components`**    | **23.9%** | **20.6%** | was 0/0; the frame and its labelling are 100%, the engine is Phase 5              |
+| `audio/components`        | 6.7%      | 0%        | Web Audio, no jsdom equivalent — not Phase 4's                                    |
+| `world/hooks`             | 4.9%      | 0%        | the input reducers — Phase 6                                                      |
+| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                           |
+| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                                |
+| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7          |
 
 `layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`.
 
 **Phase 1 closed two of the three highest-risk gaps** — `rate-limit.ts` and
 `app/api/chat/route.ts`, both now at 100% statements with mutation-verified assertions.
-**Phase 2 closed the third from the outside, and Phase 3 closed it from the inside.**
-`use-ask-agent`, `runAskRequest` and the ⌘K store are now at 100% in vitest as well, in
-~30 ms, and the E2E spec keeps only what a browser adds. `command-menu/components` at 4.2%
-is what is left of that feature, and it is Phase 4.
+**Phase 2 closed the third from the outside, Phase 3 closed it from the inside, and Phase 4
+closed the surface on top of it.** The whole ⌘K feature — store, hooks, request, answer
+rendering and menu — is now at 100% in vitest, in about two seconds, and the E2E spec keeps
+only what a browser adds.
 
 Four cautions when reading this table:
 
-- **Two rows in the previous version were fiction.** `world/components` was recorded as
-  10.9%/20.5% and `AGENTS.md` repeated it as "11%"; v8 has been printing **22.3%/27.1%**
-  all along, before Phase 1 touched anything. `command-menu` was recorded as a single
-  8.2%/1.3% row that v8 never emits — it is four directories with very different numbers.
-  Copy the rows the tool prints; do not aggregate them by hand.
-- **`studio/…/screens` and `components/ui` are raised _incidentally_** by mounting the
-  scene — a by-product, not evidence, and exactly the "tests that mount components and
-  assert nothing" effect §1 warns about.
-- **`world/components` has higher branch than statement coverage** (27.1% vs 22.3%),
-  because `boot.dom.test.tsx` drives many conditions inside one small cluster while 70-odd
-  untouched files supply the statement denominator. Neither number means it is covered.
+- **Two rows in an earlier version were fiction.** `world/components` was recorded as
+  10.9%/20.5% and `AGENTS.md` repeated it as "11%"; v8 had been printing 22.3%/27.1% all
+  along, before Phase 1 touched anything. `command-menu` was recorded as a single 8.2%/1.3%
+  row that v8 never emits — it is four directories with very different numbers. Copy the rows
+  the tool prints; do not aggregate them by hand.
+- **`studio/…/screens` is raised _incidentally_** by mounting the scene — a by-product, not
+  evidence, and exactly the "tests that mount components and assert nothing" effect §1 warns
+  about. `components/ui` used to be in the same position; it is now asserted directly, which
+  is why its branch column moved 33 points without its statement column moving at all.
+- **`world/components` still reads low because it is mostly the 3D layer.** Boot, the content
+  blocks and the destination frame inside it are at 100%; the ~30 canvas and hotspot files
+  supply the rest of the denominator and belong to Phase 6. A directory average is not a
+  status.
 - **The last 2–9% of the two client-state rows is SSR guards, and chasing it is not work.**
   What `src/stores` and `src/providers` have left is `typeof window === "undefined"` and
   `typeof navigator === "undefined"`: reaching them means deleting a global from under jsdom
@@ -356,7 +371,7 @@ on a lighting rig mean different things. Use **per-directory thresholds** in
 | `src/rate-limit.ts`, `src/app/api/**`                               | **100%** | security and contract surface                         |
 | `src/stores`, `src/hooks`, `src/providers`                          | **95%**  | side effects are mockable                             |
 | `world/utils`, `world/constants`, `*-draw.ts`, `*-layout.ts`        | **95%**  | pure logic                                            |
-| Pure-DOM components                                                 | **90%**  | branches on state/props                               |
+| Pure-DOM components                                                 | **90%**  | branches on state/props — **met at 100%**, Phase 4    |
 | R3F components                                                      | **85%**  | measured at 84.65% from smoke rendering alone (§5.2)  |
 | R3F components — **branches**                                       | **70%**  | measured at 53%; this is the row that needs real work |
 | `src/app/**` pages                                                  | **90%**  | static compositions, cheap to render                  |
@@ -385,9 +400,10 @@ Files that should be _excluded from the denominator_ rather than faked:
 headlessly), and the **type-only modules** — `src/types/*.ts` and `ai/retrieve-types.ts`
 compile to nothing, so v8 scores them 0/0 and they only depress the denominator.
 `vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
-error,not-found}.tsx`; fold these into that existing list rather than starting a new
-one, and drop the `layout`/`loading` entries if the Phase 4 work makes them
-assertable after all.
+error,not-found}.tsx`; fold these into that existing list rather than starting a new one.
+**Phase 4 did not make the `layout`/`loading` entries assertable, so they stay excluded**:
+the `(world)` layout composes the canvas, the deck and the boot gate, each of which is now
+covered where it lives, and rendering the layout again would only mount them a second time.
 
 Never fail CI on coverage _downward drift alone_ while a phase is in flight —
 ratchet on merge to `main`.
@@ -685,24 +701,90 @@ instance-level `vi.spyOn` is stored as a _key_ instead of replacing the method, 
 Exit: **met.** These files move in restructure Phase 5 but do not merge, so the specs travel
 intact with `git mv`.
 
-### Phase 4 — pure-DOM components (~95 files → 90%)
+### Phase 4 — pure-DOM components — ✅ complete
 
-Per-cluster files, not per-source-file (§3, rule 2): `hud.test.tsx`,
-✅ `boot.dom.test.tsx`, `inspector.test.tsx`, `command-menu.test.tsx`,
-`content-blocks.test.tsx`, `ui.test.tsx`, `sections.test.tsx`. Assert what the
-user sees and does — roles, labels, keyboard interaction, state transitions —
-using the established `home.dom.test.tsx` style.
+Landed 2026-08-10 as **7 new spec files and 136 new tests**, taking the suite from 42/326 to
+**50 files / 462 tests**. `pnpm validate` green, `pnpm e2e:ci` 210/210. One spec per cluster,
+not per source file (§3, rule 2), and `deck-explore-toggle.dom.test.tsx` folded into
+`hud.dom.test.tsx` because its one assertion was a subset of it.
 
-`boot.dom.test.tsx` landed early, out of phase order, because E2E could not assert it
-reliably: its three timers plus the ready signal made it the slowest and flakiest thing in
-the suite on a 2-vCPU runner. **That is the general rule this phase should follow —
-anything whose outcome depends on a timer is a component test, not an E2E test** (see
-[`decisions.md`](./decisions.md)). `command-menu.test.tsx` is the next candidate for the
-same reason: its open/close is animation-gated end-to-end and deterministic in jsdom.
+| Target                    | Before      | **After**           |
+| ------------------------- | ----------- | ------------------- |
+| `command-menu/components` | 4.2/0       | **100% / 99.0%**    |
+| `inspector/components`    | 4.8/0       | **100% / 100%**     |
+| `world/components/hud`    | 27.7/10.5   | **100% / 100%**     |
+| `components/ui`           | 82.4/66.7   | **100% / 100%**     |
+| `components/seo`          | 0/100       | **100% / 100%**     |
+| `home/components`         | 87.5/100    | **100% / 100%**     |
+| boot + content in `world` | partial     | **100% / 100%**     |
+| Repo-wide                 | 41.82/35.90 | **51.03% / 58.70%** |
 
-Also the pure formatters here: `inspector-format.ts`, `inspector-route-js.ts`,
-`ask-answer-formatting.tsx` (including the href-sanitization branches, which are
-security-relevant), `ask-agent-sources.ts`.
+- ✅ **`command-menu.dom.test.tsx` + `ask-answer.dom.test.tsx`** — the shell and its two
+  modes, then what the answer renders. The browser suite spot-checks one navigation action;
+  these assert every one of them, the close-then-act ordering that keeps a route change from
+  happening under a dialog still on screen, and the markup rules that bound model output: a
+  citation marker becomes a control only when the server sent a source for it, and a link is
+  an internal route, a fragment or an http(s)/mailto URL — or it is text.
+- ✅ **`inspector.dom.test.tsx` + `inspector-format.test.ts`** — the overlay with its
+  measurements supplied: `web-vitals` mocked at the library boundary, frame stats published
+  through `perf-store`, route JS read from a stubbed Resource Timing buffer. Units and
+  thresholds are the node spec, because the panel shows one value at a time.
+- ✅ **`hud.dom.test.tsx`** — every deck control's label and pressed state in both
+  directions, the pre-hydration render (guessing the theme there is a hydration mismatch),
+  explore mode's absence under reduced motion, the radar's station derived from the path, and
+  what the deck tells the world when a destination is pointed at or focused.
+- ✅ **`content-blocks.dom.test.tsx`** — the seven block kinds as markup, every optional
+  field both ways, and an unknown kind that throws rather than dropping a section. Fixture
+  blocks, not real destinations, so rewriting a page cannot break a spec about structure.
+- ✅ **`boot.dom.test.tsx` extended** — the gate is also a preferences screen: the theme
+  handed to the provider, a muted entry that never touches the audio engine, the inspector
+  preference applied on entry in both directions, Escape as a muted exit, an entry that cannot
+  start twice, and the splash the sequence hides as it takes over.
+- ✅ **`ui.dom.test.tsx`, `json-ld.test.tsx`, `pixelated-portrait.dom.test.tsx`,
+  `home.dom.test.tsx` extended** — the leaves, asserted only where a change would be a defect:
+  decoration stays out of the accessibility tree, `asChild` yields one element rather than a
+  link inside a button, the canvas portrait is described by the frame around it, and the hero
+  CTA opens Ask mode rather than merely opening.
+- ✅ The pure formatters this phase owed: `inspector-format.ts`, `inspector-route-js.ts` and
+  `ask-answer-formatting.tsx` (through the rendered answer, since the sanitizer's output _is_
+  the markup). `ask-agent-sources.ts` was already at 100% from Phase 3.
+
+**Verified by mutation: 97 mutations across 31 source files, 90 killed on the first pass.**
+The seven survivors were all **tests that could not fail**, and each is now fixed: an
+always-rendered optional field is an empty paragraph, which no text assertion can see; an
+internal link turned external keeps its href; `toHaveTextContent` reads text a screen reader
+would never reach, so a `hidden` announcement satisfied it; nothing asserted `aria-pressed`
+after a mode change; and skipping the boot intro was never asserted to stay silent.
+
+**What it found in the product**, which is the return on the phase:
+
+- **An accessibility defect** (`fix`): the inspector overlay's four panel titles looked like
+  headings and grouped everything under them, but were `<div>`s — WCAG 1.3.1, and nothing in
+  the overlay had structure a screen reader could navigate.
+- **A security hardening** (`fix`): `JsonLd` embedded `JSON.stringify` output directly, and
+  that does not escape `<`, so a `</script>` in the graph would have ended the element.
+  Nothing untrusted reaches it today; the guarantee is now local to the sink.
+- **Two pieces of code that could not run** (`refactor`, the Phase 3 rule applied twice):
+  ⌘K's `openTick` counted dialog opens Radix never reports, because the menu has no
+  `Dialog.Trigger`; and `measureRouteJs` guarded against a missing `window` and `performance`
+  from inside a client effect. Both deleted, both recorded in
+  [`decisions.md`](./decisions.md).
+
+**One thing is deliberately not asserted**, and the spec says so in place: the boot overlay's
+`onInteractOutside` guard. Its content is `fixed inset-0`, so a pointer has nowhere outside to
+land, and Radix's outside-interaction detection does not reproduce faithfully in jsdom — a
+version of that test passed with the guard deleted.
+
+`boot.dom.test.tsx` had landed early, out of phase order, because E2E could not assert it
+reliably. **That rule held for the rest of the phase — anything whose outcome depends on a
+timer is a component test, not an E2E test** (see [`decisions.md`](./decisions.md)): ⌘K's mode
+switching, the 600 ms route-JS settle and the boot preferences are all deterministic here and
+animation-gated in a browser.
+
+Exit: **met.** Every cluster the phase named is at 100%, and no new stderr output: the two
+jsdom traps this phase met — `vi.unstubAllGlobals()` dropping the setup file's `matchMedia`,
+and a real `location` assignment logging "Not implemented" — are handled in the specs rather
+than tolerated.
 
 ### Phase 5 — canvas draw routines and layout math (~31 files → 95%)
 
@@ -711,6 +793,14 @@ value assertions for the layout/geometry generators (`bookshelf-layout`,
 `city-layout`, `keyboard-layout`, `desk-hardware-layout`, `wall-screen-layout`,
 `mouse-shell`/`mouse-geometry`, `radar-layout`, `framing`, `orbit`, `explore`).
 Deterministic given Phase 0's seeding fix.
+
+**Start with the pixelated portrait**, which Phase 4 left at the door:
+`pixelated-portrait-{engine,sampler,frame}.ts` are 0–5%, they are the only draw cluster with
+a spec already beside them (`pixelated-portrait.dom.test.tsx` owns the frame and its
+labelling), and the engine has two properties worth asserting before any snapshot exists —
+it no-ops when there is no 2D context, and it binds no pointer listeners when
+`interactive` is false, which is how reduced motion reaches it. `tests/recording-ctx.ts` is
+this phase's helper to write (§Phase 0), and its second caller should be what triggers it.
 
 ### Phase 6 — the 3D scene graph (~79 files → 75%)
 
