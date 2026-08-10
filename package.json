@@ -19,7 +19,7 @@
     "agent:index": "tsx scripts/build-agent-index.ts",
     "agent:index:check": "tsx scripts/build-agent-index.ts --check",
     "analyze": "ANALYZE=true next build",
-    "lint": "eslint",
+    "lint": "eslint --max-warnings 11",
     "lint:fix": "eslint --fix",
     "typecheck": "tsc --noEmit",
     "format": "prettier --write .",

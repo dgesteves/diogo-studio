@@ -30,14 +30,19 @@ const securityHeaders = [
   { key: "Content-Security-Policy", value: cspDirectives.join("; ") },
   { key: "X-DNS-Prefetch-Control", value: "on" },
   { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
-  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  // Agrees with `frame-ancestors 'none'` above. Modern browsers honor the CSP
+  // directive and ignore this one; shipping SAMEORIGIN alongside it stated two
+  // different framing policies in the same response.
+  { key: "X-Frame-Options", value: "DENY" },
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   {
     key: "Permissions-Policy",
     value: "camera=(), microphone=(), geolocation=(), browsing-topics=()",
   },
-  { key: "X-XSS-Protection", value: "1; mode=block" },
+  // X-XSS-Protection is deliberately absent: OWASP says not to set it, and MDN
+  // documents it as non-standard, deprecated, and able to introduce XSS into
+  // otherwise safe pages. CSP is the control that replaces it.
 ];
 
 const nextConfig: NextConfig = {

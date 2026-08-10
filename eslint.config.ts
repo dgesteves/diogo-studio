@@ -59,9 +59,9 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       "no-console": "error",
-      // Functions carry the complexity budget, not files. Enforced at 100 with a
-      // ~50-line target in .devin/rules/00-core.md; file length is capped only
-      // loosely below so cohesive modules stay whole.
+      // Functions carry the complexity budget, not files. File length is capped
+      // only loosely below so cohesive modules stay whole — see
+      // .devin/rules/project-structure.md.
       "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
       "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
       "@typescript-eslint/no-explicit-any": "error",
@@ -85,6 +85,22 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.tsx"],
     rules: {
       "max-lines": ["error", { max: 120, skipBlankLines: true, skipComments: true }],
+      // eslint-config-next enables only six jsx-a11y rules, none of which cover
+      // keyboard operability or label association. These ten were measured against
+      // src/ before being turned on and reported zero violations, so they are a
+      // floor that costs nothing — axe and keyboard testing remain the real gate.
+      // If one ever false-positives (a canvas overlay is the likely candidate),
+      // turn that rule off here with a reason rather than disabling it inline.
+      "jsx-a11y/anchor-is-valid": "error",
+      "jsx-a11y/click-events-have-key-events": "error",
+      "jsx-a11y/control-has-associated-label": "error",
+      "jsx-a11y/interactive-supports-focus": "error",
+      "jsx-a11y/label-has-associated-control": "error",
+      "jsx-a11y/media-has-caption": "error",
+      "jsx-a11y/mouse-events-have-key-events": "error",
+      "jsx-a11y/no-autofocus": "error",
+      "jsx-a11y/no-noninteractive-element-interactions": "error",
+      "jsx-a11y/no-static-element-interactions": "error",
     },
   },
   {
