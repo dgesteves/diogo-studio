@@ -79,8 +79,21 @@ with no setup.
 - **A spec covering a `use cache` route must mock `next/cache`** — `cacheLife()` throws outside a
   Next build. The real guard that a route stays static is `prerender:check`.
 - **Reduced motion and the degraded env paths are real branches.** Set the app's own override
-  (`persistOverride(true)`) rather than re-stubbing `matchMedia`, which the setup file already
-  stubs as "no preference".
+  (`persistOverride(true)`) rather than re-stubbing `matchMedia`. The two specs that own those
+  platform seams — `stores/reduced-motion-store.dom.test.ts` and
+  `providers/providers.dom.test.tsx` — go through `@tests/media`, which `vitest.setup.ts` also
+  uses for its no-preference default so the stubs cannot drift. It includes the legacy
+  `addListener` pair, without which next-themes throws on mount.
+- **jsdom's `Storage` is a proxy, so `vi.spyOn(window.localStorage, "getItem")` silently does
+  nothing** — the property definition is stored as a _key_. Spy on `Storage.prototype`, or a
+  storage-failure test passes against code with no error handling at all.
+- **Interactions that write to an external store go through `@tests/interactions`.** user-event
+  does not wrap a state update made synchronously inside the interaction — a `window` keydown
+  listener, a store write in a click handler, anything under fake timers — and the result is an
+  `act(...)` warning, which counts as a failure by the rule above.
+- **A hook whose value depends on a library's context must be asserted through that library's
+  own consumer.** `MotionProvider` is checked with `useReducedMotionConfig`, because Motion's
+  `useReducedMotion` reads the media query directly and ignores `MotionConfig` entirely.
 
 **Write a helper when its second caller appears, not before** — `knip` fails on unused files.
 Helpers live in `tests/`, imported through `@tests/*`.

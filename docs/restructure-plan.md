@@ -20,8 +20,11 @@ started and are blocked.**
 >
 > Everything from Phase 1 onward genuinely does need the suite. Every one of those
 > phases claims to be a "pure move/merge with no behavior change."
-> At **33.05% statement / 22.15% branch coverage** that claim still cannot be verified,
-> and several phases do not merely move code — they merge it. Phase 3 collapses 15
+> At **41.82% statement / 35.90% branch coverage** (2026-08-10, after testing Phases 1–3)
+> that claim is verifiable for the server, the client-state layer and every route in a
+> browser — and still not for the scene, the draw routines or the DOM components, which is
+> where Phases 3 and 4 below do their damage. Several phases do not merely move code — they
+> merge it. Phase 3 collapses 15
 > `boot-*` files into ~5 and 6 `pixelated-portrait-*` into 2; Phase 4 dissolves 40 scene
 > files into `world` and repoints 40 importers of `config/brand.ts`. The failure
 > mode of a merge is silent: a component dropped, a constant changed, a mesh or
@@ -32,25 +35,27 @@ started and are blocked.**
 > (E2E) is deliberately structure-immune so it survives every move below and acts
 > as the harness that makes "no behavior change" a checkable statement.
 >
-> **Coverage has moved twice — 10.71% → 28.82% (2026-08-08) → 33.05% (2026-08-09) — and
-> neither move unblocks anything.** Read the shape of the gain, not the number. The first
-> came from one RTTR spec mounting `StudioScene`: concentrated in exactly one of the eight
-> phases (Phase 4), and almost purely **statements**. The second is better earned —
-> branches went 13.67% → 22.15% off `boot.dom.test.tsx` and the store specs, which exercise
-> conditions rather than mounting trees — but it lands on Phase 3's `boot-*` cluster and
-> `src/stores`, not on the phases carrying the most risk. The three that matter are still
-> flat: `rate-limit.ts` **0%**, `app/api/chat` **0%**, `command-menu` **8%**. E2E still
-> asserts 3 of 17 routes, and that harness is what actually licenses a move. What the
-> spike buys remains narrow and real: `scene.dom.test.tsx` asserts an exact mesh count, so
-> Phase 4 has one guard against the specific failure it was feared for. One guard is not
-> a net.
+> **Coverage has moved four times — 10.71% → 28.82% → 33.05% → 35.90% → 41.82% — and what
+> unblocked anything was one of those moves, not the number.** Read the shape of the gain.
+> The first came from one RTTR spec mounting `StudioScene`: concentrated in exactly one of
+> the eight phases below (Phase 4) and almost purely **statements**. Testing Phase 1 took
+> `rate-limit.ts`, `app/api/chat` and `src/ai` from ~0% to 98–100%, which licenses Phase 6
+> here. **Testing Phase 2 is what actually licenses a move at all**: E2E now asserts all 17
+> routes in both motion modes, 210 runs, and it is structure-immune. Testing Phase 3 took
+> the stores, hooks and providers to 97–100%, which licenses Phase 5 here.
+>
+> What is still missing is aimed squarely at the two dangerous phases: `world/components` at
+> 22%, `world/…/{lounge,props}` at **0%**, `world/hooks` at **2.4%**, and `studio/…/scene`
+> at 84.7% statements but **53.1% branches** from smoke rendering alone. `scene.dom.test.tsx`
+> asserts an exact mesh count, so Phase 4 has one guard against the specific failure it was
+> feared for. One guard is not a net.
 
 Baseline: commit `b72c1e5` ("remove career-graph feature and consolidate career
 data"). `pnpm validate` passed (76 tests, knip clean) and every number in §2 was
 re-measured against that commit — they are a **dated snapshot**, not live figures, and
 §2 flags the ones that have since moved. Note `pnpm e2e` was **not** green at that
-commit — two specs were broken; both are fixed, and as of 2026-08-09 the suite stands at
-**22 vitest files / 123 tests** and **44/44 Playwright** (8 spec files × two motion
+commit — two specs were broken; both are fixed, and as of 2026-08-10 the suite stands at
+**42 vitest files / 326 tests** and **210/210 Playwright** (14 spec files × two motion
 projects).
 
 ---
