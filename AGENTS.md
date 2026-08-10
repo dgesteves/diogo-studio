@@ -1,125 +1,124 @@
-# Agent notes
+# diogo-studio
 
-This file is loaded on **every** session, so it stays small and holds only what is true
-regardless of what you are touching. Everything else is routed:
-
-| Where                                                    | What                                               |
-| -------------------------------------------------------- | -------------------------------------------------- |
-| [`.devin/rules/`](./.devin/rules)                        | coding standards, loaded by file type or on demand |
-| [`.devin/skills/`](./.devin/skills)                      | procedures: `/verify`, `/e2e`, `/commit`           |
-| [`docs/restructure-plan.md`](./docs/restructure-plan.md) | authoritative for anything structural              |
-| [`docs/testing-plan.md`](./docs/testing-plan.md)         | authoritative for coverage targets                 |
-| [`docs/architecture.md`](./docs/architecture.md)         | the tree as it is today                            |
-| [`docs/decisions.md`](./docs/decisions.md)               | why the non-obvious calls were made                |
-
-**Keep this file under 16 KB.** Always-on rules are truncated at that size, silently, and
-the tail is simply never loaded. If you need to add something here, first check whether a
-rule or skill is its real home.
-
-## Status: do not start a restructure phase
-
-**Restructure Phase 0 has landed; Phases 1–7 are blocked on
-[`docs/testing-plan.md`](./docs/testing-plan.md)**, whose Phases 0, 1 and 2 are complete
-(Phase 2 minus its visual baselines, deliberately). **Testing-plan Phase 3 — client state,
-hooks, providers — is the next thing to work on.**
-
-Phase 1 closed the server holes (`rate-limit.ts` and `app/api/chat` went 0% → 100%
-statements, `src/ai` to 98.4%) and Phase 2 covered every route, the SEO surface, the studio
-map and the ⌘K agent from the outside, finding **two production defects and one test that
-could not fail**. But the layers a refactor would break are still thin at the unit level:
-`command-menu` at 4.2% components / 1.2% hooks with **0% branches**, `world/components` at
-22.3%, `world/hooks` at 2.4%. "Pure move, no behavior change" is therefore unverifiable —
-E2E proves the product works, not that a moved module kept its contract.
-
-Two changes have shipped outside that block and they set the bar: Phase 0 (a lint-cap
-relaxation, moving no code) and the `station-index` / `(world)` split, which moved code but
-came with a **measured** justification and a new invariant test guarding it. Anything less
-— tidying, renaming, "obvious" moves — waits for the suite, and each exception needs an
-entry in [`docs/decisions.md`](./docs/decisions.md).
-
-### Reading the coverage numbers
-
-Unit coverage is **35.9% statements / 27.5% branches** (30 files / 237 tests, measured
-2026-08-09); E2E is **210 runs across 14 specs**, green under `pnpm e2e:ci`.
-
-**Re-measure before citing these.** They have drifted four times, every time understating
-real progress, and two figures in an old table were **never real**: `world/components` was
-quoted as 11% when v8 had been printing 22.3% all along, and `command-menu`'s "8%" was a
-hand-rolled aggregate v8 does not emit. Copy the rows `pnpm test:coverage` prints, and
-update [`docs/testing-plan.md`](./docs/testing-plan.md) §2 alongside this paragraph.
-
-**Phase 2 lowered the branch number (27.7% → 27.5%) and that is correct.** Vitest does not
-instrument the browser, so 79 new E2E tests are invisible to it, while the two fixes added
-`src/` branches only E2E covers. Never read this number as how well the product is tested,
-and never ratchet a threshold in the same commit as an E2E phase.
-
-## Verification
+A portfolio whose navigation _is_ a 3D world: Next.js 16 App Router, React 19, TypeScript,
+three.js + React Three Fiber (~40% of `src/`). Private, on Vercel. No database, no auth, no
+Server Actions — the only server surface is `/api/chat`, `/api/health` and the metadata routes.
 
 ```bash
-pnpm validate   # lint + typecheck + format:check + test + knip — before every commit
-pnpm build      # agent:index:check before, prerender:check after
-pnpm e2e:ci     # Playwright + axe; needs `pnpm e2e:install` once
-pnpm size       # review signal, not a gate
+pnpm install     # Node 24+, pnpm 11+, both pinned
+pnpm dev
+pnpm validate    # lint + typecheck + format:check + test + knip — the commit gate
+pnpm build       # agent:index:check runs before, prerender:check after
+pnpm e2e:ci      # Playwright + axe on a production build (`pnpm e2e:install` once)
 ```
 
-`pnpm validate` is the gate but it does **not** run `e2e`, so a green validate says nothing
-about the Playwright suite — it was silently red on `main` for weeks because nobody ran it.
-`pnpm lint` must report **exactly 11 warnings and 0 errors**; never add to that count and
-never silence one with an inline `eslint-disable`.
+**`pnpm validate` runs neither `build` nor `e2e`.** Anything touching routing, metadata, the
+3D world, focus or timing is unverified until `pnpm e2e:ci` is green. **`/verify`** picks the
+gates and reads a failure, **`/e2e`** runs and triages Playwright, **`/commit`** picks a type.
 
-Use **`/verify`** for the full gate sequence and what each step catches, and **`/e2e`** for
-running or triaging Playwright — including why `pnpm e2e` is not what CI runs.
+## Principles
 
-## Repository constraints (private, GitHub Free)
+1. **Server-first.** Server Components by default; `"use client"` only for state, effects,
+   refs, browser APIs or events, pushed to the leaves.
+2. **Static rendering is this site's main performance asset.** Rendering is dynamic-by-default
+   under Cache Components, so an uncached dynamic read silently de-optimizes a route.
+   `pnpm prerender:check` is the guard — never satisfy it by removing a route from its list.
+3. **The 3D world is an enhancement, never the only path to content.** Everything must be
+   reachable with reduced motion and with no canvas. WCAG 2.2 AA is a gate, not a report, and
+   a clean `pnpm lint` says very little about it.
+4. **Validate at the boundary** with Zod, and prefer making illegal states unrepresentable to
+   defensive checks. (`any`, non-null assertions and loose casts are already lint errors.)
+5. **Secrets stay server-side, and every env var is optional** — features degrade instead of
+   failing (no `OPENAI_API_KEY` → `503`, no `UPSTASH_*` → in-memory limiter, no Sentry DSN →
+   skipped). Preserve that when adding one; read env only through `@/config/env`.
 
-Do not add workflows or re-add removed ones without checking these first — the plan, not
-the config, is what makes them fail:
+## Framework behavior that isn't visible in the source
 
-- No branch protection or rulesets, so `main` is unprotected and **no required status
-  checks exist**. Anything depending on them (PR auto-merge, `CODEOWNERS`) does not work.
-- No code scanning — CodeQL needs the paid Code Security add-on, and OSSF Scorecard is
-  public-repository-only.
-- **2,000 Actions minutes/month** and a **500 MB artifact quota**. Upload artifacts only on
-  failure, always with `retention-days`.
+Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a major upgrade.
 
-The full table with rationale is in the Quality gates section of
-[`docs/architecture.md`](./docs/architecture.md).
+- **Memoization is automatic** (`reactCompiler`): write plain code, add no speculative
+  memoization. `useMemo`/`useCallback` stay valid where referential stability is part of the
+  contract — a three.js object, an effect dependency, an identity-comparing external API.
+- **Routes are typed** (`typedRoutes`): `Link href` and `router.push` take a real route, never
+  a `string`. Narrow an untrusted href with `asInternalHref()` from `@/constants/routes`.
+- **Caching is opt-in** (`cacheComponents`) via `use cache` + `cacheLife()`/`cacheTag()`. It
+  removed the `dynamic`, `dynamicParams`, `revalidate` and `fetchCache` segment configs;
+  `maxDuration`, `runtime`, `instant` and `prefetch` remain valid and `/api/chat` uses
+  `maxDuration`. The official docs are inconsistent about `dynamicParams` — **trust the build
+  error over any prose, including this file.**
+- **Synchronous IO during prerender is a build error**, not a de-optimization: `new Date()`,
+  `Date.now()`, `Math.random()`, `crypto.randomUUID()`.
+- **Navigation hides routes rather than unmounting them** (React `<Activity>`, up to 3), so
+  state and DOM survive and effects re-run on show. The canvas and HUD live in the `(world)`
+  layout and are unaffected — but new stateful client UI inside a station page must not assume
+  a fresh mount.
+- **Tailwind 4 is CSS-first:** no `tailwind.config.*` exists or should be added; tokens live in
+  `src/styles/globals.css` under `@theme`. Don't reintroduce a legacy config because older
+  examples use one.
+- **Prefer the React 19 `ref` prop** for new code. `forwardRef` is deprecated but supported —
+  no ban, no migration.
 
-## Facts with no other home
+## Authority, and keeping this file true
 
-- **The package is ESM and every authored file is TypeScript.** `"type": "module"`, and
-  `eslint.config.ts`, `postcss.config.ts`, `commitlint.config.ts` and `vitest.config.ts` are
-  all `.ts`. There are **zero `.js`/`.cjs`/`.mjs`/`.mts` files** and no `require`,
-  `module.exports`, `__dirname` or `__filename` anywhere. Don't reintroduce a `.mjs` to
-  disambiguate what is no longer ambiguous — and note `pnpm typecheck` covers the build
-  config only because it is TypeScript; a `.js` config would be invisible to it.
-- **`jiti` is a real dependency, not decoration.** ESLint needs it to read a TypeScript
-  config and declares it only as an _optional peer_, so before it was declared here linting
-  worked purely because `vite` happened to supply it. Remove it and `pnpm lint` stops being
-  able to load its own config.
-- **`src/constants/agent-index.json` is generated, not authored.** Its sources are
-  `src/constants/{career,patterns,routes}.ts` + `config/site.ts` (read by
-  `scripts/agent-index/virtual-chunks.ts`) and `features/world/constants/destinations.ts`
-  (read by `destination-chunks.ts`). Edit a source, then run `pnpm agent:index`; `prebuild`
-  runs `agent:index:check` and fails the build when the committed index is stale.
-- **`src/constants/career.ts` looks dead but isn't.** Zero runtime consumers — only
-  `scripts/agent-index/virtual-chunks.ts` (build-time) and its own test import it. Don't
-  delete it as unused; `knip` won't flag it either.
-- **"Inspector" means two different things.** The ⌘K surface is `features/command-menu`,
-  and its agent is branded "the Inspector agent" in the UI. `features/inspector` is
-  unrelated — it is the performance / Web-Vitals overlay. This collision has already
-  produced one wrong doc; don't let it produce another.
-- **`src/config/brand.ts` is not brand colors.** It is three.js material tokens
-  (`roughness`, `metalness`, `color`) with ~40 importers.
-- **Every env var is optional** and features degrade rather than fail, so a missing
-  `.env.local` does not break the build.
-- **The ⌘K menu restores keyboard focus itself.** It has no `Dialog.Trigger` (it opens from
-  the deck, the hero CTA and ⌘K), and Radix's modal content _suppresses_ FocusScope's own
-  restore in favor of focusing a trigger that is therefore always null — so closing it used
-  to strand focus on `<body>`. `command-menu-store.tsx` remembers the opener and
-  `command-menu.tsx` restores it in `onCloseAutoFocus`. When testing it: on macOS a click
-  does not focus a button, so a mouse-driven test passes against the broken code, and Radix
-  restores inside a `setTimeout(0)`, so a single `activeElement` read is too early.
-- **Audio assets must be free for commercial use.** Only ship tracks/SFX with an explicit
-  commercial-use license (Pixabay, Mixkit, Freesound per-clip) and record the license and
-  attribution. Never commercial music.
+1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
+2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
+   Playwright 1.62.
+3. Recorded decisions — `docs/decisions.md`, `docs/restructure-plan.md`. May override (2),
+   never (1).
+4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3, the
+   config may be the bug: investigate it.
+5. These instructions — `AGENTS.md`, then `.devin/rules`.
+6. Existing implementation — evidence of what is, never authority for what should be.
+7. Descriptive docs — `docs/architecture.md` and the plans describe; they don't decide.
+
+**"The repository does X" is never by itself a reason to do X.** Before copying an existing
+pattern, check whether (1)–(3) endorse it; if not, treat it as potential technical debt — say
+so, keep the change scoped, and either fix it or record why you deferred. **But divergence is
+a decision, not a side effect:** two conventions inside one module are worse than either, so
+make the smallest correct change and take a broader correction to `docs/decisions.md` or the
+user. **When an instruction here is wrong, fix it in the same change** — claims in this system
+have shipped wrong before, and a rule nobody corrects is how. If a check can enforce it
+(TypeScript, ESLint, a test, CI), prefer the check over the rule.
+
+Standards and placement live in `.devin/rules/` (activated by file type or on demand); the
+tree as it is today in `docs/architecture.md`; the structural target and its phases in
+`docs/restructure-plan.md`; coverage targets in `docs/testing-plan.md`; and the reasoning
+behind non-obvious calls in `docs/decisions.md` — append-only, so read the entry, not the file.
+
+## Constraints that are easy to trip over
+
+- **No restructure phase starts** until the unit suite can show a move changed no behavior;
+  `docs/restructure-plan.md` owns the gate and its exceptions. Re-measure with
+  `pnpm test:coverage` before citing any coverage figure.
+- **`src/constants/agent-index.json` is generated.** Edit a source
+  (`src/constants/{career,patterns,routes}.ts`, `config/site.ts`,
+  `features/world/constants/destinations.ts`) then run `pnpm agent:index`.
+  `src/constants/career.ts` has no runtime consumer and is still load-bearing — `knip` will not
+  tell you that.
+- **"Inspector" is two things:** `features/command-menu` is the ⌘K surface, whose agent is
+  branded "the Inspector agent"; `features/inspector` is the Web-Vitals overlay.
+- **The AI endpoint's safety properties already hold and break silently.** When touching
+  `/api/chat`, `src/ai/**` or the answer UI, keep them: user text stays in the user message and
+  is never concatenated into the system prompt; model output renders as text, never HTML, and
+  never becomes a URL or route; citations resolve only against the server-built citation list,
+  with hrefs through `asInternalHref()`; the input cap, output-token cap, `maxDuration` and
+  rate limiter stay; the refusal path stays tested; never leak the system prompt or index in a
+  response or error. Corpus content not authored in this repo would be untrusted prompt input
+  and needs its own review.
+- **CSP: `'unsafe-inline'` is an accepted limitation of a fully static build, not a TODO.** The
+  invariant that bounds it: **no user- or model-derived content reaches an inline script or
+  HTML sink.** A nonce-based CSP forces every route dynamic and is incompatible with PPR, so
+  don't introduce one; any future change must prove the inline blocks still run, the routes
+  stay static, and `prerender:check` passes. See `docs/decisions.md`.
+- **All human-readable text is US English (en-US).** Correct the neighbors rather than matching
+  them; never rename an identifier to fix spelling.
+- **Comments earn their place** — a measured decision, a workaround, a non-obvious constraint,
+  as in `eslint.config.ts` and `playwright.config.ts`. Never restate the code.
+- **New dependency releases must age 24 h** (`minimumReleaseAge: 1440`). Never raise, bypass or
+  exclude a package to get a build green — escalate. For an audit advisory prefer an aged patch
+  or a `pnpm-workspace.yaml` override, never a floating range.
+- **Audio assets must be licensed for commercial use** (Pixabay / Mixkit / Freesound per-clip);
+  record license and attribution. Never commercial music.
+- **GitHub Free, private repo:** no branch protection and no required status checks, so nothing
+  stops a red push but you. Upload CI artifacts only on failure, with `retention-days`. Full
+  table in `docs/architecture.md`.

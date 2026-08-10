@@ -1,105 +1,68 @@
 ---
 trigger: glob
-globs: tests/e2e/**, playwright.config.ts, **/*.spec.ts
+globs: tests/e2e/**, **/*.spec.ts, playwright.config.ts
 ---
 
-# E2E — Playwright & axe
+# E2E — writing Playwright + axe specs
 
-**Playwright** + `@axe-core/playwright`. Specs live in `tests/e2e/*.spec.ts` with shared
-fixtures and helpers in `tests/e2e/fixtures.ts` (not collected as a spec — `testMatch`
-only takes `*.spec.ts`). For running and triaging the suite, use the `/e2e` skill; this
-rule is about writing specs. Unit-test standards are in
-[`testing.md`](./testing.md).
+This rule is about **writing** specs. Running them and reading a failure is the `/e2e` skill;
+unit standards are in `testing.md`.
 
 ## What this layer owns
 
-- **Assert** what only exists end-to-end: route status, `<h1>`, metadata, JSON-LD, real
-  navigation, focus management, and every 3D non-negotiable from
-  [`three-r3f-world.md`](./three-r3f-world.md). **Every route gets an E2E smoke
-  assertion** — those are only observable here, so it is not duplicating a unit test.
-  Beyond that, don't re-test unit coverage in a browser.
-- **Reliable because** web-first assertions retry the _check_, `openWithShortcut` retries
-  the _action_ until hydration lands, and both motion projects run the same specs.
-- **Never** use `waitForTimeout`, and never soften an assertion to fit slow CI. If the
-  scene is competing for the main thread, budget the wait explicitly and say why in a
-  comment.
-- **Keep timing out of E2E.** Anything whose outcome depends on a clock belongs in a
-  fake-timer unit test. The boot gate is the worked example: three timers and a ready
-  signal asserted in `world/components/boot.dom.test.tsx` in ~200ms, while E2E keeps only
-  "a first visit is gated, dismissing it yields a usable page, a reload does not gate
-  again".
+Only what exists end-to-end: route status, `<h1>`, metadata, JSON-LD, real navigation, focus
+management, the axe scans, and the non-negotiables in `three-r3f-world.md` — treat that list as
+the specification each spec maps to. Every route gets a smoke assertion; beyond that, don't
+re-test unit coverage in a browser, and keep anything clock-dependent in the fake-timer layer.
 
 ## Both motion modes, always
 
-`playwright.config.ts` defines two projects and **every spec runs in both**:
+Two projects run every spec: `reduced-motion` (no canvas — the accessible path) and
+`full-motion` (the 3D world, boot, HUD). Before the split the whole suite forced `reduce`, so
+the path most visitors get had never been tested.
 
-| Project          | `reducedMotion` | What it exercises                      |
-| ---------------- | --------------- | -------------------------------------- |
-| `reduced-motion` | `reduce`        | no canvas at all — the accessible path |
-| `full-motion`    | `no-preference` | the 3D world, boot sequence, HUD       |
-
-Until 2026-08-08 the whole suite forced `reducedMotion: "reduce"`, so the 3D path was
-never tested at all. Don't let that recur by tagging a new spec `@reduced-motion` for
-convenience.
-
-- **Import `test` from `./fixtures`, never from `@playwright/test`.** The fixture seeds
-  the boot session key so `BootSequence`'s click-gated dialog does not intercept the
-  spec — without it `getByRole("dialog")` matches the boot overlay, not the ⌘K menu.
-  Opt out with `test.use({ skipBoot: false })` only to test boot itself.
-- **Only tag a spec when it is genuinely mode-specific**, with
-  `test.describe("…", { tag: "@full-motion" }, …)` or `@reduced-motion`; the projects
-  `grepInvert` the other tag. Default to untagged so it runs in both — a bug that only
-  appears with the canvas mounted is the reason this split exists.
-- **`full-motion` carries its own `expect.timeout` (15s) and `timeout` (90s)** because a
-  scene rendering on a software renderer competes with the assertion loop: the same
-  assertion settles in 395ms without a canvas and 9.3s with one. Do not "fix" a slow
-  full-motion assertion by adding a sleep, and do not raise the **global** timeout —
-  reduced-motion specs must stay on the strict default.
+- **Import `test` from `./fixtures`, never `@playwright/test`.** The fixture seeds the boot
+  session key so `BootSequence`'s click-gated dialog does not intercept the spec — without it
+  `getByRole("dialog")` matches the boot overlay instead of the ⌘K menu. Opt out with
+  `test.use({ skipBoot: false })` only to test boot itself.
+- **Default to untagged so a spec runs in both.** Tag `@full-motion` / `@reduced-motion` only
+  when the behavior is genuinely mode-specific — a bug that appears only with the canvas
+  mounted is why the split exists.
 
 ## Waiting correctly
 
-- **`⌘K` needs `openWithShortcut()`** and the inspector needs `openInspector()`, both
-  from `fixtures.ts` — never a bare `keyboard.press`. The listeners are attached in a
-  `useEffect`, so pressing right after `goto` races hydration and fails roughly 1 run in
-  12; mounting the canvas widens the window further.
-- **Use `settleWorld(page, canvasMounts)` before asserting on hydrated DOM.**
-  `canvasMounts` is a per-project option; without the wait a `full-motion` assertion just
-  re-measures the reduced-motion markup.
-- **Any spec reading canvas dimensions must retry the read.** `toBeAttached` resolves
-  before r3f's ResizeObserver sizes the element, so the canvas reports the HTML default
-  of 300x150 for a moment.
-- **Fix flakes at the root.** Retrying an _action_ until a precondition holds
-  (`expect(async () => {…}).toPass()`) is a web-first wait and is correct. Leaning on
-  `retries` so a spec eventually passes is masking; retries exist for infrastructure
-  flake, and a test that needs them is a bug.
+- **`⌘K` needs `openWithShortcut()` and the inspector needs `openInspector()`** from
+  `fixtures.ts`, never a bare `keyboard.press`: the listeners attach in a `useEffect` and
+  nothing in the DOM distinguishes server markup from hydrated markup.
+- **Call `settleWorld(page, canvasMounts)` before asserting on hydrated DOM.** Without it a
+  `full-motion` assertion just re-measures the reduced-motion markup.
+- **Retry any read of canvas dimensions** — `toBeAttached` resolves before r3f's ResizeObserver
+  sizes the element, so it reports the HTML default of 300×150 for a moment.
 
-## Workers, and why they are capped
+## Never
 
-**2 locally, 1 in CI, for two unrelated reasons.** Locally, five concurrent SwiftShader
-contexts starve each other badly enough to close browser sessions — `Protocol error …
-session closed` is that. On CI the limit is the runner: 2 vCPU shared by Chromium _and_
-the `pnpm start` server, so `--workers=2` starves the **server** and a route hangs in its
-`Loading` fallback past the expect budget. Do not raise CI to match local, and do not
-shard around it — `--shard=n/2` splits on the project boundary and buys nothing. See
-[`docs/decisions.md`](../../docs/decisions.md).
+- **Never soften an assertion** to fit slow CI, and **never `waitForTimeout`**. Retrying an
+  _action_ until a precondition holds (`expect(async () => {…}).toPass()`) is a web-first wait
+  and is correct; leaning on `retries` is masking, because retries exist for infrastructure
+  flake and a spec that needs them is a bug.
+- **Never raise the global timeout.** `full-motion` already carries its own `expect.timeout` and
+  `timeout` because a software-rendered scene competes with the assertion loop; reduced-motion
+  specs stay on the strict default.
+- **Never raise CI workers or shard around slowness.** Both caps exist for measured reasons
+  recorded in `playwright.config.ts` and `docs/decisions.md`.
 
-## Accessibility
+## Accessibility and queries
 
-- **Axe scans `WCAG_TAGS` from the fixtures**, which includes `wcag22aa` to match the
-  documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
-  2.2 AA is not automatable, so the bar is still partly a manual claim.
-- Accessibility is a hard gate, not a report. Keyboard-reachable index, visible focus,
-  labeled controls, no focus traps when panels reveal.
+Axe scans `WCAG_TAGS` from the fixtures, including `wcag22aa`. Be honest about what that buys:
+in axe-core 4.12 that tag is one rule (`target-size`) and there are no `wcag22a` rules at all,
+so most of the 2.2 AA bar stays a manual claim — keyboard passes, visible focus, labeled
+controls, no focus trap when a panel reveals.
 
-## Conventions
+Query by accessible role and name, never class names or DOM structure. Write fixtures with the
+documented signature `async ({ … }, use)`; the React-family lint rules are off for `tests/**`,
+so `rules-of-hooks` no longer misreads Playwright's `use` callback — if that error reappears the
+config regressed, so don't rename the parameter to dodge it.
 
-- **Query by accessible role and name.** Never class names, never DOM structure; test IDs
-  only as a last resort.
-- **Write fixtures with the documented Playwright signature** — `async ({ … }, use)`.
-  `eslint.config.ts` turns the React-family rules off for `tests/**` and `scripts/**`, so
-  `react-hooks/rules-of-hooks` no longer mistakes the `use` callback for React's `use()`.
-  If you ever see that error here again, the config regressed; do not rename the
-  parameter to dodge it.
-- **Visual baselines are not present, by choice.** When added they are a review signal,
-  never a gate: ~8–10 shots, Docker-pinned, paths-filtered. WebGL on a software renderer
-  is variance-prone, and a suite people re-baseline on red has no signal left.
+**Visual baselines are absent by choice.** When added they are a review signal, never a gate:
+WebGL on a software renderer is variance-prone, and a suite people re-baseline on red has no
+signal left.

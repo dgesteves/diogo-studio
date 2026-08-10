@@ -1,69 +1,42 @@
 ---
 trigger: glob
-globs: **/*.tsx, **/*.jsx, **/*.css
+globs: **/*.tsx, **/*.css
 ---
 
-# React 19 components, styling & accessibility
+# Components, styling & accessibility
+
+`AGENTS.md` carries the compiler's automatic memoization, the `ref`-prop preference and where
+Tailwind tokens live. This rule is what those leave out.
 
 ## Components
 
-- One concept per file, **named exports**, explicit `Props` types (extend
-  `React.ComponentProps<…>` instead of re-listing DOM props).
-- Add `"use client"` only when required, and keep client islands small. Don't
-  define components inside other components. Always give list items stable `key`s
-  (never the array index when items can reorder).
-- Follow the **Rules of Hooks**: call hooks at the top level only, with complete
-  dependency arrays and no conditional calls. Reach for `useEffect` last — prefer
-  deriving values during render, lifting state, or handling things in events.
-- React 19: use `useActionState`, `useOptimistic`, and `<form action={…}>` for
-  mutations; use `use()` to unwrap promises/context under Suspense.
-- Write **declarative JSX** (map/conditional render over imperative DOM work).
-  Minimize client-side state — derive from props/server data first.
-- Build composable APIs (slot / `asChild`, `forwardRef` when wrapping a DOM node).
-  Prefer accessible primitives (e.g. Radix UI) over hand-rolled interactive widgets.
-- **Forms: there is no form library here.** `react-hook-form` is not installed and
-  the repo has exactly one `<form>` (the command-menu ask input). Use a native
-  `<form>` with Zod validation at the boundary and accessible errors
-  (`aria-invalid`, linked message ids). Only reach for `react-hook-form` + a `zod`
-  resolver if a genuinely multi-field form arrives — and justify the dependency
-  per the core rule.
+- One concept per file, named exports, explicit `Props` — extend `React.ComponentProps<…>`
+  rather than re-listing DOM props.
+- Prefer composition (`asChild`/slot) over wrapper components that forward everything, and
+  accessible primitives (Radix, `cmdk`) over hand-rolled interactive widgets.
+- Reach for `useEffect` last: derive during render, lift state, or handle it in the event.
+- **There is no form library.** One `<form>` exists (the ⌘K ask input). Use a native form with
+  Zod validation at the boundary and accessible errors (`aria-invalid`, linked message ids).
+  `react-hook-form` would be a dependency decision, not a default.
 
-## Styling (Tailwind)
+## Styling
 
-- Utility-first. Compose conditional classes with a **`cn()`** helper
-  (`clsx` + `tailwind-merge`) — never string concatenation. Model variants with
-  **class-variance-authority**, and let an incoming `className` override last.
-- Use **design tokens / theme values**, not arbitrary hex or magic numbers.
-  Support dark mode, and gate every animation on `prefers-reduced-motion`.
-- Design **mobile-first** (base styles, then `sm:`/`md:`/`lg:` overrides). Avoid
-  inline styles and global CSS for component-level styling.
+- Compose conditional classes with `cn()` (`clsx` + `tailwind-merge`), never string
+  concatenation; model variants with `class-variance-authority` and let an incoming `className`
+  win last.
+- Use the design tokens rather than arbitrary values, and gate every animation on
+  `prefers-reduced-motion` — here that is a real code path, not a preference.
 
-## Accessibility (hard gate)
+## Accessibility (a gate, WCAG 2.2 AA)
 
-- Semantic HTML first (`button`, `a`, `nav`, `main`, ordered headings). Every
-  interactive element must be keyboard-operable with a visible `:focus-visible`
-  ring — never remove focus outlines without an equivalent replacement.
-- Icon-only controls need an `aria-label`; associate inputs with a `<label>`.
-  Set `aria-current="page"` on the active nav link.
-- **Lint is not an a11y safety net.** `eslint-config-next` enables only **6**
-  `jsx-a11y` rules (`alt-text`, `aria-props`, `aria-proptypes`,
-  `aria-unsupported-elements`, `role-has-required-aria-props`,
-  `role-supports-aria-props`). Fix those rather than disabling them, but a clean
-  `pnpm lint` says almost nothing about accessibility — `@axe-core/playwright`
-  and keyboard-only testing are the real gate.
-
-## Performance
-
-- Use `next/image` (sized, modern formats), `next/font` (self-hosted, no layout
-  shift), and `next/script` (defer/lazy) — never raw `<img>`, font `<link>`s, or
-  blocking third-party scripts.
-- Lazy-load heavy/below-the-fold client code with `next/dynamic`. Keep animation,
-  charting, 3D, and rich editors inside small client boundaries so the server
-  shell stays lean.
-- **With the React Compiler enabled** (`reactCompiler: true`), automatic
-  memoization is in effect — **do not add `useMemo` / `useCallback` /
-  `React.memo`**. Reach for manual memoization only to fix a **measured**
-  problem or to preserve a referentially-stable value an external API requires,
-  and say so in a short comment. Without the compiler, memoize only proven hot
-  paths — never speculatively. Protect the LCP element and avoid layout shift
-  (reserve space for media/embeds).
+- Semantic HTML first. Every interactive element is keyboard-operable with a visible
+  `:focus-visible` ring; never remove an outline without an equivalent.
+- Icon-only controls need an accessible name; `aria-current="page"` on the active nav link; no
+  focus trap when a panel reveals; and a dialog restores focus to whatever opened it — the ⌘K
+  menu does this itself in `onCloseAutoFocus`, because it has no `Dialog.Trigger`.
+- Target size ≥ 24×24 CSS px and focus must not be obscured by fixed chrome — the two WCAG 2.2
+  criteria this UI can plausibly break.
+- **Lint is a floor, not the bar.** The enabled `jsx-a11y` rules catch structural mistakes;
+  `@axe-core/playwright` plus keyboard-only testing is the real check, and part of 2.2 AA is
+  not automatable at all. Fix an a11y rule rather than disabling it; if one genuinely
+  false-positives, disable it in `eslint.config.ts` with a reason, never inline.

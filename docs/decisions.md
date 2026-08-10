@@ -6,6 +6,73 @@ not for every change.
 
 ---
 
+## 2026-08-10 — One always-on file; `.devin/rules` stays scoped despite being undocumented
+
+An audit against the shipped Devin CLI documentation found that **`.devin/rules/` appears in
+none of it.** `rules.mdx` and the configuration-import reference document `AGENTS.md` (plus
+`AGENTS.local.md`, `AGENT.md`, `.windsurfrules`), `.cursor/rules/`, `.windsurf/rules/` and
+`.claude/`; `.devin/skills/` is documented, `.devin/rules/` is not. It demonstrably works —
+`trigger: always_on` is injected, `model_decision` rules are offered to the agent, `glob` rules
+activate on a matching file — but the mechanism the whole scoped layer depends on is an
+undocumented one.
+
+The response is not to abandon it. The CLI's own operating guidance puts new configuration in
+`.devin/`, and `.windsurf/rules/` would trade a documented loader for a tool-specific directory
+this project does not otherwise use. Instead the **critical contract moved into `AGENTS.md`**,
+the one documented always-on path, and `.devin/rules/` now carries only detail that is
+recoverable from the code if it ever stops loading. `00-core.md` and `language-and-copy.md`'s
+`always_on` trigger were the second and third always-on sources; both are gone, so **there is
+exactly one always-on file.** Do not add another.
+
+That cut 17,917 bytes of always-on context to 8,490. Four rules were deleted rather than
+rewritten: `00-core.md` (its durable content is now in `AGENTS.md`, its file-type content in the
+glob rules), `typescript.md` (every compiler option it listed is already on and every
+prohibition is already an ESLint error), and `performance.md` plus
+`observability-and-errors.md` (framework-obvious or generic; their one project-specific fact,
+the `station-index`-over-`destinations` client-bundle trap, moved to `three-r3f-world.md`).
+Historical entries in this log and in the plans still cite `00-core.md` by name; they describe
+what was true then, and this entry is where its content went.
+
+Two corrections the same audit produced, recorded because both had shipped as instructions:
+the always-on injection cap is **32 KiB per file with a truncation hint naming the source
+path**, not the 16,384 bytes silently dropped that the entry below states; and Cache Components
+removed the `dynamic`, `dynamicParams`, `revalidate` and `fetchCache` route segment configs
+while leaving **`maxDuration`, `runtime`, `instant` and `prefetch` valid** — the previous rule
+said `runtime` fails the build, and `/api/chat` exports `maxDuration`.
+
+## 2026-08-10 — `'unsafe-inline'` stays; a nonce CSP would cost static rendering
+
+Moving `script-src` off `'unsafe-inline'` looks like an obvious hardening step and is being
+deliberately declined.
+
+Next.js documents nonce-based CSP as requiring **dynamic rendering for every page**: static
+optimization and ISR are disabled, and it is **incompatible with Partial Prerendering**, which
+`cacheComponents` makes the default. Static rendering is this site's main performance asset and
+`prerender:check` exists to defend nineteen routes of it, so a nonce would trade the
+architecture for the mitigation.
+
+Hashes are the other route off `'unsafe-inline'` and do not close it either. There are two
+inline blocks: `boot-splash.tsx` emits a build-time constant, which hashes to one stable value,
+but `json-ld.tsx` emits `JSON.stringify(data)`, whose content **differs per route** — a static
+header list in `next.config.ts` cannot enumerate those hashes maintainably. Whether a
+`type="application/ld+json"` block is even subject to `script-src` was not established from a
+primary source, so the size of the remaining problem is not yet known.
+
+What makes the current policy acceptable is a property, not a directive: **no user- or
+model-derived content reaches an inline script or any HTML sink.** Both `dangerouslySetInnerHTML`
+uses take authored data through `JSON.stringify`, and model output is rendered as React text
+nodes with hrefs narrowed by `asInternalHref()`. That invariant is the thing to protect; the
+inline-block count is a budget, and it is two.
+
+Two header defects were fixed while here. `X-XSS-Protection: 1; mode=block` was **removed** —
+OWASP says not to set it and MDN documents it as non-standard, deprecated and able to introduce
+XSS into otherwise safe pages. `X-Frame-Options` moved from `SAMEORIGIN` to **`DENY`** so it
+agrees with the `frame-ancestors 'none'` already in the CSP instead of stating a second,
+different framing policy in the same response.
+
+Any future attempt must prove three things before it lands: the inline blocks still execute,
+every must-be-static route is still static, and `prerender:check` passes.
+
 ## 2026-08-10 — `AGENTS.md` holds only what has no other home; procedures became skills
 
 `AGENTS.md` had grown to **19,991 bytes against a 16,384-byte always-on injection cap**, so
