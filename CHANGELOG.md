@@ -1,5 +1,76 @@
 # Changelog
 
+## [1.12.2](https://github.com/dgesteves/diogo-studio/compare/v1.12.1...v1.12.2) (2026-08-10)
+
+
+### Bug Fixes
+
+* **agent:** give a missing query the message written for it ([444542b](https://github.com/dgesteves/diogo-studio/commit/444542bcc9d1bea5563a086d9c4b017767eb285a))
+* **command-menu:** return focus to whatever opened the menu ([e2fe1f3](https://github.com/dgesteves/diogo-studio/commit/e2fe1f3450720f04965d7b6c66b3471a13d55ecf))
+* **inspector:** mark each overlay panel title as the heading it is ([a485549](https://github.com/dgesteves/diogo-studio/commit/a485549f57400f0e7d0ce0ef2b1ce87b8a19193d))
+* **seo:** stop every route sharing the home page social preview ([030f60e](https://github.com/dgesteves/diogo-studio/commit/030f60ed9788178b1588a07353adc4708ba397fc))
+* **seo:** stop JSON-LD data from being able to close its own script ([3e0feb6](https://github.com/dgesteves/diogo-studio/commit/3e0feb61e571f78d7f523851022869f4d454c488))
+* **test:** wait for r3f to size the canvas instead of reading it once ([4ceb274](https://github.com/dgesteves/diogo-studio/commit/4ceb27425e4af5a4ed78f5ceea83a1f23ef9777a))
+
+
+### Code Refactoring
+
+* **command-menu:** delete the open tick Radix could never increment ([f427015](https://github.com/dgesteves/diogo-studio/commit/f427015c92c310b9798a68251b4044c1e3d71bf4))
+* **command-menu:** drop an SSR guard that cannot run on the server ([a0025c4](https://github.com/dgesteves/diogo-studio/commit/a0025c4b390dc3130b55bda334fc2b9ddb21e45b))
+* **inspector:** drop the route-JS guards that cannot run ([a0ff8f1](https://github.com/dgesteves/diogo-studio/commit/a0ff8f19a2e6bc83d8da46679c0d172622c1301c))
+
+
+### Documentation
+
+* consolidate and compress the .devin/rules layer ([b9ca945](https://github.com/dgesteves/diogo-studio/commit/b9ca94598de67a969585f9b92a78a5a2652fc5a6))
+* consolidate E2E and testing rules, record metadata and prose-conversion traps ([68783cb](https://github.com/dgesteves/diogo-studio/commit/68783cba727446f11a79bcc2f78999eb91cf5aa3))
+* mark testing-plan Phase 1 complete, and correct two coverage figures ([aa687de](https://github.com/dgesteves/diogo-studio/commit/aa687de8b8e42e7fd16bf8698b594258f7bf45b6))
+* mark testing-plan Phase 2 complete and record what it found ([b180ca0](https://github.com/dgesteves/diogo-studio/commit/b180ca044e226ed51a01e497620de17b121ecf41))
+* mark testing-plan Phase 3 complete and record what it found ([cb0b1a9](https://github.com/dgesteves/diogo-studio/commit/cb0b1a9f266f46bf375010cbfb7e15f3a631c38f))
+* mark testing-plan Phase 4 complete and record what it found ([9ea77a4](https://github.com/dgesteves/diogo-studio/commit/9ea77a4406d53f06f3df79a90b9fdabc19949e9f))
+* record the Phase 0 and ESM decisions, and correct two claims ([bf4d5b4](https://github.com/dgesteves/diogo-studio/commit/bf4d5b4536246da2f277a729122cf9b94e3edecc))
+* record why visual baselines are deferred and what they would actually test ([3125185](https://github.com/dgesteves/diogo-studio/commit/31251857353ffdd857706e2794c5707729697406))
+
+
+### Tests
+
+* **command-menu,inspector:** cover the two keyboard-driven feature stores ([a991b0e](https://github.com/dgesteves/diogo-studio/commit/a991b0ecbd246184aa7d13783c25162418316f4c))
+* **command-menu:** cover every state the Ask answer UI can render ([6536cc5](https://github.com/dgesteves/diogo-studio/commit/6536cc5ba6cba957f9d266e3d98c801bd1a88d86))
+* **command-menu:** cover the ⌘K surface and the answer it renders ([5abdc05](https://github.com/dgesteves/diogo-studio/commit/5abdc0586efbc4def78cff45c90f57bf742129ef))
+* cover rate limiting, the metadata routes and the site url ([987a995](https://github.com/dgesteves/diogo-studio/commit/987a995f32e3ac990ebe48aa44d1c12e91994552))
+* cover the remaining pure-DOM leaves ([16975f5](https://github.com/dgesteves/diogo-studio/commit/16975f5059c1c91b514051ac92e78a4db10b644f))
+* **e2e:** assert every authored string is served without JavaScript ([cb68cd9](https://github.com/dgesteves/diogo-studio/commit/cb68cd962edc9db6d56e37ce9acb05c8b6db8637))
+* **e2e:** assert every route serves a page, a heading and its own metadata ([5cbe9b9](https://github.com/dgesteves/diogo-studio/commit/5cbe9b976b5f65f1a38fcc0ef7d75208337fa221))
+* **e2e:** assert the world-quality tier is reported and meaningful ([ecf271d](https://github.com/dgesteves/diogo-studio/commit/ecf271d20e898c508ddca58d6d2673b190a79374))
+* **e2e:** cover the ask-agent journey from the browser side ([ea33e0c](https://github.com/dgesteves/diogo-studio/commit/ea33e0ce590e9e1e874d007f2c27b33fc2df3618))
+* **e2e:** cover the structured-data graph and the crawler endpoints ([4b810fa](https://github.com/dgesteves/diogo-studio/commit/4b810fa8a965be51d0a861e01ac9cf8417e1d11a))
+* **e2e:** cover the studio map, deep-link focus and explore mode ([aeb5d8d](https://github.com/dgesteves/diogo-studio/commit/aeb5d8db4ae5e4d513c12b5f7b751d7a92accb00))
+* **e2e:** finish the ⌘K modes and cover the boot gate's preferences ([bc0941b](https://github.com/dgesteves/diogo-studio/commit/bc0941bfe126b9e6b04683d3a0aa62f370916ad1))
+* **e2e:** scan every route with axe, and assert focus is actually visible ([8127aab](https://github.com/dgesteves/diogo-studio/commit/8127aabde58b7f55fc88f161e7f4b719d8c3ace8))
+* **e2e:** verify the four viewports the world must not crop at ([828694b](https://github.com/dgesteves/diogo-studio/commit/828694ba92945c3fb59c92413b184c187e418621))
+* finish the testing-plan Phase 0 foundation ([14635d4](https://github.com/dgesteves/diogo-studio/commit/14635d4b68552bd584a25e8bc34dc2fcc43cd1be))
+* **hooks:** cover the shared hooks, including the branches jsdom hides ([cad141d](https://github.com/dgesteves/diogo-studio/commit/cad141d839a5905285f61ed9d7434996b045e333))
+* **inspector:** cover the overlay, its units and its measurements ([fb8c80e](https://github.com/dgesteves/diogo-studio/commit/fb8c80e6d24a9af072b39e2c4f8c708acdf5d489))
+* **providers:** assert the reduced-motion contract end to end ([2b53244](https://github.com/dgesteves/diogo-studio/commit/2b532449b034b6826ac323cb7a66640e03c51dc1))
+* share the act-wrapped click and keypress helpers ([89192c3](https://github.com/dgesteves/diogo-studio/commit/89192c355a9ff53d922429058a964ce6a3ac968a))
+* **stores:** cover every client store's change, storage and server semantics ([64e6d35](https://github.com/dgesteves/diogo-studio/commit/64e6d35f3479009c46b6c672a4ca83f87c9fe0f7))
+* **world:** cover the boot gate's preferences and its exits ([8fde662](https://github.com/dgesteves/diogo-studio/commit/8fde662245ca33cdd449708f24470c426c675792))
+* **world:** cover the command deck, the studio map and the explore HUD ([f08283a](https://github.com/dgesteves/diogo-studio/commit/f08283a89810e862bd7d58031429fd68e0f3b61e))
+* **world:** cover the content blocks and the station frame ([05fa322](https://github.com/dgesteves/diogo-studio/commit/05fa322dc97a0484d4499dde7754eeaee748d68d))
+
+
+### Build System
+
+* declare the package ESM and move every config to TypeScript ([3dffe0c](https://github.com/dgesteves/diogo-studio/commit/3dffe0cb32c3e8101894314b2d1f0ad185a950d6))
+* **deps:** repair the duplicated lockfile key that broke every CI job ([27a10c6](https://github.com/dgesteves/diogo-studio/commit/27a10c6edea63470055414dc7f079c51e564bfcf))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump the development-minor-patch group with 2 updates ([#211](https://github.com/dgesteves/diogo-studio/issues/211)) ([45407eb](https://github.com/dgesteves/diogo-studio/commit/45407eb4a2711369eea7ae66f324e9a699b58739))
+* **deps:** bump the production-minor-patch group with 3 updates ([#210](https://github.com/dgesteves/diogo-studio/issues/210)) ([69ff954](https://github.com/dgesteves/diogo-studio/commit/69ff954478d2dbbf0b4d7d90f795825617a7f672))
+* **lint:** enable jsx-a11y rules and align security headers with policy ([273bd8d](https://github.com/dgesteves/diogo-studio/commit/273bd8dc235413a95af0c304fead2a91e54fa91d))
+
 ## [1.12.1](https://github.com/dgesteves/diogo-studio/compare/v1.12.0...v1.12.1) (2026-08-09)
 
 
