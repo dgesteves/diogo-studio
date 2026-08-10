@@ -1,14 +1,26 @@
+import type { ReactElement } from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
-import { CommandMenuProvider } from "@/features/command-menu";
+import { click } from "@tests/interactions";
+import { CommandMenuProvider, useCommandMenu } from "@/features/command-menu";
 import { Home } from "./home";
 
-function renderHome() {
-  return render(
+/** The CTA's whole job is the mode it opens the menu in, which only the store can report. */
+function MenuProbe(): ReactElement {
+  const { open, mode } = useCommandMenu();
+  return <p data-testid="menu">{open ? `open:${mode}` : "closed"}</p>;
+}
+
+function renderHome(): UserEvent {
+  const user = userEvent.setup();
+  render(
     <CommandMenuProvider>
       <Home />
+      <MenuProbe />
     </CommandMenuProvider>,
   );
+  return user;
 }
 
 describe("Home landing", () => {
@@ -22,9 +34,14 @@ describe("Home landing", () => {
     ).toBeInTheDocument();
   });
 
-  it("exposes a ⌘K trigger CTA that opens the agent in Ask mode", () => {
-    renderHome();
+  it("exposes a ⌘K trigger CTA that opens the agent in Ask mode", async () => {
+    const user = renderHome();
     expect(screen.getByRole("button", { name: /ask the agent about diogo/i })).toBeInTheDocument();
+
+    await click(user, /ask the agent about diogo/i);
+
+    // Straight into Ask: a visitor who came for the agent should not have to switch modes.
+    expect(screen.getByTestId("menu")).toHaveTextContent("open:ask");
   });
 
   it("renders the availability status", () => {
