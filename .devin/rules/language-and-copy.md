@@ -49,6 +49,18 @@ are — `compromise`, `enterprise`, `advertise`, `supervise`, `precise`.
   `pnpm-lock.yaml` by pnpm. Fix the source, then regenerate.
 - **Proper nouns**, including place and person names.
 
+## Three traps when fixing prose in bulk
+
+The repo was converted wholesale on 2026-08-09 (68 occurrences — it had been uniformly
+British). If you ever do that again:
+
+- **A naive `s/optimis/optimiz/` corrupts `optimistic`.** Guard the suffix:
+  `optimis[eai]`.
+- **`CHANGELOG.md` and `src/constants/agent-index.json` are generated.** Fix the source
+  and regenerate, or the next build overwrites you.
+- **Identifiers, package names and quoted upstream text are out of scope.** Spelling is
+  a copy concern; renaming an export is a refactor with real blast radius.
+
 ## Locale settings
 
 These are formatting decisions, not spelling, but they should agree with the
@@ -59,6 +71,13 @@ above and should not drift:
 - `Intl` formatters take `"en-US"`. Note that the locale drives output order and
   separators, so changing one is a visible UI change — verify the rendered
   string, and prefer an explicit `hourCycle` over relying on `hour12` defaults.
+
+**Nothing asserts on the terminal clock.** `useCenterScreenTexture` in
+`features/studio/components/screens/terminal-screen.ts` formats Lisbon time with
+`Intl.DateTimeFormat("en-US", …)` and paints it into a **canvas texture**, never the
+DOM — so no unit test or spec can see it, and a locale or format change ships
+unverified. Check the rendered string by hand. `hourCycle: "h23"` is explicit on
+purpose: `hour12: false` leaves the h23/h24 midnight rollover to the locale default.
 
 ## Enforcement
 

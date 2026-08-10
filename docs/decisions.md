@@ -6,6 +6,43 @@ not for every change.
 
 ---
 
+## 2026-08-10 — `AGENTS.md` holds only what has no other home; procedures became skills
+
+`AGENTS.md` had grown to **19,991 bytes against a 16,384-byte always-on injection cap**, so
+its last 55 lines were silently truncated out of every session. The lost tail included the
+GitHub Free constraints — the text that says _"do not add workflows without checking these
+first"_ was itself the part that never loaded.
+
+Measuring the file rather than trimming it found the actual cause: **roughly three quarters
+of it restated facts a rule already carried.** `brand.ts`, `mulberry32` determinism,
+`typedRoutes`, the vitest three-copy pins, the `.dom.test` split and the 3D non-negotiables
+were all duplicated verbatim from `.devin/rules/`, which is also why it kept drifting. Three
+apparent duplicates were not: the `rootMetadata` `openGraph` trap, the
+`station-index`-over-`destinations` bundle rule, and the `agent:index` prebuild gate matched
+on keyword only and would have been lost by a naive dedupe.
+
+The layers now split by **when the content is needed**, not by topic:
+
+- **`AGENTS.md`** — always-on: orientation, restructure status, the verification entry
+  points, repository constraints, and the ten or so facts with no other home. 8.1 KB, with a
+  stated cap so the next addition has to justify itself.
+- **`.devin/rules/`** — standards, routed by trigger. `testing.md` was **17,850 bytes and
+  over the same cap**, silently truncating whenever a test file was opened; it split into
+  `testing.md` (Vitest, 14.6 KB) and `e2e-playwright.md` (Playwright, 6.1 KB) along the line
+  the two suites already had — 14 `*.spec.ts` under `tests/e2e/`, 29 `*.test.ts(x)` in
+  `src/`.
+- **`.devin/skills/`** — procedures, loaded on demand: `/e2e` (runner choice and failure
+  triage), `/verify` (the gate order and what fails silently), `/commit` (picking an accurate
+  Conventional Commit type).
+
+The rule of thumb, for the next person tempted to add to `AGENTS.md`: **a standard is a rule,
+a procedure is a skill, and `AGENTS.md` is only for what neither can route.** Duplicating a
+fact across two of them is not redundancy for safety — it is the drift mechanism.
+
+Verified by auditing 42 distinctive strings from the two original files against the new
+corpus before deleting anything, and by `pnpm validate` (0 errors, the expected 11 warnings,
+237 tests).
+
 ## 2026-08-09 — Visual baselines are deferred, and the renderer is the reason
 
 `testing-plan.md` §5.1 planned ~8–10 `toHaveScreenshot()` baselines as the third layer over

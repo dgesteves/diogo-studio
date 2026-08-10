@@ -1,15 +1,18 @@
 ---
 trigger: glob
-globs: **/*.test.ts, **/*.test.tsx, **/*.spec.ts, **/*.spec.tsx, tests/**
+globs: **/*.test.ts, **/*.test.tsx, tests/*.ts, vitest.config.ts, vitest.setup.ts
 ---
 
-# Testing
+# Testing — Vitest
 
 Stack: **Vitest** (two projects — see "Which environment a test runs in" below),
-**Testing Library** (`react`, `dom`, `jest-dom`, `user-event`), **Playwright** +
-`@axe-core/playwright`, and **`@react-three/test-renderer`** (RTTR) for the 3D
-scene. There is no Jest and **no MSW** — mock with `vi.mock` at the module
-boundary. Do not add a testing library without checking `package.json` first.
+**Testing Library** (`react`, `dom`, `jest-dom`, `user-event`), and
+**`@react-three/test-renderer`** (RTTR) for the 3D scene. There is no Jest and
+**no MSW** — mock with `vi.mock` at the module boundary. Do not add a testing
+library without checking `package.json` first.
+
+Playwright standards live in [`e2e-playwright.md`](./e2e-playwright.md); running and
+triaging that suite is the `/e2e` skill.
 
 [`docs/testing-plan.md`](../../docs/testing-plan.md) is the authoritative plan and
 tracks per-layer coverage targets.
@@ -116,23 +119,12 @@ The boot gate, debounces, streaming state — anything whose outcome depends on 
 - **Reliable because** a `Request` goes in and a `Response` comes out — no server, no port.
 - **Never** reach past the boundary: mock with `vi.mock` at the module edge.
 
-### Journeys and accessibility — Playwright, both motion modes
+### Journeys and accessibility — Playwright
 
-- **Assert** what only exists end-to-end: route status, `<h1>`, metadata, JSON-LD, real
-  navigation, focus management, and every `AGENTS.md` non-negotiable. **Every route gets an
-  E2E smoke assertion** — those are only observable here, so it is not duplicating a unit
-  test. Beyond that, don't re-test unit coverage in a browser.
-- **Reliable because** web-first assertions retry the _check_, `openWithShortcut` retries
-  the _action_ until hydration lands, and both motion projects run the same specs.
-- **Never** use `waitForTimeout`, and never soften an assertion to fit slow CI. If the
-  scene is competing for the main thread, budget the wait explicitly and say why in a
-  comment.
-
-### Visual baselines — Playwright screenshots (not yet present)
-
-- A **review signal, never a gate**: ~8–10 shots, Docker-pinned, paths-filtered. WebGL on
-  a software renderer is variance-prone, and a suite people re-baseline on red has no
-  signal left.
+Route status, metadata, JSON-LD, real navigation, focus management and the axe scans.
+Owned by [`e2e-playwright.md`](./e2e-playwright.md). The rule that matters from this
+side: **don't re-test unit coverage in a browser**, and keep anything clock-dependent
+in the fake-timer layer above.
 
 ## Coverage: what good looks like
 
@@ -192,45 +184,6 @@ node with no setup at all.
   `world-canvas.tsx` but RTTR bypasses. **A run should have zero stderr output** — treat new
   noise as a defect, not as background.
 
-## E2E runs in both motion modes
-
-`playwright.config.ts` defines two projects and **every spec runs in both**:
-
-| Project          | `reducedMotion` | What it exercises                      |
-| ---------------- | --------------- | -------------------------------------- |
-| `reduced-motion` | `reduce`        | no canvas at all — the accessible path |
-| `full-motion`    | `no-preference` | the 3D world, boot sequence, HUD       |
-
-- **Import `test` from `./fixtures`, never from `@playwright/test`.** The fixture seeds
-  the boot session key so `BootSequence`'s click-gated dialog does not intercept the
-  spec — without it `getByRole("dialog")` matches the boot overlay, not the ⌘K menu.
-  Opt out with `test.use({ skipBoot: false })` only to test boot itself.
-- **Only tag a spec when it is genuinely mode-specific**, with
-  `test.describe("…", { tag: "@full-motion" }, …)` or `@reduced-motion`; the projects
-  `grepInvert` the other tag. Default to untagged so it runs in both — a bug that only
-  appears with the canvas mounted is the reason this split exists.
-- **`full-motion` carries its own `expect.timeout` (15s) and `timeout` (90s)** because a
-  scene rendering on a software renderer competes with the assertion loop: the same
-  assertion settles in 395ms without a canvas and 9.3s with one. Do not "fix" a slow
-  full-motion assertion by adding a sleep, and do not raise the **global** timeout —
-  reduced-motion specs must stay on the strict default.
-- **Workers are capped at 2 locally (1 in CI), for two unrelated reasons.** Locally, five
-  concurrent SwiftShader contexts starve each other badly enough to close browser
-  sessions — if you see `Protocol error … session closed`, that is the cause. On CI the
-  limit is the runner: 2 vCPU shared by Chromium _and_ the `pnpm start` server, so
-  `--workers=2` starves the **server** and a route hangs in its `Loading` fallback past
-  the expect budget. Do not raise CI to match local, and do not shard to work around it —
-  `--shard=n/2` splits on the project boundary and buys nothing. See
-  [`docs/decisions.md`](../../docs/decisions.md).
-- **Axe scans `WCAG_TAGS` from the fixtures**, which includes `wcag22aa` to match the
-  documented WCAG 2.2 AA bar. That tag is exactly one rule (`target-size`); the rest of
-  2.2 AA is not automatable, so the bar is still partly a manual claim.
-- **Write fixtures with the documented Playwright signature** — `async ({ … }, use)`.
-  `eslint.config.ts` turns the React-family rules off for `tests/**` and `scripts/**`,
-  so `react-hooks/rules-of-hooks` no longer mistakes the `use` callback for React's
-  `use()`. If you ever see that error here again, the config regressed; do not rename
-  the parameter to dodge it.
-
 ## Non-negotiables
 
 These hold across every layer above; the per-layer sections say what to assert, these say
@@ -259,15 +212,8 @@ how to write it.
   `*.test.ts(x)`.
 - **A regression test with every bug fix**, written so it fails against the unfixed code.
   Never weaken or delete a test to make a change pass.
-- **Fix flakes at the root.** Retrying an _action_ until a precondition holds is a
-  web-first wait and is correct — `expect(async () => {…}).toPass()` around a
-  keypress that needs React to have hydrated, for example. Leaning on
-  `playwright.config.ts` `retries` so a spec eventually passes is masking. Retries
-  exist for infrastructure flake; a test that needs them is a bug.
-- **`⌘K` needs `openWithShortcut()`** from `tests/e2e/fixtures.ts` — never a bare
-  `keyboard.press`. The listener is attached in a `useEffect`, so pressing right after
-  `goto` races hydration and fails roughly 1 run in 12; mounting the canvas makes the
-  window wider still.
+- **Fix flakes at the root.** A flaky unit test means a hidden clock, a leaked store, or
+  a real race — find it rather than retrying around it.
 
 ## This codebase specifically
 
@@ -289,10 +235,19 @@ how to write it.
   real behavior and must be tested: no `OPENAI_API_KEY` → `/api/chat` returns
   `503`; no `UPSTASH_*` → in-memory rate limiting.
 - **Reduced motion is a real code path**, not a preference. `world-stage.tsx` never
-  mounts the canvas when it is set, so both branches need coverage — which is what the
-  two Playwright projects above are for, plus `reduced-motion.spec.ts` (asserts the
-  canvas is absent and the site still works) and `world-3d.spec.ts` (asserts it mounts
-  and content stays in the DOM). In vitest, cover both branches explicitly.
-- The **non-negotiables in [`AGENTS.md`](../../AGENTS.md)** (content stays in the
-  DOM, reduced-motion navigability, WCAG 2.2 AA, the world never crops) are the
-  specification for the E2E suite — each one should map to an assertion.
+  mounts the canvas when it is set, so cover both branches explicitly in vitest. The
+  browser side is covered by the two Playwright projects in
+  [`e2e-playwright.md`](./e2e-playwright.md).
+- **`vi.stubEnv` does nothing here.** `createEnv` validates and freezes its values at
+  import, so a spec needing a different environment mocks the module against
+  `tests/env.ts`:
+  `vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }))`.
+  `DEFAULTS` is typed from `typeof env`, so adding a required var fails typecheck there
+  until it is accounted for.
+- **A spec covering a `"use cache"` route must mock `next/cache`.** `cacheLife()` throws
+  outside a Next build ("only available with the `cacheComponents` config"), so
+  `sitemap.ts` is driven with `cacheLife` stubbed and the profile asserted on the mock.
+  The real guard that a route stays static is `prerender:check`, not the spec.
+- The **3D non-negotiables in [`three-r3f-world.md`](./three-r3f-world.md)** (content
+  stays in the DOM, reduced-motion navigability, WCAG 2.2 AA, the world never crops) are
+  the specification for the E2E suite — each one should map to an assertion.

@@ -10,8 +10,9 @@ The world is roughly 40% of `src/`. It renders inside one `<Canvas>` and it is
 
 ## Non-negotiables (these gate every change)
 
-These are the same ones recorded in [`AGENTS.md`](../../AGENTS.md) and enforced by
-the axe/E2E specs. They are hard requirements, not preferences:
+This rule is the source of truth for them, and the axe/E2E specs enforce them —
+[`e2e-playwright.md`](./e2e-playwright.md) treats the list below as the specification each
+spec maps to. They are hard requirements, not preferences:
 
 - **Content stays in the DOM.** Reveal-on-focus is a visual affordance, not a data
   change. Server-rendered destination content stays crawlable and reachable by
@@ -61,6 +62,16 @@ the axe/E2E specs. They are hard requirements, not preferences:
   hardcode, and never raise it to fix a visual bug.
 - Publish scene stats to `perf-store` (world writes, inspector reads); don't add a
   second telemetry path.
+
+## Quality tiers — the world downgrades itself
+
+`detectSoftwareRenderer()` probes the renderer before the canvas chunk mounts and
+`WorldQualityGuard` watches frame times after; together they walk `full → reduced →
+frozen`, **one way only**. CI runs on SwiftShader, so it starts at `frozen`
+(`frameloop="demand"`, one painted frame). The current tier is published on the world
+root as **`data-world-quality`** — read it first when the scene behaves differently
+than expected. Never work around a slow frame by capping quality at the call site or
+forcing an interaction; check the tier.
 
 ## Canvas-2D screens
 

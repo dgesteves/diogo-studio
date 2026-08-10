@@ -1,9 +1,20 @@
 ---
 trigger: glob
-globs: app/**, src/app/**, **/app/**
+globs: src/app/**, src/seo/**
 ---
 
 # App Router — architecture, data & rendering
+
+## Metadata
+
+**Never set `openGraph.title`, `description` or `url` in `rootMetadata`.** An explicit
+value there is inherited _verbatim_ by every child route instead of being overridden by
+that route's own title and description — which is how all 17 pages came to ship the home
+page's social preview with `og:url` pointing at `/`. Left absent, Next derives them per
+page. `og:url` is deliberately emitted by nothing; see
+[`docs/decisions.md`](../../docs/decisions.md). This is asserted in
+`tests/e2e/seo.spec.ts`, because metadata inheritance does not exist until a route is
+rendered — no unit test can see it.
 
 ## Server vs Client Components
 

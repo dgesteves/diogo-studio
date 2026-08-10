@@ -25,6 +25,10 @@ description: Apply when working on performance, bundle size, Core Web Vitals (LC
 - Watch import cost: prefer tree-shakeable, modern packages; never import a
   whole library for one helper; avoid duplicate dependencies that do the same
   job.
+- **Client islands import `features/world/constants/station-index.ts`, never
+  `destinations.ts`.** The latter carries every page's prose via `blocks`, so importing
+  it from a `"use client"` module ships all of it to the browser for nothing. The index
+  holds slug/href/label/sectors only, and `station-index.test.ts` asserts the two agree.
 
 ## Avoid waterfalls, stream the rest
 

@@ -1,6 +1,6 @@
 ---
 trigger: glob
-globs: **/*.ts, **/*.tsx, **/*.mts, **/*.cts
+globs: **/*.ts, **/*.tsx, **/*.mts
 ---
 
 # TypeScript
