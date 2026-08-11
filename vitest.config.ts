@@ -87,15 +87,47 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html", "lcov"],
       include: ["src/**/*.{ts,tsx}"],
-      exclude: [
-        "src/**/*.d.ts",
-        "src/**/*.{test,spec}.{ts,tsx}",
-        "src/**/__tests__/**",
-        "src/app/**/layout.tsx",
-        "src/app/**/loading.tsx",
-        "src/app/**/error.tsx",
-        "src/app/**/not-found.tsx",
-      ],
+      /**
+       * Two entries only, and both are "there is no executable code here" rather than "this is
+       * hard to test". Every other candidate was tried and turned out to be reachable: the 17
+       * route pages render in `pages.test.tsx`, satori rasterizes real PNGs in `icons.test.tsx`,
+       * the error boundaries and the 404 render in `chrome.dom.test.tsx`, and `root-metadata.ts`
+       * is plain data. Type-only modules need no entry at all — they compile to nothing, so v8
+       * never sees them.
+       *
+       * Before adding one, prove the file cannot be asserted rather than that it is
+       * inconvenient, and check whether what cannot run headlessly is the file or a dependency
+       * of it: stubbing the dependency is how `world-postprocessing.tsx` stayed measured.
+       */
+      exclude: ["src/**/*.d.ts", "src/**/*.{test,spec}.{ts,tsx}"],
+
+      /**
+       * A ratchet, set from a measured run rather than from an aspiration: 98.96 / 93.81 /
+       * 98.82 / 99.73 on 2026-08-11, over the whole of `src/` bar type declarations and the
+       * specs themselves. Floored to whole numbers so a rounding difference is not a build
+       * failure, and raised only after re-measuring.
+       *
+       * **Deliberately global rather than per-directory.** Per-layer thresholds were the
+       * original plan and are the wrong instrument *right now*: `docs/restructure-plan.md`
+       * moves or merges nearly every directory in `src/`, and a threshold keyed on a path that
+       * is about to change either breaks the build during a pure move or silently stops
+       * applying. The two rows below are the exceptions because their locations are fixed by
+       * what they are — the HTTP surface and the abuse limiter — and they are the highest-risk
+       * files in the repo.
+       *
+       * Branches sit five points under statements because a handful of `noUncheckedIndexedAccess`
+       * guards and `?? fallback`s cannot be reached without testing TypeScript instead of the
+       * product. Read the branch column first when raising these: statements can be bought by
+       * mounting things, conditions cannot.
+       */
+      thresholds: {
+        statements: 98,
+        branches: 93,
+        functions: 98,
+        lines: 99,
+        "src/app/api/**": { statements: 100, functions: 100, lines: 100, branches: 93 },
+        "src/rate-limit.ts": { statements: 100, functions: 100, lines: 100, branches: 100 },
+      },
     },
   },
 });

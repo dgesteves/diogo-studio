@@ -6,6 +6,57 @@ not for every change.
 
 ---
 
+## 2026-08-11 — The coverage exclusion list is two entries, and that was a correction
+
+Phase 7 was first drafted with a nine-entry exclusion list: the 17 route pages, both layouts, the
+satori icons, `global-error`, `loading`, `error`, `not-found`, `root-metadata.ts`,
+`telemetry/constants.ts` and four type-only modules. Each had a reason that sounded like "this
+cannot be asserted here" and mostly meant "this is inconvenient to assert here". **It was
+reviewed and reversed before it was committed**, which is why the history shows only the
+two-entry list — this entry is the record of the wrong turn.
+
+Two measurements settled it. First, removing every exclusion moved coverage from 98.92% to
+97.25% — the list was worth 1.7 points, so it was neither hiding a problem nor buying much.
+Second, and decisive: **everything on it turned out to be reachable.** A route page renders
+server-side in 20 ms; satori rasterizes a real 32×32 PNG in 45 ms and the bytes can be checked
+against the declared `size`; the error boundaries, the spinner and the 404 render under Testing
+Library; `root-metadata.ts` is plain data; both layouts render as the shell a visitor actually
+gets. The claim in the deleted plan that these were E2E-only was inherited, not tested.
+
+Two dependencies genuinely do not run headlessly, and stubbing them at the library boundary is
+what made the files above measurable rather than excluded: `next/font/google` is a build-time
+transform whose loader is not a function outside a Next build, and `@vercel/analytics` injects
+its script on mount so it leaves nothing in server-rendered markup. That is the general rule
+now written into the config: **check whether what cannot run is the file or a dependency of it.**
+
+What is left is `src/**/*.d.ts` and the specs themselves — no executable code in either. Type-only
+modules need no entry at all: they compile to nothing, so v8 never reports them.
+
+The residue is honest rather than excluded. `layout.tsx` and the boundaries are covered but E2E
+still owns what only a real request proves — metadata _inheritance_, which does not exist until a
+route renders, and the icons served through the hashed href the page emits. And two mutations in
+this batch survived as genuine equivalent mutants: changing a favicon's declared _and_ rendered
+size together is not a defect, and only the mismatch is.
+
+## 2026-08-11 — Coverage thresholds are global, not per-directory
+
+`testing-plan.md` §5.3 argued for per-directory thresholds, and it was right that 90% on pure
+math and 90% on a lighting rig mean different things. It is still the wrong instrument to
+install **now**: `restructure-plan.md` moves or merges nearly every directory in `src/`, so a
+threshold keyed on `src/features/studio/components/scene/**` either fails the build during a
+pure `git mv` or silently stops applying to the files it was written for. That is the same
+class of mistake as keying the jsdom/node split on a directory, which §5.4 already rejected.
+
+So: global floors on all four metrics, set from a measured run and floored to whole numbers,
+plus exactly two path-keyed rows — `src/app/api/**` and `src/rate-limit.ts` at 100%. Those two
+are exempt because their locations are fixed by what they are (the HTTP surface and the abuse
+limiter) and because they are the highest-risk files in the repo.
+
+**Revisit per-layer thresholds after the restructure lands**, when the paths are stable. Until
+then the branch column is the honest signal: it sits five points under statements because of
+`noUncheckedIndexedAccess` guards and `?? fallback`s that cannot be reached without testing
+TypeScript instead of the product.
+
 ## 2026-08-11 — `features/audio` is tested, not excluded: it never used Web Audio
 
 The plan listed audio as "Web Audio, no jsdom equivalent" and no phase ever claimed it, which

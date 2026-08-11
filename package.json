@@ -35,7 +35,7 @@
     "knip": "knip",
     "size": "size-limit",
     "size:why": "size-limit --why",
-    "validate": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm test && pnpm knip",
+    "validate": "pnpm lint && pnpm typecheck && pnpm format:check && pnpm test:coverage && pnpm knip",
     "prepare": "husky"
   },
   "dependencies": {
