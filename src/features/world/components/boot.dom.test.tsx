@@ -20,6 +20,7 @@ import {
   BOOT_READY_LABEL,
   BOOT_STEPS,
 } from "../constants/boot";
+import { BootProgressReporter } from "./boot-progress-reporter";
 import { BootSequence } from "./boot-sequence";
 import { BootSplash } from "./boot-splash";
 import { BootThemeToggle } from "./boot-theme-toggle";
@@ -27,7 +28,11 @@ import { BootThemeToggle } from "./boot-theme-toggle";
 const audio = vi.hoisted(() => ({ enable: vi.fn() }));
 const theme = vi.hoisted(() => ({ resolved: "light", setTheme: vi.fn() }));
 
+// drei's loader store, which is the only thing `BootProgressReporter` reads.
+const loader = vi.hoisted(() => ({ progress: 0 }));
+
 vi.mock("@/features/audio", () => ({ useAudio: () => ({ enable: audio.enable }) }));
+vi.mock("@react-three/drei", () => ({ useProgress: () => ({ progress: loader.progress }) }));
 vi.mock("next-themes", () => ({
   useTheme: () => ({ resolvedTheme: theme.resolved, setTheme: theme.setTheme }),
 }));
@@ -324,6 +329,49 @@ describe("Boot gate: the preferences it offers", () => {
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
     expect(hasBootedThisSession()).toBe(true);
     expect(audio.enable).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * The number on the progress bar comes from inside the canvas: drei's loader publishes it,
+ * `BootProgressReporter` copies it into the boot store, and the gate reads the store. Nothing
+ * else connects the two, so with the reporter missing the bar would sit at 0% until the world
+ * reported ready and then jump straight to 100%.
+ */
+describe("Boot progress", () => {
+  function renderWithLoader() {
+    return render(
+      <>
+        <BootProgressReporter />
+        <BootSequence />
+      </>,
+    );
+  }
+
+  it("shows the loader's asset progress to the visitor", () => {
+    loader.progress = 37.4;
+
+    renderWithLoader();
+
+    expect(screen.getByText("37%")).toBeInTheDocument();
+  });
+
+  it("follows the loader as the assets arrive", () => {
+    loader.progress = 20;
+    const { rerender } = renderWithLoader();
+    expect(screen.getByText("20%")).toBeInTheDocument();
+
+    loader.progress = 80;
+    act(() => {
+      rerender(
+        <>
+          <BootProgressReporter />
+          <BootSequence />
+        </>,
+      );
+    });
+
+    expect(screen.getByText("80%")).toBeInTheDocument();
   });
 });
 

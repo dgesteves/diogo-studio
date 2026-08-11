@@ -16,3 +16,6 @@ if (typeof console !== "undefined" && !globalsWithFlag.__r3fClockDeprecationSile
   };
   /* eslint-enable no-console */
 }
+
+// A side-effect module: the empty export is what makes it one to TypeScript.
+export {};

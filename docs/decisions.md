@@ -6,6 +6,40 @@ not for every change.
 
 ---
 
+## 2026-08-11 — Three RTTR traps the test harness owns rather than each spec
+
+`tests/r3f.tsx` grew three non-obvious pieces during testing-plan Phase 6. Each one produced a
+test that passed while asserting nothing, so they are recorded here rather than left as
+comments.
+
+**`@react-three/postprocessing` has to be inlined alongside fiber.** `vitest.config.ts` already
+prefers fiber's ESM build and inlines `fiber`/`drei`/`test-renderer` (see the 2026-08-08 entry
+on two `Mesh` identities). Postprocessing was not on that list, so it resolved fiber's **CJS**
+build and its `useThree` looked for the root in a second React context — failing with "R3F:
+Hooks can only be used within the Canvas component!" from inside a component that plainly is,
+preceded by three's "Multiple instances of Three.js" warning. Any package that calls a fiber
+hook belongs on that list.
+
+**`Box3.setFromObject` and `getWorldPosition` do not refresh ancestors.** Both call
+`updateWorldMatrix(false, true)` — descendants, not parents — so a mesh three groups deep
+reports its position as though every group above it sat at the origin. A lounge spec asserting
+the sofa sits on the rug passed on exactly the number it expected, in the wrong space. The
+harness now calls `scene.updateMatrixWorld(true)` on every read.
+
+**A captured `RootState` goes stale.** R3F replaces the state object on every `set()`, and
+`<PerspectiveCamera makeDefault>` is a `set()`. A probe that captured `useThree()` at mount
+therefore kept the renderer's default 75° camera while the scene drove another one, so a camera
+assertion read a camera nothing was moving. The probe now reports the _store_ and `state` is a
+getter over `store.getState()`.
+
+Two smaller things that are stubs rather than traps, both on the mock renderer and both stubbed
+through the new `prepare` hook: `compileAsync` is real three code that polls a driver which does
+not exist headlessly and leaves a timer running past the test, and `ContactShadows` renders to
+an offscreen target every frame that a mock context has no framebuffer for. `prepare` exists
+because three defines `compileAsync` as an own property of each renderer — there is no prototype
+to spy on — and the components that call it do so from a mount-time effect, so the renderer has
+to exist before its children mount.
+
 ## 2026-08-11 — Phase 5's leak: `useDisposable`, and why `useMemo` was the wrong holder
 
 Testing-plan Phase 5 went looking for draw-routine transcripts and found that **`src/`

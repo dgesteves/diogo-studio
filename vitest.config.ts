@@ -63,7 +63,16 @@ export default defineConfig({
           css: true,
           server: {
             deps: {
-              inline: ["@react-three/fiber", "@react-three/drei", "@react-three/test-renderer"],
+              // Every package that calls a fiber hook has to be inlined alongside fiber
+              // itself, or it resolves fiber's CJS build and its `useThree` looks for the
+              // root in a second React context: "Hooks can only be used within the Canvas
+              // component!" from inside a component that plainly is.
+              inline: [
+                "@react-three/fiber",
+                "@react-three/drei",
+                "@react-three/postprocessing",
+                "@react-three/test-renderer",
+              ],
             },
           },
           // A spec's own afterEach must run before the global one, so anything it mounted

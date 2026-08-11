@@ -1,10 +1,18 @@
-import ReactThreeTestRenderer from "@react-three/test-renderer";
-import { Color, type Light, type Mesh, type Object3D } from "three";
+import { act } from "@testing-library/react";
+import { Color } from "three";
 import { afterEach, describe, expect, it } from "vitest";
+import {
+  geometryParams,
+  materialOf,
+  renderScene,
+  unmountScenes,
+  type SceneQuery,
+} from "@tests/r3f";
 import { brandColors } from "@/config/brand";
 import { worldPalettes } from "@/config/world-theme";
 import { ROOM } from "@/constants/room";
 import { setWorldMode, type WorldMode } from "@/stores/world-theme-store";
+import { StatusLed } from "./status-led";
 import { StudioScene } from "./studio-scene";
 
 /**
@@ -14,66 +22,25 @@ import { StudioScene } from "./studio-scene";
  */
 const SCENE_MESH_COUNT = 228;
 
-type PlaneParams = { width: number; height: number };
+afterEach(unmountScenes);
 
-type SceneQuery = {
-  meshes: Mesh[];
-  lightsOfType: (type: string) => Light[];
-  planeParams: () => PlaneParams[];
-};
-
-const renderers: { unmount: () => Promise<void> }[] = [];
-
-function isMesh(object: Object3D): object is Mesh {
-  return (object as Mesh).isMesh === true;
+async function studio(mode: WorldMode = "night"): Promise<SceneQuery> {
+  // Set before mounting: changing it under a live scene would notify the store's
+  // subscribers as an unwrapped act() update.
+  await act(async () => setWorldMode(mode));
+  return renderScene(<StudioScene />);
 }
-
-function isLight(object: Object3D): object is Light {
-  return (object as Light).isLight === true;
-}
-
-function readPlaneParams(mesh: Mesh): PlaneParams | undefined {
-  const params: unknown = (mesh.geometry as { parameters?: unknown }).parameters;
-  if (typeof params !== "object" || params === null) return undefined;
-  const { width, height } = params as Partial<PlaneParams>;
-  return typeof width === "number" && typeof height === "number" ? { width, height } : undefined;
-}
-
-async function renderScene(mode: WorldMode = "night"): Promise<SceneQuery> {
-  // Unmount first: a still-subscribed renderer would receive the store change as an
-  // unwrapped act() update.
-  await Promise.all(renderers.splice(0).map((previous) => previous.unmount()));
-  setWorldMode(mode);
-
-  const renderer = await ReactThreeTestRenderer.create(<StudioScene />);
-  renderers.push(renderer);
-
-  const objects: Object3D[] = [];
-  renderer.scene.instance.traverse((object) => objects.push(object));
-  const meshes = objects.filter(isMesh);
-
-  return {
-    meshes,
-    lightsOfType: (type) => objects.filter(isLight).filter((light) => light.type === type),
-    planeParams: () =>
-      meshes.map(readPlaneParams).filter((params): params is PlaneParams => !!params),
-  };
-}
-
-afterEach(async () => {
-  await Promise.all(renderers.splice(0).map((renderer) => renderer.unmount()));
-});
 
 describe("StudioScene", () => {
   it("mounts the whole scene graph headlessly", async () => {
-    const scene = await renderScene();
+    const scene = await studio();
 
     expect(scene.meshes).toHaveLength(SCENE_MESH_COUNT);
     expect(scene.meshes.every((mesh) => mesh.geometry.type.length > 0)).toBe(true);
   });
 
   it("lights the room from the shared brand tokens", async () => {
-    const scene = await renderScene();
+    const scene = await studio();
 
     expect(scene.lightsOfType("AmbientLight")).toHaveLength(1);
     expect(scene.lightsOfType("HemisphereLight")).toHaveLength(1);
@@ -85,12 +52,13 @@ describe("StudioScene", () => {
   });
 
   it("swaps the light rig with the world palette instead of remounting the scene", async () => {
-    const night = await renderScene();
+    const night = await studio();
     expect(night.lightsOfType("AmbientLight")[0]?.intensity).toBeCloseTo(
       worldPalettes.night.ambientIntensity,
     );
 
-    const day = await renderScene("day");
+    await unmountScenes();
+    const day = await studio("day");
 
     expect(day.lightsOfType("AmbientLight")[0]?.intensity).toBeCloseTo(
       worldPalettes.day.ambientIntensity,
@@ -99,11 +67,80 @@ describe("StudioScene", () => {
   });
 
   it("sizes the room shell from the shared ROOM constants", async () => {
-    const scene = await renderScene();
+    const scene = await studio();
 
-    const walls = scene.planeParams().filter((params) => params.width === ROOM.wallSpan);
+    const walls = scene
+      .meshesWith("PlaneGeometry")
+      .map(geometryParams)
+      .filter((params) => params.width === ROOM.wallSpan);
 
     expect(walls.length).toBeGreaterThan(0);
     expect(walls.some((params) => params.height === ROOM.wallHeight)).toBe(true);
+  });
+});
+
+/**
+ * The blinking lights on the server rack and the desk hardware — the only thing in the room
+ * that moves on its own when nobody is interacting with it. Each is a core sphere and an
+ * additive halo, and the halo has to follow the core: a pulse where only the sphere changes
+ * reads as a flicker rather than a light.
+ */
+describe("StatusLed", () => {
+  const SPEED = 2;
+  /**
+   * The wave is `sin(t · speed + phase)` and `advance` accumulates the clock, so these are the
+   * deltas that walk it to its first peak, then from the trough to the peak after it.
+   */
+  const PEAK = Math.PI / 2 / SPEED;
+  const TROUGH = (3 * Math.PI) / 2 / SPEED;
+  const TROUGH_TO_PEAK = Math.PI / SPEED;
+
+  async function led(props: Partial<Parameters<typeof StatusLed>[0]> = {}) {
+    const scene = await renderScene(
+      <StatusLed position={[0, 0, 0]} color={brandColors.statusOk} radius={0.01} {...props} />,
+    );
+    const opacities = (): { core: number; halo: number } => {
+      const [core, halo] = scene.refresh().meshes.map((mesh) => materialOf(mesh).opacity);
+      return { core: core!, halo: halo! };
+    };
+    return { scene, opacities };
+  }
+
+  it("pulses between an idle floor and full brightness", async () => {
+    const { scene, opacities } = await led({ blinkSpeed: SPEED });
+
+    await scene.advance(1, TROUGH);
+    const dim = opacities();
+
+    await scene.advance(1, TROUGH_TO_PEAK);
+    const bright = opacities();
+
+    expect(bright.core).toBeCloseTo(1);
+    expect(dim.core).toBeGreaterThan(0);
+    expect(dim.core).toBeLessThan(bright.core);
+    // The halo is a fixed fraction of the core at both ends, which is what keeps it a glow.
+    expect(dim.halo / dim.core).toBeCloseTo(bright.halo / bright.core);
+  });
+
+  it("holds still when it is given no blink speed", async () => {
+    const { scene, opacities } = await led();
+    const resting = opacities();
+
+    await scene.advance(4, PEAK);
+
+    expect(opacities()).toEqual(resting);
+  });
+
+  /** Without the phase offset every LED in the rack blinks in unison, which reads as one lamp. */
+  it("offsets the blink by its phase", async () => {
+    const { scene, opacities } = await led({ blinkSpeed: SPEED });
+    await scene.advance(1, PEAK);
+    const unshifted = opacities().core;
+
+    await unmountScenes();
+    const shifted = await led({ blinkSpeed: SPEED, phase: Math.PI / 2 });
+    await shifted.scene.advance(1, PEAK);
+
+    expect(shifted.opacities().core).not.toBeCloseTo(unshifted);
   });
 });
