@@ -4,7 +4,7 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phases 0–4 are complete except for the visual baselines; Phases 5–7 are not
+Status: **Phases 0–5 are complete except for the visual baselines; Phases 6–7 are not
 started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
 `mulberry32` promoted to `src/utils/mulberry32.ts`, **the existing E2E suite made green**
 (it was 16/18 — the `/work` spec asserted content that no longer exists, and the ⌘K
@@ -35,10 +35,15 @@ that could not fail**, plus one guard that could not run.
 inspector overlay, the command deck, the content blocks, the boot gate's preferences, the
 shared atoms — and the suite is **50 files / 462 tests**. It found **one accessibility
 defect, one security hardening and two pieces of code that could not run**, plus **four of
-its own tests that could not fail**. **Phase 5 (canvas draw routines) is the next thing to
-work on.**
+its own tests that could not fail**.
 
-Baseline: re-measured 2026-08-10 on the current tree, after Phase 4.
+**Phase 5 has now landed**: every canvas draw routine, texture factory and layout generator the
+plan named is covered, the suite is **59 files / 589 tests**, and repo-wide coverage is **74.34%
+/ 67.94%**. It found **one production defect**, and a broad one — `src/` contained no `dispose()`
+call at all, so every texture and geometry the scene builds by hand leaked whenever a visitor
+turned motion off. **Phase 6 (the 3D scene graph) is the next thing to work on.**
+
+Baseline: re-measured 2026-08-11 on the current tree, after Phase 5.
 `pnpm validate` passes and `pnpm e2e:ci` is **210/210 at `workers: 1`**. Every number below
 is measured; where an earlier draft's figure has been superseded it is marked, because this
 plan's whole argument is that unverified numbers should not govern work — and this table has
@@ -79,11 +84,11 @@ which files should never be chased.
 
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
-| Non-test source files           | **301** (157 `.tsx`, 144 `.ts`)                        |
-| Unit test files / tests         | **50 / 462**                                           |
+| Non-test source files           | **302** (157 `.tsx`, 145 `.ts`)                        |
+| Unit test files / tests         | **59 / 589**                                           |
 | E2E specs / tests               | **14 / 105** → **210 runs** across two motion projects |
-| Statements / branches           | **51.03% / 58.70%**                                    |
-| Functions / lines               | **66.79% / 51.30%**                                    |
+| Statements / branches           | **74.34% / 67.94%**                                    |
+| Functions / lines               | **74.67% / 74.79%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | **17 of 17** — status, `h1`, metadata, axe, content    |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
@@ -115,6 +120,13 @@ Branch coverage is now _ahead_ of statement coverage repo-wide, and both numbers
 thing about what is left: the residue is the 3D layer, where mounting is cheap and asserting
 is not (§1). Every remaining low row is Phase 5 or 6.
 
+**Phase 5 inverts the shape on purpose, and that is not a regression either: statements 51.03% →
+74.34%, branches 58.70% → 67.94%.** Draw routines are long and nearly straight-line, so a
+transcript assertion buys a great many statements per branch — the opposite of Phase 3's trade
+and equally honest. Read it against what the phase asserted rather than against the column: 127
+tests, 29 mutations, one real leak. The rows still short of their §5.3 target are named in Phase
+5, and each is either a guard that cannot run or Phase 6's.
+
 ### Coverage by layer today
 
 These are v8's own per-directory rows, not aggregates — the previous version of this
@@ -142,17 +154,20 @@ table invented a few, and two of them were wrong (see below).
 | **`home/components`**     | **100%**  | **100%**  | was 87.5/100 — Phase 4 closed the CTA's own action                                |
 | **`src/stores`**          | **97.7%** | **90.7%** | was 60.3/44.4 — Phase 3; the residue is SSR guards, explained below               |
 | **`src/providers`**       | **97.2%** | **90.9%** | was 30.6/27.3 — Phase 3                                                           |
-| **`studio/…/scene`**      | **84.7%** | **53.1%** | the RTTR spike — 40 files, 4 tests. Note the gap between the two columns.         |
+| **`studio/…/scene`**      | **98.9%** | **77.6%** | was 84.7/53.1 — Phase 5 took the texture factories and the keyboard legends       |
 | `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                        |
 | `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature     |
-| `world/utils`             | 49.7%     | 35.5%     | Phase 5                                                                           |
+| `world/utils`             | 49.7%     | 35.5%     | `framing`/`orbit`/`explore` are 100%; the animation modules left are Phase 6      |
 | `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`       |
 | **`world/components`**    | **29.5%** | **38.7%** | was 22.3/27.1; boot and the content blocks are **100%**, the rest is the 3D layer |
-| `studio/…/screens`        | 23.8%     | 8.3%      | incidental — the spike mounts them, nothing asserts them                          |
-| **`about/components`**    | **23.9%** | **20.6%** | was 0/0; the frame and its labelling are 100%, the engine is Phase 5              |
+| **`studio/…/screens`**    | **88.7%** | **52.8%** | was 23.8/8.3 — Phase 5; the residue is the R3F wrapper around each draw           |
+| **`about/components`**    | **95.0%** | **75.0%** | was 23.9/20.6 — Phase 5 took the portrait engine and its sampler                  |
 | `audio/components`        | 6.7%      | 0%        | Web Audio, no jsdom equivalent — not Phase 4's                                    |
 | `world/hooks`             | 4.9%      | 0%        | the input reducers — Phase 6                                                      |
-| `world/…/{lounge,props}`  | **0%**    | **0%**    | draw routines — Phase 5                                                           |
+| **`world/…/props`**       | **78.6%** | **56.0%** | was 0/0 — Phase 5, the wall screens and the generated bookshelf                   |
+| **`world/…/lounge`**      | **55.4%** | **87.5%** | was 0/0 — Phase 5 took the TV; the furniture around it is Phase 6                 |
+| **`world/…/tv-channels`** | **100%**  | **91.7%** | was 0/0 — Phase 5                                                                 |
+| **`src/hooks`**           | **100%**  | **100%**  | held at 100% through Phase 5's new `use-disposable`                               |
 | `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                                |
 | `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7          |
 
@@ -172,10 +187,11 @@ Four cautions when reading this table:
   along, before Phase 1 touched anything. `command-menu` was recorded as a single 8.2%/1.3%
   row that v8 never emits — it is four directories with very different numbers. Copy the rows
   the tool prints; do not aggregate them by hand.
-- **`studio/…/screens` is raised _incidentally_** by mounting the scene — a by-product, not
-  evidence, and exactly the "tests that mount components and assert nothing" effect §1 warns
-  about. `components/ui` used to be in the same position; it is now asserted directly, which
-  is why its branch column moved 33 points without its statement column moving at all.
+- **`studio/…/screens` used to be raised _incidentally_** by mounting the scene — a by-product,
+  not evidence, and exactly the "tests that mount components and assert nothing" effect §1 warns
+  about. Phase 5 replaced that with transcript assertions on the four draw routines, so what is
+  left in the row is the R3F wrapper around each. `components/ui` made the same move in Phase 4,
+  which is why its branch column moved 33 points without its statement column moving at all.
 - **`world/components` still reads low because it is mostly the 3D layer.** Boot, the content
   blocks and the destination frame inside it are at 100%; the ~30 canvas and hotspot files
   supply the rest of the denominator and belong to Phase 6. A directory average is not a
@@ -795,21 +811,63 @@ jsdom traps this phase met — `vi.unstubAllGlobals()` dropping the setup file's
 and a real `location` assignment logging "Not implemented" — are handled in the specs rather
 than tolerated.
 
-### Phase 5 — canvas draw routines and layout math (~31 files → 95%)
+### Phase 5 — canvas draw routines and layout math — ✅ complete
 
-Recording-context snapshots for all 16 draw modules and the texture factories;
-value assertions for the layout/geometry generators (`bookshelf-layout`,
-`city-layout`, `keyboard-layout`, `desk-hardware-layout`, `wall-screen-layout`,
-`mouse-shell`/`mouse-geometry`, `radar-layout`, `framing`, `orbit`, `explore`).
-Deterministic given Phase 0's seeding fix.
+Landed 2026-08-11 as **9 new spec files and 127 new tests**, taking the suite from 50/462 to
+**59 files / 589 tests**. `pnpm validate` green. `tests/recording-ctx.ts` is the helper Phase 0
+deferred, written here because this phase gave it its callers.
 
-**Start with the pixelated portrait**, which Phase 4 left at the door:
-`pixelated-portrait-{engine,sampler,frame}.ts` are 0–5%, they are the only draw cluster with
-a spec already beside them (`pixelated-portrait.dom.test.tsx` owns the frame and its
-labelling), and the engine has two properties worth asserting before any snapshot exists —
-it no-ops when there is no 2D context, and it binds no pointer listeners when
-`interactive` is false, which is how reduced motion reaches it. `tests/recording-ctx.ts` is
-this phase's helper to write (§Phase 0), and its second caller should be what triggers it.
+| Target                       | Before      | **After**           |
+| ---------------------------- | ----------- | ------------------- |
+| `studio/…/scene`             | 84.7/53.1   | **98.9% / 77.6%**   |
+| `studio/…/screens`           | 23.8/8.3    | **88.7% / 52.8%**   |
+| `about/components`           | 23.9/20.6   | **95.0% / 75.0%**   |
+| `world/…/props`              | 0/0         | **78.6% / 56.0%**   |
+| `world/…/lounge`             | 0/0         | **55.4% / 87.5%**   |
+| `world/…/lounge-tv-channels` | 0/0         | **100% / 91.7%**    |
+| `src/hooks`                  | 100/100     | **100% / 100%**     |
+| Repo-wide                    | 51.03/58.70 | **74.34% / 67.94%** |
+
+- ✅ **The pixelated portrait**, which Phase 4 left at the door — the engine's two properties
+  worth asserting before any snapshot exists: it no-ops with no 2D context, and it binds no
+  pointer listeners when `interactive` is false, which is how reduced motion reaches it.
+- ✅ **The desk screens and the wall screens** — `screens/screen-draw.test.ts` and
+  `props/screen-draw.test.ts`, one spec per cluster. What a given input paints, and that the
+  inputs that move (a caret, a frame rate, a clock, a stroke, a progress) each change it.
+- ✅ **`lounge-tv.test.ts`** — every frame is a pure function of one integer, so channel
+  rotation, the seeded tune-in static and the progress bar are all assertable.
+- ✅ **`props/bookshelf.test.ts`** — the generated shelf, asserted as invariants rather than a
+  golden: nothing hangs off either end, no two spines overlap, heights clamp under the plank
+  above, the instance keys are unique, and each row is its own arrangement.
+- ✅ **`scene/textures.dom.test.ts`** — the four texture factories and the keyboard legends,
+  through `stubCanvasContexts`. Windows inside the facade and in the lit palette, gradient
+  stops in order, stars above the horizon, the glow reaching zero before its quad edge, and
+  every legend centered on its keycap and shrunk to fit.
+- ✅ **`use-disposable.dom.test.ts`** and **`lounge-tv-texture.dom.test.ts`** — the hook the
+  phase's defect produced, and the television's 110 ms clock.
+
+**Verified by mutation: 29 mutations across 7 source files, 27 killed on the first pass.** Both
+survivors were fixed rather than accepted: a redundant `Array.isArray` branch that `Object.values`
+already covered was **deleted** (the Phase 3/4 rule, a third time), and the `typeof … ===
+"function"` guard on the disposable walk had nothing exercising it until a `{ dispose: 3 }` was
+added to the mixed fixture.
+
+**What it found in the product is one defect, and it is the phase's real return:** `src/`
+contained **no `dispose()` call at all**, while `three-r3f-world.md` requires imperatively-built
+textures and geometries to be released on unmount. Ten textures and seven geometries across six
+components leaked every time the canvas unmounted — which a visitor causes by turning motion off
+mid-session, since `world-stage.tsx` gates the whole scene on it. Fixed with
+`src/hooks/use-disposable.ts`; see [`decisions.md`](./decisions.md) for why it holds the resource
+in `useState` rather than `useMemo`.
+
+**Two residues are deliberate, not unfinished.** The five wall-screen draws sit at 50% branches
+and `keyboard-layout`, `radar-layout` and `mouse-trim-geometry` near it, because what is left in
+each is a `noUncheckedIndexedAccess` guard or a `?? fallback` that indexing inside the array's own
+length cannot reach — the §5.3 rule about `src/ai` applies unchanged, and reaching them tests
+TypeScript rather than the product. And `world/…/lounge` reads 55% because the remaining files are
+the R3F furniture, which is Phase 6.
+
+**Phase 6 (the 3D scene graph) is the next thing to work on.**
 
 ### Phase 6 — the 3D scene graph (~79 files → 75%)
 
