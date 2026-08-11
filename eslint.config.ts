@@ -9,6 +9,7 @@ import prettier from "eslint-config-prettier/flat";
 const FEATURES = ["about", "audio", "command-menu", "home", "inspector", "studio", "world"];
 
 type ImportPattern = { group: string[]; message: string };
+type ImportPath = { name: string; importNames: string[]; message: string };
 
 const DEEP_FEATURE_IMPORT: ImportPattern = {
   group: ["@/features/*/**"],
@@ -21,11 +22,25 @@ const ROUTING_IS_A_LEAF: ImportPattern = {
   message: "app/ is the routing layer and a leaf — nothing may import from it.",
 };
 
+// `fireEvent` dispatches a single synthetic event, where a real interaction is a sequence
+// (pointerdown → mousedown → focus → click), so it passes against UI a user could not
+// operate. `user-event` is the default, through `@tests/interactions` when the handler
+// writes to an external store. Events a user cannot perform — `error` on an image, a media
+// or animation event — are the honest exception: take them with a one-line reason.
+// Unrelated to `@react-three/test-renderer`'s `renderer.fireEvent`, which is the only way to
+// reach a mesh, since R3F raycasts its events and no mesh has a DOM node.
+const PREFER_USER_EVENT: ImportPath = {
+  name: "@testing-library/react",
+  importNames: ["fireEvent"],
+  message:
+    "Prefer user-event (via @tests/interactions for store writes) — fireEvent fires one event, not the sequence a real interaction produces.",
+};
+
 // Rule entries only get their tuple type from context, so anything built outside a
 // defineConfig literal needs its own annotation.
 const restrictedImports = (...patterns: ImportPattern[]): Linter.RuleEntry => [
   "warn",
-  { patterns },
+  { patterns, paths: [PREFER_USER_EVENT] },
 ];
 
 // eslint-config-next's `next` entry globs every file in the repo and brings the react,
