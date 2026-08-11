@@ -6,6 +6,27 @@ not for every change.
 
 ---
 
+## 2026-08-11 — `features/audio` is tested, not excluded: it never used Web Audio
+
+The plan listed audio as "Web Audio, no jsdom equivalent" and no phase ever claimed it, which
+left 239 lines at 8.8% coverage. **The premise was false.** There is no `AudioContext`
+anywhere in `src/`: the engine is four `HTMLAudioElement`s and a volume ramp on
+`setInterval`, and jsdom provides both. Only `play()` and `pause()` are unimplemented, and
+stubbing those two prototype methods also removes jsdom's "Not implemented" noise from the run.
+
+It is now at 100% statements and branches, and the branches were worth having, because they are
+all cases where sound must **not** happen: a browser that blocks autoplay (`play()` rejects, and
+fading up anyway would leave the volume set on a paused element so the next legitimate start is
+silent), a visitor who asked for reduced motion, a returning visitor who must wait for a gesture,
+and storage the browser refuses.
+
+One finding worth keeping for any effect-heavy spec here: **the React Compiler decides what is
+observable.** `WorldAudio`'s two "did it actually change" guards looked untestable — the effects
+never re-ran on an ordinary re-render, because the compiler memoizes the context value and
+`play` keeps its identity. The one thing that moves it is the `enabled` flag, so toggling sound
+off and on is the seam that proves those guards. Three mutations survived before this was
+understood; a spec that mounts and re-renders is not enough here.
+
 ## 2026-08-11 — `WebGLContextGuard` deleted: three.js already prevents that default
 
 The component added a `webglcontextlost` listener to the canvas whose entire body was
