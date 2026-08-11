@@ -1,10 +1,13 @@
 ---
 paths:
   - "src/app/api/**"
+  - "src/agent/**"
   - "src/ai/**"
   - "src/schemas/**"
+  - "src/env.ts"
   - "src/config/env.ts"
   - "src/rate-limit.ts"
+  - "src/content/pages/**"
   - "next.config.ts"
   - "instrumentation*.ts"
 ---

@@ -1,5 +1,6 @@
 ---
 paths:
+  - "src/world/**"
   - "src/features/world/**"
   - "src/features/studio/**"
   - "src/components/r3f/**"

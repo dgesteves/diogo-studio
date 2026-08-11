@@ -1,317 +1,462 @@
 # Architecture
 
-What the codebase **is** today. The code wins; where they disagree this file is
-stale and should be corrected.
+**This file is normative.** It describes the architecture this codebase is being built
+toward, and it is the authority when the code disagrees — the opposite of the contract
+this file carried before 2026-08-11, when it described only what existed. That inversion
+is deliberate and recorded in [`decisions.md`](./decisions.md): the destination is the
+source of truth, not the current tree.
 
-> For anything **structural** —where a folder should be, what should merge —
-> [`restructure-plan.md`](./restructure-plan.md) supersedes this file, and
-> [`.devin/rules/project-structure.md`](../.devin/rules/project-structure.md) is
-> the rule new code follows. This file describes the current tree; that rule
-> describes the target. They differ on purpose, and the plan closes the gap.
->
-> Nothing speculative is recorded here. A folder appears below only if it exists.
+[`refactor.md`](./refactor.md) tracks how far the code has moved toward this document and
+is deleted when it arrives. Where the code and this file disagree today, the gap is a
+phase in that plan — not a licence to write new code against the old shape.
 
-## Core ideas
+---
 
-- **Layered + feature-first.** Thin routing on top, vertical feature slices in
-  the middle, shared UI and platform code at the bottom.
-- **`app/` routes only.** Pages compose; they don't implement.
-- **Infrastructure lives in named top-level folders.** Server-only modules (`ai/`,
-  `rate-limit.ts`) are poisoned with `import "server-only"`; the rest stays
-  isomorphic (client + server safe).
-- **Curated public surface per feature.** Other code imports a feature only
-  through its `index.ts`, never its internals. This is lint-enforced as a warning
-  (`no-restricted-imports`); the 11 remaining violations all reach into
-  `features/studio` and are resolved by restructure Phase 4.
-- **One direction of dependencies** (top imports down, never up):
+## 1. The product
 
-```
-app/  →  features/  →  components/ • hooks/ • providers/ • stores/
-                    →  utils/ • ai/ • seo/ • schemas/ • telemetry/  →  config/ • constants/ • types/
-```
+A one-author portfolio. Seventeen pages of authored prose. No database, no users, no auth.
+One differentiator: the primary navigation is a 3D room. One dynamic surface: an agent that
+answers questions from the same prose.
 
-`components/ui/` primitives and `utils/` helpers are leaves — they import nothing
-above them. Nothing imports from `app/`.
+Two consequences carry the whole architecture:
 
-## Stack
+1. **There is one body of content and several renderers of it.** A DOM reading surface, a
+   3D room, an agent, a sitemap, a command menu. Each derives; none authors.
+2. **The 3D room is an enhancement, never the only path to content.** A visitor with reduced
+   motion, no WebGL, a slow device, assistive tooling, or no JavaScript gets a complete
+   portfolio. The room is a domain of the product, not the owner of it.
 
-| Concern             | Choice                                                                                          |
-| ------------------- | ----------------------------------------------------------------------------------------------- |
-| Framework / runtime | Next.js 16 (App Router), React 19                                                               |
-| Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                                             |
-| Styling             | Tailwind v4, `cva` + `cn` (`clsx` + `tailwind-merge`)                                           |
-| UI primitives       | Radix UI, `cmdk`, `sonner`, `lucide-react`                                                      |
-| Content             | Typed static data + TSX bodies in each feature's `constants/`                                   |
-| 3D / motion         | `three` + React Three Fiber + drei + postprocessing, `motion`, `lenis`                          |
-| Validation          | `zod`                                                                                           |
-| AI                  | Vercel AI SDK + `@ai-sdk/openai` (RAG over a prebuilt index)                                    |
-| State (client)      | URL state first; hand-rolled external stores read via `useSyncExternalStore` (no store library) |
-| Env                 | `@t3-oss/env-nextjs` (Zod-validated) → `src/config/env.ts`                                      |
-| Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`                                         |
-| Rate limiting       | Upstash Redis + Ratelimit                                                                       |
-| Tooling             | pnpm, ESLint, Prettier, Vitest (+ RTTR for the 3D scene), Playwright + axe, knip, size-limit    |
+---
 
-`next.config.ts` enables **`reactCompiler`**, **`typedRoutes`** and
-**`cacheComponents`**. The last one makes rendering dynamic-by-default, so static
-rendering is protected by `pnpm prerender:check` (`postbuild`), which fails the build
-if any of the 19 must-be-static routes de-optimizes.
-
-## Path aliases
-
-- `@/*` → `src/*` — always use this; never deep relative imports (`../../../`).
-
-## Repository tree
+## 2. The six domains
 
 ```
-.
-├── .github/                    workflows (ci, audit, release-please) + dependabot
-├── .husky/                     git hooks (pre-commit, commit-msg)
-├── .vscode/                    shared settings + recommended extensions
-├── docs/                       architecture.md • decisions.md • restructure-plan.md
-├── public/                     static assets served as-is (images, icons, audio)
-├── scripts/                    build/maintenance scripts (tsx) — agent-index builder,
-│                               check-prerender
-├── tests/e2e/                  Playwright + axe specs (8 files / 26 tests, run in both
-│                               motion modes = 44) + fixtures.ts
-├── instrumentation.ts          server observability register() (Sentry)
-├── instrumentation-client.ts   client error + Web Vitals capture
-└── src/
-    ├── app/                    ── ROUTING LAYER ONLY ──────────────────────────
-    │   ├── (world)/            17 public pages, one folder each, + the 3D-shell layout
-    │   ├── api/                chat/route.ts • health/route.ts (both Node, dynamic)
-    │   ├── layout.tsx          root layout (fonts, providers, <html>)
-    │   ├── error.tsx • global-error.tsx • not-found.tsx • loading.tsx
-    │   ├── icon.tsx • apple-icon.tsx
-    │   └── robots.ts • sitemap.ts
-    │
-    ├── features/               ── VERTICAL SLICES ─────────────────────────────
-    │   └── about • audio • command-menu • home • inspector • studio • world
-    │       ├── components/     feature UI (server + client)
-    │       ├── hooks/ stores/ utils/ constants/   as needed
-    │       ├── types.ts
-    │       ├── *.test.tsx      colocated beside the file they test
-    │       └── index.ts        ★ curated public API — the ONLY import surface
-    │
-    ├── components/             ── SHARED UI ───────────────────────────────────
-    │   ├── ui/                 primitives: badge, brand-icons, button, kbd, status-dot
-    │   ├── r3f/                React Three Fiber infra (perf reporter, ctx guard)
-    │   └── seo/                json-ld / structured-data UI
-    │
-    │                           ── INFRASTRUCTURE (named top-level, no `lib/`) ──
-    ├── ai/                     retrieval, prompts, embeddings      (server-only)
-    ├── rate-limit.ts           shared IP rate-limiter (Upstash + fallback) (server-only)
-    ├── seo/                    metadata + structured-data builders
-    ├── schemas/                agent.ts — the zod contract for /api/chat
-    ├── utils/                  pure isomorphic helpers (cn, mulberry32)
-    ├── telemetry/              perf + web-vitals constants
-    │
-    ├── hooks/                  use-in-view • use-is-client • use-world-palette
-    ├── providers/              theme, motion, lenis, reduced-motion + composed <Providers>
-    ├── stores/                 external stores: boot, explore, perf, reduced-motion,
-    │                           web-vitals, world, world-theme
-    │
-    ├── constants/              routes.ts (URL SSOT) • patterns.ts • career.ts
-    │                           room.ts • agent-index.json (generated)
-    ├── config/                 env.ts • site.ts • navigation.ts • brand.ts • world-theme.ts
-    ├── styles/                 globals.css (design tokens live here)
-    └── types/                  agent.ts (re-export of schemas/agent)
+                    ┌───────────────────────────────────────┐
+                    │            content/                   │
+                    │   the authored record — one truth     │
+                    └───────────────────────────────────────┘
+                        ▲        ▲        ▲        ▲
+            ┌───────────┘        │        │        └───────────┐
+      ┌─────┴─────┐   ┌──────────┴──┐  ┌──┴──────────┐   ┌─────┴────────┐
+      │   site/   │   │   world/    │  │   agent/    │   │ command-menu/│
+      │ DOM pages │   │  3D room    │  │ RAG (server)│   │  ⌘K surface  │
+      └───────────┘   └──────┬──────┘  └─────────────┘   └──────────────┘
+                             │ perf signal
+                       ┌─────▼──────┐
+                       │ inspector/ │
+                       └────────────┘
 ```
 
-There is no `src/lib/`, `src/db/`, `src/auth/`, `src/email/`, `src/api/`,
-`src/proxy.ts` (nor its deprecated predecessor `src/middleware.ts`), `messages/`, or
-`components/layout/`. The site currently has
-no header, nav, or footer chrome — navigation is the 3D world plus the ⌘K menu.
+| Domain          | One-line charter                                           |
+| --------------- | ---------------------------------------------------------- |
+| `content/`      | The authored record. Every fact the product states.        |
+| `site/`         | Renders content to the DOM. Metadata, SEO, page shell.     |
+| `world/`        | Renders content as a navigable 3D room.                    |
+| `agent/`        | Retrieves over content and generates answers. Server-only. |
+| `command-menu/` | The ⌘K surface: navigate the site, ask the agent.          |
+| `inspector/`    | Developer-facing overlay for performance and Web Vitals.   |
 
-## Layer responsibilities
+There is no `features/` umbrella. Six domains at the root of `src/` are easier to hold in
+your head than six domains inside a folder that says nothing.
 
-### `app/` — routing only
+---
 
-Route segments and Next.js special files **only**. A `page.tsx` resolves params,
-sets `metadata`, and composes UI from `features/` + `components/`. Route groups
-(`(world)`) share a layout without affecting the URL. No business logic, data
-access, or shared components here. All 17 pages are synchronous Server Components.
+## 3. Domain contracts
 
-### `features/<feature>/` — vertical slices
+The five questions each domain must answer without reference to project history.
 
-Everything for one capability, colocated. Crossing a feature boundary means
-importing from its **`index.ts`** only. A feature may contain UI, hooks, stores,
-utils, constants & static data, authored content, and tests.
+### `content/`
 
-Authored content follows the same rule: a feature owns its content as typed static
-data under its own `constants/` — `features/world/constants/` holds the destination
-data (typed objects whose JSX bodies compose shared `components/`). There is no
-`content/` folder; the feature's `index.ts` exports the collection, which is how
-the command menu, sitemap, and OG images consume it.
+|                        |                                                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Owns**               | Every authored fact: page prose, the career record, the author's identity and links, the URL map, editorial grouping (sectors). |
+| **May import**         | Nothing. It is the root of the graph.                                                                                           |
+| **Must never import**  | Anything. Especially not `world/` — content does not know 3D exists.                                                            |
+| **Runtime**            | Split. `content/pages/**` is `server-only` (prose). Everything else is isomorphic and client-safe.                              |
+| **Source of truth**    | Itself. This is the only domain that may contain a fact.                                                                        |
+| **Talks to others by** | Being imported. It has no behavior, only data and types.                                                                        |
 
-Two of the seven are honestly page sections rather than capabilities (`home` is
-5 files behind a 10-line `sr-only` component; `about` is 7 behind one 13-line
-component), and `studio` is 3D content rendered inside `world`'s `<Canvas>` rather
-than an independent slice. Restructure Phases 4 and 7 address both.
+The client/server split inside this domain is load-bearing, not tidiness. `Page` carries
+`blocks` — the full prose body — so a client island that imports the page collection to read
+a label drags every page's text into the browser bundle, where nothing reads it.
+Tree-shaking cannot help: these are property reads on runtime objects. So `content/pages.ts`
+is the client-safe projection (slug, path, label, sector) and `content/pages/**` holds the
+prose behind `import "server-only"`, which turns the rule into a build error.
 
-### `components/` — shared UI
+### `site/`
 
-Presentational and reusable. `ui/` = primitives (no app/domain imports); `seo/` =
-structured-data UI; `r3f/` = React Three Fiber infra. Note `r3f/` currently has a
-single importer (`features/world/components/world-canvas.tsx`), so by the
-two-importer rule it is world plumbing in a shared folder — Phase 4 moves it.
+|                        |                                                                                                         |
+| ---------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Owns**               | The DOM reading surface: page shell, the block renderer, page and root metadata, JSON-LD, the portrait. |
+| **May import**         | `content/`, `ui/`                                                                                       |
+| **Must never import**  | `world/`, `agent/`, `command-menu/`, `inspector/`, `app/`                                               |
+| **Runtime**            | Server-first. Client only where interaction demands it.                                                 |
+| **Source of truth**    | None — it derives everything from `content/`. It owns presentation, never facts.                        |
+| **Talks to others by** | Being composed by `app/`. It is a leaf renderer and calls nothing.                                      |
 
-### `hooks/`, `providers/`, `stores/` — shared client layer
+**`site/` never imports `world/`.** This is what makes "the 3D room is an enhancement"
+structurally true rather than a stated intention: the reading surface cannot depend on the
+room, so it cannot break when the room is absent. The room is mounted _beside_ page content
+by the layout, never around it.
 
-- `hooks/` — of the three, only `use-is-client` is genuinely cross-feature;
-  `use-in-view` has one importer and `use-world-palette` five, all world/studio.
-- `providers/` — client context providers composed into one `<Providers>` in
-  `providers/index.tsx`, mounted by the root layout.
-- `stores/` — hand-rolled external stores read via `useSyncExternalStore`.
-  **There is no store library** — `zustand` is not a dependency. Only `perf-store`
-  is genuinely shared (world writes, inspector reads); the other six are owned by
-  one feature and move in Phase 5.
+### `world/`
 
-### Infrastructure — named top-level folders
+|                        |                                                                                                                                             |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Owns**               | The 3D room: scene geometry, materials, camera, input, boot, HUD, audio, canvas screens, and the spatial placement of each page.            |
+| **May import**         | `content/`, `ui/`, `reduced-motion`                                                                                                         |
+| **Must never import**  | `site/`, `agent/`, `inspector/`, `app/`                                                                                                     |
+| **Runtime**            | Client-only. Nothing here renders on the server.                                                                                            |
+| **Source of truth**    | Spatial and visual tuning only — where a station sits, how the camera moves, what a material looks like. **Never a fact about the author.** |
+| **Talks to others by** | Publishing a perf signal (`world/perf.ts`) that `inspector/` reads; opening the command menu through a callback it is handed.               |
 
-Platform code lives in named folders directly under `src/` (no `lib/` wrapper),
-with an explicit server/client boundary:
+The rule that keeps this domain honest:
 
-- **Server-only modules** (`ai/`, `rate-limit.ts`) start with
-  `import "server-only"` so the build fails if they leak into a client component.
-  Secrets and server SDKs live only here.
-- **Isomorphic helpers** (`utils/`, `seo/`, `schemas/`, `telemetry/`) are pure and
-  dependency-light — safe on client and server. No secrets, no Node-only APIs.
+> **A canvas draw function decides layout, typography, color, spacing, animation, truncation
+> and decoration. It may not contain a company, role, date, technology, or description.**
 
-### `config/`, `constants/`, `types/`, `styles/`
+Enforced by construction rather than by review: every draw function takes its data as a
+parameter, so a fact has nowhere to hide.
 
-- `config/` — static configuration: validated env (`env.ts` — never raw
-  `process.env` elsewhere), site metadata, navigation, `brand.ts` (misleadingly
-  named: it is three.js material tokens, with 40 importers — 39 modules plus the scene
-  spec) and `world-theme.ts`.
-- `constants/` — `routes.ts` is the typed SSOT for all 17 internal URLs (a plain
-  `as const` map; no path builders). Also the `patterns` taxonomy, `career.ts`,
-  `room.ts`, and the generated `agent-index.json`.
-- `types/` — one file, a pure re-export of `schemas/agent.ts` with 17 importers.
-- `styles/` — global CSS and design tokens, imported by the root layout.
-- Test helpers, fixtures and render utils belong in **`tests/`** at the repo root,
-  next to `tests/e2e/` — not under `src/`, so they stay outside the coverage
-  denominator and the `src/**` lint block. There is **no MSW**; mock with `vi.mock`.
+`world/stations.ts` holds the _spatial_ record for each page — camera position, anchor,
+accent, which object represents it — keyed by page slug. It carries no prose. The join
+between "what a page says" and "where it lives in the room" is a slug, and nothing more.
 
-## The `/api/chat` surface
+### `agent/`
 
-A thin **Route Handler** at `app/api/chat/route.ts` (Node runtime — `runtime` is
-incompatible with `cacheComponents`; streaming verified): parse →
-validate with `@/schemas/agent` → rate-limit → retrieve → stream. Every step
-delegates: retrieval and prompting live in `src/ai/` (server-only), the shared IP
-rate-limiter in `src/rate-limit.ts` (server-only), the contracts in
-`src/schemas/agent.ts`. The route holds no business logic.
+|                        |                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Owns**               | The Zod contract for `/api/chat`, retrieval, prompting, streaming, the response envelope, rate limiting, and the generated index. |
+| **May import**         | `content/` (including `content/pages/**`), `env`                                                                                  |
+| **Must never import**  | `site/`, `world/`, `command-menu/`, `inspector/`, `ui/`, `app/`                                                                   |
+| **Runtime**            | **Server-only**, every module. `import "server-only"` is the first line.                                                          |
+| **Source of truth**    | The generated index is derived from `content/` and never hand-edited.                                                             |
+| **Talks to others by** | HTTP, and only HTTP. `app/api/chat/route.ts` is its single entry point.                                                           |
 
-It degrades in layers rather than failing: no `OPENAI_API_KEY` returns `503` with
-the top index matches, no embeddings falls back to the keyword/BM25 tier, and no
-`UPSTASH_*` falls back to an in-memory token bucket.
+No client module may import from `agent/`, including its types — the schema is imported by
+the client through its own module, and the boundary is the wire format. Its safety
+properties are non-negotiable and break silently, so they are listed in `AGENTS.md`.
 
-**Naming trap:** the ⌘K surface is `features/command-menu`, and its agent is
-branded "the Inspector agent" in the UI. `features/inspector` is something else
-entirely — the performance/Web-Vitals overlay. Don't conflate them.
+### `command-menu/`
 
-## Where does X go?
+|                        |                                                                               |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| **Owns**               | The ⌘K dialog, its two modes, and the client-side ask/stream state.           |
+| **May import**         | `content/` (the client-safe page projection), `ui/`, `reduced-motion`         |
+| **Must never import**  | `agent/`, `world/`, `site/`, `inspector/`, `app/`                             |
+| **Runtime**            | Client.                                                                       |
+| **Source of truth**    | None. Its route list derives from `content/pages.ts` — all seventeen of them. |
+| **Talks to others by** | `fetch("/api/chat")`. It never imports the agent.                             |
 
-| Adding…                             | Location                                          |
-| ----------------------------------- | ------------------------------------------------- |
-| A page or API route                 | `src/app/…` (thin)                                |
-| A capability's UI + logic           | `src/features/<feature>/`                         |
-| A generic primitive                 | `src/components/ui/`                              |
-| Isomorphic helper (`cn`, `format`)  | `src/utils/`                                      |
-| Server-only integration             | a named top-level folder + `import "server-only"` |
-| Zod schema shared across boundaries | `src/schemas/`                                    |
-| Site metadata, nav                  | `src/config/{site,navigation}.ts`                 |
-| A URL / route literal               | `src/constants/routes.ts` (typed SSOT)            |
-| A global constant / enum            | `src/constants/`                                  |
-| three.js material / color token     | `src/config/brand.ts`                             |
-| Env var                             | `src/config/env.ts` — never raw `process.env`     |
-| Authored content (typed data + JSX) | the owning feature's `constants/`                 |
-| Static data owned by one feature    | `src/features/<feature>/constants/`               |
-| Static data shared by 2+ features   | `src/constants/`                                  |
-| Domain logic over feature data      | the consuming feature's `utils/`                  |
-| Test helper / mock / fixture        | `tests/`                                          |
-| A decision with rationale           | `docs/decisions.md`                               |
+### `inspector/`
 
-Reuse rule: used by **one** feature → keep it there; used by **2+** → promote to
-`components/`, `hooks/`, `stores/`, `utils/`, or a shared infra folder. Demote when
-that stops being true.
+|                        |                                                           |
+| ---------------------- | --------------------------------------------------------- |
+| **Owns**               | The performance overlay and its open/closed state.        |
+| **May import**         | `world/perf`, `telemetry`, `ui/`, `reduced-motion`        |
+| **Must never import**  | `content/`, `agent/`, `site/`, `app/`                     |
+| **Runtime**            | Client.                                                   |
+| **Source of truth**    | None. It is a dashboard over signals produced elsewhere.  |
+| **Talks to others by** | Subscribing. It reads; it never writes to another domain. |
 
-## Conventions
+A signal is owned by whoever **produces** it, not whoever displays it. The world produces
+frame statistics, so `world/perf.ts` owns them. `instrumentation-client.ts` produces Web
+Vitals, so `telemetry.ts` owns those. The inspector subscribes to both and owns neither —
+which is why adding a second consumer later requires no move.
 
-- **Naming**: `kebab-case` files/dirs; `PascalCase` components; `useX` hooks;
-  `is/has/can` booleans. One primary, **named** export per file.
-- **Imports**: `@/…` alias across areas, relative inside a feature. Cross-feature
-  imports go through `index.ts`.
-- **Boundaries**: `"use client"` only on interactive leaves; `import "server-only"`
-  on every server module.
-- **Size**: `max-lines-per-function` is capped at 100 and is the real signal;
-  `max-lines` is 250 (120 for `.tsx`, off for draw/layout/data modules). Split on
-  mixed concerns, never to hit a number.
-- **Tests** colocate with source (`*.test.ts(x)`) at the cluster root; E2E in
-  `tests/e2e/`.
+### Supporting modules
 
-## Quality gates
+| Module               | Owns                                                        | Runtime    |
+| -------------------- | ----------------------------------------------------------- | ---------- |
+| `ui/`                | Generic primitives with zero domain knowledge, plus `cn`    | Isomorphic |
+| `env.ts`             | The **only** reader of `process.env`, Zod-validated         | Isomorphic |
+| `telemetry.ts`       | Sentry sample rate, the Web Vitals store                    | Isomorphic |
+| `reduced-motion.tsx` | The motion preference: system, low-power, override, storage | Client     |
+| `styles/`            | Design tokens and global CSS                                | —          |
 
-`pnpm validate` = lint + typecheck + `format:check` + tests + `knip`. Plus
-`pnpm e2e` (Playwright + axe), `pnpm size` (size-limit), `pnpm analyze`.
-`pnpm build` runs `agent:index:check` before and `prerender:check` after.
+`ui/` is the hardest boundary to keep clean and the easiest to test: **if a primitive needs
+to know what a `Page` is, it does not belong in `ui/`.**
 
-CI (`.github/workflows/ci.yml`) runs the same gates plus `build` and `e2e`;
-`audit.yml` audits production dependencies daily; `release-please.yml` maintains
-the release PR. Nothing else runs, deliberately.
+---
 
-`pnpm size` is a **review signal, not a gate** — its CI step is
-`continue-on-error`, because a breach would otherwise also sink the `e2e` job via
-`needs: build`. Core Web Vitals are the real bar.
+## 4. Dependency rules
 
-This repository is **private on a GitHub Free plan**, which removes capabilities
-the workflows would otherwise rely on. Keep this in mind before adding CI:
+```
+app/  →  site/ · world/ · command-menu/ · inspector/  →  content/ · ui/
+app/api/  →  agent/  →  content/
+leaves (import nothing above them):  content/ · ui/ · env · telemetry · reduced-motion
+```
 
-| Capability                   | Status on private + Free                                |
+Five rules, all lint-enforced as errors:
+
+1. **Nothing imports from `app/`.** Routing is a leaf.
+2. **No domain imports a sibling domain**, with three named exceptions that are part of the
+   design: `inspector/` → `world/perf`, `world/` → `content/`, `site/` → `content/`.
+3. **`ui/` imports no domain.**
+4. **`content/` imports nothing.**
+5. **`agent/` is reachable only from `app/api/` and build scripts.**
+
+**There are no barrel files.** Import the module you need at its real path. With shallow
+domains there are no internals to protect, so a barrel buys nothing and costs two things:
+a client bundle pulling in content-bearing modules it never reads, and an indirection
+between a name and its definition. The dependency rules above are enforced directly on
+paths, which is what the barrels were standing in for.
+
+---
+
+## 5. The content model
+
+### Types
+
+```ts
+// content/schema.ts
+export type Block =
+  | { kind: "lede"; id?: string; text: string }
+  | { kind: "prose"; id?: string; paragraphs: readonly string[] }
+  | { kind: "list"; id?: string; title?: string; items: readonly string[] }
+  | { kind: "stats"; id?: string; items: readonly Stat[] }
+  | { kind: "cards"; id?: string; items: readonly Card[] }
+  | { kind: "timeline"; id?: string; items: readonly Role[] }
+  | { kind: "links"; id?: string; items: readonly Link[] };
+
+export type Page = {
+  slug: PageSlug;
+  path: PagePath;
+  label: string; // short form: nav, HUD, radar, citations
+  sector: SectorId; // editorial grouping
+  eyebrow: string;
+  title: string;
+  summary: string; // the ONE description — page metadata, OG, agent
+  blocks: readonly Block[];
+};
+```
+
+`id` on a block is the mechanism that makes single-authoring real: it is the DOM anchor, the
+`#fragment` in an agent citation, and the chunk boundary in the retrieval index. All three
+derive from one declaration.
+
+### Derivation
+
+Every representation below is generated from the table above. None of them may restate it.
+
+| Representation       | Derived from                    | Built by                    |
+| -------------------- | ------------------------------- | --------------------------- |
+| Page body (DOM)      | `page.blocks`                   | `site/blocks.tsx`           |
+| Page metadata / OG   | `page.title`, `page.summary`    | `site/metadata.ts`          |
+| `sitemap.xml`        | `content/pages.ts`              | `app/sitemap.ts`            |
+| JSON-LD              | `content/profile.ts`            | `site/structured-data.tsx`  |
+| Retrieval index      | blocks, with `id` as the anchor | `scripts/build-index.ts`    |
+| 3D canvas screens    | `content/career.ts` and friends | `world/screens/*`           |
+| HUD, radar, deck map | `content/pages.ts`              | `world/hud/*`               |
+| ⌘K route list        | `content/pages.ts`              | `command-menu/navigate.tsx` |
+
+If a fact needs changing, exactly one file changes.
+
+---
+
+## 6. The tree
+
+```
+src/
+  app/                        ROUTING ONLY — resolve, set metadata, compose
+    (world)/
+      layout.tsx              mounts <World/> BESIDE {children}, never around it
+      page.tsx  about/  work/ …            17 explicit folders, ~3 lines each
+    api/chat/route.ts  api/health/route.ts
+    layout.tsx  error.tsx  global-error.tsx  not-found.tsx  loading.tsx
+    icon.tsx  apple-icon.tsx  robots.ts  sitemap.ts
+
+  content/                    ★ SOURCE OF TRUTH
+    schema.ts                 Block · Page · Sector · Role
+    routes.ts                 typed URL map + asInternalHref()
+    pages.ts                  client-safe: slug · path · label · sector
+    profile.ts                identity, role, links, availability
+    career.ts                 the ONE career record
+    pages/                    server-only prose, one file per sector
+      core.ts  experience.ts  projects.ts  craft.ts  stance.ts
+      tooling.ts  explorations.ts  reach.ts  timeline.ts
+
+  site/                       THE DOM READING SURFACE
+    page-view.tsx  blocks.tsx  metadata.ts  structured-data.tsx
+    portrait.tsx  portrait-engine.ts
+
+  world/                      THE 3D ROOM
+    world.tsx                 mount point: fallback · gate · dynamic canvas
+    canvas.tsx  camera.tsx  interact.tsx  quality.tsx  postprocessing.tsx  fallback.tsx
+    stations.ts               slug → camera · anchor · accent · object (spatial only)
+    hotspots.tsx  materials.ts  room.ts  palette.ts  tuning.ts  input.ts
+    store.ts  perf.ts  audio.ts
+    boot/                     gate · overlay · splash · backdrop
+    hud/                      deck · radar · map · explore-hud
+    scene/                    room · desk · workstation · lounge · shelving
+                              lighting · city  + geometry modules
+    screens/                  canvas.ts (one texture hook) · kit.ts (one CRT kit)
+                              wall-screens · monitors · tv — DRAW FROM content
+
+  agent/                      SERVER-ONLY
+    schema.ts  retrieval.ts  prompt.ts  stream.ts  response.ts  rate-limit.ts
+    index.json                generated — per-block chunks with anchors
+
+  command-menu/               menu · navigate · ask · answer · store
+  inspector/                  overlay · panels
+
+  ui/                         button · badge · kbd · status-dot · brand-icons · cn.ts
+  styles/globals.css
+  env.ts                      the only process.env reader
+  reduced-motion.tsx          provider + store, one concept
+  telemetry.ts                sample rate + Web Vitals store
+
+scripts/build-index.ts        content → agent/index.json
+tests/                        helpers (@tests/*) + e2e/
+```
+
+Eight folders and three files at the root of `src/`. Maximum depth four segments. No
+`utils/`, `helpers/`, `common/`, `shared/`, `sections/`, `constants/`, or `components/`
+passthrough level anywhere, and no folder that exists to make the tree look organized.
+
+### Path aliases
+
+- `@/*` → `src/*` — always. Never `../../../`.
+- `@tests/*` → `tests/*` — test helpers only.
+
+---
+
+## 7. Conventions
+
+**Naming.** `kebab-case` files and folders, `PascalCase` components, `useX` hooks,
+`is/has/can` booleans. One primary, named export per file, except where a framework demands
+a default (pages, layouts, `route.ts`, metadata images, configs).
+
+**The folder is the namespace.** Never repeat it in the filename. `world/boot/overlay.tsx`,
+not `world/boot/boot-overlay.tsx`. Read an import path aloud; if a word repeats, rename.
+
+**File size is not a design signal.** There is no line cap on files.
+`max-lines-per-function` is capped at 100 as an error, because function length tracks
+complexity and file length tracks nothing. Never split a cohesive module to satisfy a
+number; never merge unrelated responsibilities to reduce a file count.
+
+**Cohesion over count.** Five files that are one concept become one file. One file holding
+two independent responsibilities becomes two. The question is always "does a reader need
+these together?", never "how many files is that?".
+
+**Boundaries.** `"use client"` at interactive leaves only. `import "server-only"` on every
+server module. Never both in one file.
+
+**Content is US English (en-US)**, in code, copy, comments and commits.
+
+**Comments earn their place** — a measured decision, a workaround, a non-obvious constraint.
+Never a restatement of the code.
+
+**Tests colocate with their subject** at the cluster root — one spec per concept, not per
+file, so a folder move carries its tests. `*.dom.test.{ts,tsx}` runs under jsdom; everything
+else runs under node, judged by what the test touches rather than what the module is about.
+Helpers live in `tests/` and are imported through `@tests/*`.
+
+---
+
+## 8. Where does X go?
+
+| Adding…                             | Location                                         |
+| ----------------------------------- | ------------------------------------------------ |
+| A page's prose                      | `content/pages/<sector>.ts`                      |
+| A fact about the author             | `content/profile.ts` or `content/career.ts`      |
+| A URL                               | `content/routes.ts`                              |
+| A route or API handler              | `src/app/…` (thin)                               |
+| DOM rendering of content            | `site/`                                          |
+| 3D geometry, materials, camera work | `world/scene/`, `world/materials.ts`             |
+| A number that tunes rendering       | `world/tuning.ts` — never beside content         |
+| A canvas screen                     | `world/screens/` — takes its data as an argument |
+| Retrieval, prompting, streaming     | `agent/` + `import "server-only"`                |
+| A generic primitive                 | `ui/`                                            |
+| An env var                          | `env.ts` — never raw `process.env`               |
+| Cross-domain state                  | the **producing** domain; consumers subscribe    |
+| A test helper                       | `tests/`                                         |
+| A decision with rationale           | `docs/decisions.md`                              |
+
+**Promotion rule.** Code lives with its owner. It moves to a shared module only when two or
+more domains import it, and moves back when that stops being true. Counting importers is the
+test — it is what exposes a "shared" folder holding single-consumer code.
+
+---
+
+## 9. Stack
+
+| Concern             | Choice                                                                             |
+| ------------------- | ---------------------------------------------------------------------------------- |
+| Framework / runtime | Next.js 16 (App Router), React 19                                                  |
+| Language            | TypeScript 6 (`strict`, `noUncheckedIndexedAccess`)                                |
+| Styling             | Tailwind v4 (CSS-first, no config file), `cva` + `cn`                              |
+| UI primitives       | Radix UI, `cmdk`, `lucide-react`                                                   |
+| Content             | Typed static data in `content/`                                                    |
+| 3D                  | `three` + React Three Fiber + drei + postprocessing                                |
+| Validation          | `zod`                                                                              |
+| AI                  | Vercel AI SDK + `@ai-sdk/openai`, RAG over a prebuilt index                        |
+| Client state        | URL first; hand-rolled external stores via `useSyncExternalStore` from one factory |
+| Env                 | `@t3-oss/env-nextjs` → `src/env.ts`                                                |
+| Observability       | Sentry, Vercel Analytics + Speed Insights, `web-vitals`                            |
+| Rate limiting       | Upstash Redis with an in-memory fallback                                           |
+| Tooling             | pnpm, ESLint, Prettier, Vitest (+ RTTR), Playwright + axe, knip, size-limit        |
+
+`next.config.ts` enables **`reactCompiler`**, **`typedRoutes`** and **`cacheComponents`**.
+The last makes rendering dynamic-by-default, so static rendering — this site's main
+performance asset — is protected by `pnpm prerender:check`, which fails the build if any of
+the 19 must-be-static routes de-optimizes.
+
+**Every env var is optional and features degrade rather than fail**: no `OPENAI_API_KEY`
+returns `503` with the top index matches, no embeddings falls back to keyword/BM25, no
+`UPSTASH_*` falls back to an in-memory token bucket. Preserve that when adding one.
+
+---
+
+## 10. Quality gates
+
+`pnpm validate` = lint + typecheck + `format:check` + tests with coverage + knip. It runs
+neither `build` nor `e2e`, so anything touching routing, metadata, the 3D world, focus or
+timing is unverified until `pnpm e2e:ci` is green.
+
+`pnpm build` runs `agent:index:check` before and `prerender:check` after. `pnpm size` is a
+review signal, not a gate — its CI step is `continue-on-error`, because a breach would
+otherwise also sink the `e2e` job via `needs: build`. Core Web Vitals are the real bar.
+
+Coverage thresholds live in `vitest.config.ts`, set from measured runs. **Never lower one to
+make a change pass**: a threshold rises because a test was written, so it falls only when
+code is deleted.
+
+This repository is **private on a GitHub Free plan**, which removes capabilities the
+workflows would otherwise rely on:
+
+| Capability                   | Status                                                  |
 | ---------------------------- | ------------------------------------------------------- |
 | Branch protection / rulesets | Unavailable — `main` is unprotected, no required checks |
-| Code scanning (CodeQL)       | Unavailable — needs the paid Code Security add-on       |
-| OSSF Scorecard               | Public repositories only                                |
-| PR auto-merge                | Needs a required check to wait on, so unusable          |
-| `CODEOWNERS`                 | Inactive (needs Pro or higher)                          |
-| Actions minutes              | 2,000/month (public repositories are unlimited)         |
-| Artifact storage             | 500 MB shared quota                                     |
+| Code scanning (CodeQL)       | Unavailable — needs the paid add-on                     |
+| PR auto-merge, `CODEOWNERS`  | Unavailable                                             |
+| Actions minutes              | 2,000/month · Artifact storage 500 MB                   |
 
-Because minutes and artifact storage are finite, CI uploads artifacts only on
-failure and with short retention. `pnpm validate` locally is the cheap gate; treat
-CI as confirmation, not as the first place a problem is found.
+Nothing stops a red push but you. CI uploads artifacts only on failure with short retention;
+`pnpm validate` locally is the cheap gate, CI is confirmation.
 
-One known inefficiency is deliberate: the `e2e` job builds the app again rather
-than consuming the `build` job's output. Sharing `.next` would mean either
-artifact upload (a multi-hundred-MB write against a 500 MB quota) or cache-key
-contention between the two jobs, both worse than one extra build.
+`pnpm e2e` is **not** what CI runs — locally it uses `next dev`, 2 workers, no retries; CI
+sets `CI=1`, switching to `next start` against a production build, 1 worker, `retries: 2`.
+`pnpm e2e:ci` closes the flag gap; `pnpm e2e:runner` (Ubuntu container, 2 vCPU / 7 GB)
+closes the runner gap. Neither reproduces the CPU architecture: GitHub runs x86-64, a Mac
+runs arm64, so SwiftShader timings are indicative, not identical.
 
-## Reproducing CI locally
+---
 
-`pnpm e2e` is **not** what CI runs. Locally it starts `next dev` with 2 workers and
-no retries; CI sets `CI=1`, which switches `playwright.config.ts` to `next start`
-against a production build, 1 worker and `retries: 2`. Two commands close the gap,
-in increasing fidelity and cost:
+## 11. Authority
 
-| Command                       | Mirrors                                                                                         | Cost                      |
-| ----------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------- |
-| `pnpm e2e:ci`                 | The build and the Playwright flags: production `next start`, 1 worker, retries, `CI=1`          | ~4 min, no setup          |
-| `pnpm e2e:runner`             | The runner as well: Ubuntu 24.04, pinned browsers, **2 vCPU / 7 GB**, frozen install, no `.env` | ~3 min warm, needs Docker |
-| `docker run rhysd/actionlint` | Nothing at runtime — static analysis of the workflow YAML itself                                | seconds                   |
+1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
+2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
+   Playwright 1.62.
+3. Recorded decisions — this file and [`decisions.md`](./decisions.md). May override (2),
+   never (1).
+4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3,
+   the config may be the bug: investigate it.
+5. Agent instructions — `AGENTS.md`, then `.claude/rules/`.
+6. Existing implementation — evidence of what is, **never authority for what should be.**
 
-`scripts/ci-local.sh` (behind `pnpm e2e:runner`) takes `playwright test` arguments,
-so `pnpm e2e:runner -g "Boot sequence"` works, and `CI_CPUS`, `CI_MEMORY` and
-`CI_IMAGE` override the defaults — `CI_CPUS=1` is the quickest way to see whether a
-spec depends on timing. It shadows `node_modules`, `.next` and `.env.local` with
-container-owned mounts, so the host install is untouched and the degraded-env paths
-(no `OPENAI_API_KEY` → `/api/chat` returns 503) are the ones under test, exactly as
-on a runner.
-
-**What no local setup reproduces: the CPU architecture.** GitHub runs x86-64; a Mac
-runs arm64, so SwiftShader timings are indicative, not identical, and amd64 under
-emulation is too slow to be a signal. Calibration point: the two `Boot sequence`
-specs take ~12s each on the host and ~60s in the constrained container.
-
-`act` is deliberately not wired in — see `docs/decisions.md`. Run it ad hoc
-(`act -j lint`) if a workflow's _wiring_ is in question; it cannot reproduce
-`actions/cache`, secrets, or the runner's CPU budget, which is where the failures
-have actually been.
+**"The repository does X" is never by itself a reason to do X.** This codebase contains
+temporary 3D work, duplicated content, abandoned experiments and historical structure.
+Before copying a pattern, check whether (1)–(3) endorse it. When an instruction here turns
+out to be wrong, fix it in the same change — a rule nobody corrects is how wrong claims
+ship. If a check can enforce it, prefer the check over the rule.

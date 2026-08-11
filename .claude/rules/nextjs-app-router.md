@@ -1,6 +1,7 @@
 ---
 paths:
   - "src/app/**"
+  - "src/site/**"
   - "src/seo/**"
   - "next.config.ts"
 ---

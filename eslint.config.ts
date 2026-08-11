@@ -121,7 +121,7 @@ const eslintConfig = defineConfig([
   {
     // Shaders, procedural geometry, canvas draw routines, layout math and static
     // data are legitimately long. Splitting them produces import graphs, not
-    // boundaries — see docs/restructure-plan.md Cause 1.
+    // boundaries — a 100-line cap here is what shredded this codebase once already.
     files: [
       "src/**/*-{draw,shaders,geometry,layout,textures,data}.ts",
       "src/**/{data,generated,constants}/**/*.{ts,tsx}",
