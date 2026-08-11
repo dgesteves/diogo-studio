@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react";
 import type { ReactElement } from "react";
 
-import type { AgentCitation } from "@/types/agent";
+import type { AgentCitation } from "@/schemas/agent";
 import { cn } from "@/utils/cn";
 
 import type { AskStatus, RetrievalMode } from "../types";

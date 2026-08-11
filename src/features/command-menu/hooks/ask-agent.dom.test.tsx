@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import type { AgentCitation, AgentSourcesPayload } from "@/types/agent";
+import type { AgentCitation, AgentSourcesPayload } from "@/schemas/agent";
 import { useAskAgent } from "./use-ask-agent";
 
 /**

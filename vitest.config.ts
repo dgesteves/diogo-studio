@@ -108,7 +108,7 @@ export default defineConfig({
        * failure, and raised only after re-measuring.
        *
        * **Deliberately global rather than per-directory.** Per-layer thresholds were the
-       * original plan and are the wrong instrument *right now*: `docs/restructure-plan.md`
+       * original plan and are the wrong instrument *right now*: `docs/refactor.md`
        * moves or merges nearly every directory in `src/`, and a threshold keyed on a path that
        * is about to change either breaks the build during a pure move or silently stops
        * applying. The two rows below are the exceptions because their locations are fixed by

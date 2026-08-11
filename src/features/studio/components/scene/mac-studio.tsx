@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { anodizedMetalMaterial, brandColors, portMaterial } from "@/config/brand";
 
-import { ANODIZED, DESK_TOP_Y, PORT } from "./constants";
+import { DESK_TOP_Y } from "./constants";
 import {
   HARDWARE_CENTER_Z,
   HARDWARE_DEPTH,
@@ -47,7 +47,7 @@ export function MacStudio(): ReactElement {
         smoothness={4}
         position={[0, BODY_CENTER_Y, 0]}
       >
-        <meshStandardMaterial {...ANODIZED} />
+        <meshStandardMaterial {...anodizedMetalMaterial} />
       </RoundedBox>
       <mesh position={[0, PEDESTAL_HEIGHT + 0.0015, 0]}>
         <boxGeometry args={[MAC_STUDIO_WIDTH - 0.014, 0.003, HARDWARE_DEPTH - 0.014]} />
@@ -68,7 +68,7 @@ function FrontPanel(): ReactElement {
       {FRONT_PORTS.map((port) => (
         <mesh key={port.x} position={[port.x, PORT_Y, -0.0015]}>
           <boxGeometry args={[port.width, PORT_HEIGHT, 0.004]} />
-          <meshStandardMaterial {...PORT} />
+          <meshStandardMaterial {...portMaterial} />
         </mesh>
       ))}
       <mesh position={[0, PEDESTAL_HEIGHT + 0.0022, -0.001]}>

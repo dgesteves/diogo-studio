@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { ReactElement } from "react";
 
-import type { AgentCitation, AgentSourceKind } from "@/types/agent";
+import type { AgentCitation, AgentSourceKind } from "@/schemas/agent";
 
 import type { RetrievalMode } from "../types";
 

@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AgentChunk } from "@/types/agent";
+import type { AgentChunk } from "@/schemas/agent";
 
 import { retrieveByCosine } from "./retrieve-cosine";
 import { retrieveByKeyword } from "./retrieve-keyword";

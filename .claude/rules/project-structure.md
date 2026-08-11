@@ -5,89 +5,105 @@ paths:
 
 # Placement and boundaries
 
-Feature-first vertical slices, one dependency direction, and ownership decided by who imports
-it. Never import upward.
+Six domains at the root of `src/`, one dependency direction, and ownership decided by who
+produces a thing rather than who displays it. The full contracts are in
+[`docs/architecture.md`](../../docs/architecture.md) §3 — this file is the working summary.
 
-## Ownership: the two-importer test
+**A refactor is in flight.** `docs/architecture.md` is the target and wins; the current tree
+is being moved toward it and is **not a pattern to copy**. `docs/refactor.md` says which
+phase owns which move.
 
-**Put code in the feature that uses it. Promote to a shared folder only when two or more
-features import it, and demote when that stops being true.** This is the rule that matters
-most here — ignoring it is what produced shared folders holding single-consumer code. When
-unsure, count the importing features.
+## The domains
 
 ```
 src/
-  app/                 routing only
-  features/<feature>/  vertical slice, with index.ts as its only cross-feature surface
-  components/          UI imported by 2+ features (ui/ = primitives, seo/, r3f/)
-  config/ constants/   env, site, navigation, brand, world-theme; routes.ts is the URL SSOT
-  utils/               pure isomorphic helpers
-  ai/ rate-limit.ts    server-only integrations, named for what they are
-  seo/ schemas/ telemetry/   isomorphic platform modules
-  stores/              state written by one feature and read by another — nothing else
-  hooks/ providers/    shared client hooks; providers composed in providers/index.tsx
-  styles/              globals.css + design tokens
+  app/            routing only — resolve, set metadata, compose
+  content/        ★ the authored record — the only place a fact may live
+  site/           renders content to the DOM: page shell, blocks, metadata, SEO
+  world/          renders content as a 3D room: scene, HUD, boot, audio, screens
+  agent/          retrieval + generation, server-only, reachable only over HTTP
+  command-menu/   the ⌘K surface
+  inspector/      the performance overlay
+  ui/             generic primitives with zero domain knowledge
+  styles/         globals.css + design tokens
+  env.ts  telemetry.ts  reduced-motion.tsx
 ```
 
-`app/` holds route segments and Next.js special files only. Route files resolve params, set
-`metadata` and compose UI from outside `app/`; nothing imports from `app/`, and that is
-lint-enforced.
+No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `sections/`,
+`constants/`, and no `components/` passthrough level inside a domain.
 
-**There is no `src/lib/`** — a project convention, not a universal principle: a `lib/` hides
-the server/isomorphic split that `import "server-only"` exists to make visible. Infrastructure
-goes in a folder named for what it does.
+## Dependency rules — lint-enforced as errors
 
-## Feature shape: target, current, transition
+```
+app/  →  site/ · world/ · command-menu/ · inspector/  →  content/ · ui/
+app/api/  →  agent/  →  content/
+leaves:  content/ · ui/ · env · telemetry · reduced-motion
+```
 
-- **Target** (`docs/restructure-plan.md`): a flat feature root, with one level of grouping only
-  for a real cluster. No `components/` passthrough folder.
-- **Current:** every feature has a `components/` folder. This is pre-existing debt owned by the
-  plan, not a pattern to reproduce in a new feature.
-- **Transition:** don't create a _second_ shape inside one feature — two conventions in one
-  folder is worse than either. Add alongside that feature's existing files and let its phase
-  move them together. If that seems wrong for a specific change, say so rather than silently
-  picking.
+1. **Nothing imports from `app/`.** Routing is a leaf.
+2. **No domain imports a sibling**, except three by design: `inspector/` → `world/perf`,
+   and `site/` / `world/` → `content/`.
+3. **`ui/` imports no domain.** If a primitive needs to know what a `Page` is, it is not a
+   primitive.
+4. **`content/` imports nothing.**
+5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
+   module, not even for a type.
+
+## Where a fact lives
+
+**`content/` is the only place a fact may live.** A company, role, date, technology, project
+description or page summary belongs there and nowhere else. Everything else derives:
+page metadata, the sitemap, JSON-LD, the retrieval index, the HUD labels, the ⌘K route list,
+and the 3D canvas screens.
+
+The rule for the 3D layer specifically: **a draw function decides layout, typography, color,
+spacing, animation, truncation and decoration — it may not contain a fact.** Enforce it by
+construction: every draw function takes its data as a parameter.
+
+Three things that are not content and must not share a folder with it:
+
+| Kind          | Example                                  | Home              |
+| ------------- | ---------------------------------------- | ----------------- |
+| Content       | a role, a date, a page summary           | `content/`        |
+| Tuning        | camera damping, DPR ladder, fog distance | `world/tuning.ts` |
+| Configuration | an env var, a deployment URL             | `env.ts`          |
 
 ## Imports
 
-- `@/…` across areas, relative paths inside a feature. Never `../../../`, and never
-  `@/features/X` from inside `features/X`.
-- **Cross-feature imports go through the target's `index.ts`.** This is a recorded decision and
-  it is lint-enforced, but barrels are not free: a barrel that re-exports heavy or
-  content-bearing modules pulls them into any client bundle that touches it. See the
-  `station-index` trap in `three-r3f-world.md` for the live example.
-- Shared folders (`components/`, `utils/`, `config/`, `providers/`) never import from
-  `features/` or `app/`.
-- The import guardrails are warnings under a `--max-warnings` cap set in `package.json`. The
-  open ones are pre-existing reaches into `features/studio` that restructure Phase 4 removes:
-  never add to the count, and never clear one with an inline `eslint-disable`. Add a new
-  feature folder to `FEATURES` in `eslint.config.ts`.
-- Mark server-only modules `import "server-only"`; `"use client"` goes at the leaves. Never mix
-  the two in one module.
-- **Name magic values at the narrowest useful scope** — file-local `const`, then the feature's
-  `data/`, then `config/` only when genuinely global. `constants/routes.ts` is the typed SSOT
-  for internal URLs.
+- `@/…` across domains, relative paths inside one. Never `../../../`.
+- **No barrel files.** Import the module at its real path. Barrels buy nothing once domains
+  are shallow, and cost a client bundle pulling in content-bearing modules it never reads.
+- `import "server-only"` on every server module — all of `agent/` and all of
+  `content/pages/**`. `"use client"` at interactive leaves only. Never both in one file.
+- **Name magic values at the narrowest useful scope**: file-local `const` first, then the
+  domain's tuning module, then a root module only when genuinely global.
 
 ## Naming and size
 
-- **The folder is the namespace — don't repeat it in the filename, and never encode a path
-  twice.** Read the import path aloud; if a word repeats, rename
-  (`lounge/lounge-tv-channels/` is the counterexample already in the tree). Generated
-  artifacts live in `generated/`, authored data in `data/`.
-- One primary, named export per file, except where a framework requires a default (pages,
-  layouts, `route.ts`, metadata images, configs).
-- Size caps live in `eslint.config.ts`. The judgment they can't express: **don't split a
-  cohesive module to satisfy a cap.** Shaders, procedural geometry, draw routines and static
-  data are legitimately long and are exempt there. Split when a file mixes concerns —
-  rendering vs. state, pure helpers vs. effects, data vs. behavior.
+- **The folder is the namespace — never repeat it in the filename.** `world/boot/overlay.tsx`,
+  not `world/boot/boot-overlay.tsx`. Read the import path aloud; if a word repeats, rename.
+- `kebab-case` files and folders; `PascalCase` components; `useX` hooks; `is/has/can`
+  booleans. One primary, named export per file, except where a framework demands a default.
+- **File length is not a design signal and there is no cap on it.**
+  `max-lines-per-function` is 100 as an error — function length tracks complexity, file
+  length tracks nothing. Never split a cohesive module to hit a number, and never merge
+  unrelated responsibilities to reduce a count. Split when a file mixes concerns: rendering
+  vs. state, pure helpers vs. effects, data vs. behavior.
 
-## State and tests
+## State
 
-Client state uses hand-rolled external stores read via `useSyncExternalStore`; there is no
-store library, and adding one needs a `docs/decisions.md` entry. Keep server state on the
-server.
+Client state uses hand-rolled external stores read via `useSyncExternalStore`, built from
+**one shared factory** — there is no store library, and adding one needs a
+`docs/decisions.md` entry.
 
-Colocate `*.test.ts(x)` with the source at the **cluster root** — one file per concept, not per
-source file. Shared helpers, fixtures and render utils go in `tests/` at the repo root, which
-keeps them out of the coverage denominator and the `src/**` lint block. E2E specs live in
-`tests/e2e/`.
+**A signal is owned by whoever produces it, not whoever displays it.** The world produces
+frame statistics, so it owns them; the inspector subscribes. That is why adding a second
+consumer later requires no move.
+
+## Tests
+
+Colocate `*.test.ts(x)` with the source at the **cluster root** — one file per concept, not
+per source file, so a folder move carries its tests. `*.dom.test.{ts,tsx}` runs under jsdom;
+everything else runs under node, judged by what the test touches rather than what the module
+is about. Shared helpers go in `tests/` and are imported through `@tests/*`, which keeps them
+out of the coverage denominator and the `src/**` lint block. E2E specs live in `tests/e2e/`.

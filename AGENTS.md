@@ -64,14 +64,13 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
 1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
 2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
    Playwright 1.62.
-3. Recorded decisions — `docs/decisions.md`, `docs/restructure-plan.md`. May override (2),
-   never (1).
+3. Recorded decisions — `docs/architecture.md` (the design target) and `docs/decisions.md`.
+   May override (2), never (1).
 4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3, the
    config may be the bug: investigate it.
 5. These instructions — `AGENTS.md`, then your agent's rule set: `.claude/rules` and
    `.claude/skills` for Claude Code, `.devin/` for Devin.
 6. Existing implementation — evidence of what is, never authority for what should be.
-7. Descriptive docs — `docs/architecture.md` and the plans describe; they don't decide.
 
 **"The repository does X" is never by itself a reason to do X.** Before copying an existing
 pattern, check whether (1)–(3) endorse it; if not, treat it as potential technical debt — say
@@ -82,15 +81,17 @@ user. **When an instruction here is wrong, fix it in the same change** — claim
 have shipped wrong before, and a rule nobody corrects is how. If a check can enforce it
 (TypeScript, ESLint, a test, CI), prefer the check over the rule.
 
-Standards and placement live in `.devin/rules/` (activated by file type or on demand); the
-tree as it is today in `docs/architecture.md`; the structural target and its phases in
-`docs/restructure-plan.md`; and the reasoning behind non-obvious calls in `docs/decisions.md` —
-append-only, so read the entry, not the file.
+**A refactor is in flight, so this repository is unusually unsafe to imitate.** It contains
+temporary 3D work, duplicated content, abandoned experiments and historical structure.
+`docs/architecture.md` is **normative** — it describes the six-domain architecture the code is
+being built toward and wins when the code disagrees. `docs/refactor.md` holds the phases and
+the evidence; `docs/decisions.md` holds the reasoning, append-only, so read the entry rather
+than the file. Standards and placement live in `.claude/rules/` (activated by file type).
 
 ## Constraints that are easy to trip over
 
-- **The suite is the restructure's safety net, and `pnpm validate` now gates it.** Coverage
-  thresholds live in `vitest.config.ts` — global, not per-directory, because the restructure
+- **The suite is the refactor's safety net, and `pnpm validate` now gates it.** Coverage
+  thresholds live in `vitest.config.ts` — global, not per-directory, because the refactor
   moves the directories. Re-measure with `pnpm test:coverage` before citing any figure, and
   raise a threshold only from a measured run. **Never lower one to make a change pass**: the
   number went up because a test was written, so it comes down only when code is deleted.

@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { routes } from "@/constants/routes";
-import type { AgentCitation, AgentSourcesPayload } from "@/types/agent";
+import type { AgentCitation, AgentSourcesPayload } from "@/schemas/agent";
 import { expect, test } from "./fixtures";
 
 /**

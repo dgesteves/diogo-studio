@@ -6,6 +6,79 @@ not for every change.
 
 ---
 
+## 2026-08-11 — `restructure-plan.md` deleted: its premise was wrong, not its diagnosis
+
+`restructure-plan.md` always said of itself "delete when phases 1–7 land". It is being deleted
+for a different reason: **it was superseded before it was executed.** Its replacement is
+[`refactor.md`](./refactor.md), and the target it moves toward is
+[`architecture.md`](./architecture.md).
+
+References to the deleted file survive in older entries below. This entry is their redirect.
+
+**The diagnosis was right and is kept.** A 100-line `max-lines` cap was manufacturing files —
+a 417-line canvas portrait cut into six modules that import each other only to stay under the
+cap. Layering by technical kind twice (`src/` buckets, then the same buckets inside every
+feature) meant finding the boot overlay traversed kind → feature → kind → cluster. Names had
+stopped describing ownership: `config/brand.ts` is three.js material tokens with 44 importers,
+`features/studio` is not a feature, `src/stores/` held state owned by one feature. Phase 0
+fixed the cause and shipped; the rest of the analysis carries into `refactor.md` §2.
+
+**The charter was wrong.** Every phase was defined as "a pure move/merge with no behavior
+change", and that constraint could not survive contact with the repository. Re-auditing found
+that roughly a third of the necessary work is deletion and correction, not relocation:
+
+- The career record is authored **four times** in three formats, and has already drifted three
+  ways. A move-only plan gives all four copies better addresses.
+- Three dependencies — `motion`, `sonner`, `lenis` — are wired into the provider tree and do
+  nothing. `knip` cannot see them because the imports are real.
+- The product states things that are not true: `/playground` advertises a feature deleted in
+  `b72c1e5`, the inspector's empty state cites an SVG that does not exist, and the agent's
+  system prompt and refusal text both send users to a site footer that does not exist.
+- Retrieval is a data defect, not a layout one: 25 whole-page chunks, `anchor` undefined on
+  every one of them so the citation deep-links cannot fire, and 8 chunks permalinked to `/`.
+
+None of that is reachable by moving files, and a plan that forbade behavior change would have
+canonized all of it in a tidier tree. "No behavior change" is the right promise for a
+refactor of _correct_ code; this code is a partially finished product, and treating it as
+correct was the error.
+
+**What replaced it.** One charter — author content once, derive every representation, delete
+what does not earn its place — and a rule that every change declares which of six kinds it is
+(deletion, consolidation, structural refactor, bug fix, architectural redesign, product/UX),
+so the one kind that changes what a visitor sees stays isolated and schedulable.
+
+**Two structural conclusions are also reversed**, both from the same cause: they were derived
+from the old tree rather than from the product.
+
+- The old target kept `features/`, with `agent/` inside it beside `command-menu`. But the
+  agent is server-only, and a folder whose lint rule exists to police client barrels is the
+  wrong home for it. Domains now sit flat at the root of `src/`.
+- The old target kept barrels as the cross-feature import surface. With shallow domains there
+  are no internals left to protect, so the barrels buy nothing and cost a client bundle
+  pulling in content-bearing modules it never reads. They are deleted and the dependency
+  rules are enforced on paths directly.
+
+## 2026-08-11 — `architecture.md` is now normative, not descriptive
+
+`architecture.md` used to open with "What the codebase **is** today. The code wins; where they
+disagree this file is stale." That contract was correct while the tree was the thing being
+described. It is wrong now, and holding it produced a real failure mode: the file documented
+`features/studio` and `src/stores/` faithfully, which made an accidental structure read as an
+intended one to anyone — human or agent — arriving without the history.
+
+The file is now the **design target**, and it is the authority when the code disagrees.
+`refactor.md` tracks the distance between them and is deleted when it reaches zero.
+
+This inverts entry 6 of the authority list in the same file — "existing implementation:
+evidence of what is, never authority for what should be" — from a caveat into the operating
+principle. The codebase contains temporary 3D work, duplicated content, abandoned experiments
+and historical structure. A document that describes it accurately is, for as long as that is
+true, a document that recommends it.
+
+The cost is real and accepted: for the duration of the refactor, `architecture.md` describes
+folders that do not exist yet. That is why the header says so explicitly, and why the phase
+list lives in a second file rather than being implied by the first.
+
 ## 2026-08-11 — The coverage exclusion list is two entries, and that was a correction
 
 Phase 7 was first drafted with a nine-entry exclusion list: the 17 route pages, both layouts, the

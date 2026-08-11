@@ -5,7 +5,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 import { env } from "@/config/env";
-import type { AgentChunk, AgentSourcesPayload } from "@/types/agent";
+import type { AgentChunk, AgentSourcesPayload } from "@/schemas/agent";
 
 import { sourcesHeaderValue } from "./agent-response";
 import { formatUserPrompt, SYSTEM_PROMPT } from "./system-prompt";

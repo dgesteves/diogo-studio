@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { brandColors, darkMetalMaterial } from "@/config/brand";
 
-import { DESK_TOP_Y, METAL } from "./constants";
+import { DESK_TOP_Y } from "./constants";
 
 const EARCUP_SIDES = [-1, 1] as const;
 const EARCUP_X = 0.108;
@@ -26,7 +26,7 @@ export function Headphones(): ReactElement {
     <group position={[1.12, DESK_TOP_Y, 0.05]}>
       <mesh position={[0, 0.009, 0]}>
         <cylinderGeometry args={[0.088, 0.098, 0.018, 24]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <mesh position={[0, 0.019, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.072, 0.0024, 10, 32]} />
@@ -34,7 +34,7 @@ export function Headphones(): ReactElement {
       </mesh>
       <mesh position={[0, (BASE_TOP + POST_TOP) / 2, 0]}>
         <cylinderGeometry args={[0.015, 0.018, POST_TOP - BASE_TOP, 14]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <mesh position={[0, HEADBAND_Y, 0]}>
         <torusGeometry args={[HEADBAND_RADIUS, HEADBAND_TUBE, 12, 40, Math.PI]} />
@@ -63,11 +63,11 @@ function Earcup({ side }: { side: number }): ReactElement {
         smoothness={2}
         position={[side * YOKE_X, (HEADBAND_Y - EARCUP_Y) / 2, 0]}
       >
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </RoundedBox>
       <mesh position={[side * YOKE_X * 0.5, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.007, 0.007, YOKE_X, 10]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <mesh rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[EARCUP_RADIUS, EARCUP_RADIUS, EARCUP_HALF_DEPTH * 2, 28]} />

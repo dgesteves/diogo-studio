@@ -1,8 +1,7 @@
-import { chatRequestSchema } from "@/schemas/agent";
+import { chatRequestSchema, type AgentSourcesPayload } from "@/schemas/agent";
 import { retrieve } from "@/ai/retrieve";
 import { createRateLimiter } from "@/rate-limit";
 import { env } from "@/config/env";
-import type { AgentSourcesPayload } from "@/types/agent";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/ai/agent-index";
 import { buildCitations, jsonResponse, REFUSAL_TEXT, textResponse } from "@/ai/agent-response";

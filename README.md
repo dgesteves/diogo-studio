@@ -42,12 +42,11 @@ retries. For anything timing- or 3D-sensitive, reproduce the runner with
 
 ## Conventions
 
-- Coding standards and file placement: [`.devin/rules/`](./.devin/rules).
-  A restructure is planned and Phase 0 has landed; the test suite it was
-  waiting on is complete, so the remaining phases are unblocked.
-  [`docs/restructure-plan.md`](./docs/restructure-plan.md) is authoritative
-  for structural questions, [`docs/architecture.md`](./docs/architecture.md)
-  describes the tree as it is today, and
+- Coding standards and file placement: [`.claude/rules/`](./.claude/rules).
+  [`docs/architecture.md`](./docs/architecture.md) is authoritative for
+  structural questions — it describes the architecture the code is being built
+  toward, not the tree as it stands. A refactor is in flight;
+  [`docs/refactor.md`](./docs/refactor.md) tracks the phases, and
   [`docs/decisions.md`](./docs/decisions.md) records the reasoning behind the
   non-obvious calls.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/) —

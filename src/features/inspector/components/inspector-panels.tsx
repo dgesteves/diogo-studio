@@ -36,8 +36,8 @@ export function ScenePanel({ perf }: { perf: PerfSnapshot }): ReactElement {
         </div>
       ) : (
         <p className="text-subtle-foreground text-[11px] leading-relaxed">
-          No live scene. The hero canvas is paused (reduced-motion, low-power, or off-screen) — the
-          static SVG carries the same data.
+          No live scene. The 3D world is not running — reduced motion, a low-power connection, or a
+          renderer that could not hold a frame rate. Every page is fully readable without it.
         </p>
       )}
     </Panel>

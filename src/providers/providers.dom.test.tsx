@@ -1,14 +1,11 @@
 import type { ReactElement, ReactNode } from "react";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useReducedMotionConfig } from "motion/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { click } from "@tests/interactions";
 import { restoreMediaStubs, stubMatchMedia, stubNetworkConnection } from "@tests/media";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import { AppProviders } from "./index";
-import { LenisProvider } from "./lenis-provider";
-import { MotionProvider } from "./motion-provider";
 import { ReducedMotionProvider, useReducedMotionPreference } from "./reduced-motion-provider";
 import { ThemeProvider } from "./theme-provider";
 
@@ -16,33 +13,15 @@ import { ThemeProvider } from "./theme-provider";
  * `reducedMotion` decides whether this site animates at all, and `AGENTS.md` makes reduced
  * motion a real path rather than a degraded one. It is derived from three independent
  * sources — the OS media query, a low-power connection, and the visitor's own toggle — so
- * what matters here is the precedence between them and that both consumers of the result
- * (Motion and Lenis) actually obey it.
+ * what matters here is the precedence between them.
+ *
+ * It used to also assert that Motion and Lenis obeyed the result. Both were deleted in the
+ * refactor's first phase: `MotionConfig` configured a library with no animated components,
+ * and Lenis substituted a permanent rAF loop for the native `scroll-behavior: smooth` it
+ * disabled. What consumes the preference now is the world (which does not mount at all under
+ * reduced motion, asserted in `world-stage.dom.test.tsx` and `reduced-motion.spec.ts`) and
+ * the CSS media query in `globals.css`.
  */
-
-type LenisOptions = { anchors?: boolean; smoothWheel?: boolean; easing?: (t: number) => number };
-
-const lenis = vi.hoisted(() => ({
-  constructed: 0,
-  destroyed: 0,
-  frames: 0,
-  options: null as LenisOptions | null,
-}));
-
-vi.mock("lenis", () => ({
-  default: class FakeLenis {
-    constructor(options: LenisOptions) {
-      lenis.constructed += 1;
-      lenis.options = options;
-    }
-    raf(): void {
-      lenis.frames += 1;
-    }
-    destroy(): void {
-      lenis.destroyed += 1;
-    }
-  },
-}));
 
 function Preference(): ReactElement {
   const { reducedMotion, systemReducedMotion, lowPower, override, setOverride } =
@@ -70,14 +49,6 @@ function Preference(): ReactElement {
   );
 }
 
-// `useReducedMotionConfig` is what Motion's own components call: it resolves
-// MotionConfig's `reducedMotion` first and only then falls back to the OS query. Motion's
-// `useReducedMotion` deliberately ignores MotionConfig, so it would report the system
-// preference here and say nothing about this provider.
-function MotionProbe(): ReactElement {
-  return <span data-testid="motion">{String(useReducedMotionConfig())}</span>;
-}
-
 function withPreference(children: ReactNode): ReactElement {
   return <ReducedMotionProvider>{children}</ReducedMotionProvider>;
 }
@@ -85,13 +56,6 @@ function withPreference(children: ReactNode): ReactElement {
 function read(testId: string): string {
   return screen.getByTestId(testId).textContent ?? "";
 }
-
-beforeEach(() => {
-  lenis.constructed = 0;
-  lenis.destroyed = 0;
-  lenis.frames = 0;
-  lenis.options = null;
-});
 
 afterEach(restoreMediaStubs);
 
@@ -170,81 +134,6 @@ describe("ReducedMotionProvider", () => {
   });
 });
 
-describe("MotionProvider", () => {
-  it("hands the preference to Motion, so every animation obeys it", () => {
-    persistOverride(true);
-    render(
-      withPreference(
-        <MotionProvider>
-          <MotionProbe />
-        </MotionProvider>,
-      ),
-    );
-
-    expect(read("motion")).toBe("true");
-  });
-
-  it("leaves animation enabled when motion is allowed", () => {
-    render(
-      withPreference(
-        <MotionProvider>
-          <MotionProbe />
-        </MotionProvider>,
-      ),
-    );
-
-    expect(read("motion")).toBe("false");
-  });
-});
-
-describe("LenisProvider", () => {
-  it("runs smooth scrolling and tears it down on unmount", () => {
-    const raf = vi.spyOn(window, "requestAnimationFrame");
-    const cancel = vi.spyOn(window, "cancelAnimationFrame");
-
-    const { unmount } = render(withPreference(<LenisProvider />));
-
-    expect(lenis.constructed).toBe(1);
-    expect(raf).toHaveBeenCalled();
-
-    // Drive one frame by hand: the loop is `lenis.raf(time)` then re-request.
-    const [frame] = raf.mock.calls[0] ?? [];
-    act(() => frame?.(performance.now()));
-    expect(lenis.frames).toBe(1);
-
-    unmount();
-    expect(lenis.destroyed).toBe(1);
-    expect(cancel).toHaveBeenCalled();
-
-    raf.mockRestore();
-    cancel.mockRestore();
-  });
-
-  it("takes over in-page anchors with a bounded ease-out", () => {
-    render(withPreference(<LenisProvider />));
-
-    // `anchors: true` is why a "skip to content" or footnote link glides instead of
-    // jumping; the easing has to start at rest and finish, or the scroll never lands.
-    expect(lenis.options).toMatchObject({ anchors: true, smoothWheel: true });
-    const easing = lenis.options?.easing;
-    expect(easing?.(0)).toBe(0);
-    // An exponential ease-out never quite reaches 1 (1 - 2⁻¹⁰), which is close enough that
-    // the scroll lands on the anchor.
-    expect(easing?.(1)).toBeCloseTo(1, 2);
-    expect(easing?.(0.5)).toBeGreaterThan(0.5);
-  });
-
-  it("never hijacks scrolling under reduced motion", () => {
-    persistOverride(true);
-
-    render(withPreference(<LenisProvider />));
-
-    // Smooth scroll is momentum the visitor did not ask for; it is also a documented
-    // accessibility failure. Not constructing it is the only correct behavior.
-    expect(lenis.constructed).toBe(0);
-  });
-});
-
 describe("ThemeProvider", () => {
   it("applies the resolved theme as a class, which is what Tailwind reads", () => {
     render(
@@ -260,7 +149,7 @@ describe("ThemeProvider", () => {
 });
 
 describe("AppProviders", () => {
-  it("wires the whole tree, so a page can read the preference and raise a toast", () => {
+  it("wires the whole tree, so a page reads both the theme and the preference", () => {
     // Set the override first: the fallback in `useReducedMotionPreference` reports full
     // motion, so asserting the default would pass even with the provider removed here.
     persistOverride(true);
@@ -268,13 +157,11 @@ describe("AppProviders", () => {
     render(
       <AppProviders>
         <Preference />
-        <MotionProbe />
       </AppProviders>,
     );
 
     expect(read("reduced-motion")).toBe("true");
-    expect(read("motion")).toBe("true");
-    // Sonner's region is where every toast lands; without it, feedback is silent.
-    expect(screen.getByLabelText(/notifications/i)).toBeInTheDocument();
+    // The theme resolves through the same tree; a missing ThemeProvider leaves no class.
+    expect(document.documentElement).toHaveClass("light");
   });
 });
