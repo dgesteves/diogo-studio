@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { makeChunk } from "@tests/agent";
-import { agentSourcesPayloadSchema } from "@/schemas/agent";
-import type { AgentSourcesPayload } from "@/types/agent";
+import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/schemas/agent";
 
 import {
   buildCitations,

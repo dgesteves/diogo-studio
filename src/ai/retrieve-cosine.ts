@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AgentChunk } from "@/types/agent";
+import type { AgentChunk } from "@/schemas/agent";
 
 import { MIN_COSINE_SCORE, TOP_K } from "./retrieve-tunables";
 import type { RetrievalHit, RetrievalResult } from "./retrieve-types";

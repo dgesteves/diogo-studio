@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AgentChunk } from "@/types/agent";
+import type { AgentChunk } from "@/schemas/agent";
 
 import { BM25_B, BM25_K1 } from "./retrieve-tunables";
 import { tokenize } from "./retrieve-tokenize";

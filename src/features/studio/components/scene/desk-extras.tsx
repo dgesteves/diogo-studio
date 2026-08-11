@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { DoubleSide } from "three";
-import { brandColors } from "@/config/brand";
+import { brandColors, darkMetalMaterial } from "@/config/brand";
 
-import { DESK_TOP_Y, METAL } from "./constants";
+import { DESK_TOP_Y } from "./constants";
 import { Headphones } from "./headphones";
 
 export function DeskExtras(): ReactElement {
@@ -21,28 +21,28 @@ function DeskLamp(): ReactElement {
     <group position={[-1.36, DESK_TOP_Y, 0.3]} rotation={[0, Math.PI / 2, 0]}>
       <mesh position={[0, 0.008, 0]}>
         <cylinderGeometry args={[0.07, 0.08, 0.016, 24]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <mesh position={[0, 0.28, 0]}>
         <cylinderGeometry args={[0.012, 0.012, 0.54, 12]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <mesh position={[0, 0.55, 0.2]} rotation={[Math.PI / 2.6, 0, 0]}>
         <cylinderGeometry args={[0.011, 0.011, 0.48, 12]} />
-        <meshStandardMaterial {...METAL} />
+        <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
       <group position={[0, 0.625, 0.415]} rotation={[-0.5, 0, 0]}>
         <mesh position={[0, 0.062, 0]}>
           <sphereGeometry args={[0.028, 16, 16]} />
-          <meshStandardMaterial {...METAL} />
+          <meshStandardMaterial {...darkMetalMaterial} />
         </mesh>
         <mesh>
           <cylinderGeometry args={[0.034, 0.078, 0.12, 24, 1, true]} />
-          <meshStandardMaterial {...METAL} side={DoubleSide} />
+          <meshStandardMaterial {...darkMetalMaterial} side={DoubleSide} />
         </mesh>
         <mesh position={[0, 0.058, 0]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.034, 24]} />
-          <meshStandardMaterial {...METAL} />
+          <meshStandardMaterial {...darkMetalMaterial} />
         </mesh>
         <mesh position={[0, -0.056, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.076, 24]} />

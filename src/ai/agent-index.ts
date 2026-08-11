@@ -1,7 +1,6 @@
 import "server-only";
 
-import { agentIndexSchema } from "@/schemas/agent";
-import type { AgentChunk, AgentIndex } from "@/types/agent";
+import { agentIndexSchema, type AgentChunk, type AgentIndex } from "@/schemas/agent";
 
 import indexJson from "@/constants/agent-index.json" with { type: "json" };
 

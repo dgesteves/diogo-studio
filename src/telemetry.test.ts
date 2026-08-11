@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_TRACES_SAMPLE_RATE } from "./constants";
+import { DEFAULT_TRACES_SAMPLE_RATE } from "./telemetry";
 
 /**
  * The fallback Sentry trace sample rate, used by `instrumentation.ts` and

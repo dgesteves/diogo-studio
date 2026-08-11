@@ -3,8 +3,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { makeChunk } from "@tests/agent";
 import { setTestEnv } from "@tests/env";
 import { REFUSAL_TEXT } from "@/ai/agent-response";
-import { agentSourcesPayloadSchema } from "@/schemas/agent";
-import type { AgentChunk, AgentSourcesPayload } from "@/types/agent";
+import {
+  agentSourcesPayloadSchema,
+  type AgentChunk,
+  type AgentSourcesPayload,
+} from "@/schemas/agent";
 
 import { POST } from "./route";
 

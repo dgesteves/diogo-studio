@@ -4,8 +4,8 @@ The migration from the tree as it is to the architecture in
 [`architecture.md`](./architecture.md). **That file is the target; this one is the route.**
 Delete this file when the last phase lands.
 
-Status: **Phase 1 in progress.** Supersedes `restructure-plan.md`, deleted 2026-08-11 — see
-[`decisions.md`](./decisions.md) for why its central premise was wrong.
+Status: **Phase 1 landed 2026-08-11. Phase 2 next.** Supersedes `restructure-plan.md`, deleted
+the same day — see [`decisions.md`](./decisions.md) for why its central premise was wrong.
 
 ---
 
@@ -130,9 +130,11 @@ Each phase leaves `pnpm validate` and `pnpm e2e:ci` green and is independently r
 The E2E suite is structure-immune by design and is the only gate that observes behavior
 rather than resolution — run it at the end of every phase, not just the dangerous ones.
 
-### Phase 1 — remove the dead weight ⏳
+### Phase 1 — remove the dead weight ✅ landed 2026-08-11
 
-Deletion and bug fix. Nothing moves, so nothing can break subtly.
+Deletion and bug fix. Nothing moves, so nothing can break subtly. Outcome: **818 tests green,
+coverage up** (98.96 → 98.98% statements, 93.81 → 93.87% branches — deleting code raises it),
+19/19 routes still static, **209 E2E passed**, bundle 747.97 kB gzipped against a 1.3 MB limit.
 
 - Delete `motion`, `sonner`, `lenis` with their providers and the six `.lenis*` CSS blocks.
 - Delete the five `.cg-*` classes and `.boot-ring`.

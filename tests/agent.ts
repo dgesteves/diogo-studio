@@ -1,4 +1,4 @@
-import type { AgentChunk } from "@/types/agent";
+import type { AgentChunk } from "@/schemas/agent";
 
 export function makeChunk(
   overrides: Partial<AgentChunk> & Pick<AgentChunk, "id" | "content">,

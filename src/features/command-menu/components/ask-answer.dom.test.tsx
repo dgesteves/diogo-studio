@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import type { AgentCitation } from "@/types/agent";
+import type { AgentCitation } from "@/schemas/agent";
 import type { AskStatus, RetrievalMode } from "../types";
 import { AskAnswerSurface } from "./ask-answer-surface";
 

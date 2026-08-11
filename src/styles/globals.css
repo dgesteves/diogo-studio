@@ -124,27 +124,6 @@
     scroll-behavior: smooth;
   }
 
-  html.lenis,
-  html.lenis body {
-    height: auto;
-  }
-
-  .lenis.lenis-smooth {
-    scroll-behavior: auto !important;
-  }
-
-  .lenis.lenis-smooth [data-lenis-prevent] {
-    overscroll-behavior: contain;
-  }
-
-  .lenis.lenis-stopped {
-    overflow: hidden;
-  }
-
-  .lenis.lenis-smooth iframe {
-    pointer-events: none;
-  }
-
   body {
     background: var(--background);
     color: var(--foreground);
@@ -209,59 +188,6 @@
     text-shadow:
       0 0 14px color-mix(in srgb, var(--accent) 50%, transparent),
       0 0 38px color-mix(in srgb, var(--accent) 28%, transparent);
-  }
-}
-
-.cg-node-link {
-  outline: none;
-}
-.cg-node-link:focus-visible .cg-node-ring,
-.cg-node-link:hover .cg-node-ring {
-  stroke-width: 2.4;
-  filter: url(#cg-node-glow);
-}
-.cg-node-link:focus-visible .cg-node-halo,
-.cg-node-link:hover .cg-node-halo {
-  opacity: 1.6;
-}
-.cg-node-halo {
-  opacity: 1;
-  transition: opacity 200ms ease-out;
-}
-.cg-node-ring {
-  transition: stroke-width 180ms ease-out;
-}
-.cg-node-dot {
-  transition: r 180ms ease-out;
-}
-.cg-node-link:hover .cg-node-dot,
-.cg-node-link:focus-visible .cg-node-dot {
-  r: 6;
-}
-
-@keyframes cg-edge-tracer-flow {
-  from {
-    stroke-dashoffset: 0;
-    opacity: 0.85;
-  }
-  85% {
-    opacity: 0.85;
-  }
-  to {
-    stroke-dashoffset: -1200;
-    opacity: 0;
-  }
-}
-.cg-edge-tracer {
-  animation: cg-edge-tracer-flow 3.6s linear infinite;
-  opacity: 0.85;
-  filter: drop-shadow(0 0 4px color-mix(in srgb, var(--accent) 60%, transparent));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cg-edge-tracer {
-    animation: none;
-    opacity: 0;
   }
 }
 
@@ -756,21 +682,6 @@
     auto,
     100% 100%;
   animation: boot-fill-stripes 0.8s linear infinite;
-}
-
-@keyframes boot-ring-pulse {
-  0% {
-    transform: scale(0.92);
-    opacity: 0.7;
-  }
-  70%,
-  100% {
-    transform: scale(1.28);
-    opacity: 0;
-  }
-}
-.boot-ring {
-  animation: boot-ring-pulse 2.2s ease-out infinite;
 }
 
 @property --boot-angle {

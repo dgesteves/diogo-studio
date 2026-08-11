@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AgentChunk } from "@/types/agent";
+import type { AgentChunk } from "@/schemas/agent";
 
 import { bm25Score, buildCorpusStats } from "./retrieve-bm25";
 import { tokenize } from "./retrieve-tokenize";
