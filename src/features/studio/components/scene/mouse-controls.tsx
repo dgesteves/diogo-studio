@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { DoubleSide } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { mouseNormal, mousePoint } from "./mouse-shell";
 import { createMouseSeamGeometry, type MouseSeam } from "./mouse-trim-geometry";
@@ -45,18 +46,14 @@ const WHEEL_SLOT = {
 } as const satisfies MouseSeam;
 
 export function MouseControls(): ReactElement {
-  const parts = useMemo(
-    () => ({
-      channel: createMouseSeamGeometry(CHANNEL),
-      divide: createMouseSeamGeometry(DIVIDE),
-      slot: createMouseSeamGeometry(WHEEL_SLOT),
-      wheel: mousePoint(WHEEL_T, RIDGE_V).addScaledVector(
-        mouseNormal(WHEEL_T, RIDGE_V),
-        -WHEEL_SINK,
-      ),
-    }),
-    [],
-  );
+  // `wheel` is a Vector3 rather than a resource, and is left alone: only the three seam
+  // geometries hold anything the GPU has to be told to let go of.
+  const parts = useDisposable(() => ({
+    channel: createMouseSeamGeometry(CHANNEL),
+    divide: createMouseSeamGeometry(DIVIDE),
+    slot: createMouseSeamGeometry(WHEEL_SLOT),
+    wheel: mousePoint(WHEEL_T, RIDGE_V).addScaledVector(mouseNormal(WHEEL_T, RIDGE_V), -WHEEL_SINK),
+  }));
 
   return (
     <>

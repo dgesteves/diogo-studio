@@ -5,8 +5,9 @@
  * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { CanvasTexture } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 import { createCanvasTexture } from "@/features/studio/components/screens/canvas-texture";
 
 import { drawLoungeTv, type LoungeTvState } from "./lounge-tv-screen-draw";
@@ -14,7 +15,7 @@ import { drawLoungeTv, type LoungeTvState } from "./lounge-tv-screen-draw";
 const TICK_MS = 110;
 
 export function useLoungeTvTexture(): CanvasTexture {
-  const { canvas, texture } = useMemo(() => createCanvasTexture(640, 360), []);
+  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 360));
   const [state, setState] = useState<LoungeTvState>(() => ({ tick: 0 }));
 
   useEffect(() => {

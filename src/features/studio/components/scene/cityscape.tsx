@@ -1,19 +1,19 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { Instance, Instances } from "@react-three/drei";
 import { AdditiveBlending } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createCityFacadeTexture, createSkyTexture } from "./city-textures";
 import { CITY_BUILDINGS, FACADE_VARIANTS } from "./city-layout";
 import { Moon } from "./moon";
 
 export function Cityscape(): ReactElement {
-  const facades = useMemo(
-    () => Array.from({ length: FACADE_VARIANTS }, (_, i) => createCityFacadeTexture(100 + i)),
-    [],
+  const facades = useDisposable(() =>
+    Array.from({ length: FACADE_VARIANTS }, (_, i) => createCityFacadeTexture(100 + i)),
   );
-  const sky = useMemo(() => createSkyTexture(), []);
+  const sky = useDisposable(() => createSkyTexture());
 
   return (
     <group>

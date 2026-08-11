@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
 import type { CanvasTexture } from "three";
 import { brandColors } from "@/config/brand";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { MONO, createCanvasTexture } from "../screens/canvas-texture";
 import { KEYCAPS, KEYCAP_DEPTH, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH } from "./keyboard-layout";
@@ -35,10 +35,10 @@ function drawLegends(ctx: CanvasRenderingContext2D): void {
 }
 
 export function useKeyboardLegendTexture(): CanvasTexture {
-  return useMemo(() => {
+  return useDisposable(() => {
     const { canvas, texture } = createCanvasTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
     const ctx = canvas.getContext("2d");
     if (ctx) drawLegends(ctx);
     return texture;
-  }, []);
+  });
 }

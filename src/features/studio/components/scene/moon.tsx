@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { AdditiveBlending } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createGlowTexture, createMoonTexture } from "./moon-textures";
 
@@ -11,8 +12,8 @@ const MOON_COLOR = "#eef4f8";
 
 export function Moon(): ReactElement {
   // three.js textures need a stable identity to avoid re-uploading to the GPU
-  const glow = useMemo(() => createGlowTexture(), []);
-  const surface = useMemo(() => createMoonTexture(), []);
+  const glow = useDisposable(() => createGlowTexture());
+  const surface = useDisposable(() => createMoonTexture());
 
   return (
     <group>

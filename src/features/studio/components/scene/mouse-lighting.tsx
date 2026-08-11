@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { DoubleSide } from "three";
 import { brandColors } from "@/config/brand";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createMouseBandGeometry, type MouseBand } from "./mouse-trim-geometry";
 
@@ -11,14 +12,11 @@ const LED: MouseBand = { offset: 0.00055, bottom: 0.0013, top: 0.0027 };
 const HALO: MouseBand = { offset: 0.0013, bottom: 0.0005, top: 0.0036 };
 
 export function MouseGlow(): ReactElement {
-  const bands = useMemo(
-    () => ({
-      skirt: createMouseBandGeometry(SKIRT),
-      led: createMouseBandGeometry(LED),
-      halo: createMouseBandGeometry(HALO),
-    }),
-    [],
-  );
+  const bands = useDisposable(() => ({
+    skirt: createMouseBandGeometry(SKIRT),
+    led: createMouseBandGeometry(LED),
+    halo: createMouseBandGeometry(HALO),
+  }));
 
   return (
     <>

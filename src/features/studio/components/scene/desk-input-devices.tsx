@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { DESK_TOP_Y } from "./constants";
 import { MouseControls } from "./mouse-controls";
@@ -13,7 +14,7 @@ const MOUSE_SCALE = 1.05;
 const SHELL_MATERIAL = { color: "#141a21", roughness: 0.62, metalness: 0.3 } as const;
 
 export function Mouse(): ReactElement {
-  const shell = useMemo(() => createMouseShellGeometry(), []);
+  const shell = useDisposable(() => createMouseShellGeometry());
 
   return (
     <group position={[0.45, DESK_TOP_Y, 0.34]} rotation={[0, -0.09, 0]} scale={MOUSE_SCALE}>

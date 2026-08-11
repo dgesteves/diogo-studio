@@ -6,6 +6,44 @@ not for every change.
 
 ---
 
+## 2026-08-11 — Phase 5's leak: `useDisposable`, and why `useMemo` was the wrong holder
+
+Testing-plan Phase 5 went looking for draw-routine transcripts and found that **`src/`
+contained no `dispose()` call at all**, against a `three-r3f-world.md` rule that requires one:
+"textures and geometries built imperatively must be disposed on unmount." Six components were
+affected — the lounge television, the keyboard legends, the cityscape's six facades and its
+sky, the moon's glow and surface, and the mouse's shell, three bands and three seams. Roughly
+ten textures and seven geometries.
+
+**It is reachable, which is what made it worth fixing rather than noting.** `world-stage.tsx`
+gates the canvas on `isClient && !reducedMotion`, and the reduced-motion store is explicitly
+built to follow an OS preference that changes mid-session (Phase 3 tested that branch). So
+turning motion off unmounts the entire scene, and every one of those resources stays on the
+GPU; turning it back on allocates a fresh set. R3F disposes what it **reconciles** from JSX,
+and a texture passed as a `map={…}` prop was never reconciled, so nothing else was ever going
+to free it.
+
+The fix is one shared hook, `src/hooks/use-disposable.ts` — placed there rather than in either
+feature because `world` and `studio` both import it, which is the two-importer test in
+`project-structure.md`. It takes the factory rather than the built resource, so a call site
+cannot memoize and forget the cleanup, or — the subtler trap — write an effect against an
+array literal that is rebuilt every render and therefore disposes the live resource.
+
+**It holds the resource in `useState`, not `useMemo`, and that is the load-bearing detail.**
+React is explicitly free to discard a `useMemo` and recompute it; for a value that has to be
+released by hand, a discarded memo _is_ the leak. A lazy `useState` initializer is the hook
+that runs exactly once. The React Compiler's lint pushed toward this independently — it
+rejects `useMemo(create, [])` because the first argument is not an inline function — but the
+correctness argument is the reason, and it is why this should not be "simplified" back.
+
+Two smaller notes. The walk that finds disposables inside an array or an object uses
+`Object.values` alone: an explicit `Array.isArray` branch was written first, and the mutation
+pass showed removing it changed nothing, because `Object.values` already returns an array's
+elements. It was deleted rather than covered — the Phase 3/4 rule applied a third time. And
+the walk checks `typeof value.dispose === "function"` rather than the key alone, because the
+mouse hands back a `Vector3` beside its geometries and `createCanvasTexture` hands back a
+`{ canvas, texture }` pair, so the collection genuinely contains non-resources.
+
 ## 2026-08-11 — `.claude/` is authored; `.devin/` is a frozen fallback
 
 Moving from the Devin desktop IDE to WebStorm + Claude Code. Claude Code reads `CLAUDE.md` and
