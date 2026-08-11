@@ -6,6 +6,24 @@ not for every change.
 
 ---
 
+## 2026-08-11 — `WebGLContextGuard` deleted: three.js already prevents that default
+
+The component added a `webglcontextlost` listener to the canvas whose entire body was
+`event.preventDefault()`. three's own `WebGLRenderer` registers the same listener in its
+constructor — deliberately before the context is created (`#12753`) — and its handler calls
+`event.preventDefault()` and sets `_isContextLost`. So the guard could not change anything
+observable: the event is prevented either way, and both handlers run.
+
+It was found by trying to test it. The first assertion — dispatch a cancelable
+`webglcontextlost` on `gl.domElement`, expect `defaultPrevented` — passed with the component's
+body removed, and the paired "stops listening after unmount" assertion failed, because three's
+listener is still there. A component whose only test cannot fail is the same finding Phases 3,
+4 and 5 each produced once, and it takes the same fix: delete it rather than exclude it from
+coverage or write a test that asserts registration instead of behavior.
+
+If a real need appears — logging the loss, or showing the visitor a fallback — it should be a
+component that does that observable thing, not a second `preventDefault`.
+
 ## 2026-08-11 — Phase 5's leak had five more call sites than recorded
 
 The entry below names six components and "roughly ten textures and seven geometries". That was

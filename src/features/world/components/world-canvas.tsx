@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 
 import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { ScenePrecompile } from "@/components/r3f/scene-precompile";
-import { WebGLContextGuard } from "@/components/r3f/webgl-context-guard";
 import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/constants/routes";
@@ -79,7 +78,6 @@ export function WorldCanvas({
       <color attach="background" args={[palette.background]} />
       <fog attach="fog" args={[palette.fogColor, palette.fogNear, palette.fogFar]} />
 
-      <WebGLContextGuard />
       <PerfReporter />
       <BootProgressReporter />
 
