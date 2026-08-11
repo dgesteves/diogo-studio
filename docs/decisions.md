@@ -57,6 +57,44 @@ added there is machine-local.)
 
 No new dependency, script or gate step; `pnpm validate` is unchanged.
 
+## 2026-08-10 — `tests/recording-ctx.ts` over `vitest-canvas-mock`, and RTTR stays the 3D answer
+
+Testing-plan §4 chose a recording `Proxy` for the canvas-2D routines before checking what is
+on the shelf. The off-the-shelf option is **`vitest-canvas-mock`** (a fork of
+`jest-canvas-mock`), which mocks the whole 2D API, validates arguments the way a browser does,
+and exposes `__getEvents()`, `__getDrawCalls()` and `__getPath()` for snapshots — the same
+technique. It was still declined, for reasons specific to this repo rather than to the package:
+
+- **It installs from a setup file onto `HTMLCanvasElement.prototype`, so it needs jsdom.** These
+  routines are pure functions of a context, and they run in the **node** project, which is the
+  default here and measurably cheaper (Phase 0: 9.66s → 2.77s of environment time). Adopting it
+  would move ~16 specs into jsdom to gain nothing they use.
+- **It would replace the deliberate `getContext → null` baseline** in `vitest.setup.ts` for
+  every jsdom spec. Null is the production-shaped answer — every routine guards it, and the
+  portrait engine's no-op path depends on it — so recording must stay opt-in per spec.
+- **Text metrics are the one measurement these specs need.** Every font in `src/` is the same
+  monospace stack, so the helper computes a 0.6em advance, which is what makes "this line runs
+  off the panel" a real assertion rather than a transcript diff. A generic mock cannot know that.
+- One 200-line helper against a new devDependency, its aging window and its transitive deps.
+
+So the plan's decision stands, now with the alternative on the record. **If the helper ever
+needs argument validation or path tracking, take the library instead of growing it.**
+
+Nothing changes for the 3D layer: `@react-three/test-renderer` is what pmndrs documents for
+R3F and it is already installed and proven (§5.2). Three parts of its API that Phase 6 owes and
+the plan did not name: `advanceFrames(frames, delta)` drives `useFrame` deterministically —
+which is most of the world's motion — `renderer.fireEvent(instance, "pointerOver")` drives the
+hotspots, and `toGraph()`/`toTree()` serialize the scene for a snapshot. `create()` sets
+`frameloop: "never"`, so nothing advances unless a test says so.
+
+**`renderer.fireEvent` is not Testing Library's `fireEvent`, and does not weaken the
+user-event rule.** R3F has no DOM nodes for meshes — it raycasts every event from one pointer
+event on the `<canvas>` — so user-event cannot reach the scene at any price. RTTR calls the
+handler on a test instance, which proves wiring and state but skips the raycast; whether a
+pointer at given coordinates actually hits an object is a Playwright question, and stays one.
+In the DOM, `user-event` remains the only interaction API, through `@tests/interactions` where
+the handler writes to an external store.
+
 ## 2026-08-10 — Phase 4's dead guards: ⌘K's `openTick` and route-JS's environment checks
 
 Phase 4's menu spec left exactly one uncovered line in `command-menu.tsx`, and the reason it

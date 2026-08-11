@@ -265,6 +265,15 @@ deterministic, needs no native dependency, runs in milliseconds, and produces
 exactly the "test the exact current behavior" characterization you asked for. A
 draw routine's snapshot is a literal transcript of what it paints.
 
+The off-the-shelf version of that technique is **`vitest-canvas-mock`**, and it was
+weighed before Phase 5 wrote a line: it needs jsdom and a setup file, where these
+routines are pure functions of a context that run in the cheaper node project, and it
+would take over the deliberate `getContext → null` baseline for every jsdom spec.
+`tests/recording-ctx.ts` stays, with one thing the library cannot supply — a 0.6em
+monospace advance for `measureText`, which is what turns "this line runs off the panel"
+into an assertion. See [`decisions.md`](./decisions.md), and take the library rather than
+growing the helper if argument validation is ever needed.
+
 **`@react-three/test-renderer@9.1.1` works — but not out of the box.** Installed and
 proven: `StudioScene` renders headlessly with 228 meshes, 194 groups and 16 lights, no
 GPU. This is the only way to get real assertions on the 3D tree, and it is precisely
@@ -810,6 +819,21 @@ counts, positions against the layout constants, material tokens from
 `config/brand.ts`, and the palette branch. Plus the `world/hooks` input reducers
 (`explore-input-state`, `orbit-input-state`, key bindings, damping, clamping) and
 `ai-core-animation` / `intro` / `radial-glow`.
+
+The spike used only `create()` and the scene graph. Three parts of the API this phase
+needs: **`advanceFrames(frames, delta)`** runs `useFrame` subscribers on a fixed delta —
+`create()` sets `frameloop: "never"`, so motion advances only when a test says so, which
+is how the animation modules become deterministic; **`renderer.fireEvent(instance,
+"pointerOver")`** drives the hotspots; and **`toGraph()`/`toTree()`** serialize a scene area
+for a snapshot. Branches, not statements, remain the target (§5.2).
+
+**That `fireEvent` is RTTR's, not Testing Library's, and the DOM rule is unchanged: use
+`user-event`.** A mesh has no DOM node — R3F raycasts its events from one pointer event on
+the `<canvas>` — so user-event has nothing to aim at and cannot reach the scene at all. The
+real split is which question is being asked: RTTR answers _is the handler wired and does the
+state change_, in milliseconds and with no camera involved; only Playwright can answer _does
+a pointer at these coordinates hit that object_, which `world.spec.ts` already does for
+explore mode. Phase 6 needs both, and neither is a substitute for user-event in a DOM spec.
 
 This is the phase that directly de-risks restructure Phases 3–4.
 
