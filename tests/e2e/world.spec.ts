@@ -12,9 +12,8 @@ import { expect, settleWorld, test } from "./fixtures";
  *
  * Clicking a sign inside the canvas is not asserted here and should not be. Picking a
  * mesh by screen coordinate on a software renderer is a coin flip, and the same
- * navigation is reachable through the map — so the scene-graph tests in testing-plan
- * Phase 6 own "the hotspot is where it should be", and this owns "a visitor can get
- * anywhere".
+ * navigation is reachable through the map — so the RTTR specs own "the hotspot is where it
+ * should be", and this owns "a visitor can get anywhere".
  */
 test.describe("Studio map", () => {
   test("lists every destination under its sector", async ({ page }) => {

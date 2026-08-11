@@ -13,8 +13,8 @@ paths:
 **Vitest** (two projects), **Testing Library** and **`@react-three/test-renderer`** (RTTR) for
 the scene. No Jest, no MSW — mock with `vi.mock` at the module boundary, and check
 `package.json` before reaching for a library. Playwright standards are in
-`e2e-playwright.md`; per-layer coverage targets and the phase plan are in
-`docs/testing-plan.md`.
+`e2e-playwright.md`; the coverage thresholds and every exclusion's reasoning are commented in
+`vitest.config.ts`, which `pnpm validate` enforces.
 
 ## What makes a test worth keeping
 

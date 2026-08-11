@@ -38,6 +38,31 @@ route renders, and the icons served through the hashed href the page emits. And 
 this batch survived as genuine equivalent mutants: changing a favicon's declared _and_ rendered
 size together is not a defect, and only the mismatch is.
 
+## 2026-08-11 — `testing-plan.md` deleted, and where its content went
+
+The plan said of itself: "This plan is temporary and gets deleted when its phases land."
+Phases 0–7 have landed, so it is gone. What it carried has been split by whether a tool can
+enforce it:
+
+- **The coverage targets are now thresholds** in `vitest.config.ts`, which `pnpm validate` and
+  CI both run. A number in a document is a wish; a number in a config is a gate.
+- **The exclusion list was re-derived from scratch and came out at two entries** — see the entry
+  above it, which supersedes the plan's own list.
+- **The conventions moved to `.claude/rules/testing.md` and `AGENTS.md`** — what each kind of
+  test owns, the jsdom-by-filename split, the helper locations, the repo's mechanical traps.
+- **The findings stayed here.** Every phase's defects already have entries above.
+- **The one unfinished item was already recorded here** — the DOM-only visual baselines, in the
+  2026-08-09 entry. It is not lost; it was never started.
+
+What is deliberately _not_ preserved is the phase narrative: which phase bought which
+percentage, the measured tables, the "shape of the gain" arguments. That was scaffolding for
+sequencing work that is now done, and `git log` holds it if anyone wants the history.
+
+The reason to delete rather than archive is the same one behind
+[the no-roadmap entry](#2026-08-07--no-roadmap-document): a document nothing forces to stay
+true will drift, and this one went stale four times _while being actively maintained_. Its own
+§2 said so.
+
 ## 2026-08-11 — Coverage thresholds are global, not per-directory
 
 `testing-plan.md` §5.3 argued for per-directory thresholds, and it was right that 90% on pure

@@ -67,7 +67,7 @@ if any of the 19 must-be-static routes de-optimizes.
 ├── .github/                    workflows (ci, audit, release-please) + dependabot
 ├── .husky/                     git hooks (pre-commit, commit-msg)
 ├── .vscode/                    shared settings + recommended extensions
-├── docs/                       architecture.md • decisions.md • restructure-plan.md • testing-plan.md
+├── docs/                       architecture.md • decisions.md • restructure-plan.md
 ├── public/                     static assets served as-is (images, icons, audio)
 ├── scripts/                    build/maintenance scripts (tsx) — agent-index builder,
 │                               check-prerender

@@ -84,14 +84,24 @@ have shipped wrong before, and a rule nobody corrects is how. If a check can enf
 
 Standards and placement live in `.devin/rules/` (activated by file type or on demand); the
 tree as it is today in `docs/architecture.md`; the structural target and its phases in
-`docs/restructure-plan.md`; coverage targets in `docs/testing-plan.md`; and the reasoning
-behind non-obvious calls in `docs/decisions.md` — append-only, so read the entry, not the file.
+`docs/restructure-plan.md`; and the reasoning behind non-obvious calls in `docs/decisions.md` —
+append-only, so read the entry, not the file.
 
 ## Constraints that are easy to trip over
 
-- **No restructure phase starts** until the unit suite can show a move changed no behavior;
-  `docs/restructure-plan.md` owns the gate and its exceptions. Re-measure with
-  `pnpm test:coverage` before citing any coverage figure.
+- **The suite is the restructure's safety net, and `pnpm validate` now gates it.** Coverage
+  thresholds live in `vitest.config.ts` — global, not per-directory, because the restructure
+  moves the directories. Re-measure with `pnpm test:coverage` before citing any figure, and
+  raise a threshold only from a measured run. **Never lower one to make a change pass**: the
+  number went up because a test was written, so it comes down only when code is deleted.
+- **Test helpers live in `tests/` and are imported through `@tests/*`** — `r3f` for the scene
+  graph, `recording-ctx` for canvas draws, `interactions` for act-wrapped user-event, plus
+  `stores`, `media`, `env` and `agent`. Write one when its second caller appears, not before;
+  `knip` fails on an unused file. Colocate specs at the **cluster root**, one file per concept
+  rather than per source file, so a `git mv` of the folder carries them.
+- **Judge the environment by what the test touches, not what the module is about.**
+  `*.dom.test.{ts,tsx}` runs under jsdom with `vitest.setup.ts`; everything else runs under
+  node. Node is the default so a missing marker fails loudly with `document is not defined`.
 - **`src/constants/agent-index.json` is generated.** Edit a source
   (`src/constants/{career,patterns,routes}.ts`, `config/site.ts`,
   `features/world/constants/destinations.ts`) then run `pnpm agent:index`.

@@ -43,8 +43,8 @@ retries. For anything timing- or 3D-sensitive, reproduce the runner with
 ## Conventions
 
 - Coding standards and file placement: [`.devin/rules/`](./.devin/rules).
-  A restructure is planned — Phase 0 has landed, the rest is blocked on
-  [`docs/testing-plan.md`](./docs/testing-plan.md), which is the critical path.
+  A restructure is planned and Phase 0 has landed; the test suite it was
+  waiting on is complete, so the remaining phases are unblocked.
   [`docs/restructure-plan.md`](./docs/restructure-plan.md) is authoritative
   for structural questions, [`docs/architecture.md`](./docs/architecture.md)
   describes the tree as it is today, and

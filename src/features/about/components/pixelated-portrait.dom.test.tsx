@@ -6,9 +6,10 @@ import { PixelatedPortrait } from "./pixelated-portrait";
 
 /**
  * The portrait draws itself onto a canvas, which jsdom cannot rasterize — the engine and its
- * sampler are testing-plan Phase 5. What is testable now is the part that decides whether the
- * portrait is content or noise: a canvas is invisible to assistive technology, so the frame
- * around it carries the description, and something legible stands in until pixels arrive.
+ * sampler are covered through a recording context in `pixelated-portrait-engine.dom.test.ts`.
+ * What this file owns is the part that decides whether the portrait is content or noise: a
+ * canvas is invisible to assistive technology, so the frame around it carries the description,
+ * and something legible stands in until pixels arrive.
  */
 
 describe("PixelatedPortrait", () => {

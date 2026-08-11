@@ -3,11 +3,17 @@
 A review of `src/` as it actually is today, why it feels over-engineered, and a
 phased plan to fix it without changing behavior.
 
-Status: **Phase 0 and the §8 documentation audit have landed. Phases 1–7 are not
-started and are blocked.**
+Status: **Phase 0 and the §8 documentation audit have landed. Phases 1–7 are unblocked
+and not started.**
 
-> **Phases 1–7 are blocked on the test suite. Do not start one until
-> [`testing-plan.md`](./testing-plan.md) is complete.**
+> **The gate is met, as of 2026-08-11.** The test suite this plan waited on is complete and
+> deleted, having done its job: **87 files / 823 tests**, `pnpm e2e:ci` at 210/210 across two
+> motion modes, and coverage of **98.96% statements / 93.81% branches**, now enforced by
+> thresholds in `vitest.config.ts` that `pnpm validate` runs. Every layer these phases touch
+> is covered: the scene graph by `@react-three/test-renderer`, the draw routines by recording
+> transcripts, the DOM by Testing Library, every route by Playwright. The paragraphs below are
+> kept because the _argument_ still governs how a phase is verified — only the "not yet"
+> is gone.
 >
 > **Phase 0 was deliberately unblocked and shipped early** (2026-08-08), because the
 > argument below does not apply to it: relaxing a lint cap moves no code and changes
@@ -35,8 +41,9 @@ started and are blocked.**
 > (E2E) is deliberately structure-immune so it survives every move below and acts
 > as the harness that makes "no behavior change" a checkable statement.
 >
-> **Coverage has moved four times — 10.71% → 28.82% → 33.05% → 35.90% → 41.82% — and what
-> unblocked anything was one of those moves, not the number.** Read the shape of the gain.
+> **Coverage moved seven times — 10.71% → 28.82% → 33.05% → 35.90% → 41.82% → 51.03% →
+> 74.34% → 98.96% — and what unblocked anything was one of those moves, not the number.**
+> Read the shape of the gain.
 > The first came from one RTTR spec mounting `StudioScene`: concentrated in exactly one of
 > the eight phases below (Phase 4) and almost purely **statements**. Testing Phase 1 took
 > `rate-limit.ts`, `app/api/chat` and `src/ai` from ~0% to 98–100%, which licenses Phase 6
@@ -44,11 +51,13 @@ started and are blocked.**
 > routes in both motion modes, 210 runs, and it is structure-immune. Testing Phase 3 took
 > the stores, hooks and providers to 97–100%, which licenses Phase 5 here.
 >
-> What is still missing is aimed squarely at the two dangerous phases: `world/components` at
-> 22%, `world/…/{lounge,props}` at **0%**, `world/hooks` at **2.4%**, and `studio/…/scene`
-> at 84.7% statements but **53.1% branches** from smoke rendering alone. `scene.dom.test.tsx`
-> asserts an exact mesh count, so Phase 4 has one guard against the specific failure it was
-> feared for. One guard is not a net.
+> The gap this paragraph used to describe was exactly the two dangerous phases:
+> `world/components` at 22%, `world/…/{lounge,props}` at **0%**, `world/hooks` at **2.4%**,
+> and `studio/…/scene` at 84.7% statements but **53.1% branches** from smoke rendering alone.
+> Those rows now read **98.2 / 99.4 / 98.2 / 98.2 / 99.8%**, with branches at 87–95%, and the
+> assertions behind them were each verified by mutation. `scene.dom.test.tsx` still asserts an
+> exact mesh count — Phase 4's guard against the specific failure it was feared for — but it is
+> no longer the only one.
 
 Baseline: commit `b72c1e5` ("remove career-graph feature and consolidate career
 data"). `pnpm validate` passed (76 tests, knip clean) and every number in §2 was
@@ -269,7 +278,7 @@ Do this on a branch, one commit per phase, on a clean tree.
 
 **Run `pnpm e2e` at the end of every phase, not just 3, 4 and 7.** The original
 rule was written when the E2E suite was 6 specs covering 3 of 17 routes, so it
-was cheap to skip and worth little. Once `testing-plan.md` Phase 2 lands it
+was cheap to skip and worth little. Now that the E2E suite is in place it
 covers all 17 routes plus the `AGENTS.md` non-negotiables, and it is the only
 gate that observes behavior rather than resolution.
 
@@ -586,12 +595,12 @@ docs/
   architecture.md       what is, not what might be
   decisions.md          dated decision log
   restructure-plan.md   this file — delete when phases 1–7 land
-  testing-plan.md       delete when its phases land
 .devin/rules/           10 files
 ```
 
-Five documents plus the rule set — two of them (this file and `testing-plan.md`) are
-temporary by construction. No roadmap, no vision board, no design-system doc, no
+Four documents plus the rule set — this file is the only one temporary by construction.
+`testing-plan.md` was the other, and it was deleted on 2026-08-11 when its phases landed,
+which is the precedent for deleting this one. No roadmap, no vision board, no design-system doc, no
 migration archaeology — every one of those rotted because nothing forced it to stay
 true. What survives is either enforced by a tool (`.devin/rules/`, the lint
 guardrails, verification commands) or is a fact that cannot drift (repo constraints,
