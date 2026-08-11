@@ -3,6 +3,7 @@ paths:
   - "**/*.test.ts"
   - "**/*.test.tsx"
   - "tests/*.ts"
+  - "tests/*.tsx"
   - "vitest.config.ts"
   - "vitest.setup.ts"
 ---
@@ -71,7 +72,24 @@ with no setup.
 
 - **Every scene test failing with `Cannot assign to read only property 'position'` is module
   duplication of three, not a three.js bug.** The pins that prevent it are commented in
-  `vitest.config.ts`; don't remove them.
+  `vitest.config.ts`; don't remove them. R3F's "Hooks can only be used within the Canvas
+  component!" thrown from a component that plainly is inside one has the same cause a level out:
+  a package that calls a fiber hook and is missing from `server.deps.inline`.
+- **Scene specs go through `@tests/r3f`, which owns three traps that each produce a passing
+  test that asserts nothing.** `advanceFrames` does not move `state.clock` and calls
+  `useFrame` outside React — use `advance()`. `Box3.setFromObject` and `getWorldPosition`
+  refresh descendants but not ancestors, so read world positions from the helper, which
+  updates the whole scene first; a mesh three groups deep otherwise reports its position as
+  if every group above it were at the origin. And `scene.state` is a getter over the live
+  store, because R3F replaces the state object on every `set()` — a captured `RootState` keeps
+  the renderer's default 75° camera while `makeDefault` drives another one. Full reasoning in
+  [`docs/decisions.md`](../../docs/decisions.md).
+- **RTTR's renderer is a real `WebGLRenderer` over a mock context, so it answers most things
+  and a few not at all.** `gl.info`, `compileAsync` and a real `<canvas>` are all there;
+  `setRenderTarget` (drei's `ContactShadows`) and postprocessing's `getContextAttributes()`
+  need a GPU. Stub those on the live renderer through `renderScene`'s `prepare` — three defines
+  `compileAsync` as an own property, so there is no prototype to spy on. The canvas is also
+  **detached**, so drei's `<Html>` renders nowhere until `prepare` appends it to the document.
 - **jsdom cannot rasterize canvas** (`getContext("2d")` is `null`), so draw routines are tested
   through a recording `Proxy`. Those snapshots are only trustworthy while `src/` stays free of
   `Math.random()`.

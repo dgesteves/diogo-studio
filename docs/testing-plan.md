@@ -4,8 +4,8 @@ A phased plan to take `src/` to a real, trustworthy regression net — built
 specifically so that [`restructure-plan.md`](./restructure-plan.md) can be
 executed without fear.
 
-Status: **Phases 0–5 are complete except for the visual baselines; Phases 6–7 are not
-started.** Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
+Status: **Phases 0–6 are complete except for the visual baselines; Phase 7 is not started.**
+Phase 0 shipped the foundation — the `Math.random()` seeding fix in §5.1,
 `mulberry32` promoted to `src/utils/mulberry32.ts`, **the existing E2E suite made green**
 (it was 16/18 — the `/work` spec asserted content that no longer exists, and the ⌘K
 Ask-mode spec was flaky ~1 in 12 because it raced hydration), **RTTR installed with its
@@ -41,9 +41,18 @@ its own tests that could not fail**.
 plan named is covered, the suite is **59 files / 589 tests**, and repo-wide coverage is **74.34%
 / 67.94%**. It found **one production defect**, and a broad one — `src/` contained no `dispose()`
 call at all, so every texture and geometry the scene builds by hand leaked whenever a visitor
-turned motion off. **Phase 6 (the 3D scene graph) is the next thing to work on.**
+turned motion off.
 
-Baseline: re-measured 2026-08-11 on the current tree, after Phase 5.
+**Phase 6 has now landed, and the 3D layer is no longer the residue**: every scene area is
+covered by RTTR, the suite is **80 files / 763 tests**, and repo-wide coverage is **94.90% /
+90.95%** — past this plan's own ~90% projection. It found **two production defects** (nine more
+canvas textures leaking the way Phase 5's did, and a component whose entire body three.js
+already does), **one hole in the vitest config**, and **two of its own tests that could not
+fail**. **Phase 7 (lock it in) is the next thing to work on**, and Phase 6 left it three
+decisions — `features/audio`, the 17 route pages, and the exclusion list — named at the end of
+that section.
+
+Baseline: re-measured 2026-08-11 on the current tree, after Phase 6.
 `pnpm validate` passes and `pnpm e2e:ci` is **210/210 at `workers: 1`**. Every number below
 is measured; where an earlier draft's figure has been superseded it is marked, because this
 plan's whole argument is that unverified numbers should not govern work — and this table has
@@ -62,9 +71,9 @@ specs**, and the whole toolchain was already wired: vitest + jsdom, Testing Libr
 existed and were good.
 
 So this was not a greenfield problem but a **coverage-breadth** one: the tests clustered on
-pure logic and data invariants. Phase 1 added the server surface, Phase 3 client state, and
-Phase 4 the DOM. **What is left is the 3D scene and the canvas draw routines**, which is what
-the rest of this section is about.
+pure logic and data invariants. Phase 1 added the server surface, Phase 3 client state, Phase 4
+the DOM, Phase 5 the canvas draw routines and Phase 6 the 3D scene. **What is left is not a
+layer but a set of decisions**, listed at the end of Phase 6 and owned by Phase 7.
 
 The second correction is more important. **"Maximum coverage on everything" is
 the wrong objective function.** 79 of 298 files render Three.js, and coverage on
@@ -84,11 +93,11 @@ which files should never be chased.
 
 | Metric                          | Value                                                  |
 | ------------------------------- | ------------------------------------------------------ |
-| Non-test source files           | **302** (157 `.tsx`, 145 `.ts`)                        |
-| Unit test files / tests         | **59 / 589**                                           |
+| Non-test source files           | **301** (156 `.tsx`, 145 `.ts`)                        |
+| Unit test files / tests         | **80 / 763**                                           |
 | E2E specs / tests               | **14 / 105** → **210 runs** across two motion projects |
-| Statements / branches           | **74.34% / 67.94%**                                    |
-| Functions / lines               | **74.67% / 74.79%**                                    |
+| Statements / branches           | **94.90% / 90.95%**                                    |
+| Functions / lines               | **92.99% / 95.63%**                                    |
 | Routes in `constants/routes.ts` | **17**, all with a `(world)` page                      |
 | E2E route coverage              | **17 of 17** — status, `h1`, metadata, axe, content    |
 | E2E motion modes                | **both** — `reduced-motion` + `full-motion` projects   |
@@ -127,49 +136,58 @@ and equally honest. Read it against what the phase asserted rather than against 
 tests, 29 mutations, one real leak. The rows still short of their §5.3 target are named in Phase
 5, and each is either a guard that cannot run or Phase 6's.
 
+**Phase 6 closes it: statements 74.34% → 94.90%, branches 67.94% → 90.95%**, and the two columns
+have converged, which is what "the residue is the 3D layer" was always predicting. Mounting a
+declarative scene is still cheap in statements (§5.2), so the branch number is the one that says
+this phase did the work: **+23 points, from asserting the conditions the scene actually has** —
+day against night, full against reduced against frozen, explore against orbit, a hotspot
+pointed at against focused, a driver that never answers. What is left below 90% is named at the
+end of Phase 6, and none of it is a scene.
+
 ### Coverage by layer today
 
 These are v8's own per-directory rows, not aggregates — the previous version of this
 table invented a few, and two of them were wrong (see below).
 
-| Layer                     | Stmts     | Branch    | Note                                                                              |
-| ------------------------- | --------- | --------- | --------------------------------------------------------------------------------- |
-| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.           |
-| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.           |
-| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                         |
-| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                           |
-| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                         |
-| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP                   |
-| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                                    |
-| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                         |
-| **`src/hooks`**           | **100%**  | **100%**  | was 29.2/0 — Phase 3                                                              |
-| **`command-menu/hooks`**  | **100%**  | **100%**  | was 1.2/0 — Phase 3; the whole Ask pipeline, driven through `useAskAgent`         |
-| **`command-menu/stores`** | **100%**  | **100%**  | was 48.5/10.5 — Phase 3, after deleting one unreachable guard                     |
-| **`inspector/stores`**    | **100%**  | **100%**  | was 68.3/44.4 — Phase 3                                                           |
-| **`command-menu/comp…`**  | **100%**  | **99.0%** | was 4.2/0 — Phase 4. The one branch left is a regex-guaranteed pair.              |
-| **`inspector/comp…`**     | **100%**  | **100%**  | was 4.8/0 — Phase 4, overlay and formatters                                       |
-| **`world/…/hud`**         | **100%**  | **100%**  | was 27.7/10.5 — Phase 4, the whole command deck                                   |
-| **`components/ui`**       | **100%**  | **100%**  | was 82.4/66.7 — Phase 4; incidental coverage replaced by assertions               |
-| **`components/seo`**      | **100%**  | **100%**  | was 0/100 — Phase 4, plus the escaping fix it prompted                            |
-| **`home/components`**     | **100%**  | **100%**  | was 87.5/100 — Phase 4 closed the CTA's own action                                |
-| **`src/stores`**          | **97.7%** | **90.7%** | was 60.3/44.4 — Phase 3; the residue is SSR guards, explained below               |
-| **`src/providers`**       | **97.2%** | **90.9%** | was 30.6/27.3 — Phase 3                                                           |
-| **`studio/…/scene`**      | **98.9%** | **77.6%** | was 84.7/53.1 — Phase 5 took the texture factories and the keyboard legends       |
-| `world/constants`         | 78.9%     | 84.6%     | the data-invariant tests + `station-index`                                        |
-| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature     |
-| `world/utils`             | 49.7%     | 35.5%     | `framing`/`orbit`/`explore` are 100%; the animation modules left are Phase 6      |
-| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`       |
-| **`world/components`**    | **29.5%** | **38.7%** | was 22.3/27.1; boot and the content blocks are **100%**, the rest is the 3D layer |
-| **`studio/…/screens`**    | **88.7%** | **52.8%** | was 23.8/8.3 — Phase 5; the residue is the R3F wrapper around each draw           |
-| **`about/components`**    | **95.0%** | **75.0%** | was 23.9/20.6 — Phase 5 took the portrait engine and its sampler                  |
-| `audio/components`        | 6.7%      | 0%        | Web Audio, no jsdom equivalent — not Phase 4's                                    |
-| `world/hooks`             | 4.9%      | 0%        | the input reducers — Phase 6                                                      |
-| **`world/…/props`**       | **78.6%** | **56.0%** | was 0/0 — Phase 5, the wall screens and the generated bookshelf                   |
-| **`world/…/lounge`**      | **55.4%** | **87.5%** | was 0/0 — Phase 5 took the TV; the furniture around it is Phase 6                 |
-| **`world/…/tv-channels`** | **100%**  | **91.7%** | was 0/0 — Phase 5                                                                 |
-| **`src/hooks`**           | **100%**  | **100%**  | held at 100% through Phase 5's new `use-disposable`                               |
-| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                                |
-| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7          |
+| Layer                     | Stmts     | Branch    | Note                                                                          |
+| ------------------------- | --------- | --------- | ----------------------------------------------------------------------------- |
+| **`rate-limit.ts`**       | **100%**  | **100%**  | was 0/0 — Phase 1. Abuse protection: the highest-risk file in the repo.       |
+| **`app/api/chat`**        | **100%**  | **93.8%** | was 0/0 — Phase 1. The one unreached branch is a `??` that cannot fire.       |
+| **`app/api/health`**      | **100%**  | **100%**  | was 0/100                                                                     |
+| **`src/ai`**              | **98.4%** | **95.2%** | was 71.4/72.3 — Phase 1; the residue is explained below                       |
+| **`src/config`**          | **100%**  | **100%**  | was 86.7/66.7 — `getSiteUrl` precedence and normalization                     |
+| `src/schemas`             | 100%      | 100%      | was already 100% by import; now actually asserted, through HTTP               |
+| `src/constants`           | 100%      | 100%      | `routes` + `career` invariants                                                |
+| `src/utils`               | 100%      | 100%      | `cn.ts` + `mulberry32.ts`                                                     |
+| **`src/hooks`**           | **100%**  | **100%**  | was 29.2/0 — Phase 3; held at 100% through Phase 5's `use-disposable`         |
+| **`command-menu/hooks`**  | **100%**  | **100%**  | was 1.2/0 — Phase 3; the whole Ask pipeline, driven through `useAskAgent`     |
+| **`command-menu/stores`** | **100%**  | **100%**  | was 48.5/10.5 — Phase 3, after deleting one unreachable guard                 |
+| **`inspector/stores`**    | **100%**  | **100%**  | was 68.3/44.4 — Phase 3                                                       |
+| **`command-menu/comp…`**  | **100%**  | **99.0%** | was 4.2/0 — Phase 4. The one branch left is a regex-guaranteed pair.          |
+| **`inspector/comp…`**     | **100%**  | **100%**  | was 4.8/0 — Phase 4, overlay and formatters                                   |
+| **`world/…/hud`**         | **100%**  | **100%**  | was 27.7/10.5 — Phase 4, the whole command deck                               |
+| **`components/ui`**       | **100%**  | **100%**  | was 82.4/66.7 — Phase 4; incidental coverage replaced by assertions           |
+| **`components/seo`**      | **100%**  | **100%**  | was 0/100 — Phase 4, plus the escaping fix it prompted                        |
+| **`home/components`**     | **100%**  | **100%**  | was 87.5/100 — Phase 4 closed the CTA's own action                            |
+| **`src/stores`**          | **97.7%** | **90.7%** | was 60.3/44.4 — Phase 3; the residue is SSR guards, explained below           |
+| **`src/providers`**       | **97.2%** | **90.9%** | was 30.6/27.3 — Phase 3                                                       |
+| **`studio/…/scene`**      | **99.8%** | **87.8%** | was 84.7/53.1 — Phase 5 the textures, Phase 6 the status LEDs                 |
+| **`world/constants`**     | **97.8%** | **84.6%** | was 78.9/84.6 — Phase 6; `render.ts` through `PerformanceMonitor`             |
+| `src/seo`                 | 50%       | 100%      | `structured-data` only; `root-metadata.ts` is **0%** here, E2E-only by nature |
+| **`world/utils`**         | **99.3%** | **95.2%** | was 49.7/35.5 — Phase 6 took the animation modules                            |
+| `src/app`                 | 44.4%     | 66.7%     | `sitemap.ts` + `robots.ts` now **100%**; the rest is icons + `global-error`   |
+| **`world/components`**    | **98.2%** | **95.1%** | was 29.5/38.7 — Phase 6, the whole 3D layer including the canvas host         |
+| **`studio/…/screens`**    | **99.1%** | **83.3%** | was 88.7/52.8 — Phase 6 took the four texture clocks Phase 5 left             |
+| **`about/components`**    | **95.0%** | **75.0%** | was 23.9/20.6 — Phase 5 took the portrait engine and its sampler              |
+| `features/audio`          | 8.8%      | 0%        | Web Audio, no jsdom equivalent — **no phase ever owned it**; Phase 7 decides  |
+| **`world/hooks`**         | **98.2%** | **93.4%** | was 4.9/0 — Phase 6, the orbit and explore input reducers                     |
+| **`world/…/props`**       | **98.2%** | **76.0%** | was 78.6/56.0 — Phase 6 closed the wall screens' own component                |
+| **`world/…/lounge`**      | **99.4%** | **87.5%** | was 55.4/87.5 — Phase 6 took the furniture around the television              |
+| **`world/…/tv-channels`** | **100%**  | **91.7%** | was 0/0 — Phase 5                                                             |
+| **`components/r3f`**      | **100%**  | **100%**  | was 13.1/37.5 — Phase 6, after deleting one component that could not run      |
+| `app/(world)` pages       | **0%**    | 100%      | all 17 route pages                                                            |
+| `src/types`, `*-types.ts` | **0%**    | **0%**    | type-only modules; belong in the §5.3 exclusion list, applied in Phase 7      |
+| `src/telemetry`           | **0%**    | 100%      | one constant, imported only by the excluded `instrumentation*.ts` — same list |
 
 `layout`/`loading`/`error`/`not-found` are already excluded in `vitest.config.ts`.
 
@@ -189,13 +207,16 @@ Four cautions when reading this table:
   the tool prints; do not aggregate them by hand.
 - **`studio/…/screens` used to be raised _incidentally_** by mounting the scene — a by-product,
   not evidence, and exactly the "tests that mount components and assert nothing" effect §1 warns
-  about. Phase 5 replaced that with transcript assertions on the four draw routines, so what is
-  left in the row is the R3F wrapper around each. `components/ui` made the same move in Phase 4,
-  which is why its branch column moved 33 points without its statement column moving at all.
-- **`world/components` still reads low because it is mostly the 3D layer.** Boot, the content
-  blocks and the destination frame inside it are at 100%; the ~30 canvas and hotspot files
-  supply the rest of the denominator and belong to Phase 6. A directory average is not a
-  status.
+  about. Phase 5 replaced that with transcript assertions on the four draw routines and Phase 6
+  with clocks around them. `components/ui` made the same move in Phase 4, which is why its
+  branch column moved 33 points without its statement column moving at all. **A high row is
+  only worth what its assertions are worth**, which is why every phase above reports its
+  mutation count next to its coverage.
+- **A directory average is still not a status.** `world/components` read 29.5% through Phase 5
+  while boot, the content blocks and the destination frame inside it were already at 100% — the
+  ~30 canvas and hotspot files supplied the rest of the denominator. It now reads 98.2% for the
+  same reason in reverse: the number moved because a different set of files got specs, not
+  because anything already covered got better.
 - **The last 2–9% of the two client-state rows is SSR guards, and chasing it is not work.**
   What `src/stores` and `src/providers` have left is `typeof window === "undefined"` and
   `typeof navigator === "undefined"`: reaching them means deleting a global from under jsdom
@@ -265,8 +286,9 @@ The first five rows account for every file exactly once (95 + 49 + 12 = 156
 rows, called out separately because it needs its own technique — do not add it to
 the total.
 
-All **298 files are now testable with what is installed** — the 79 that need RTTR were
-the one gap, and it is closed (§5.2). No file is left without a tool.
+All **301 files are now testable with what is installed** — the 79 that need RTTR were
+the one gap, and it is closed (§5.2). No file is left without a tool, and after Phase 6 no file
+is left without a spec either, except the ones §5.3 names.
 
 ### Two hard technical findings
 
@@ -390,24 +412,31 @@ A single global number is the wrong instrument, because 90% on pure math and 90%
 on a lighting rig mean different things. Use **per-directory thresholds** in
 `vitest.config.ts`, each ratcheted upward as phases land:
 
-| Layer                                                               | Target   | Rationale                                             |
-| ------------------------------------------------------------------- | -------- | ----------------------------------------------------- |
-| `src/ai`, `src/schemas`, `src/config`, `src/constants`, `src/utils` | **100%** | pure, no excuse                                       |
-| `src/rate-limit.ts`, `src/app/api/**`                               | **100%** | security and contract surface                         |
-| `src/stores`, `src/hooks`, `src/providers`                          | **95%**  | side effects are mockable                             |
-| `world/utils`, `world/constants`, `*-draw.ts`, `*-layout.ts`        | **95%**  | pure logic                                            |
-| Pure-DOM components                                                 | **90%**  | branches on state/props — **met at 100%**, Phase 4    |
-| R3F components                                                      | **85%**  | measured at 84.65% from smoke rendering alone (§5.2)  |
-| R3F components — **branches**                                       | **70%**  | measured at 53%; this is the row that needs real work |
-| `src/app/**` pages                                                  | **90%**  | static compositions, cheap to render                  |
+| Layer                                                               | Target   | Rationale                                            |
+| ------------------------------------------------------------------- | -------- | ---------------------------------------------------- |
+| `src/ai`, `src/schemas`, `src/config`, `src/constants`, `src/utils` | **100%** | pure, no excuse                                      |
+| `src/rate-limit.ts`, `src/app/api/**`                               | **100%** | security and contract surface                        |
+| `src/stores`, `src/hooks`, `src/providers`                          | **95%**  | side effects are mockable                            |
+| `world/utils`, `world/constants`, `*-draw.ts`, `*-layout.ts`        | **95%**  | pure logic                                           |
+| Pure-DOM components                                                 | **90%**  | branches on state/props — **met at 100%**, Phase 4   |
+| R3F components                                                      | **85%**  | **met at 98.2%**, Phase 6 (was 84.65% from mounting) |
+| R3F components — **branches**                                       | **70%**  | **met at 95.1%**, Phase 6; was the row needing work  |
+| `src/app/**` pages                                                  | **90%**  | at **0%**; see below — Phase 7 drops it or meets it  |
 
-Projection: **~88–92% statements overall**, not 100% — still a sum of per-layer
-numbers rather than a derived figure, but the row that moved it most is no longer a
-guess: R3F statements are measured at 84.65% (§5.2), which puts the projection on
-firmer ground than when it was written. Set **branch** thresholds alongside the
-statement ones from the start; the spike showed statements can hit 85% while branches
-sit at 53%, so a statement-only ratchet would report a suite that is far healthier than
-it is.
+Projection: **~88–92% statements overall**, not 100%. **Measured after Phase 6: 94.90% /
+90.95%**, so the projection was slightly conservative and the layered approach held — but the
+reason to keep reading it as a sum rather than a single number is unchanged, and two rows in
+the table above are still nowhere near their target. Set **branch** thresholds alongside the
+statement ones; the spike showed statements can hit 85% while branches sit at 53%, so a
+statement-only ratchet would report a suite that is far healthier than it is.
+
+**Two targets in this table are now claims Phase 7 has to settle rather than inherit.** The
+`src/app/**` pages row asks for 90% and sits at 0%: all 17 are asserted over HTTP by
+`routes.spec.ts`, `seo.spec.ts` and `content-in-dom.spec.ts`, which is stronger evidence than a
+render test would be, so the honest options are to exclude them with that reasoning written
+down or to drop the row — not to leave a number nothing is working toward. And `features/audio`
+has no row at all and 8.8% coverage, because no phase ever claimed it; Web Audio has no jsdom
+equivalent, so it is the same decision.
 
 **Phase 1 met the 100% row for `rate-limit.ts` and `app/api/**` on statements, and came
 within a whisker on `src/ai` — 98.4%/95.2%.** The residue is worth understanding rather
@@ -421,14 +450,23 @@ tests TypeScript rather than the product. See [`decisions.md`](./decisions.md).
 Files that should be _excluded from the denominator_ rather than faked:
 `instrumentation*.ts`, `global-error.tsx`, `icon.tsx`/`apple-icon.tsx` (satori
 `ImageResponse`, asserted via E2E HTTP status instead),
-`world-postprocessing.tsx` (pure effect-pass config with no observable behavior
-headlessly), and the **type-only modules** — `src/types/*.ts` and `ai/retrieve-types.ts`
+and the **type-only modules** — `src/types/*.ts` and `ai/retrieve-types.ts`
 compile to nothing, so v8 scores them 0/0 and they only depress the denominator.
 `vitest.config.ts` **already** excludes `src/app/**/{layout,loading,
 error,not-found}.tsx`; fold these into that existing list rather than starting a new one.
 **Phase 4 did not make the `layout`/`loading` entries assertable, so they stay excluded**:
 the `(world)` layout composes the canvas, the deck and the boot gate, each of which is now
 covered where it lives, and rendering the layout again would only mount them a second time.
+Add `src/telemetry/constants.ts` to the list at the same time — it is one constant, imported
+only by the `instrumentation*.ts` files already on it.
+
+**`world-postprocessing.tsx` has been taken _off_ this list, and the reason generalizes.** It
+was here as "pure effect-pass config with no observable behavior headlessly"; the behavior turns
+out to be observable, because mocking `@react-three/postprocessing` at the third-party boundary
+leaves our own component running and its palette-driven bloom and vignette values assertable
+(Phase 6). What genuinely cannot run headlessly is one library call — `EffectComposer` reading
+`getContextAttributes().alpha` off a real WebGL context. **Before excluding a file, check whether
+what cannot run is the file or a dependency of it**, and stub the dependency.
 
 Never fail CI on coverage _downward drift alone_ while a phase is in flight —
 ratchet on merge to `main`.
@@ -869,37 +907,140 @@ the R3F furniture, which is Phase 6.
 
 **Phase 6 (the 3D scene graph) is the next thing to work on.**
 
-### Phase 6 — the 3D scene graph (~79 files → 75%)
+### Phase 6 — the 3D scene graph — ✅ complete
 
-RTTR tests per scene area: room, desk, monitors and screens, lounge, props and
-wall screens, AI core, hotspots, camera, portals, lighting. Assert mesh/light
-counts, positions against the layout constants, material tokens from
-`config/brand.ts`, and the palette branch. Plus the `world/hooks` input reducers
-(`explore-input-state`, `orbit-input-state`, key bindings, damping, clamping) and
-`ai-core-animation` / `intro` / `radial-glow`.
+Landed 2026-08-11 as **21 new spec files and 174 new tests**, taking the suite from 59/589 to
+**80 files / 763 tests**. `pnpm validate` green. The 3D layer is no longer the residue: every
+row the earlier phases deferred is now at 97–100%. This section's own heading asked for 75%
+statements and §5.3 for 70% branches on R3F components; `world/components` reports **98.2% /
+95.1%**, and `pnpm e2e:ci` is still 210/210.
 
-The spike used only `create()` and the scene graph. Three parts of the API this phase
-needs: **`advanceFrames(frames, delta)`** runs `useFrame` subscribers on a fixed delta —
-`create()` sets `frameloop: "never"`, so motion advances only when a test says so, which
-is how the animation modules become deterministic; **`renderer.fireEvent(instance,
-"pointerOver")`** drives the hotspots; and **`toGraph()`/`toTree()`** serialize a scene area
-for a snapshot. Branches, not statements, remain the target (§5.2).
+| Target             | Before      | **After**           |
+| ------------------ | ----------- | ------------------- |
+| `world/components` | 29.5/38.7   | **98.2% / 95.1%**   |
+| `world/hooks`      | 4.9/0       | **98.2% / 93.4%**   |
+| `world/utils`      | 49.7/35.5   | **99.3% / 95.2%**   |
+| `world/constants`  | 78.9/84.6   | **97.8% / 84.6%**   |
+| `world/…/lounge`   | 55.4/87.5   | **99.4% / 87.5%**   |
+| `world/…/props`    | 78.6/56.0   | **98.2% / 76.0%**   |
+| `studio/…/scene`   | 98.9/77.6   | **99.8% / 87.8%**   |
+| `studio/…/screens` | 88.7/52.8   | **99.1% / 83.3%**   |
+| `components/r3f`   | 13.1/37.5   | **100% / 100%**     |
+| Repo-wide          | 74.34/67.94 | **94.90% / 90.95%** |
 
-**That `fireEvent` is RTTR's, not Testing Library's, and the DOM rule is unchanged: use
+- ✅ **The scene areas the section named**, one spec per area at its cluster root: the room and
+  its light rig against `config/brand.ts` (extended from the §5.2 spike), the desk screens, the
+  wall screens and the generated shelf, the AI core, the hotspots, the camera, the portals, the
+  quality guard, the stage and the lounge. `tests/r3f.tsx` is the helper Phase 0 deferred until
+  a second scene spec existed; it now has thirteen callers and owns three traps recorded in
+  [`decisions.md`](./decisions.md).
+- ✅ **`lounge.dom.test.tsx`** — the last scene area at 0%, asserted as an arrangement rather
+  than a golden: the furniture stands on the floor, inside the room, hugging both walls, with
+  the sofa on the rug facing a screen lit from the channel it is showing and a soundbar riding
+  the console top. Positions are read as world boxes, never as local `position` props.
+- ✅ **`canvas-support.dom.test.tsx`** — the two components the canvas wraps the scene in that
+  draw nothing: the precompile that takes the boot screen down (resolve, reject, an
+  eight-second timeout, and once only across all three) and the perf reporter the inspector
+  reads (a quarter-second sampling window, the renderer's own counters, and readings that go
+  stale when the canvas dies).
+- ✅ **`screens/textures.dom.test.ts` + `screens/frames.dom.test.tsx`** — the four desk-screen
+  clocks, split by what drives them rather than by file: a caret on a 600 ms interval and a
+  Lisbon clock with an uptime counted from mount under fake timers; a frame-rate sampler and a
+  tablet stroke under `advance()`. This is the row Phase 5 left at 52.8% branches.
+- ✅ **`world-canvas.dom.test.tsx`** — the composition root, which had never been rendered at
+  all. `Canvas` is replaced with a pass-through that records its props, so the whole world
+  mounts inside RTTR's root: 331 meshes, 25 lights, the quality tier reaching `frameloop`,
+  `dpr` and `antialias`, the palette reaching the fog and the bloom, `dprForFactor` through
+  `PerformanceMonitor`, and explore mode standing the visitor up at eye height.
+- ✅ **`world-neon`, `StatusLed`, `BootProgressReporter`** — the sign's decorative text kept out
+  of the accessibility tree and dimmed by the palette, the LED's pulse and its halo, and the
+  loader's progress arriving on the gate's progress bar, asserted in `boot.dom.test.tsx` where
+  the number is read.
+- ✅ **`silence-clock-deprecation.test.ts`** — the console filter the whole suite's zero-stderr
+  rule leans on, asserted for the property nobody would notice breaking: every _other_ warning
+  still gets through, including an `Error` that happens to quote the deprecation.
+
+**Verified by mutation: 54 mutations across 21 source files, 52 killed on the first pass.** Both
+survivors were tests of mine that could not fail, and both are fixed. The lounge's placement was
+asserted against the same constant that places it — a tautology that a moved origin walked
+straight through — so it now asserts the corner the lounge occupies in the _room_, which also
+constrains the rotation. And the console filter's `typeof args[0] === "string"` guard was an
+equivalent mutant until a warning carrying an `Error` was added, since `String()` on it would
+have matched.
+
+**What it found in the product is two defects, one of them the same one Phase 5 found.**
+`useMemo` with no cleanup held a `createCanvasTexture` in **five more call sites** — the four
+desk-screen hooks and `wall-screen.tsx`, which is one instance per wall station, so nine
+textures leak on every motion toggle. Phase 5's audit looked for texture _factories_ and these
+are hooks that wrap one. And **`WebGLContextGuard` was deleted**: its whole body was
+`event.preventDefault()` on `webglcontextlost`, which three's own `WebGLRenderer` already does
+from a listener it registers in its constructor — so a test of it passed with the body removed.
+That is the Phase 3/4/5 rule applied a fourth time. Both are in
+[`decisions.md`](./decisions.md).
+
+**It also found a hole in the test config**, which is why nothing here resolved at first:
+`@react-three/postprocessing` was missing from `server.deps.inline`, so it loaded fiber's CJS
+build and its `useThree` failed with "Hooks can only be used within the Canvas component!" from
+inside a component that plainly is. Same root cause as §5.2, one package further out.
+
+**Four residues are deliberate.** `world-canvas.tsx` sits at 90% statements: the two lines left
+are the `onSelect` and `onAskAi` callbacks, and driving them here would mean raycasting a
+pointer through the full scene, which `world-interact.dom.test.tsx` already does on its own
+props and `station-index.test.ts` already proves for slug → href. `world-postprocessing.tsx` is
+no longer an exclusion candidate — §5.3 is updated — because mocking
+`@react-three/postprocessing` at the third-party boundary leaves our own component running; what
+_cannot_ run headlessly is `EffectComposer`, which reads `getContextAttributes().alpha` off a
+real WebGL context. And the last percent of `orbit-input-state.ts` and `destinations.ts` is a
+`instanceof Element` narrowing and a `RouteKey` that cannot miss its own map: the §5.3 rule
+about `src/ai` applies unchanged.
+
+**Three things Phase 7 has to decide, none of them Phase 6's to take.** `features/audio` is at
+**8.8%** and no phase ever owned it — Web Audio has no jsdom equivalent, so it is either an
+exclusion with a reason or an E2E-only surface stated as such. The 17 `app/(world)` pages are at
+**0%** against §5.3's 90% target, while `routes.spec.ts` and `content-in-dom.spec.ts` assert all
+17 over HTTP; that target should either be dropped or met, not left as a number nothing is
+working toward. And `src/telemetry/constants.ts` is imported only by `instrumentation*.ts`, which
+§5.3 already excludes, so it belongs in the same list.
+
+Exit: **met.** Restructure Phases 3–4 move 40 scene files and collapse the boot cluster, and the
+failure mode of both — a mesh, a light or a whole layer silently disappearing — now fails a test
+in under nine seconds.
+
+#### The RTTR API this phase needed, beyond the spike
+
+The spike used only `create()` and the scene graph. **`advanceFrames(frames, delta)`** runs the
+`useFrame` subscribers — `create()` sets `frameloop: "never"`, so motion only advances when a
+test says so — but it does **not** move `state.clock` and it calls the subscribers outside
+React, so `tests/r3f.tsx` wraps it in `advance()`, which does both. **`toGraph()`/`toTree()`**
+turned out to be no help for a component that renders `null`: both serialize three instances,
+not React elements, so a `PerformanceMonitor` is reached through the props a stub recorded
+rather than through the tree.
+
+**`renderer.fireEvent` is RTTR's, not Testing Library's, and the DOM rule is unchanged: use
 `user-event`.** A mesh has no DOM node — R3F raycasts its events from one pointer event on
 the `<canvas>` — so user-event has nothing to aim at and cannot reach the scene at all. The
 real split is which question is being asked: RTTR answers _is the handler wired and does the
 state change_, in milliseconds and with no camera involved; only Playwright can answer _does
 a pointer at these coordinates hit that object_, which `world.spec.ts` already does for
-explore mode. Phase 6 needs both, and neither is a substitute for user-event in a DOM spec.
-
-This is the phase that directly de-risks restructure Phases 3–4.
+explore mode. Phase 6 needed both, and neither is a substitute for user-event in a DOM spec.
 
 ### Phase 7 — lock it in
 
 Per-layer coverage thresholds enabled and ratcheted; `pnpm validate` switched to
 the coverage run; coverage-exclusion list from §5.3 applied; `AGENTS.md` updated
 with the testing conventions and helper locations.
+
+Three decisions Phase 6 deliberately left rather than taking, each argued where it belongs
+(§5.3 and the end of Phase 6): what to do about **`features/audio`** at 8.8%, which no phase
+ever owned; whether the **`src/app/**` pages** row keeps its 90% target or is dropped in favor
+of the HTTP assertions that already cover all 17; and folding **`src/telemetry/constants.ts`**
+into the existing exclusion list. Two of the three are one line of config each — the work is
+writing down which way it went.
+
+One sequencing note this plan has earned twice: the thresholds should be set from a
+**re-measured** run in the same commit that enables them, and never in the same commit as an
+E2E phase (§2). At the time of writing the numbers to ratchet against are 94.90% statements and
+90.95% branches repo-wide, but re-measure — this table has gone stale four times.
 
 **Only then start `restructure-plan.md` Phase 1.** (Its Phase 0 — the lint caps and
 the import guardrails — was deliberately unblocked and has already landed: relaxing a
