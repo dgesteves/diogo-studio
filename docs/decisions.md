@@ -6,6 +6,57 @@ not for every change.
 
 ---
 
+## 2026-08-11 — `.claude/` is authored; `.devin/` is a frozen fallback
+
+Moving from the Devin desktop IDE to WebStorm + Claude Code. Claude Code reads `CLAUDE.md` and
+`.claude/`, never `AGENTS.md` on its own and never `.devin/**` at any tier — so until now the
+entire 787-line rule set loaded into a Claude Code session as **zero** instruction. The fix is
+wiring, not content: a 14-line `CLAUDE.md` that `@`-imports `AGENTS.md`, plus `.claude/rules/`
+and `.claude/skills/` copied from `.devin/` with only the frontmatter rewritten.
+
+**`.claude/` is authored, not generated.** A generator plus a drift check wired into
+`pnpm validate` was designed and rejected: it assumed both tools running side by side
+indefinitely, when this is a migration where you use one tool at a time. It also had the
+direction backwards — you would edit the tool you are leaving and regenerate into the one you
+actually use. The accepted tradeoff is that `.devin/` goes stale if a rule changes here; that
+is visible and reversible, and cheaper than a script, two package scripts and a gate step that
+get deleted within a month.
+
+**`.devin/` is frozen, enforced rather than remembered.** Zero edits, so Devin keeps working
+exactly as it does today, and `permissions.deny` on `Edit(./.devin/**)` in
+`.claude/settings.json` makes the freeze mechanical. The decision point is explicit: **if the
+WebStorm + Claude Code trial succeeds, delete `.devin/`;** if it fails, nothing needs undoing.
+
+**The freeze bites immediately, and that is the cost being accepted, not an oversight.** The
+`fireEvent` lint rule landing alongside this is documented in `.claude/rules/testing.md` and
+_not_ in its `.devin/` twin, so the two rule sets are already one paragraph apart. ESLint
+enforces the rule either way, which is the reason this is tolerable: the enforcement is in the
+config, and the rule files only explain it.
+
+Two transforms were not cosmetic. `allowed-tools: [read, edit, grep, glob, exec]` are Devin
+tool names, not Claude Code ones — copied verbatim they grant nothing, with no error, just
+unexplained permission prompts; they become `Read Edit Grep Glob Bash`. And the `verify` skill
+is renamed to `gates`, because in Claude Code the bare name `/verify` resolves to a _different_
+bundled skill: an agent obeying the old `AGENTS.md` line would run the wrong workflow and
+believe it had verified. The rename costs one line and keeps the bundled `/verify` and `/run`
+available — worth having on a 3D portfolio, where a change can pass every gate and still look
+wrong.
+
+The three `trigger: model_decision` rules became `paths:` globs, which is a strict improvement:
+the rule now fires deterministically when a matching file is read instead of depending on the
+model electing to load it. Known limitation, accepted: path-scoped rules are not re-injected
+after `/compact`, though the always-on `CLAUDE.md`/`AGENTS.md` layer does survive it.
+
+**cspell was considered and rejected.** WebStorm has a built-in spellchecker, so a `cspell.json`
+plus a dependency plus a `validate` step would duplicate it for the human path. This keeps
+`language-and-copy.md`'s claim that nothing checks copy accurate. The residual gap is real: the
+WebStorm spellchecker only fires when a human has the file open, so a typo in a file Claude
+writes and nobody opens ships unseen — which is precisely why that rule stays load-bearing for
+the agent. (WebStorm's custom dictionary lives in `.idea/`, which is git-ignored, so vocabulary
+added there is machine-local.)
+
+No new dependency, script or gate step; `pnpm validate` is unchanged.
+
 ## 2026-08-10 — Phase 4's dead guards: ⌘K's `openTick` and route-JS's environment checks
 
 Phase 4's menu spec left exactly one uncovered line in `command-menu.tsx`, and the reason it

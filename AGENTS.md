@@ -13,8 +13,9 @@ pnpm e2e:ci      # Playwright + axe on a production build (`pnpm e2e:install` on
 ```
 
 **`pnpm validate` runs neither `build` nor `e2e`.** Anything touching routing, metadata, the
-3D world, focus or timing is unverified until `pnpm e2e:ci` is green. **`/verify`** picks the
-gates and reads a failure, **`/e2e`** runs and triages Playwright, **`/commit`** picks a type.
+3D world, focus or timing is unverified until `pnpm e2e:ci` is green. Your agent's skill list
+carries three workflows: one picks the gates and reads a failure, one runs and triages
+Playwright, one picks a commit type. Names differ by tool — see `CLAUDE.md` for Claude Code.
 
 ## Principles
 
@@ -67,7 +68,8 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
    never (1).
 4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3, the
    config may be the bug: investigate it.
-5. These instructions — `AGENTS.md`, then `.devin/rules`.
+5. These instructions — `AGENTS.md`, then your agent's rule set: `.claude/rules` and
+   `.claude/skills` for Claude Code, `.devin/` for Devin.
 6. Existing implementation — evidence of what is, never authority for what should be.
 7. Descriptive docs — `docs/architecture.md` and the plans describe; they don't decide.
 

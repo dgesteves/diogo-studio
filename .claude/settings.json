@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm lint)",
+      "Bash(pnpm typecheck)",
+      "Bash(pnpm format:check)",
+      "Bash(pnpm test)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm knip)",
+      "Bash(pnpm validate)",
+      "Bash(pnpm build)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.local)",
+      "Edit(./CHANGELOG.md)",
+      "Edit(./pnpm-lock.yaml)",
+      "Edit(./src/constants/agent-index.json)",
+      "Edit(./.devin/**)"
+    ]
+  }
+}
