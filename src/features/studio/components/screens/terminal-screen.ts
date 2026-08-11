@@ -2,11 +2,12 @@
 
 /* eslint-disable react-hooks/immutability --
  * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
+ * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { CanvasTexture } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createCanvasTexture } from "./canvas-texture";
 import { FOCUS_POOL, STATUS_ROWS } from "./terminal-screen-data";
@@ -36,7 +37,7 @@ function formatUptime(ms: number): string {
 }
 
 export function useCenterScreenTexture(): CanvasTexture {
-  const { canvas, texture } = useMemo(() => createCanvasTexture(640, 400), []);
+  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 400));
   const bootAt = useRef<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
 

@@ -2,12 +2,13 @@
 
 /* eslint-disable react-hooks/immutability --
  * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
+ * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
  */
 
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import type { CanvasTexture } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createCanvasTexture } from "./canvas-texture";
 import { drawMetrics } from "./metrics-screen-draw";
@@ -17,7 +18,7 @@ const SAMPLE_SECONDS = 0.5;
 const INITIAL_FPS = 60;
 
 export function useRightScreenTexture(): CanvasTexture {
-  const { canvas, texture } = useMemo(() => createCanvasTexture(640, 400), []);
+  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 400));
   const frames = useRef(0);
   const elapsed = useRef(0);
   const history = useRef<number[]>(Array.from({ length: SPARK_LEN }, () => INITIAL_FPS));

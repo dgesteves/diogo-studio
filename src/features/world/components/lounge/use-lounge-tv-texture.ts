@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/immutability --
  * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
+ * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
  */
 
 import { useEffect, useState } from "react";

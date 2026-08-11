@@ -2,12 +2,13 @@
 
 /* eslint-disable react-hooks/immutability --
  * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
+ * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
  */
 
-import { useEffect, useMemo, type ReactElement } from "react";
+import { useEffect, type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import type { CanvasTexture } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 import { createCanvasTexture } from "@/features/studio/components/screens/canvas-texture";
 
 export type ScreenDraw = (ctx: CanvasRenderingContext2D) => void;
@@ -21,7 +22,7 @@ type WallScreenProps = {
 };
 
 function useScreenTexture(draw: ScreenDraw): CanvasTexture {
-  const { canvas, texture } = useMemo(() => createCanvasTexture(600, 800), []);
+  const { canvas, texture } = useDisposable(() => createCanvasTexture(600, 800));
   useEffect(() => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;

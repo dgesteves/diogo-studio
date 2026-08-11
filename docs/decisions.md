@@ -6,6 +6,25 @@ not for every change.
 
 ---
 
+## 2026-08-11 — Phase 5's leak had five more call sites than recorded
+
+The entry below names six components and "roughly ten textures and seven geometries". That was
+the audit's count, and the audit missed a shape: **five more call sites held a
+`createCanvasTexture` in a `useMemo` with no cleanup** — the four `screens/` hooks
+(`code-screen`, `terminal-screen`, `metrics-screen`, `tablet-screen`), which are the desk's
+three monitors and the graphics tablet, and `props/wall-screen.tsx`, which is instantiated once
+per wall station and therefore leaks five 600×800 textures at a time. Nine textures in total,
+on exactly the path the entry below describes: turning motion off mid-session unmounts the
+canvas, and every one of them stays on the GPU.
+
+The reason they were missed is worth keeping, because it will recur. Phase 5 audited the
+`*-textures.ts` factories and the scene components that call them; these five are _hooks_ that
+wrap a factory, and one of them lives in a different feature from the factory it imports.
+`grep -rn "createCanvasTexture("` finds all of them and is the check to run — it now returns
+eleven call sites, each either inside a `useDisposable` factory or inside a `*-textures.ts`
+factory whose result is held by one, and each covered by a test that fails if the disposal is
+removed.
+
 ## 2026-08-11 — Three RTTR traps the test harness owns rather than each spec
 
 `tests/r3f.tsx` grew three non-obvious pieces during testing-plan Phase 6. Each one produced a

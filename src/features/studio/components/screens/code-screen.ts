@@ -2,17 +2,18 @@
 
 /* eslint-disable react-hooks/immutability --
  * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the memoized texture is intentionally mutated here.
+ * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { CanvasTexture } from "three";
+import { useDisposable } from "@/hooks/use-disposable";
 
 import { createCanvasTexture } from "./canvas-texture";
 import { drawCode } from "./code-screen-draw";
 
 export function useLeftScreenTexture(): CanvasTexture {
-  const { canvas, texture } = useMemo(() => createCanvasTexture(640, 400), []);
+  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 400));
   const [caretOn, setCaretOn] = useState(true);
 
   useEffect(() => {
