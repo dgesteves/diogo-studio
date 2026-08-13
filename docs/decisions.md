@@ -6,6 +6,36 @@ not for every change.
 
 ---
 
+## 2026-08-13 — pnpm settings live in `pnpm-workspace.yaml` only, and the pins now bite
+
+`.npmrc` is deleted. pnpm 11 reads its own settings from `pnpm-workspace.yaml` and CLI
+flags; it accepts `.npmrc` and `npm_config_*` without complaint and ignores them. Verified
+against pnpm 11.7.0: with `engine-strict=true` in `.npmrc`, a package declaring
+`engines.node: ">=99"` installs cleanly; the same setting as `engineStrict` in this file
+fails as intended. `package-manager-strict` behaved the same way.
+
+That made all three `.npmrc` lines dead from the day they were added (`8938999`, the same
+day `pnpm@11` was pinned) — so nothing had ever enforced the Node 24 / pnpm 11 pins that
+`AGENTS.md` calls pinned. `engineStrict` and `packageManagerStrict` now carry them; both
+default to false, so they buy real checks rather than restating a default.
+`auto-install-peers` is not carried over — it has been pnpm's default since v8.
+
+**This is a behavior change, not a repair.** `pnpm install` on the wrong Node now fails
+where it used to succeed. That is the point, but it is also the thing someone will hit and
+be tempted to switch off.
+
+Found via the same class of bug in `scripts/ci-local.sh`, which set the store location
+through `npm_config_store_dir`. Ignored, so pnpm fell back to its default — and because
+`$HOME` in the container is on a different filesystem from the bind-mounted `/work`, the
+store relocated into the working tree, leaving 343 MB of untracked `.pnpm-store/`. Fixed
+with the real `--store-dir` flag. It is deliberately not gitignored: nothing is supposed to
+write it, so its appearance is a signal. The script asserts on it after installing, because
+the first version of this failure announced itself only as a dirty `git status`.
+
+The two dead settings had been canceling out — the script disabled `engine-strict` for a
+container whose Node differs, and neither half worked. Hence one commit: turning the pins
+on without `--config.engineStrict=false` in the container would break `pnpm e2e:runner`.
+
 ## 2026-08-11 — `restructure-plan.md` deleted: its premise was wrong, not its diagnosis
 
 `restructure-plan.md` always said of itself "delete when phases 1–7 land". It is being deleted

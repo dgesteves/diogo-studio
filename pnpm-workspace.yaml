@@ -1,8 +1,20 @@
+# This file is the only place pnpm 11 reads its own settings from. `.npmrc` and
+# `npm_config_*` are accepted without complaint and then ignored, so a setting
+# put there does nothing and looks like it works — this repo shipped three dead
+# ones for three months. Override per-invocation with a CLI flag, not an env var.
+
 # Declared explicitly rather than relying on the pnpm 11 default: an explicit
 # value also turns on minimumReleaseAgeStrict, so resolution fails instead of
 # silently falling back to a version younger than the policy allows. Kept in
 # step with the Dependabot cooldown in .github/dependabot.yml.
 minimumReleaseAge: 1440
+
+# Both default to false, so these buy real checks: `engines` in package.json is
+# enforced at install time, and a `packageManager` mismatch fails instead of
+# resolving to whichever pnpm happens to be on PATH. `scripts/ci-local.sh` opts
+# out of the first one — the Playwright image's Node is not this project's.
+engineStrict: true
+packageManagerStrict: true
 
 allowBuilds:
   sharp: true

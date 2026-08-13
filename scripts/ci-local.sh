@@ -37,8 +37,11 @@ image="${CI_IMAGE:-mcr.microsoft.com/playwright:v${playwright_version}-noble}"
 # Host node_modules is macOS/arm64 and .next holds a host-built manifest; shadowing both
 # with container-owned volumes keeps the two installs from corrupting each other, and
 # keeps the install and the browser cache warm between runs. The pnpm store has to live
-# inside the node_modules volume: pnpm puts it on the same filesystem as the install, so
-# anywhere else it lands in the mounted working tree as `.pnpm-store`.
+# inside the node_modules volume: pnpm keeps the store on the same filesystem as the
+# install, and with $HOME on the container's own filesystem the default relocates into
+# the bind-mounted tree as `.pnpm-store`. Only `--store-dir` overrides that — pnpm 11
+# ignores `npm_config_store_dir`, which is how 343 MB once landed in the working tree.
+# The assertion after the install is what stops that failing silently a second time.
 volume_prefix="$(basename "$repo_root")-ci"
 
 # A plain string, not an array: macOS ships bash 3.2, where expanding an empty array
@@ -70,8 +73,6 @@ docker run --rm $tty_flags $env_mask \
   --volume "${volume_prefix}-ms-playwright:/root/.cache/ms-playwright" \
   --workdir /work \
   --env CI=1 \
-  --env npm_config_engine_strict=false \
-  --env npm_config_store_dir=/work/node_modules/.pnpm-store \
   "$image" \
   bash -euo pipefail -c '
     node_major="$(node -p "process.versions.node.split(\".\")[0]")"
@@ -80,7 +81,20 @@ docker run --rm $tty_flags $env_mask \
     fi
 
     corepack enable
-    pnpm install --frozen-lockfile
+
+    # engineStrict is on in pnpm-workspace.yaml and this image ships whatever Node the
+    # Playwright release pinned, which is not the one this project pins. The warning
+    # above is the signal that matters; failing the install here would only be noise.
+    pnpm install --frozen-lockfile \
+      --store-dir /work/node_modules/.pnpm-store \
+      --config.engineStrict=false
+
+    if [ -e /work/.pnpm-store ]; then
+      echo "error: pnpm wrote its store into the mounted working tree despite --store-dir." >&2
+      echo "       pnpm changed how the store location is configured; fix scripts/ci-local.sh." >&2
+      exit 1
+    fi
+
     pnpm exec playwright install chromium
     pnpm build
     pnpm exec playwright test "$@"
