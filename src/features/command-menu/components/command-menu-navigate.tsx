@@ -1,12 +1,12 @@
 "use client";
 
 import { Command } from "cmdk";
-import { Home, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { type ReactElement } from "react";
 
-import { primaryNav } from "@/config/navigation";
+import { stationSectors } from "@/content/pages";
 
 import { ProfileGroup, ThemeGroup } from "./command-menu-actions";
 import { Item, iconForPage } from "./command-menu-item";
@@ -35,27 +35,28 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
 
       <Command.List className="max-h-[420px] overflow-y-auto px-2 py-2">
         <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-sm">
-          No results. Try <span className="text-foreground font-medium">home</span> or{" "}
+          No results. Try <span className="text-foreground font-medium">studio</span> or{" "}
           <span className="text-foreground font-medium">about</span>.
         </Command.Empty>
 
-        <Command.Group heading="Pages">
-          <Item
-            icon={<Home className="size-4" />}
-            label="Home"
-            hint="/"
-            onSelect={() => runAndClose(() => router.push("/"))}
-          />
-          {primaryNav.map((item) => (
-            <Item
-              key={item.href}
-              icon={iconForPage(item.href)}
-              label={item.label}
-              hint={item.href}
-              onSelect={() => runAndClose(() => router.push(item.href))}
-            />
-          ))}
-        </Command.Group>
+        {/*
+         * All seventeen routes, under the editorial grouping `content/pages.ts` authors.
+         * A second, partial list of six lived in `config/navigation.ts` until Phase 2b and
+         * had already stopped covering two thirds of the site.
+         */}
+        {stationSectors.map((sector) => (
+          <Command.Group key={sector.label} heading={sector.label}>
+            {sector.stations.map((station) => (
+              <Item
+                key={station.href}
+                icon={iconForPage(station.href)}
+                label={station.label}
+                hint={station.href}
+                onSelect={() => runAndClose(() => router.push(station.href))}
+              />
+            ))}
+          </Command.Group>
+        ))}
 
         <ThemeGroup run={runAndClose} setTheme={setTheme} />
 

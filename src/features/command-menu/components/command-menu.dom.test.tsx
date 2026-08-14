@@ -3,7 +3,7 @@ import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
 import { restoreMediaStubs } from "@tests/media";
-import { primaryNav } from "@/config/navigation";
+import { stationIndex, stationSectors } from "@/content/pages";
 import { siteConfig } from "@/content/profile";
 import type { ReactElement } from "react";
 import { CommandMenuProvider, useCommandMenu } from "../stores/command-menu-store";
@@ -272,24 +272,39 @@ describe("⌘K menu: the shell", () => {
 });
 
 describe("⌘K menu: Navigate mode", () => {
-  it("offers home and every primary destination, each labelled with its path", async () => {
+  /**
+   * Every route, not a chosen few: the menu shipped its own list of six until Phase 2b, so a
+   * page the site had for months was unreachable from the surface built to reach pages. The
+   * assertion is against `content/pages.ts` itself, which is what makes adding a page enough.
+   */
+  it("offers all seventeen routes, each under its own sector and labelled with its path", async () => {
     await open();
 
-    const pages = screen.getByRole("group", { name: /pages/i });
-    expect(within(pages).getByRole("option", { name: /^home\s*\/$/i })).toBeInTheDocument();
-    for (const item of primaryNav) {
-      expect(
-        within(pages).getByRole("option", {
-          name: new RegExp(`${item.label}\\s*${item.href}`, "i"),
-        }),
-      ).toBeInTheDocument();
+    let offered = 0;
+
+    for (const sector of stationSectors) {
+      const group = screen.getByRole("group", { name: new RegExp(`^${sector.label}$`, "i") });
+
+      for (const station of sector.stations) {
+        expect(
+          within(group).getByRole("option", {
+            name: new RegExp(`${station.label}\\s*${station.href}`, "i"),
+          }),
+          station.href,
+        ).toBeInTheDocument();
+      }
+
+      offered += within(group).getAllByRole("option").length;
     }
+
+    // Nothing extra, either: a sector that renders a route twice reads as two destinations.
+    expect(offered).toBe(stationIndex.length);
   });
 
   it("closes before it navigates, so nothing routes under an open dialog", async () => {
     const user = await open();
 
-    await selectOption(user, /^home\s*\/$/i);
+    await selectOption(user, /^studio\s*\/$/i);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(push).not.toHaveBeenCalled();
@@ -299,7 +314,7 @@ describe("⌘K menu: Navigate mode", () => {
     expect(push).toHaveBeenCalledWith("/");
   });
 
-  it.each(primaryNav.map((item) => [item.label, item.href] as const))(
+  it.each(stationIndex.map((station) => [station.label, station.href] as const))(
     "sends %s to %s",
     async (label, href) => {
       // Data-driven on purpose: a destination that renders but pushes a neighbor's route is

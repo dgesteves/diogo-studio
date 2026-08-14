@@ -1,11 +1,12 @@
 "use client";
 
 import { Command } from "cmdk";
-import { ArrowUpRight, UserRound } from "lucide-react";
+import { ArrowUpRight, Home, UserRound } from "lucide-react";
 import { type ReactElement, type ReactNode } from "react";
 import { routes } from "@/content/pages";
 
 export function iconForPage(href: string): ReactElement {
+  if (href === routes.home) return <Home className="size-4" />;
   if (href.startsWith(routes.about)) return <UserRound className="size-4" />;
   return <ArrowUpRight className="size-4" />;
 }
