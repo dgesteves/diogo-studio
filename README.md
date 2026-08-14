@@ -55,7 +55,7 @@ retries. For anything timing- or 3D-sensitive, reproduce the runner with
 - Breaking changes: `feat!:` or a `BREAKING CHANGE:` footer.
 - All human-readable text is **US English (en-US)** — prose, UI copy, error
   messages, accessible names, commit messages. See
-  [`.devin/rules/language-and-copy.md`](./.devin/rules/language-and-copy.md).
+  [`.claude/rules/language-and-copy.md`](./.claude/rules/language-and-copy.md).
 - Tests colocate with source as `*.test.ts(x)`; E2E specs live in `tests/e2e/`.
 
 ## CI

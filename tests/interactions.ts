@@ -5,7 +5,7 @@ import type { UserEvent } from "@testing-library/user-event";
  * user-event's act wrapping does not cover a state update that happens synchronously
  * inside the interaction — a `window` keydown listener outside React's event system, a
  * store write in a click handler, or anything at all once fake timers are driving it. Each
- * of those produced `act(...)` warnings, and `.devin/rules/testing.md` treats new stderr
+ * of those produced `act(...)` warnings, and `.claude/rules/testing.md` treats new stderr
  * output as a defect, so interactions that touch an external store go through these.
  */
 

@@ -76,7 +76,7 @@ const eslintConfig = defineConfig([
       "no-console": "error",
       // Functions carry the complexity budget, not files. File length is capped
       // only loosely below so cohesive modules stay whole — see
-      // .devin/rules/project-structure.md.
+      // .claude/rules/project-structure.md.
       "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
       "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
       "@typescript-eslint/no-explicit-any": "error",
