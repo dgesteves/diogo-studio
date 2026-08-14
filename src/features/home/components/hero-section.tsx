@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patternList } from "@/constants/patterns";
 import { routes } from "@/content/pages";
-import { getDestination } from "@/features/world";
+import { getDestination } from "@/content/prose";
 import { HeroAskCta } from "./hero-ask-cta";
 
 export function HeroSection(): ReactElement {

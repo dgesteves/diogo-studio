@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/content/pages";
-import { DestinationView } from "@/features/world";
+import { PageView } from "@/site/page-view";
 
 export const metadata: Metadata = {
   title: "Work",
@@ -11,5 +11,5 @@ export const metadata: Metadata = {
 };
 
 export default function WorkPage(): ReactElement {
-  return <DestinationView slug="work" />;
+  return <PageView slug="work" />;
 }

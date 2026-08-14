@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/content/pages";
-import { DestinationView } from "@/features/world";
+import { PageView } from "@/site/page-view";
 
 export const metadata: Metadata = {
   title: "Playground",
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function PlaygroundPage(): ReactElement {
-  return <DestinationView slug="playground" />;
+  return <PageView slug="playground" />;
 }

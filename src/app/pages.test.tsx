@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { renderToStaticMarkup } from "react-dom/server";
 import { routes, type RouteKey } from "@/content/pages";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { getDestination } from "@/features/world";
+import { getDestination } from "@/content/prose";
 
 /**
  * All 17 route pages, discovered rather than listed, so a new one is asserted the moment the

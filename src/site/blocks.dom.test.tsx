@@ -2,8 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { getDestination } from "@/content/prose";
 import type { ContentBlock } from "@/content/schema";
-import { ContentBlocks } from "./content-blocks";
-import { DestinationView } from "./destination-view";
+import { ContentBlocks } from "./blocks";
+import { PageView } from "./page-view";
 
 /**
  * How an authored block becomes markup. `content-in-dom.spec.ts` proves the real text of
@@ -162,10 +162,10 @@ describe("Content blocks: an unknown kind", () => {
   });
 });
 
-describe("Destination view", () => {
+describe("Page view", () => {
   it("frames a station with exactly one first-level heading", () => {
     const destination = getDestination("about");
-    render(<DestinationView slug="about" />);
+    render(<PageView slug="about" />);
 
     const headings = screen.getAllByRole("heading", { level: 1 });
     expect(headings).toHaveLength(1);
@@ -174,21 +174,23 @@ describe("Destination view", () => {
     expect(screen.getByText(destination.summary)).toBeInTheDocument();
   });
 
-  it("makes room for a station's own media and extras", () => {
+  it("makes room for a page's own media, actions and extras", () => {
     render(
-      <DestinationView slug="about" media={<p>A pixelated portrait</p>}>
+      <PageView slug="about" media={<p>A pixelated portrait</p>} actions={<p>Ask the agent</p>}>
         <p>An extra section</p>
-      </DestinationView>,
+      </PageView>,
     );
 
     expect(screen.getByText("A pixelated portrait")).toBeInTheDocument();
+    expect(screen.getByText("Ask the agent")).toBeInTheDocument();
     expect(screen.getByText("An extra section")).toBeInTheDocument();
   });
 
-  it("renders no media slot when a station has none", () => {
-    render(<DestinationView slug="contact" />);
+  it("renders no optional slot a page has not filled", () => {
+    render(<PageView slug="contact" />);
 
     expect(screen.queryByText("A pixelated portrait")).not.toBeInTheDocument();
+    expect(screen.queryByText("Ask the agent")).not.toBeInTheDocument();
     expect(screen.getByRole("heading", { level: 1 })).toBeInTheDocument();
   });
 });

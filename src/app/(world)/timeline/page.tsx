@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
 import { routes } from "@/content/pages";
-import { DestinationView } from "@/features/world";
+import { PageView } from "@/site/page-view";
 
 export const metadata: Metadata = {
   title: "Timeline",
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 };
 
 export default function TimelinePage(): ReactElement {
-  return <DestinationView slug="timeline" />;
+  return <PageView slug="timeline" />;
 }

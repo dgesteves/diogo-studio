@@ -24,6 +24,35 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — `src/site/` is a new top-level domain, and the reading surface leaves the room
+
+`refactor.md` §8 rule 1 requires a written justification for a new directory at the root of
+`src/`: which ownership or runtime boundary it marks, and why no existing domain can own the
+code. This is that entry, for Phase 2b's `src/site/`.
+
+The boundary it marks is **the DOM reading surface**. Until now `destination-view.tsx`,
+`destination-panel.tsx` and `content-blocks.tsx` lived in `features/world/components/`, so all
+seventeen routes reached their own markup by importing the 3D domain. That is the dependency
+`architecture.md` §3 names as the one that has to run the other way: "`site/` never imports
+`world/`" is what makes "the room is an enhancement" structurally true rather than an intention.
+With the renderer inside `world/`, the claim was documentation only — every page depended on
+the room to render text, and nothing but habit stopped a block renderer from reading a scene
+store.
+
+No existing domain can own it. `world/` owning it is the defect. `content/` imports nothing and
+has no behavior. `app/` is a leaf that composes. `ui/` may not know what a `Page` is. So the
+answer to "who owns this?" was not already a domain, which is the test the rule sets.
+
+Three files became two on the way. `destination-panel.tsx` had exactly one consumer — its
+parent — and `content-rich-blocks.tsx` exactly one — the block switch. Both are the
+fragmentation §2.1 measured and rule 4 replaced, so they were folded into `page-view.tsx` and
+`blocks.tsx` rather than moved. `DestinationView` is now `PageView`: the domain is pages, and
+"destination" is the room's word for one.
+
+`features/world/index.ts` also stopped re-exporting `getDestination`. A barrel over `content/`
+lets a client island reach the prose through the world, which is the bundle problem
+`content/prose`'s `server-only` marker exists to prevent.
+
 ## 2026-08-14 — `decisions.md` comes off the authority ladder and becomes a record
 
 It sat at **rank 3** in `architecture.md` §11 and `AGENTS.md`, above automated enforcement at
