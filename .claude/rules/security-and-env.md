@@ -7,7 +7,7 @@ paths:
   - "src/env.ts"
   - "src/config/env.ts"
   - "src/rate-limit.ts"
-  - "src/content/pages/**"
+  - "src/content/prose/**"
   - "next.config.ts"
   - "instrumentation*.ts"
 ---

@@ -6,6 +6,51 @@ not for every change.
 
 ---
 
+## 2026-08-14 — Refactor Phase 2a: the prose is one file per slug, `server-only`, and the URL map derives from it
+
+Three calls made while moving the authored record into `content/`, each of which would
+otherwise be re-litigated by whoever reads `architecture.md` next.
+
+**One file per slug, not per sector.** `architecture.md` §6 described `content/pages/` grouped
+into nine sector files; the tree that shipped is `content/prose/<slug>.ts`, seventeen of them,
+and §6 has been corrected to match. Sector grouping means you must know `/uses` lives in
+"tooling" before you can find its words, and it put a file and a folder both named `pages` in
+one directory with opposite meanings. Seventeen files averaging ~42 lines looks like the
+fragmentation this refactor exists to undo, and is not: these are authored documents with
+independent lifecycles, not a component tree split by a lint rule. Rule 4 in `refactor.md` §8
+is the test — different consumers, different lifecycle — and each page passes it.
+
+**No `content/routes.ts`.** A `routes.ts` beside a `pages.ts` would encode all seventeen URLs
+twice, in the phase whose entire purpose is single-authoring. `routes` is derived from the
+`as const` page list through a mapped type, which is what keeps a string literal per route for
+`typedRoutes`; the `Object.fromEntries` assertion is the only cast in the file and is commented
+there. The editorial sector grouping stayed authored rather than derived, because a sector's
+reading order is not the page order — deriving it would have silently reordered the deck's
+Reach sector.
+
+**`server-only` shipped with the move, not after it.** The client/server split inside `content/`
+is the reason the domain is split at all: `Page` carries `blocks`, so one client island reading
+a label off the prose collection ships every page's text to the browser. `architecture.md` §3
+already named `import "server-only"` as the mechanism that makes this a build error rather than
+a convention, and no later phase owned adding it.
+
+Its cost is a resolution flag. The `server-only` package throws on its default export and is
+empty on its `react-server` one, and two node processes legitimately read the corpus: the agent
+index builder, and `content-in-dom.spec.ts`, which asserts every authored block reaches the HTML
+over raw HTTP with no browser. Both now run under `--conditions=react-server`, set on the
+`agent:index*` and `e2e*` scripts.
+
+Three things about that flag are load-bearing:
+
+- **It must be set at process start**, so it cannot live in `playwright.config.ts` — the config
+  is evaluated after the runner has already loaded the spec files. It is on the npm script.
+- **It must not reach `next build` or `next start`**, which have to resolve packages the way
+  production does. `e2e:ci` prefixes only the `playwright` half, and `webServer.env` clears
+  `NODE_OPTIONS` for the Playwright-managed server.
+- **The alternative was worse.** Dropping the marker and policing the boundary with a lint glob
+  in Phase 7 would leave the most expensive mistake in the domain — a client island importing
+  prose — as a warning under a budget, instead of a failed build.
+
 ## 2026-08-14 — Refactor Phase 0: `max-lines` deleted outright, and "one export per file" retired
 
 **This reverses the 2026-08-08 entry below**, which kept `max-lines` at 250 (120 for `.tsx`,

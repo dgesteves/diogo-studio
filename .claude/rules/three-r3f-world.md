@@ -78,10 +78,11 @@ forcing an interaction.
 
 - The canvas is a client island: `"use client"` at the stage boundary, loaded via
   `next/dynamic`, never imported into a Server Component tree.
-- **Client islands import `features/world/constants/station-index.ts`, never
-  `destinations.ts`.** The latter carries every page's prose via `blocks`, so importing it from
-  a `"use client"` module ships all of it to the browser for nothing. The index holds
-  slug/href/label/sectors only, and `station-index.test.ts` asserts the two agree.
+- **Client islands import `@/content/pages`, never `@/content/prose`.** The latter carries
+  every page's prose via `blocks`, so importing it from a `"use client"` module would ship all
+  of it to the browser for nothing. The page list holds slug/href/label/sectors only, and
+  `content/prose.test.ts` asserts the two agree. This one is enforced: the prose is
+  `server-only`, so reaching for it from a client module fails the build.
 - Scene code must not reach into a sibling domain. **A domain's store module is its public
   API; every other file in it is private** (`docs/refactor.md` §4.2) — the world exposes its
   stores and nothing else, and reads a sibling only through that sibling's store. Inside the

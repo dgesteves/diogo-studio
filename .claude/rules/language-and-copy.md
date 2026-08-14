@@ -3,7 +3,6 @@ paths:
   - "src/content/**"
   - "src/site/**"
   - "src/seo/**"
-  - "src/config/site.ts"
   - "src/app/layout.tsx"
   - "src/**/*-draw.ts"
   - "src/**/*-textures.ts"

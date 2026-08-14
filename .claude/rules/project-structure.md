@@ -45,7 +45,7 @@ leaves:  content/ · ui/ · env · telemetry · reduced-motion
    and `site/` / `world/` → `content/`.
 3. **`ui/` imports no domain.** If a primitive needs to know what a `Page` is, it is not a
    primitive.
-4. **`content/` imports nothing.**
+4. **`content/` imports nothing outside itself** — its own modules may compose each other.
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
    module, not even for a type.
 
@@ -77,8 +77,10 @@ Three things that are not content and must not share a folder with it:
 - `@/…` across domains, relative paths inside one. Never `../../../`.
 - **No barrel files.** Import the module at its real path. Barrels buy nothing once domains
   are shallow, and cost a client bundle pulling in content-bearing modules it never reads.
-- `import "server-only"` on every server module — all of `agent/` and all of
-  `content/pages/**`. `"use client"` at interactive leaves only. Never both in one file.
+- `import "server-only"` on every server module — all of `agent/`, plus `content/prose.ts`
+  and all of `content/prose/**`. `"use client"` at interactive leaves only. Never both in one
+  file. A node script or Playwright spec that reads the prose runs under
+  `--conditions=react-server`, which is already on the `agent:index*` and `e2e*` scripts.
 - **Name magic values at the narrowest useful scope**: file-local `const` first, then the
   domain's tuning module, then a root module only when genuinely global.
 

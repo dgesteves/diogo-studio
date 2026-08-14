@@ -70,9 +70,9 @@ The five questions each domain must answer without reference to project history.
 |                        |                                                                                                                                 |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **Owns**               | Every authored fact: page prose, the career record, the author's identity and links, the URL map, editorial grouping (sectors). |
-| **May import**         | Nothing. It is the root of the graph.                                                                                           |
-| **Must never import**  | Anything. Especially not `world/` — content does not know 3D exists.                                                            |
-| **Runtime**            | Split. `content/pages/**` is `server-only` (prose). Everything else is isomorphic and client-safe.                              |
+| **May import**         | Nothing outside itself. It is the root of the graph; its own modules may compose each other.                                    |
+| **Must never import**  | Any other domain. Especially not `world/` — content does not know 3D exists.                                                    |
+| **Runtime**            | Split. `content/prose.ts` and `content/prose/**` are `server-only`. Everything else is isomorphic and client-safe.              |
 | **Source of truth**    | Itself. This is the only domain that may contain a fact.                                                                        |
 | **Talks to others by** | Being imported. It has no behavior, only data and types.                                                                        |
 
@@ -80,8 +80,18 @@ The client/server split inside this domain is load-bearing, not tidiness. `Page`
 `blocks` — the full prose body — so a client island that imports the page collection to read
 a label drags every page's text into the browser bundle, where nothing reads it.
 Tree-shaking cannot help: these are property reads on runtime objects. So `content/pages.ts`
-is the client-safe projection (slug, path, label, sector) and `content/pages/**` holds the
+is the client-safe projection (slug, path, label, sector) and `content/prose/**` holds the
 prose behind `import "server-only"`, which turns the rule into a build error.
+
+That marker also decides how a node process may read the corpus. `server-only` throws
+outside a server module graph, so the two that legitimately read it — the index builder and
+the crawlability spec — run under `--conditions=react-server`, set on the `agent:index*` and
+`e2e*` scripts. It stays off `next build` and `next start`, which must resolve packages the
+way production does.
+
+**`content/routes.ts` does not exist**, and adding one would restate every URL a second time.
+The route map is derived from the page list in `content/pages.ts` — an `as const` array
+through a mapped type, so `typedRoutes` still sees a literal per route.
 
 ### `site/`
 
@@ -127,7 +137,7 @@ between "what a page says" and "where it lives in the room" is a slug, and nothi
 |                        |                                                                                                                                   |
 | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | **Owns**               | The Zod contract for `/api/chat`, retrieval, prompting, streaming, the response envelope, rate limiting, and the generated index. |
-| **May import**         | `content/` (including `content/pages/**`), `env`                                                                                  |
+| **May import**         | `content/` (including `content/prose/**`), `env`                                                                                  |
 | **Must never import**  | `site/`, `world/`, `command-menu/`, `inspector/`, `ui/`, `app/`                                                                   |
 | **Runtime**            | **Server-only**, every module. `import "server-only"` is the first line.                                                          |
 | **Source of truth**    | The generated index is derived from `content/` and never hand-edited.                                                             |
@@ -275,13 +285,13 @@ src/
 
   content/                    ★ SOURCE OF TRUTH
     schema.ts                 Block · Page · Sector · Role
-    routes.ts                 typed URL map + asInternalHref()
     pages.ts                  client-safe: slug · path · label · sector
+                              + the derived URL map and asInternalHref()
     profile.ts                identity, role, links, availability
     career.ts                 the ONE career record
-    pages/                    server-only prose, one file per sector
-      core.ts  experience.ts  projects.ts  craft.ts  stance.ts
-      tooling.ts  explorations.ts  reach.ts  timeline.ts
+    prose.ts                  server-only: the join — slug → page with blocks
+    prose/                    server-only prose, ONE FILE PER SLUG
+      home.ts  about.ts  work.ts  projects.ts  case-studies.ts …  (17)
 
   site/                       THE DOM READING SURFACE
     page-view.tsx  blocks.tsx  metadata.ts  structured-data.tsx
@@ -372,9 +382,9 @@ Helpers live in `tests/` and are imported through `@tests/*`.
 
 | Adding…                             | Location                                         |
 | ----------------------------------- | ------------------------------------------------ |
-| A page's prose                      | `content/pages/<sector>.ts`                      |
+| A page's prose                      | `content/prose/<slug>.ts`                        |
 | A fact about the author             | `content/profile.ts` or `content/career.ts`      |
-| A URL                               | `content/routes.ts`                              |
+| A URL                               | `content/pages.ts` — the URL map derives from it |
 | A route or API handler              | `src/app/…` (thin)                               |
 | DOM rendering of content            | `site/`                                          |
 | 3D geometry, materials, camera work | `world/scene/`, `world/materials.ts`             |

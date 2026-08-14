@@ -41,7 +41,7 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
   memoization. `useMemo`/`useCallback` stay valid where referential stability is part of the
   contract — a three.js object, an effect dependency, an identity-comparing external API.
 - **Routes are typed** (`typedRoutes`): `Link href` and `router.push` take a real route, never
-  a `string`. Narrow an untrusted href with `asInternalHref()` from `@/constants/routes`.
+  a `string`. Narrow an untrusted href with `asInternalHref()` from `@/content/pages`.
 - **Caching is opt-in** (`cacheComponents`) via `use cache` + `cacheLife()`/`cacheTag()`. It
   removed the `dynamic`, `dynamicParams`, `revalidate` and `fetchCache` segment configs;
   `maxDuration`, `runtime`, `instant` and `prefetch` remain valid and `/api/chat` uses
@@ -103,10 +103,14 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
   `*.dom.test.{ts,tsx}` runs under jsdom with `vitest.setup.ts`; everything else runs under
   node. Node is the default so a missing marker fails loudly with `document is not defined`.
 - **`src/constants/agent-index.json` is generated.** Edit a source
-  (`src/constants/{career,patterns,routes}.ts`, `config/site.ts`,
-  `features/world/constants/destinations.ts`) then run `pnpm agent:index`.
+  (`src/content/{pages,profile,career-timeline}.ts`, `src/content/prose/**`,
+  `src/constants/{career,patterns}.ts`) then run `pnpm agent:index`.
   `src/constants/career.ts` has no runtime consumer and is still load-bearing — `knip` will not
   tell you that.
+- **`src/content/prose/**` is `server-only`, and that reaches the scripts.** The package throws
+  outside a server module graph, so anything in node that reads the corpus runs under
+  `--conditions=react-server` — it is on the `agent:index*` and `e2e*` scripts, and must stay
+  off `next build` / `next start`. Run those through `pnpm`, never bare `tsx` or `playwright`.
 - **"Inspector" is two things:** `features/command-menu` is the ⌘K surface, whose agent is
   branded "the Inspector agent"; `features/inspector` is the Web-Vitals overlay.
 - **The AI endpoint's safety properties already hold and break silently.** When touching

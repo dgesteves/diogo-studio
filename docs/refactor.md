@@ -5,8 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phase 0 landed 2026-08-14.** The measurement is in §2, the structural review in §4, the
-evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14.** The measurement is in §2, the structural review in
+§4, the evidence in §5.
 
 ---
 
@@ -318,12 +318,12 @@ Measured 2026-08-11 against `f7335a8`, re-verified 2026-08-13. This is what the 
 
 The career record exists in four places, in three formats, and has already drifted:
 
-| Location                           | Format            | Consumer               |
-| ---------------------------------- | ----------------- | ---------------------- |
-| `constants/career.ts`              | typed engagements | RAG index only         |
-| `world/constants/work-timeline.ts` | typed timeline    | `/work`                |
-| `props/resume-screen-draw.ts`      | canvas literals   | a 3D wall screen       |
-| `props/timeline-screen-draw.ts`    | canvas literals   | another 3D wall screen |
+| Location                        | Format            | Consumer               |
+| ------------------------------- | ----------------- | ---------------------- |
+| `constants/career.ts`           | typed engagements | RAG index only         |
+| `content/career-timeline.ts`    | typed timeline    | `/work`                |
+| `props/resume-screen-draw.ts`   | canvas literals   | a 3D wall screen       |
+| `props/timeline-screen-draw.ts` | canvas literals   | another 3D wall screen |
 
 Drift already shipped: `timeline-screen-draw` has a sixth entry ("2015 · Studio era") that
 exists nowhere else; `career.ts` lists an operating company with no matching engagement;
@@ -405,7 +405,7 @@ observes behavior rather than module resolution.
 structural risk, and a live defect on the most-shared surface — they do not belong in the
 optional final phase.
 
-### Phase 2a — `content/` exists; nothing derives from it yet
+### Phase 2a — `content/` exists; nothing derives from it yet ✅ landed 2026-08-14
 
 - **Objective.** One home for the authored record, with **no behavior change**.
 - **Scope.** `git mv` the ten `destinations-*.ts` into `content/prose/<slug>.ts`, one per page.
@@ -421,6 +421,32 @@ optional final phase.
 > `station-index.ts` already implements the client/server split `architecture.md` §3 describes
 > as new, and documents why in the file. This phase is a rename and a `git mv`, not an
 > invention — which is why it is 2a and not the risky half.
+
+> **Landed**, in four commits: `pages.ts`, `profile.ts`, the prose, then the `server-only`
+> marker. Three things differed from the scope above, all deliberate.
+>
+> **The order inverted.** `pages.ts` and `profile.ts` moved first. Moving the prose first would
+> have left `content/` importing `world/constants/station-index` and `config/site` for two
+> commits, and a rule that holds except during a migration is a rule you are teaching people to
+> break.
+>
+> **Two modules came along.** `world/types.ts` held `Destination`, `ContentBlock` and
+> `ContentLink` — the shape of the record, not of the room — so they became `content/schema.ts`;
+> `Vec3` and `WorldStation` stayed. `work-timeline.ts` is one of the four career copies §5
+> names and had a single importer in the prose, so it moved to `content/career-timeline.ts`
+> rather than force a content → world edge. **Phase 3 collapses it** into `content/career.ts`
+> with the other three.
+>
+> **`server-only` was added here rather than deferred.** It is the mechanism `architecture.md`
+> §3 relies on and no later phase owned it. The cost is one flag: `server-only` throws outside a
+> server graph, so the index builder and `content-in-dom.spec.ts` run under
+> `--conditions=react-server`, kept off `next build`/`next start` — the reasoning is in
+> `decisions.md`.
+>
+> The block-equivalence check was written and run: the serialized collection is byte-identical
+> across the move, and `agent:index:check` reproduced all 25 chunks with 25 embeddings reused.
+> `getDestination` also stopped throwing on an unknown slug — the lookup is now a
+> `Record<RouteKey, Destination>`, so the illegal state is unrepresentable instead of guarded.
 
 ### Phase 2b — everything derives
 
@@ -535,10 +561,12 @@ entry and the final tidy.
    move, and the only thing that makes Phase 5 safe. Update it deliberately and record why.
 5. **Coverage.** Thresholds are global and set from measured runs. Phases that delete code
    raise the ratio; 2b adds new code and must bring its own tests. Never lower a threshold.
-6. **Path-coupled configuration.** `scripts/check-prerender.ts:2` imports
-   `../src/constants/routes` (breaks in 2a); `vitest.config.ts:128-129` pins coverage to
+6. **Path-coupled configuration.** `scripts/check-prerender.ts` imported
+   `../src/constants/routes` — repointed at `content/pages` in 2a, along with the two
+   `scripts/agent-index/` importers; `vitest.config.ts:128-129` pins coverage to
    `src/app/api/**` and `src/rate-limit.ts` (moves in Phase 6); `components.json:8` points at
-   `src/styles/globals.css` (moves in Phase 6).
+   `src/styles/globals.css` (moves in Phase 6). 2a added one more: `package.json`'s
+   `agent:index*` and `e2e*` scripts carry `--conditions=react-server` for `server-only`.
 7. **`git blame` gets noisier.** One commit per phase, moves separated from edits, and a
    `.git-blame-ignore-revs` entry.
 8. **Bundle size shifts** when merging changes tree-shaking boundaries. Read `pnpm size` after
