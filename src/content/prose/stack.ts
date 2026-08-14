@@ -1,3 +1,5 @@
+import "server-only";
+
 import { getStationEntry } from "../pages";
 import type { Destination } from "../schema";
 

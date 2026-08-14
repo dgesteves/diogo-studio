@@ -1,4 +1,10 @@
 #!/usr/bin/env tsx
+/**
+ * Run this through `pnpm agent:index`, never bare `tsx`. It reads the authored prose,
+ * `content/prose/**` is `server-only`, and that package throws on import outside a
+ * server graph — so the script runs under `--conditions=react-server`, which resolves
+ * it to its empty export. The flag lives in the package.json script.
+ */
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, relative } from "node:path";
 

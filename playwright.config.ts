@@ -76,5 +76,13 @@ export default defineConfig<Options>({
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    // `content-in-dom.spec.ts` imports the authored prose to assert every block of it
+    // reaches the HTML, and `content/prose/**` is `server-only` — a package that throws
+    // on its default export and is empty on its `react-server` one. The `e2e*` scripts
+    // therefore run Playwright under `--conditions=react-server`, which the runner has
+    // to receive at startup to matter. Clearing it here keeps it off the server, which
+    // must resolve packages the way production does; Next applies that condition per
+    // module graph, which is where it belongs.
+    env: { NODE_OPTIONS: "" },
   },
 });

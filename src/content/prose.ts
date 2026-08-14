@@ -1,3 +1,5 @@
+import "server-only";
+
 import { STATION_ORDER, type RouteKey } from "./pages";
 import type { Destination } from "./schema";
 import { about } from "./prose/about";
