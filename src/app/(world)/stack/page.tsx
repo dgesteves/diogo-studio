@@ -1,13 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { routes } from "@/content/pages";
+import { pageMetadata } from "@/site/metadata";
 import { PageView } from "@/site/page-view";
 
-export const metadata: Metadata = {
-  title: "Stack",
-  description: "Languages, frameworks, and platforms Diogo Esteves builds with.",
-  alternates: { canonical: routes.stack },
-};
+export const metadata: Metadata = pageMetadata("stack");
 
 export default function StackPage(): ReactElement {
   return <PageView slug="stack" />;

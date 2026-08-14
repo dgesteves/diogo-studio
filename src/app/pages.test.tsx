@@ -81,12 +81,24 @@ describe("route pages", () => {
     }
   });
 
-  it("gives every station its own title and description", () => {
+  /**
+   * Not "has a title and a description" but "has *its own* record's" — the assertion the copy
+   * that used to sit in each of these files could never make, and the one that catches a page
+   * wired to a neighbor's slug.
+   */
+  it("derives every station's title and description from its own record", () => {
+    for (const [slug, page] of stations) {
+      const record = getDestination(slug);
+
+      expect(page.metadata?.title, slug).toBe(record.label);
+      expect(page.metadata?.description, slug).toBe(record.summary);
+    }
+  });
+
+  it("gives every station a distinct title and description", () => {
     const titles = stations.map(([, page]) => String(page.metadata?.title ?? ""));
     const descriptions = stations.map(([, page]) => String(page.metadata?.description ?? ""));
 
-    expect(titles.every((title) => title.length > 0)).toBe(true);
-    expect(descriptions.every((description) => description.length > 0)).toBe(true);
     // Duplicates are how a page silently serves the root's copy instead of its own.
     expect(new Set(titles).size).toBe(titles.length);
     expect(new Set(descriptions).size).toBe(descriptions.length);
