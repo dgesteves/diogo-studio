@@ -64,12 +64,17 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
 1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
 2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
    Playwright 1.62.
-3. Recorded decisions — `docs/architecture.md` (the design target) and `docs/decisions.md`.
-   May override (2), never (1).
+3. The recorded design target — `docs/architecture.md`. May override (2), never (1).
 4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3, the
    config may be the bug: investigate it.
 5. These instructions — `AGENTS.md`, then `.claude/rules` and `.claude/skills`.
 6. Existing implementation — evidence of what is, never authority for what should be.
+
+**`docs/decisions.md` is not on this ladder.** It is the reasoning behind (3), (4) and (5) —
+dated, append-only, and a record of what was true when it was written. Read an entry to learn
+why a rule or a config is the way it is; never treat one as the rule itself. **A decision binds
+through the thing that enforces it**, so when an entry and the current config disagree, the
+config is right and the entry is history.
 
 **"The repository does X" is never by itself a reason to do X.** Before copying an existing
 pattern, check whether (1)–(3) endorse it; if not, treat it as potential technical debt — say

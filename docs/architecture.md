@@ -472,12 +472,18 @@ runs arm64, so SwiftShader timings are indicative, not identical.
 1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
 2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
    Playwright 1.62.
-3. Recorded decisions — this file and [`decisions.md`](./decisions.md). May override (2),
-   never (1).
+3. The recorded design target — this file. May override (2), never (1).
 4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3,
    the config may be the bug: investigate it.
 5. Agent instructions — `AGENTS.md`, then `.claude/rules/`.
 6. Existing implementation — evidence of what is, **never authority for what should be.**
+
+**[`decisions.md`](./decisions.md) is deliberately not on this ladder.** It records why (3),
+(4) and (5) say what they say — dated entries, append-only, true as of the day they were
+written. A decision binds through the thing that enforces it: the rule, the config, the test,
+or this document. So an entry never outranks the current state of those, and an entry that has
+been overtaken is history rather than a contradiction. That is what keeps a growing archive
+from becoming a growing set of conflicts.
 
 **"The repository does X" is never by itself a reason to do X.** This codebase contains
 temporary 3D work, duplicated content, abandoned experiments and historical structure.

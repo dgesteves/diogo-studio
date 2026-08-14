@@ -2,9 +2,70 @@
 
 One dated entry per decision that has a rationale worth keeping. Newest first.
 Add an entry when a choice would otherwise be re-litigated or silently reversed —
-not for every change.
+not for every change. A bug fix with no reversible choice inside it belongs in the
+commit message; git already keeps that.
+
+**This file is a record, not a rule.** It is not on the authority ladder in
+[`architecture.md`](./architecture.md) §11, and it never outranks a rule, a config
+or a test. **A decision binds through the thing that enforces it** — `eslint.config.ts`,
+`vitest.config.ts`, a spec, `.claude/rules/`, `architecture.md`. Read an entry to learn
+_why_ one of those says what it says; never act on an entry alone.
+
+Two consequences worth stating, because they are what keep this file cheap to own:
+
+- **Every entry is true as of its date and is never rewritten.** Paths, file names and
+  numbers in old entries may name things that have since moved or changed — a refactor
+  is in flight and renames most of the tree. Verify against the current code, which is
+  what an entry's reasoning is meant to help you understand rather than replace.
+- **An overtaken entry is history, not a conflict.** Where an entry and the current
+  config disagree, the config is right. Marking the old entry is a courtesy, not an
+  obligation: if a reversal is worth understanding, write the new entry and say what it
+  reverses. Reasoning is the asset here; accuracy about the present lives elsewhere.
 
 ---
+
+## 2026-08-14 — `decisions.md` comes off the authority ladder and becomes a record
+
+It sat at **rank 3** in `architecture.md` §11 and `AGENTS.md`, above automated enforcement at
+rank 4 — whose wording is "if it contradicts 1–3, the config may be the bug: investigate it."
+Follow that through with an entry that has been overtaken and the failure is structural, not
+editorial: the 2026-08-08 entry below says `max-lines` is 250/120, Phase 0 deleted the rule
+outright six days later, and until this change the dead entry formally outranked the config and
+instructed the reader to suspect the config.
+
+That contract obliges 57 entries to stay accurate forever. The discipline it depends on had
+already failed twice in eight days — both reversals were recorded forward-only, on the new
+entry, leaving nothing on the entry a `grep` actually lands on. Nobody reads this file top to
+bottom; `AGENTS.md` says so itself ("read the entry rather than the file"). A convention that
+fails at eight days will not hold at eight months.
+
+**The fix is to change what the file is, not to keep correcting what is in it.** `decisions.md`
+is now the reasoning behind the rules, configs and tests, and is on no ladder. A decision binds
+through the thing that enforces it. An overtaken entry therefore stops being a contradiction
+and becomes history, which is the only state an append-only archive can hold indefinitely
+without maintenance.
+
+**This costs almost nothing, because the repository already works this way.** Every binding
+constraint sampled — CSP `'unsafe-inline'`, the Playwright worker cap, the coverage thresholds,
+`size-limit` being non-gating, the seeded PRNG, `server-only` — is already stated in
+`AGENTS.md`, a `.claude/rules/` file, or the config that enforces it. This file was the sole
+carrier of none of them, so nothing had to move: the change ratifies the layering that the
+2026-08-10 entry "AGENTS.md holds only what has no other home" already established. `README.md`
+had it right all along, describing this file as recording "the reasoning behind the non-obvious
+calls" and never as authority.
+
+**What was rejected.** Archiving by date: age does not predict staleness here, and the four
+oldest entries include "every env var is optional" and "no store library", both still live
+constraints cited in `AGENTS.md` and `architecture.md` §9 — a date cut would file those away
+while leaving the dead `.devin/` entry in place. Deleting the file: 26 references point at it,
+14 from source, test and config. Committing to mark every reversal forever: that is the
+treadmill this entry exists to get off. Splitting it: if it is ever needed, split by lifecycle
+— live constraints versus historical record — never by date, and not while the growth rate is
+falling (37 of 57 entries came from one two-day hardening burst; the last two days produced
+four).
+
+The two entries known to be overtaken are struck through once as a courtesy, using the
+convention two 2026-08-09 entries already established. That is a one-off, not a new obligation.
 
 ## 2026-08-14 — Refactor Phase 2a: the prose is one file per slug, `server-only`, and the URL map derives from it
 
@@ -442,7 +503,11 @@ the walk checks `typeof value.dispose === "function"` rather than the key alone,
 mouse hands back a `Vector3` beside its geometries and `createCanvasTexture` hands back a
 `{ canvas, texture }` pair, so the collection genuinely contains non-resources.
 
-## 2026-08-11 — `.claude/` is authored; `.devin/` is a frozen fallback
+## 2026-08-11 — ~~`.claude/` is authored; `.devin/` is a frozen fallback~~
+
+> **Overtaken by "VSCode, not WebStorm" (2026-08-14) above:** `.devin/` is deleted. The
+> wiring half — `CLAUDE.md` `@`-importing `AGENTS.md`, rules and skills under `.claude/` —
+> is still exactly how this repository works.
 
 Moving from the Devin desktop IDE to WebStorm + Claude Code. Claude Code reads `CLAUDE.md` and
 `.claude/`, never `AGENTS.md` on its own and never `.devin/**` at any tier — so until now the
@@ -1661,7 +1726,10 @@ would have got the _strict_ rules); and it keeps all test infrastructure next to
 testing-plan Phase 0 creates the first helper. `vitest.config.ts` already globs
 `tests/**`. _(Both done on 2026-08-09, with `tests/stores.ts`.)_
 
-## 2026-08-08 — `max-lines-per-function` replaces `max-lines` as the real cap
+## 2026-08-08 — ~~`max-lines-per-function` replaces `max-lines` as the real cap~~
+
+> **Overtaken by "Refactor Phase 0" (2026-08-14) above:** there is no `max-lines` rule at
+> all now. `max-lines-per-function: 100` survives, and is the half of this entry still live.
 
 Restructure Phase 0, landed early and deliberately out of order. `max-lines: 100`
 was the documented cause of the file-shredding in `restructure-plan.md` Cause 1,
