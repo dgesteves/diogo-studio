@@ -1,6 +1,6 @@
 import { type ReactElement } from "react";
 import Link from "next/link";
-import type { ContentBlock } from "../types";
+import type { ContentBlock } from "@/content/schema";
 
 type Stats = Extract<ContentBlock, { kind: "stats" }>["items"];
 type Cards = Extract<ContentBlock, { kind: "cards" }>["items"];

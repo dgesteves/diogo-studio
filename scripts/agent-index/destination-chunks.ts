@@ -1,8 +1,8 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry } from "./types";
 
-import { worldDestinations } from "../../src/features/world/constants/destinations";
-import type { ContentBlock, Destination } from "../../src/features/world/types";
+import { worldDestinations } from "../../src/content/prose";
+import type { ContentBlock, Destination } from "../../src/content/schema";
 
 function blockToText(block: ContentBlock): string {
   switch (block.kind) {

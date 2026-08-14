@@ -3,8 +3,8 @@ import { routes } from "@/content/pages";
 // and the `@/features/world` barrel also exports the client islands, which would drag
 // three.js into the test process to read a string. Restructure Phase 5 moves this to
 // `world/data/`; the import is the only line that has to follow it.
-import { worldDestinations } from "@/features/world/constants/destinations";
-import type { ContentBlock } from "@/features/world/types";
+import { worldDestinations } from "@/content/prose";
+import type { ContentBlock } from "@/content/schema";
 import { expect, test } from "./fixtures";
 
 /**

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { worldDestinations } from "../constants/destinations";
+import { worldDestinations } from "@/content/prose";
 import { buildRadarPoints, radarPoints } from "./radar-layout";
 
 describe("buildRadarPoints", () => {

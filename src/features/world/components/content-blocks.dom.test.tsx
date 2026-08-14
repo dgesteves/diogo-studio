@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { getDestination } from "../constants/destinations";
-import type { ContentBlock } from "../types";
+import { getDestination } from "@/content/prose";
+import type { ContentBlock } from "@/content/schema";
 import { ContentBlocks } from "./content-blocks";
 import { DestinationView } from "./destination-view";
 

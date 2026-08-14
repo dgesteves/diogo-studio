@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import type { ContentBlock } from "../types";
+import type { ContentBlock } from "@/content/schema";
 import { CardsBlock, LinksBlock, StatsBlock, TimelineBlock } from "./content-rich-blocks";
 
 export function ContentBlocks({ blocks }: { blocks: readonly ContentBlock[] }): ReactElement {
