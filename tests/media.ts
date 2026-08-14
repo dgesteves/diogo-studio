@@ -4,7 +4,7 @@ import { vi } from "vitest";
  * The two platform signals behind `reduced-motion-store`. `vitest.setup.ts` stubs
  * `matchMedia` as "no preference" for every jsdom spec, and specs that just need reduced
  * motion should set the app's own override instead of touching either of these — see
- * `.devin/rules/testing.md`. These helpers exist for the two specs that own the seams
+ * `.claude/rules/testing.md`. These helpers exist for the two specs that own the seams
  * themselves: the store's, and the provider's precedence rules, which cannot be asserted
  * without a system preference that says "reduce".
  */

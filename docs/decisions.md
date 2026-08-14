@@ -6,6 +6,48 @@ not for every change.
 
 ---
 
+## 2026-08-14 — VSCode, not WebStorm; `.devin/` deleted, and the cspell rationale expired with it
+
+The migration recorded on 2026-08-11 landed on **VSCode**, not WebStorm, and the Claude Code
+trial succeeded — so `.devin/` is deleted, which is exactly what that entry said would happen.
+`.claude/` was already the authored copy; the fallback was only ever insurance against the
+trial failing. Devin stays in use until the paid month ends, and losing its three skills for
+those weeks is the accepted cost of not maintaining two rule sets for a directory on its way
+out.
+
+**One file made the deletion urgent rather than optional.** `.devin/rules/project-structure.md`
+still documented `features/`, `components/`, `utils/`, `constants/`, `stores/`, `hooks/` and
+`providers/` as the **target**, with a tree, under `trigger: model_decision` — so it loaded
+itself whenever anyone asked where a file goes, and answered with the architecture Phases 2–6
+delete. Phase 0 of `refactor.md` carried steps 3 and 4 solely to correct it and to lift the
+freeze that forbade the correction; both are now moot and were removed, and step 5 became
+step 3. The other seven rules were byte-identical in body to their `.claude/` twins, and
+`testing.md`'s drift was purely additive — its one enforceable rule, `user-event` over
+`fireEvent`, is an ESLint error either way, which is what kept the drift tolerable.
+
+**The freeze was the right call and still produced a wrong instruction.** That is the lesson
+worth keeping: a frozen copy of a rule set is safe only while the thing it describes is also
+frozen, and this one sat across a live architecture refactor. Next time the copy either tracks
+the change or goes, at the point the refactor starts rather than at the point someone notices.
+
+**The cspell rejection rested on a premise that is now false.** It was declined (2026-08-11,
+and again in the US English entry of 2026-08-09) because WebStorm ships a built-in
+spellchecker, so a `cspell.json` plus a dependency plus a `validate` step would duplicate it
+for the human path — with the residual gap named honestly: the IDE only checks files a human
+opens. **VSCode ships no spellchecker.** The gap those entries describe is therefore wider
+now, not equal: nothing checks copy on any path, human or agent. The two older entries stand
+as written — they record what was true when decided — and this is the correction.
+
+**The conclusion does not change; only the reason does.** cspell stays out, now on its own
+merits rather than on redundancy: a curated wordlist for three.js, Next.js and R3F jargon,
+bought for a class of error that cannot break the build. What changes is that
+`language-and-copy.md` is now the _only_ thing holding US English, so it is load-bearing for
+the human path as well as the agent one. The one live artifact, `"cSpell.language": "en-US"`
+in `.vscode/settings.json`, is removed; no config, dependency or gate ever existed to remove.
+`.idea/` came out of `.gitignore` in the same change.
+
+---
+
 ## 2026-08-13 — pnpm settings live in `pnpm-workspace.yaml` only, and the pins now bite
 
 `.npmrc` is deleted. pnpm 11 reads its own settings from `pnpm-workspace.yaml` and CLI

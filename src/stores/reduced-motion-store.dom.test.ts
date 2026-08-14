@@ -17,7 +17,7 @@ import {
 /**
  * This spec and `providers/providers.dom.test.tsx` are the only two that stub `matchMedia`
  * and `navigator.connection` directly — every other spec reaches reduced motion through
- * `persistOverride`, per `.devin/rules/testing.md`. The three sources are independent and
+ * `persistOverride`, per `.claude/rules/testing.md`. The three sources are independent and
  * `reduced-motion-provider` combines them (`override ?? (system || lowPower)`), so each is
  * asserted here on its own and the precedence is asserted there.
  */
