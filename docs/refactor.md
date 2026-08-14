@@ -5,7 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1.** The measurement is in §2, the structural review in §4, the evidence in §5.
+§1. Phase 0 landed 2026-08-14.** The measurement is in §2, the structural review in §4, the
+evidence in §5.
 
 ---
 
@@ -367,7 +368,7 @@ Within a phase, `git mv` and content edits are **separate commits**, so a move c
 without losing an edit. `pnpm e2e:ci` runs at the end of every phase — it is the only gate that
 observes behavior rather than module resolution.
 
-### Phase 0 — unblock the consolidation ⏱ ~1 h
+### Phase 0 — unblock the consolidation ✅ landed 2026-08-14
 
 - **Objective.** Make the rest of the plan legal, remove the rule that caused the problem, and
   stop every agent instruction file from recommending the architecture these phases delete.
@@ -379,14 +380,22 @@ observes behavior rather than module resolution.
      rule 4 below; that convention is the live cause of the fragmentation, per §2.1. Correct
      §7's "there is no line cap on files", which was false until step 1. Correct §4's
      "lint-enforced as errors", which is false until Phase 7 — say so, with the phase named.
-  3. **`.claude/rules/project-structure.md`** needs no change here — it already describes the
-     six-domain target. Its one defect, the same false "lint-enforced as errors" claim, is
-     corrected in Phase 7, which is the change that makes it true.
+  3. **`.claude/rules/`** — `project-structure.md` carries the same one-export rule and the
+     same false "lint-enforced as errors" claim, and it is the file loaded on every `src/**`
+     edit, so both are corrected here rather than left for Phase 7. `nextjs-app-router.md`
+     recommended composing `app/` from `features/`, `components/` and `config/`, and
+     `three-r3f-world.md` recommended importing through `@/features/world`; both now state the
+     domain rule. The `paths:` frontmatter stays dual-scoped until Phase 8.
 - **Result.** Cohesion decides file boundaries; nothing else does. No instruction file still
   points at the old architecture while the refactor is in flight.
 - **Verify.** `pnpm validate` · grep `.claude/` for `features/`, `constants/`, `providers/` and
   `stores/` as _recommendations_ rather than as history.
 - **Rollback.** Documentation and one config entry; revert the commit.
+
+> **Landed.** Both `max-lines` entries and the draw/geometry override block are gone; the
+> reasoning, including the reversal of the 2026-08-08 cap decision, is in `decisions.md`. Item
+> 3 above originally read "`project-structure.md` needs no change here" — that was wrong, and
+> the corrected scope is what shipped.
 
 ### Phase 1 — dead weight ✅ landed 2026-08-11
 
