@@ -32,7 +32,7 @@ src/
 No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `sections/`,
 `constants/`, and no `components/` passthrough level inside a domain.
 
-## Dependency rules — lint-enforced as errors
+## Dependency rules — the contract, not yet the check
 
 ```
 app/  →  site/ · world/ · command-menu/ · inspector/  →  content/ · ui/
@@ -48,6 +48,10 @@ leaves:  content/ · ui/ · env · telemetry · reduced-motion
 4. **`content/` imports nothing.**
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
    module, not even for a type.
+
+`no-restricted-imports` ships as `warn` under `--max-warnings 11`, and eight live imports
+break rule 2 today (`docs/refactor.md` §4.5). **Phase 7 resolves them and promotes the rule to
+`error`.** Until then lint will not stop you: hold the rules yourself, and never add a ninth.
 
 ## Where a fact lives
 
@@ -83,12 +87,16 @@ Three things that are not content and must not share a folder with it:
 - **The folder is the namespace — never repeat it in the filename.** `world/boot/overlay.tsx`,
   not `world/boot/boot-overlay.tsx`. Read the import path aloud; if a word repeats, rename.
 - `kebab-case` files and folders; `PascalCase` components; `useX` hooks; `is/has/can`
-  booleans. One primary, named export per file, except where a framework demands a default.
-- **File length is not a design signal and there is no cap on it.**
-  `max-lines-per-function` is 100 as an error — function length tracks complexity, file
-  length tracks nothing. Never split a cohesive module to hit a number, and never merge
-  unrelated responsibilities to reduce a count. Split when a file mixes concerns: rendering
-  vs. state, pure helpers vs. effects, data vs. behavior.
+  booleans. Exports are named, except where a framework demands a default.
+- **A file exports what its concept needs.** Split when responsibilities differ — different
+  consumers, different lifecycle, different runtime; a file mixing rendering with state, pure
+  helpers with effects, or data with behavior. _Not_ one primary export per file: that rule
+  is the measured cause of this codebase's 297-file, 49-line-average shape
+  (`docs/refactor.md` §2.1) and was retired in Phase 0.
+- **File length is not a design signal and there is no cap on it** — no `max-lines` rule
+  exists; don't add one. `max-lines-per-function` is 100 as an error, because function length
+  tracks complexity and file length tracks nothing. Never split a cohesive module to hit a
+  number, and never merge unrelated ones to reduce a count.
 
 ## State
 

@@ -11,10 +11,12 @@ const FEATURES = ["about", "audio", "command-menu", "home", "inspector", "studio
 type ImportPattern = { group: string[]; message: string };
 type ImportPath = { name: string; importNames: string[]; message: string };
 
+// The glob and the `warn` severity are Phase 7's to rewrite; the message is corrected here
+// because it recommended a barrel, which docs/architecture.md §4 bans.
 const DEEP_FEATURE_IMPORT: ImportPattern = {
   group: ["@/features/*/**"],
   message:
-    "Cross-feature imports go through the feature's index.ts (@/features/world), never a deep path.",
+    "A domain's store module is its public API; every other file in it is private. Import a sibling's store, never a deep path — docs/refactor.md §4.2.",
 };
 
 const ROUTING_IS_A_LEAF: ImportPattern = {
@@ -74,11 +76,11 @@ const eslintConfig = defineConfig([
     files: ["src/**/*.{ts,tsx}"],
     rules: {
       "no-console": "error",
-      // Functions carry the complexity budget, not files. File length is capped
-      // only loosely below so cohesive modules stay whole — see
-      // .claude/rules/project-structure.md.
+      // Functions carry the complexity budget; files carry none. There is no
+      // max-lines rule anywhere in this config — a cap below what a cohesive
+      // module needs is what shredded this codebase once already. Cohesion
+      // decides file boundaries; see .claude/rules/project-structure.md.
       "max-lines-per-function": ["error", { max: 100, skipBlankLines: true, skipComments: true }],
-      "max-lines": ["error", { max: 250, skipBlankLines: true, skipComments: true }],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/consistent-type-imports": "error",
@@ -95,11 +97,8 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // React components stay tighter than the general cap — a 120-line component
-    // usually is mixing rendering with state or data shaping.
     files: ["src/**/*.tsx"],
     rules: {
-      "max-lines": ["error", { max: 120, skipBlankLines: true, skipComments: true }],
       // eslint-config-next enables only six jsx-a11y rules, none of which cover
       // keyboard operability or label association. These ten were measured against
       // src/ before being turned on and reported zero violations, so they are a
@@ -116,18 +115,6 @@ const eslintConfig = defineConfig([
       "jsx-a11y/no-autofocus": "error",
       "jsx-a11y/no-noninteractive-element-interactions": "error",
       "jsx-a11y/no-static-element-interactions": "error",
-    },
-  },
-  {
-    // Shaders, procedural geometry, canvas draw routines, layout math and static
-    // data are legitimately long. Splitting them produces import graphs, not
-    // boundaries — a 100-line cap here is what shredded this codebase once already.
-    files: [
-      "src/**/*-{draw,shaders,geometry,layout,textures,data}.ts",
-      "src/**/{data,generated,constants}/**/*.{ts,tsx}",
-    ],
-    rules: {
-      "max-lines": "off",
     },
   },
   ...FEATURES.map((feature) => ({
@@ -152,7 +139,6 @@ const eslintConfig = defineConfig([
   {
     files: ["src/**/*.test.{ts,tsx}"],
     rules: {
-      "max-lines": "off",
       "max-lines-per-function": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
     },

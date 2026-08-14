@@ -82,5 +82,7 @@ forcing an interaction.
   `destinations.ts`.** The latter carries every page's prose via `blocks`, so importing it from
   a `"use client"` module ships all of it to the browser for nothing. The index holds
   slug/href/label/sectors only, and `station-index.test.ts` asserts the two agree.
-- Scene code must not reach into unrelated features; cross-feature imports go through
-  `@/features/world`, and inside the feature use relative paths.
+- Scene code must not reach into a sibling domain. **A domain's store module is its public
+  API; every other file in it is private** (`docs/refactor.md` §4.2) — the world exposes its
+  stores and nothing else, and reads a sibling only through that sibling's store. Inside the
+  world, import relatively, never through its own `@/` alias.

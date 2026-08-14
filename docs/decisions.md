@@ -6,6 +6,46 @@ not for every change.
 
 ---
 
+## 2026-08-14 — Refactor Phase 0: `max-lines` deleted outright, and "one export per file" retired
+
+**This reverses the 2026-08-08 entry below**, which kept `max-lines` at 250 (120 for `.tsx`,
+off for draw/geometry/data modules) as a loose backstop. There is now no `max-lines` rule in
+`eslint.config.ts` at all, and no override block to go with it.
+
+That entry's diagnosis was half right. It blamed a 100-line cap for the file-shredding, and
+`refactor.md` §2.3 falsified the surviving half by measurement: no `.ts` file comes within 140
+lines of the 250 cap and only 3 of 154 `.tsx` files sit above 100, so the caps as relaxed were
+shredding nothing. **They were not the cause — but they veto the cure.** The consolidation in
+Phases 4–6 produces files the caps forbid: `world/boot.tsx` (~560 lines, from fifteen files
+averaging 41), `world/scene/lounge.tsx` (~600), `world/scene/mouse.tsx` (~364). Keeping a
+number nothing currently violates, purely so it can block six correct merges later, is the
+worst of both.
+
+The actual cause was `architecture.md` §7's **"one primary, named export per file"** — a
+fragmentation rule stated as a style rule. If a file may export one thing, a component tree
+with fifteen nodes is fifteen files by arithmetic, which is exactly what the boot overlay,
+`pixelated-portrait-*`, `audio` and `inspector-*` are. It sat in the _target_ document, so the
+refactor would have carried the cause across the move. It is replaced by: **a file exports
+what its concept needs; split when responsibilities differ — different consumers, lifecycle or
+runtime — never to satisfy a number, and never merge to reduce one.** Same wording in
+`architecture.md` §7 and `.claude/rules/project-structure.md`.
+
+`max-lines-per-function` stays at 100 as an error and is now the only length gate, because
+function length tracks complexity and file length tracks nothing.
+
+Also in this phase: `architecture.md` §4 and `.claude/rules/project-structure.md` both claimed
+the dependency rules were "lint-enforced as errors". They are `warn` under `--max-warnings 11`
+with eight live violations, so both now say so and name Phase 7 as the change that makes the
+claim true. `refactor.md` scoped Phase 0 to `architecture.md` alone, saying the rule file
+"needs no change here" — wrong, since that file carries the same one-export rule and the same
+false claim, and it is the file loaded on every `src/**` edit. `nextjs-app-router.md` and
+`three-r3f-world.md` also recommended composing from `features/` and importing through
+`@/features/world`; both now state the domain rule instead. The `paths:` frontmatter stays
+dual-scoped until Phase 8.
+
+As with the 2026-08-08 entry: relaxing a lint rule moves no code and changes no behavior, so
+`pnpm validate` is the whole gate — no build, no E2E.
+
 ## 2026-08-14 — VSCode, not WebStorm; `.devin/` deleted, and the cspell rationale expired with it
 
 The migration recorded on 2026-08-11 landed on **VSCode**, not WebStorm, and the Claude Code

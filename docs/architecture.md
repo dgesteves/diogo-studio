@@ -187,7 +187,7 @@ app/api/  →  agent/  →  content/
 leaves (import nothing above them):  content/ · ui/ · env · telemetry · reduced-motion
 ```
 
-Five rules, all lint-enforced as errors:
+Five rules:
 
 1. **Nothing imports from `app/`.** Routing is a leaf.
 2. **No domain imports a sibling domain**, with three named exceptions that are part of the
@@ -195,6 +195,13 @@ Five rules, all lint-enforced as errors:
 3. **`ui/` imports no domain.**
 4. **`content/` imports nothing.**
 5. **`agent/` is reachable only from `app/api/` and build scripts.**
+
+**These are not yet enforced as errors.** `no-restricted-imports` ships as `warn` under a
+`--max-warnings 11` budget, and eight live imports break rule 2 today — the count is in
+[`refactor.md`](./refactor.md) §4.5. **Phase 7 of the refactor** is what makes this section
+true: it resolves the eight edges, replaces the three hand-written exceptions with the
+store rule in `refactor.md` §4.2, promotes the rule to `error` and drops the warning budget.
+Until it lands, read this list as the contract, not as something the build checks.
 
 **There are no barrel files.** Import the module you need at its real path. With shallow
 domains there are no internals to protect, so a barrel buys nothing and costs two things:
@@ -324,16 +331,23 @@ passthrough level anywhere, and no folder that exists to make the tree look orga
 ## 7. Conventions
 
 **Naming.** `kebab-case` files and folders, `PascalCase` components, `useX` hooks,
-`is/has/can` booleans. One primary, named export per file, except where a framework demands
-a default (pages, layouts, `route.ts`, metadata images, configs).
+`is/has/can` booleans. Exports are named, except where a framework demands a default (pages,
+layouts, `route.ts`, metadata images, configs).
+
+**A file exports what its concept needs.** Split when responsibilities differ — different
+consumers, different lifecycle, different runtime. Never split to satisfy a number, and never
+merge to reduce one. _(This replaces "one primary, named export per file", which is a
+fragmentation rule wearing a style rule's clothes: if a file may export one thing, a component
+tree with fifteen nodes is fifteen files by arithmetic. It is the measured cause of this
+codebase's 297-file, 49-line-average shape — `refactor.md` §2.1.)_
 
 **The folder is the namespace.** Never repeat it in the filename. `world/boot/overlay.tsx`,
 not `world/boot/boot-overlay.tsx`. Read an import path aloud; if a word repeats, rename.
 
-**File size is not a design signal.** There is no line cap on files.
-`max-lines-per-function` is capped at 100 as an error, because function length tracks
-complexity and file length tracks nothing. Never split a cohesive module to satisfy a
-number; never merge unrelated responsibilities to reduce a file count.
+**File size is not a design signal.** There is no `max-lines` rule in `eslint.config.ts` — the
+250/120 caps were deleted in Phase 0 because they sat below what a cohesive `world/boot.tsx`
+or `world/scene/lounge.tsx` needs. Don't reinstate one. `max-lines-per-function` stays at 100
+as an error, because function length tracks complexity and file length tracks nothing.
 
 **Cohesion over count.** Five files that are one concept become one file. One file holding
 two independent responsibilities becomes two. The question is always "does a reader need
