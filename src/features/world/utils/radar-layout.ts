@@ -1,5 +1,5 @@
-import type { RouteKey, RoutePath } from "@/constants/routes";
-import { stationIndex } from "../constants/station-index";
+import type { RouteKey, RoutePath } from "@/content/pages";
+import { stationIndex } from "@/content/pages";
 import { getStation } from "../constants/stations";
 
 export type RadarPoint = {

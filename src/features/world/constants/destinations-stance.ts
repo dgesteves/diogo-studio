@@ -1,4 +1,4 @@
-import { getStationEntry } from "./station-index";
+import { getStationEntry } from "@/content/pages";
 import type { Destination } from "../types";
 
 export const stanceDestinations: readonly Destination[] = [

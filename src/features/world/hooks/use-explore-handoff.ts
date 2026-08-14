@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { routes, type RouteKey } from "@/constants/routes";
+import { routes, type RouteKey } from "@/content/pages";
 
 export function useExploreHandoff(active: RouteKey, explore: boolean): void {
   const router = useRouter();

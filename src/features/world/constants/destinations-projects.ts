@@ -1,5 +1,5 @@
-import { getStationEntry } from "./station-index";
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "@/content/pages";
+import { routes } from "@/content/pages";
 import type { Destination } from "../types";
 
 export const projectDestinations: readonly Destination[] = [

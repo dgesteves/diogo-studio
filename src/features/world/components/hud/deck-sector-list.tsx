@@ -2,10 +2,10 @@
 
 import type { ReactElement } from "react";
 import Link from "next/link";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { setHoveredStation } from "@/stores/world-store";
 import { cn } from "@/utils/cn";
-import { stationSectors } from "../../constants/station-index";
+import { stationSectors } from "@/content/pages";
 import { getStation } from "../../constants/stations";
 
 type DeckSectorListProps = {

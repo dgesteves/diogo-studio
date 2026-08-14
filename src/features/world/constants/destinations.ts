@@ -1,5 +1,5 @@
-import type { RouteKey } from "@/constants/routes";
-import { STATION_ORDER } from "./station-index";
+import type { RouteKey } from "@/content/pages";
+import { STATION_ORDER } from "@/content/pages";
 import type { Destination } from "../types";
 import { coreDestinations } from "./destinations-core";
 import { craftDestinations } from "./destinations-craft";

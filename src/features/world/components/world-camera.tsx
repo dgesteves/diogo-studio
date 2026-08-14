@@ -3,7 +3,7 @@
 import { useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { MathUtils, Spherical, Vector3 } from "three";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { getExploreSnapshot } from "@/stores/explore-store";
 import { getStation } from "../constants/stations";
 import { consumeIntro, introStartPosition } from "../utils/intro";

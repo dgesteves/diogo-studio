@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { asInternalHref, routes } from "@/constants/routes";
+import { asInternalHref, routes } from "@/content/pages";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS, INDEX } from "./agent-index";
 import { buildCitations } from "./agent-response";

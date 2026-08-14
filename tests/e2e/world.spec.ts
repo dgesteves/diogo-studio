@@ -1,5 +1,5 @@
-import { routes } from "@/constants/routes";
-import { stationIndex, stationSectors } from "@/features/world/constants/station-index";
+import { routes } from "@/content/pages";
+import { stationIndex, stationSectors } from "@/content/pages";
 import { expect, settleWorld, test } from "./fixtures";
 
 /**

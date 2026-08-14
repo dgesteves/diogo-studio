@@ -1,4 +1,4 @@
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 
 export type WorldState = {
   hovered: RouteKey | null;

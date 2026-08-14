@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { Metadata } from "next";
 import { renderToStaticMarkup } from "react-dom/server";
-import { routes, type RouteKey } from "@/constants/routes";
+import { routes, type RouteKey } from "@/content/pages";
 import { CommandMenuProvider } from "@/features/command-menu";
 import { getDestination } from "@/features/world";
 
@@ -41,7 +41,7 @@ const BY_PATH = new Map<string, RouteKey>(KEYS.map((key) => [routes[key], key]))
 const pages = Object.entries(modules).map(([file, page]) => {
   const path = routePathOf(file);
   const slug = BY_PATH.get(path);
-  if (!slug) throw new Error(`${file} serves ${path}, which is not in constants/routes.ts`);
+  if (!slug) throw new Error(`${file} serves ${path}, which is not in content/pages.ts`);
   return [slug, page] as const;
 });
 

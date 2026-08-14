@@ -1,5 +1,5 @@
 import { siteConfig } from "@/config/site";
-import { routes, type RoutePath } from "@/constants/routes";
+import { routes, type RoutePath } from "@/content/pages";
 import { expect, readMeta, readTitle, test } from "./fixtures";
 
 /**

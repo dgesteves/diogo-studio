@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { setTestEnv } from "@tests/env";
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 
 import robots from "./robots";
 import sitemap from "./sitemap";

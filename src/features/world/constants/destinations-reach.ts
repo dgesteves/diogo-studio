@@ -1,5 +1,5 @@
-import { getStationEntry } from "./station-index";
-import { routes } from "@/constants/routes";
+import { getStationEntry } from "@/content/pages";
+import { routes } from "@/content/pages";
 import { siteConfig } from "@/config/site";
 import type { Destination } from "../types";
 

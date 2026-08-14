@@ -1,4 +1,4 @@
-import type { InternalHref, RouteKey, RoutePath } from "@/constants/routes";
+import type { InternalHref, RouteKey, RoutePath } from "@/content/pages";
 import type { WorldObjectKind } from "./constants/object-kinds";
 
 export type Vec3 = readonly [number, number, number];

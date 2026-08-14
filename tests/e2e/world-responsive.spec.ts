@@ -1,4 +1,4 @@
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 import { expect, settleWorld, test } from "./fixtures";
 
 /**

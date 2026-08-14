@@ -1,4 +1,4 @@
-import { routes, type RoutePath } from "@/constants/routes";
+import { routes, type RoutePath } from "@/content/pages";
 
 export type NavItem = {
   label: string;

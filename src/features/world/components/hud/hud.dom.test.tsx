@@ -9,7 +9,7 @@ import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
 import { getExploreSnapshot } from "@/stores/explore-store";
 import { persistOverride } from "@/stores/reduced-motion-store";
 import { getWorldSnapshot } from "@/stores/world-store";
-import { stationIndex } from "../../constants/station-index";
+import { stationIndex } from "@/content/pages";
 import { CommandDeck } from "./command-deck";
 import { DeckComms } from "./deck-comms";
 import { DeckControls } from "./deck-controls";

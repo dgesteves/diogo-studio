@@ -2,7 +2,7 @@
 
 import type { ReactElement } from "react";
 import { Maximize2 } from "lucide-react";
-import { getStationEntry, stationIndex } from "../../constants/station-index";
+import { getStationEntry, stationIndex } from "@/content/pages";
 import { useActiveStation } from "../../hooks/use-active-station";
 import { useHoveredStation } from "../../hooks/use-hovered-station";
 import { DeckRadarPlot } from "./deck-radar-plot";

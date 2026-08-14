@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { routes, type RoutePath } from "@/constants/routes";
+import { routes, type RoutePath } from "@/content/pages";
 import { expect, openWithShortcut, settleWorld, test, WCAG_TAGS } from "./fixtures";
 
 /**

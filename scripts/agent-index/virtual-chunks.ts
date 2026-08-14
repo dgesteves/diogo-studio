@@ -3,7 +3,7 @@ import type { IndexEntry } from "./types";
 
 import { careerEngagements, operatingCompanies } from "../../src/constants/career";
 import { patterns as careerPatterns } from "../../src/constants/patterns";
-import { routes } from "../../src/constants/routes";
+import { routes } from "../../src/content/pages";
 import { siteConfig } from "../../src/config/site";
 
 export function buildCareerChunks(): IndexEntry[] {

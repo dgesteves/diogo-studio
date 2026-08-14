@@ -1,4 +1,4 @@
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import type { Vec3 } from "../types";
 import { WALL_SCREEN, WALL_SCREEN_Z } from "./wall-screen-layout";
 

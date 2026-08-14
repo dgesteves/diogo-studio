@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
 import type { MetadataRoute } from "next";
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 import { getSiteUrl } from "@/config/site";
 
 // `new Date()` is an uncached dynamic API under `cacheComponents`, which would drop

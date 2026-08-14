@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { routes } from "../src/constants/routes";
+import { routes } from "../src/content/pages";
 
 const MANIFEST = ".next/prerender-manifest.json";
 

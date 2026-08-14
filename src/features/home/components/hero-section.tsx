@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { StatusDot } from "@/components/ui/status-dot";
 import { patternList } from "@/constants/patterns";
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 import { getDestination } from "@/features/world";
 import { HeroAskCta } from "./hero-ask-cta";
 

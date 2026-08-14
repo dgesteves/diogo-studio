@@ -1,4 +1,4 @@
-import { getStationEntry } from "./station-index";
+import { getStationEntry } from "@/content/pages";
 import { siteConfig } from "@/config/site";
 import type { Destination } from "../types";
 

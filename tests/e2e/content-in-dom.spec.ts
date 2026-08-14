@@ -1,4 +1,4 @@
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 // Deep import on purpose: `destinations.ts` is the only source of the authored prose,
 // and the `@/features/world` barrel also exports the client islands, which would drag
 // three.js into the test process to read a string. Restructure Phase 5 moves this to

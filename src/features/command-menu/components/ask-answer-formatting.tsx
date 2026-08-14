@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { asInternalHref } from "@/constants/routes";
+import { asInternalHref } from "@/content/pages";
 
 export function renderFormatting(text: string, keyPrefix: string): ReactNode[] {
   const out: ReactNode[] = [];

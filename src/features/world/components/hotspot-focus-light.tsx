@@ -3,7 +3,7 @@
 import { useRef, type ReactElement } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Color, type PointLight } from "three";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { getStation } from "../constants/stations";
 import { FOCUS_FADE_RATE, FOCUS_LIGHT_DISTANCE, FOCUS_LIGHT_INTENSITY } from "../constants/focus";
 

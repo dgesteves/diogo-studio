@@ -1,8 +1,8 @@
 "use client";
 
 import { type ReactElement } from "react";
-import type { RouteKey } from "@/constants/routes";
-import { stationIndex } from "../constants/station-index";
+import type { RouteKey } from "@/content/pages";
+import { stationIndex } from "@/content/pages";
 import { furnitureHotspots, isFurnitureRoute } from "../constants/hotspots";
 import { getStation } from "../constants/stations";
 import { useHoveredStation } from "../hooks/use-hovered-station";

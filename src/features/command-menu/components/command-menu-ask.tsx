@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { type ReactElement, type SyntheticEvent, useEffect, useRef } from "react";
 
 import { Kbd } from "@/components/ui/kbd";
-import { asInternalHref } from "@/constants/routes";
+import { asInternalHref } from "@/content/pages";
 import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
 
 import { useAskAgent } from "../hooks/use-ask-agent";

@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { routes } from "@/constants/routes";
+import { routes } from "@/content/pages";
 import { setExplore } from "@/stores/explore-store";
 import { setAiCoreHovered, setHoveredStation } from "@/stores/world-store";
 import { useActiveStation } from "./use-active-station";

@@ -11,11 +11,11 @@ import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { ScenePrecompile } from "@/components/r3f/scene-precompile";
 import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { useWorldPalette } from "@/hooks/use-world-palette";
 import { markWorldReady } from "@/stores/boot-store";
 
-import { getStationEntry } from "../constants/station-index";
+import { getStationEntry } from "@/content/pages";
 import { DPR_DEGRADED, DPR_MIN, dprForFactor } from "../constants/render";
 import { getStation } from "../constants/stations";
 import { useExplore } from "../hooks/use-explore";

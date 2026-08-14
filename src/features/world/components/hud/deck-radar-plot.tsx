@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, type ReactElement } from "react";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { cn } from "@/utils/cn";
 import { radarPoints } from "../../utils/radar-layout";
 

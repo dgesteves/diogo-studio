@@ -3,7 +3,7 @@
 import { useEffect, useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Vector2, type Camera, type Raycaster } from "three";
-import type { RouteKey } from "@/constants/routes";
+import type { RouteKey } from "@/content/pages";
 import { setAiCoreHovered, setHoveredStation } from "@/stores/world-store";
 import { getHotspotObjects } from "../utils/hotspot-registry";
 import type { OrbitInputState } from "../hooks/use-orbit-input";
