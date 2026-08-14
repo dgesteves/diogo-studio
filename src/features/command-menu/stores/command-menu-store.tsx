@@ -23,7 +23,7 @@ type CommandMenuContextValue = {
   /**
    * Whatever had focus when the menu was opened, so it can be given focus back on
    * close. Captured here rather than in the dialog because this is the only place that
-   * sees every entry point — the deck button, the hero CTA, `openWithMode`, and ⌘K —
+   * sees every entry point — the deck button, the home CTA, `openWithMode`, and ⌘K —
    * and the only point early enough: once the dialog mounts it has already moved focus
    * to its own input. `command-menu.tsx` consumes it in `onCloseAutoFocus`.
    */

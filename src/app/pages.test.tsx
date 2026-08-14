@@ -45,7 +45,10 @@ const pages = Object.entries(modules).map(([file, page]) => {
   return [slug, page] as const;
 });
 
-/** The home page is the one that is not a station: it renders the hero, not a destination. */
+/**
+ * Home renders its record like the other sixteen; the one thing it does not carry is its own
+ * `metadata`, so it is only the metadata assertions that exclude it.
+ */
 const stations = pages.filter(([slug]) => slug !== "home");
 
 function homePage(): PageModule {
@@ -115,28 +118,20 @@ describe("route pages", () => {
   });
 
   /**
-   * The one line each station has: the slug it hands `DestinationView`. Getting it wrong renders
-   * another station's entire content under this URL, with correct metadata above it.
+   * The one line each page has: the slug it hands `PageView`. Getting it wrong renders another
+   * page's entire content under this URL, with correct metadata above it.
+   *
+   * All seventeen, home included — it stopped being a special case in Phase 2b, when it stopped
+   * being a hidden hero. The provider is here because home's CTA reads the ⌘K store.
    */
-  it("renders the destination that belongs to its own route", () => {
-    for (const [slug, page] of stations) {
-      const html = decode(renderToStaticMarkup(page.default()));
+  it("renders the page that belongs to its own route", () => {
+    for (const [slug, page] of pages) {
+      const html = decode(
+        renderToStaticMarkup(<CommandMenuProvider>{page.default()}</CommandMenuProvider>),
+      );
 
       expect(html, slug).toContain("<h1");
       expect(html, slug).toContain(getDestination(slug).title);
     }
-  });
-
-  /**
-   * The hero needs the ⌘K provider, which is the point: home is the only route whose content is
-   * an interactive surface rather than a rendered destination.
-   */
-  it("renders the hero on the home page rather than a station", () => {
-    const html = decode(
-      renderToStaticMarkup(<CommandMenuProvider>{homePage().default()}</CommandMenuProvider>),
-    );
-
-    expect(html).toContain("<h1");
-    expect(html).not.toContain(getDestination("about").title);
   });
 });

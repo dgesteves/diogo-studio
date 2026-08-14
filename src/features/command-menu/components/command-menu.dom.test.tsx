@@ -82,7 +82,7 @@ function citation(href: string) {
 }
 
 /**
- * The menu has no `Dialog.Trigger` of its own — the deck button, the hero CTA and ⌘K all
+ * The menu has no `Dialog.Trigger` of its own — the deck button, the home CTA and ⌘K all
  * open it through the store — so a trigger has to be part of the harness for focus
  * restoration to have anywhere to go back to.
  */

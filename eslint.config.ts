@@ -6,7 +6,7 @@ import prettier from "eslint-config-prettier/flat";
 
 // Add a folder here when a new vertical slice lands, so the same-feature import
 // guardrail below covers it.
-const FEATURES = ["about", "audio", "command-menu", "home", "inspector", "studio", "world"];
+const FEATURES = ["about", "audio", "command-menu", "inspector", "studio", "world"];
 
 type ImportPattern = { group: string[]; message: string };
 type ImportPath = { name: string; importNames: string[]; message: string };

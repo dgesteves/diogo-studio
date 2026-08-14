@@ -1,8 +1,5 @@
-import { routes } from "@/content/pages";
-// Deep import on purpose: `destinations.ts` is the only source of the authored prose,
-// and the `@/features/world` barrel also exports the client islands, which would drag
-// three.js into the test process to read a string. Restructure Phase 5 moves this to
-// `world/data/`; the import is the only line that has to follow it.
+// `content/prose` is `server-only`, so this spec — and only the `e2e*` scripts — runs
+// under `--conditions=react-server`. Never invoke `playwright` bare.
 import { worldDestinations } from "@/content/prose";
 import type { ContentBlock } from "@/content/schema";
 import { expect, test } from "./fixtures";
@@ -25,19 +22,15 @@ import { expect, test } from "./fixtures";
  */
 test.describe("Server-rendered content", () => {
   for (const destination of worldDestinations) {
-    // `/` renders `HeroSection`, not `DestinationView`, so only the title and summary
-    // reach the page. The home destination's remaining blocks feed the agent index
-    // through `destination-chunks.ts` — deliberately, since the 3D world is the home
-    // page and its panel is `sr-only`.
-    const authored =
-      destination.href === routes.home
-        ? [destination.title, destination.summary]
-        : [
-            destination.eyebrow,
-            destination.title,
-            destination.summary,
-            ...destination.blocks.flatMap(authoredStrings),
-          ];
+    // No route is exempt. `/` used to be: it rendered a bespoke hero inside an `sr-only`
+    // wrapper, so its lede, stats and links were in the agent's index and nowhere a
+    // crawler could read them. Phase 2b made it a `PageView` like the other sixteen.
+    const authored = [
+      destination.eyebrow,
+      destination.title,
+      destination.summary,
+      ...destination.blocks.flatMap(authoredStrings),
+    ];
 
     test(`${destination.href} serves all ${authored.length} authored strings with no JavaScript`, async ({
       request,

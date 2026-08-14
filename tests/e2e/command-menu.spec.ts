@@ -33,7 +33,7 @@ test.describe("⌘K Command Menu", () => {
     await expect(dialog).toBeHidden({ timeout: 30_000 });
   });
 
-  test("Phase 4: the hero CTA opens the menu directly in Ask mode", async ({ page }) => {
+  test("Phase 4: the home CTA opens the menu directly in Ask mode", async ({ page }) => {
     await page.goto("/");
 
     await page.getByRole("button", { name: /ask the agent about diogo/i }).press("Enter");

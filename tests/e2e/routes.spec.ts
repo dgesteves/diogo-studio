@@ -38,8 +38,8 @@ test.describe("Every route", () => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
 
-      // Exactly one — `destination-panel.tsx` and `hero-section.tsx` are the only two
-      // sources of an `h1` in the app, and a page must reach precisely one of them.
+      // Exactly one — `site/page-view.tsx` is the only source of an `h1` in the app, and
+      // every route must reach it exactly once.
       const heading = page.getByRole("heading", { level: 1 });
       await expect(heading).toHaveCount(1);
       await expect(heading).toBeVisible();

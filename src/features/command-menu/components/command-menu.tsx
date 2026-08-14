@@ -37,7 +37,7 @@ export function CommandMenu(): ReactElement {
   }
 
   // Radix's modal content prevents FocusScope's own restore and focuses `Dialog.Trigger`
-  // instead — and this menu has no trigger, because it opens from the deck, the hero CTA
+  // instead — and this menu has no trigger, because it opens from the deck, the home CTA
   // and ⌘K alike. So closing it dropped focus on `<body>`, stranding a keyboard visitor
   // at the top of the document. The store remembers the opener at the moment of the
   // action, which is the only point early enough: by `onOpenAutoFocus` the menu has
