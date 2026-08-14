@@ -115,7 +115,9 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
 - **`src/content/prose/**` is `server-only`, and that reaches the scripts.** The package throws
   outside a server module graph, so anything in node that reads the corpus runs under
   `--conditions=react-server` — it is on the `agent:index*` and `e2e*` scripts, and must stay
-  off `next build` / `next start`. Run those through `pnpm`, never bare `tsx` or `playwright`.
+  off `next build` / `next start`. Run those through `pnpm`, never bare `tsx` or `playwright`;
+  CI ran `pnpm exec playwright test` for a day and every E2E job died on import.
+  `playwright.config.ts` now fails fast with that instruction, so the rule is checked.
 - **"Inspector" is two things:** `features/command-menu` is the ⌘K surface, whose agent is
   branded "the Inspector agent"; `features/inspector` is the Web-Vitals overlay.
 - **The AI endpoint's safety properties already hold and break silently.** When touching

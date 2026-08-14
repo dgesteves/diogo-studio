@@ -128,7 +128,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-nextjs-${{ hashFiles('pnpm-lock.yaml') }}-
       - run: pnpm build
-      - run: pnpm exec playwright test
+      # Through the script, never `pnpm exec playwright`: `e2e` carries
+      # `--conditions=react-server`, without which the specs that read the `server-only`
+      # prose throw on import. `playwright.config.ts` fails fast if it is missing.
+      # `e2e:ci` is not used here because it would build a second time.
+      - run: pnpm e2e
         env:
           CI: "1"
       # Private repos on GitHub Free share a 500 MB artifact quota, so the report

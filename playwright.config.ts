@@ -1,8 +1,31 @@
+import { createRequire } from "node:module";
 import { defineConfig, devices } from "@playwright/test";
 import type { Options } from "./tests/e2e/fixtures";
 
 const PORT = Number(process.env.PORT ?? 3000);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
+
+/**
+ * The runner has to start under `--conditions=react-server` or `content-in-dom.spec.ts`
+ * throws on `server-only` before a single test runs — the failure this guard exists to
+ * name. The `e2e*` scripts in `package.json` carry the flag; invoking `playwright` bare
+ * does not, and CI did exactly that for a day.
+ *
+ * Resolved rather than sniffed: `NODE_OPTIONS` flags do not appear in `process.execArgv`,
+ * so the only honest test is what the condition actually changes — `server-only` exports
+ * `empty.js` under `react-server` and the module that throws otherwise.
+ */
+if (
+  createRequire(import.meta.url)
+    .resolve("server-only")
+    .endsWith("index.js")
+) {
+  throw new Error(
+    "Playwright is running without --conditions=react-server, so the specs that read the " +
+      "server-only prose will fail on import. Run `pnpm e2e` (or `pnpm e2e:ci`), never " +
+      "`playwright` directly.",
+  );
+}
 
 export default defineConfig<Options>({
   testDir: "./tests/e2e",

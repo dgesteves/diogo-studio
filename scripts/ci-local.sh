@@ -97,5 +97,7 @@ docker run --rm $tty_flags $env_mask \
 
     pnpm exec playwright install chromium
     pnpm build
-    pnpm exec playwright test "$@"
+    # `pnpm e2e`, not `pnpm exec playwright`: the script carries
+    # --conditions=react-server, which the server-only prose specs need at startup.
+    pnpm e2e "$@"
   ' -- "$@"
