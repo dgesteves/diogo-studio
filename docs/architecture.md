@@ -295,7 +295,7 @@ src/
 
   site/                       THE DOM READING SURFACE
     page-view.tsx  blocks.tsx  metadata.ts  structured-data.tsx
-    portrait.tsx  portrait-engine.ts
+    portrait.tsx  portrait-engine.ts  home-cta.tsx
 
   world/                      THE 3D ROOM
     world.tsx                 mount point: fallback · gate · dynamic canvas

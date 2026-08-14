@@ -5,8 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14.** The measurement is in §2, the structural review in
-§4, the evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14, Phase 2b on 2026-08-15.** The measurement is in §2, the
+structural review in §4, the evidence in §5.
 
 ---
 
@@ -150,7 +150,7 @@ src/
 
   site/                      THE DOM READING SURFACE
     page-view.tsx  blocks.tsx  metadata.ts  structured-data.tsx
-    portrait.tsx  portrait-engine.ts
+    portrait.tsx  portrait-engine.ts  home-cta.tsx
 
   world/                     THE 3D ROOM — client only
     world.tsx  canvas.tsx  camera.tsx  quality.tsx  postprocessing.tsx  fallback.tsx
@@ -448,7 +448,7 @@ optional final phase.
 > `getDestination` also stopped throwing on an unknown slug — the lookup is now a
 > `Record<RouteKey, Destination>`, so the illegal state is unrepresentable instead of guarded.
 
-### Phase 2b — everything derives
+### Phase 2b — everything derives ✅ landed 2026-08-15
 
 - **Objective.** Delete the second copies.
 - **Scope.** All 17 `page.tsx` derive `metadata` from `content`; `sitemap.ts` derives; ⌘K
@@ -464,6 +464,39 @@ optional final phase.
 > mode is silent: a de-optimized route, a dropped paragraph, a metadata regression. Budget for
 > the coverage cost too — global thresholds sit at ~98.98% statements and may never be
 > lowered, so the new block renderer must ship at ~99% covered.
+
+> **Landed**, in four commits: `site/` exists, metadata derives, ⌘K derives, home is a page.
+> 19/19 routes static, 828 unit tests and 212 E2E green, coverage up at 99.04% / 94.05% /
+> 98.80% / 99.73%, `agent:index:check` reproduced all 25 chunks unchanged. Four things are
+> worth knowing.
+>
+> **Two scope items were already true.** `sitemap.ts` has derived from `content/pages` since
+> 2a, and `(world)/layout.tsx` already mounted the world beside `{children}` rather than around
+> them. Both were verified rather than changed.
+>
+> **`site/` was created here, which the written scope did not say.** It follows from the rest
+> of it: "home becomes a real `PageView`" names a file that only exists in `site/`, and the
+> block renderer that had to be covered was sitting in `features/world/components/`. Leaving it
+> there would have kept every one of the seventeen routes importing its own markup through the
+> 3D domain — the exact edge §4.3 rule 5 exists to prevent. Four files became two on the way
+> (`destination-panel.tsx` and `content-rich-blocks.tsx` each had one consumer), and
+> `PageView` gained an `actions` slot beside `media`.
+>
+> **Home keeps a client island, deliberately.** `site/home-cta.tsx` holds the ⌘K ask button and
+> the availability line; everything else on `/` is now the authored record. The alternative was
+> a plain `PageView`, which would have left the agent — the site's one dynamic surface —
+> reachable only through an icon button on the deck. It reads `command-menu`'s store, which
+> §4.2 permits, so Phase 7 has nothing to resolve here.
+>
+> **The `sr-only` hero was hiding a real defect, not just markup.** Home's lede, stats and links
+> were in the retrieval index and in no page a crawler could read, and
+> `content-in-dom.spec.ts` carried an exemption for `/` that said so. The exemption is gone and
+> all seventeen routes are held to the same claim.
+>
+> One thing this phase did not do: `constants/patterns.ts` lost its only DOM consumer with the
+> hero's pattern badges, so it is now — like the `constants/career.ts` it types — load-bearing
+> for the retrieval index alone, and `knip` will not say so. **Phase 3 inherits it** with the
+> career record it belongs to.
 
 ### Phase 3 — one career record, one index
 

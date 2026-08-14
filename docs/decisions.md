@@ -24,6 +24,33 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — The home page renders its record visibly, and keeps one client island
+
+`/` rendered a bespoke `HeroSection` inside a `.sr-only` wrapper, on the reasoning that the 3D
+room _is_ the home page. Two costs came with that and only one of them was visible.
+
+The visible one: home was the single route with no reading surface. The invisible one is worse
+— home's authored `lede`, `stats` and `links` blocks were never rendered at all, so they sat in
+the retrieval index, answerable by the agent, and absent from the page a crawler or a screen
+reader reads. `content-in-dom.spec.ts` had a written exemption for `/` recording exactly this.
+A guarantee with one route excused from it is a guarantee about sixteen routes.
+
+So home renders `PageView` like the others. The room is still behind it; the panel sits over the
+room the way every station's already did, so this is the layout the site already had on
+sixteen-seventeenths of its routes.
+
+Two things from the hero were not in the record and had to be decided rather than derived. The
+**⌘K ask button stays**, as `site/home-cta.tsx` in a new `actions` slot: the agent is the
+site's one dynamic surface, and without the CTA its only entry points are an icon button on the
+deck and a keyboard shortcut nothing announces. The **five pattern badges go** — they are
+`constants/patterns.ts`, not `content/`, and a landing that lists five capability labels above
+the fold was saying less than the stats block below it. The availability line, which the hero
+carried as its own shortened variant, is read from `content/profile.ts`.
+
+`site/` holding a `"use client"` module is not an exception being carved: it reads
+`command-menu`'s store, which is a sibling's public API under `refactor.md` §4.2, and Phase 7's
+globs allow it as written.
+
 ## 2026-08-15 — `src/site/` is a new top-level domain, and the reading surface leaves the room
 
 `refactor.md` §8 rule 1 requires a written justification for a new directory at the root of
