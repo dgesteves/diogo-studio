@@ -5,7 +5,7 @@ import { Mail, Monitor, MoonStar, Sun } from "lucide-react";
 import { type ReactElement } from "react";
 
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 
 import { Item } from "./command-menu-item";
 

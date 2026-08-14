@@ -1,4 +1,4 @@
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { routes, type RoutePath } from "@/content/pages";
 import { expect, readMeta, readTitle, test } from "./fixtures";
 

@@ -1,6 +1,6 @@
 import { getStationEntry } from "@/content/pages";
 import { routes } from "@/content/pages";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import type { Destination } from "../types";
 
 export const reachDestinations: readonly Destination[] = [

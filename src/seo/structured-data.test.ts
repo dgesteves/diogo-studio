@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";
 
 type Json = Record<string, unknown>;

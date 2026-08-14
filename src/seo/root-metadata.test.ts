@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { getSiteUrl, siteConfig } from "@/config/site";
+import { getSiteUrl } from "@/config/site-url";
+import { siteConfig } from "@/content/profile";
 import { rootMetadata, rootViewport } from "./root-metadata";
 
 /**

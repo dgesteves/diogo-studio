@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { Html } from "@react-three/drei";
 import { brandColors } from "@/config/brand";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { useWorldPalette } from "@/hooks/use-world-palette";
 
 const BACK = -2.27;

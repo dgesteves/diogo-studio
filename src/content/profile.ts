@@ -1,5 +1,11 @@
-import { env } from "@/config/env";
-
+/**
+ * The author. Identity, role, reach, and the facts the metadata, JSON-LD and the
+ * agent all state — declared once, here, because this domain is the only place a
+ * fact may live.
+ *
+ * Deployment configuration is not identity: `getSiteUrl()` reads the environment and
+ * therefore stays out of `content/`, which imports nothing.
+ */
 export const siteConfig = {
   name: "Diogo Esteves",
   shortName: "Diogo Esteves",
@@ -29,16 +35,3 @@ export const siteConfig = {
   },
   twitterHandle: "@dgesteves",
 } as const;
-
-const DEFAULT_SITE_URL = "http://localhost:3000";
-
-function normalizeUrl(value: string): string {
-  const withProtocol = value.startsWith("http") ? value : `https://${value}`;
-  return withProtocol.replace(/\/+$/, "");
-}
-
-export function getSiteUrl(): string {
-  const candidate = env.NEXT_PUBLIC_APP_URL ?? env.VERCEL_PROJECT_PRODUCTION_URL ?? env.VERCEL_URL;
-
-  return candidate ? normalizeUrl(candidate) : DEFAULT_SITE_URL;
-}

@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { AboutPortrait } from "./about-portrait";
 import { PixelatedPortrait } from "./pixelated-portrait";
 

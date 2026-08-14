@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactElement } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { cn } from "@/utils/cn";
 import { BOOT_READY_LABEL, BOOT_STEPS } from "../constants/boot";
 import { BootActions } from "./boot-actions";

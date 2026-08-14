@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { setTestEnv } from "@tests/env";
 
-import { getSiteUrl, siteConfig } from "./site";
+import { getSiteUrl } from "./site-url";
 
 vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 
@@ -67,19 +67,5 @@ describe("getSiteUrl() normalization", () => {
       setTestEnv({ NEXT_PUBLIC_APP_URL: value });
       expect(getSiteUrl().endsWith("/")).toBe(false);
     }
-  });
-});
-
-describe("siteConfig", () => {
-  it("carries the identity the metadata and JSON-LD are built from", () => {
-    expect(siteConfig.name).toBe("Diogo Esteves");
-    expect(siteConfig.email).toContain("@");
-    expect(siteConfig.twitterHandle.startsWith("@")).toBe(true);
-  });
-
-  it("links out over https only", () => {
-    const insecure = Object.values(siteConfig.links).filter((url) => !url.startsWith("https://"));
-
-    expect(insecure).toEqual([]);
   });
 });

@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import { getSiteUrl, siteConfig } from "@/config/site";
+import { getSiteUrl } from "@/config/site-url";
+import { siteConfig } from "@/content/profile";
 
 const siteUrl = getSiteUrl();
 const siteName = siteConfig.name;

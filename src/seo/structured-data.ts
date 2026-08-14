@@ -1,5 +1,6 @@
 import type { Person, WebSite, WithContext } from "schema-dts";
-import { getSiteUrl, siteConfig } from "@/config/site";
+import { getSiteUrl } from "@/config/site-url";
+import { siteConfig } from "@/content/profile";
 
 const PERSON_ID = "#person";
 const WEBSITE_ID = "#website";

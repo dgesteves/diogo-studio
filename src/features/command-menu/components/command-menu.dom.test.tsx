@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
 import { restoreMediaStubs } from "@tests/media";
 import { primaryNav } from "@/config/navigation";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import type { ReactElement } from "react";
 import { CommandMenuProvider, useCommandMenu } from "../stores/command-menu-store";
 import { CommandMenu } from "./command-menu";

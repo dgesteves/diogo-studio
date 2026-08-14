@@ -1,4 +1,4 @@
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 
 export type StatusRow = { label: string; value: string };
 

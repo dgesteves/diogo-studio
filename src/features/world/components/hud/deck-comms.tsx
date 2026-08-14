@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
 import { StatusDot } from "@/components/ui/status-dot";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 
 export function DeckComms(): ReactElement {
   const year = new Date().getFullYear();

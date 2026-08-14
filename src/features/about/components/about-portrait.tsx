@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 
 import { PixelatedPortrait } from "./pixelated-portrait";
 

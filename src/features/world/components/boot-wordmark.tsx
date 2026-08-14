@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { BOOT_ROLE_LINE } from "../constants/boot";
 
 export function BootWordmark(): ReactElement {

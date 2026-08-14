@@ -4,7 +4,7 @@ import type { IndexEntry } from "./types";
 import { careerEngagements, operatingCompanies } from "../../src/constants/career";
 import { patterns as careerPatterns } from "../../src/constants/patterns";
 import { routes } from "../../src/content/pages";
-import { siteConfig } from "../../src/config/site";
+import { siteConfig } from "../../src/content/profile";
 
 export function buildCareerChunks(): IndexEntry[] {
   const out: IndexEntry[] = [];

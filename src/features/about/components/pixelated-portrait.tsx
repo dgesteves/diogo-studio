@@ -6,7 +6,7 @@ import { useReducedMotionPreference } from "@/providers/reduced-motion-provider"
 import { useInView } from "@/hooks/use-in-view";
 import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/utils/cn";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 
 const PixelatedPortraitCanvas = dynamic(
   () => import("./pixelated-portrait-canvas").then((m) => m.PixelatedPortraitCanvas),

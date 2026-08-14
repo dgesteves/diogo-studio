@@ -3,7 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import type { MeshBasicMaterial } from "three";
 import { materialOf, renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { brandColors } from "@/config/brand";
-import { siteConfig } from "@/config/site";
+import { siteConfig } from "@/content/profile";
 import { worldPalettes } from "@/config/world-theme";
 import { setWorldMode, type WorldMode } from "@/stores/world-theme-store";
 import { WorldNeon } from "./world-neon";
