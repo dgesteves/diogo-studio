@@ -34,7 +34,7 @@ No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `section
 and none of them may come back — a new top-level directory needs a `docs/decisions.md` entry
 naming the ownership or runtime boundary it marks.
 
-## Dependency rules — the contract, not yet the check
+## Dependency rules — checked, as errors
 
 ```
 app/  →  site/ · world/ · command-menu/ · telemetry/  →  content/ · ui/
@@ -46,19 +46,27 @@ leaves:  content/ · ui/ · env · store · reduced-motion · use-is-client · c
 2. **No domain imports a sibling's private files.** A domain's **store module is its public
    API** — `world/store.ts`, `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx`,
    `telemetry/vitals.ts` — and everything else in it is private. `site/` exports no state, so
-   it is private whole; `site/` and `world/` never see each other at all.
+   it is private whole; `site/` and `world/` never see each other at all. **A consumer is
+   granted a named subset of that list, never the whole of it:** `telemetry/` gets
+   `world/perf` and not `world/store`. The grants are `ACCESS` in `eslint.config.ts`.
 3. **`ui/` imports no domain.** If a primitive needs to know what a `Page` is, it is not a
    primitive.
 4. **`content/` imports nothing outside itself** — its own modules may compose each other.
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
    module, not even for a type. `chat-contract.ts` is the wire format both ends share.
 
-`no-restricted-imports` ships as `warn`, but `--max-warnings` is `0`, so a warning fails the
-build like an error. What is live today is the **same-domain rule**, one entry per domain:
-inside `world/`, `site/`, `command-menu/`, `telemetry/` and `agent/`, import relatively, never
-through the domain's own `@/…` alias. That is what stops a flattened domain growing a barrel
-back. What is **not** yet checked is rule 2 from outside — Phase 7 adds one group per domain
-with the store carved out, and promotes the lot to `error`. Until then rule 2 is on you.
+All five are `no-restricted-imports` **errors** as of Phase 7 — including the **same-domain
+rule** (inside `world/`, `site/`, `command-menu/`, `telemetry/` and `agent/`, import
+relatively, never through the domain's own `@/…` alias), which is what stops a flattened
+domain growing a barrel back. `content/` and `ui/` are closed to the whole of `@/`. The
+default is deny: a new file starts closed, so if lint objects to an import, the boundary is
+the thing to think about, not the message.
+
+**Never widen a rule inline.** No `eslint-disable` for this one — a cross-domain edge is
+either right, in which case it is one line in `ACCESS` in `eslint.config.ts` plus a note in
+`docs/decisions.md`, or it is the design telling you the code is in the wrong domain.
+`tests/boundaries.test.ts` asserts both directions of every rule against the real config, so
+a grant that is too wide fails a named test rather than passing quietly.
 
 ## Where a fact lives
 

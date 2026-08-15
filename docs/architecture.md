@@ -217,10 +217,14 @@ leaves (import nothing above them):
 Six rules:
 
 1. **Nothing imports from `app/`.** Routing is a leaf.
-2. **A domain's store module is its public API; every other file in it is private.** A sibling
-   may import the store and nothing else. The public modules are `world/store.ts`,
-   `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx` and `telemetry/vitals.ts`;
-   `site/` exports no state, so it is private whole.
+2. **A domain's store module is its public API; every other file in it is private.** The
+   modules a domain _may_ expose are `world/store.ts`, `world/perf.ts`,
+   `command-menu/store.tsx`, `telemetry/store.tsx` and `telemetry/vitals.ts`; `site/` exports
+   no state, so it is private whole. **Each consumer is then granted a named subset, not the
+   whole list** — `telemetry/` reads `world/perf` and is deliberately not granted
+   `world/store`, because the overlay has no business in hover, day/night or explore state.
+   The grants are the `ACCESS` table in `eslint.config.ts`, and widening one is a one-line
+   edit there: the right price for a new cross-domain edge.
 3. **`site/` never imports `world/`, and `world/` never imports `site/`** — not even a store.
    This is the edge that makes "the 3D room is an enhancement" structural rather than stated.
 4. **`ui/` imports no domain.**
@@ -228,14 +232,20 @@ Six rules:
 6. **`agent/` is reachable only from `app/api/` and build scripts**, never from a client
    module, not even for a type.
 
-**Half of this is enforced.** `no-restricted-imports` ships as `warn`, but the warning budget
-is `0` as of Phase 4, so a warning fails `pnpm lint` exactly like an error. What is live is the
-**same-domain rule** — inside each domain, import relatively, never through its own `@/…`
-alias — which is what stops a flattened domain growing a barrel back, and rule 1 everywhere.
-What is not yet checked is rule 2 from **outside** a domain. Phase 6 deleted the barrels the
-old glob could not see, so every remaining cross-domain import already points at a store;
-**Phase 7** encodes that as one group per domain with the store carved out, and promotes the
-lot to `error`. Until it lands, read rules 2 and 3 as the contract rather than as a check.
+**All six are enforced**, as `no-restricted-imports` errors, since Phase 7. Every scope in
+`src/` gets the whole contract at once — the domains it owns, the siblings it reaches, and the
+grants that let it — built from `ACCESS` in `eslint.config.ts`. The default is deny, so a new
+file at the root of `src/` starts closed rather than in a gap, and the **same-domain rule**
+(inside each domain, import relatively, never through its own `@/…` alias) is what stops a
+flattened domain growing a barrel back.
+
+**Read `eslint.config.ts` before editing a grant, not this section.** A closed domain is two
+entries — an exact `paths` entry for the bare specifier and a `patterns` group for everything
+below it — and merging them silently voids every carve-out, because `group` matches with
+gitignore semantics and those refuse to re-include a path under an excluded parent. That
+mistake shipped in `docs/refactor.md` §4.4 for three phases before anyone ran it.
+`tests/boundaries.test.ts` holds both directions of every rule above against the real config,
+so a carve-out that is too wide and one that is voided each fail a named test.
 
 **There are no barrel files.** Import the module you need at its real path. With shallow
 domains there are no internals to protect, so a barrel buys nothing and costs two things:

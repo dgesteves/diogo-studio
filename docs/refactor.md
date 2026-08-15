@@ -5,9 +5,10 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3, 4, 5 and 6 on 2026-08-15.** The
-measurement is in §2, the structural review in §4, the evidence in §5. **Phases 7 and 8 are
-all that remain**, and neither moves a file.
+§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3, 4, 5, 6 and 7 on 2026-08-15.** The
+measurement is in §2, the structural review in §4, the evidence in §5. **Phase 8 is all that
+remains**, it moves no file, and it is droppable — the architecture is now held by
+`eslint.config.ts` and `tests/boundaries.test.ts` rather than by this document.
 
 ---
 
@@ -29,7 +30,8 @@ work in. §2 replaces the diagnosis.
 errors." They are `warn`, under what was then a `--max-warnings 11` budget, and **eight live
 imports break them today** with no phase assigned to converge. §4 fixes the rules and Phase 7
 enforces them. _(Phase 4 took the budget to `0`; the eight imports still pass, because they go
-through a barrel the glob does not match — §4.5.)_
+through a barrel the glob does not match — §4.5.)_ **Both claims are true as of Phase 7**, and
+the glob those documents described turned out not to work — see §4.4.
 
 **Two phases were mis-sized and one was mis-labelled.** Phase 2 was one revertible unit
 containing the content model, the metadata flip, the layout change and the home page. Phase 5
@@ -250,14 +252,19 @@ adjacency list, which is what Phase 7 encodes.
 
 Root leaves — `env.ts`, `store.ts`, `reduced-motion.tsx`, `chat-contract.ts`,
 `use-is-client.ts` — may be imported by anyone permitted above and import nothing from `src/`
-themselves. (`store.ts` is the store factory, added in Phase 4: four domains build stores, so
-it belongs to none of them. `use-is-client.ts` arrived in Phase 6 by the same test: `world/`
-and `site/` both read it.)
+**except another root leaf**. (`store.ts` is the store factory, added in Phase 4: four domains
+build stores, so it belongs to none of them. `use-is-client.ts` arrived in Phase 6 by the same
+test: `world/` and `site/` both read it.)
+
+> **Corrected in Phase 7.** This line read "import nothing from `src/` themselves", which has
+> been false since Phase 4: `reduced-motion.tsx` imports `@/store`, and has to — it is a
+> provider built on the factory. Leaves import leaves; what they may not reach is a domain.
 
 ### 4.2 The store exception, stated precisely
 
-A client domain's **store module is its public API; every other file in it is private.** A
-sibling may import the store and nothing else.
+A client domain's **store module is its public API; every other file in it is private.** The
+table below is what a domain may _expose_; §4.1 is the authority on **which sibling gets
+which module**, and it grants a named subset rather than the whole row.
 
 | Domain          | Public store modules                         | Everything else |
 | --------------- | -------------------------------------------- | --------------- |
@@ -269,6 +276,11 @@ sibling may import the store and nothing else.
 This is not a new affordance; it is the shape the code already has. It covers the three edges
 `architecture.md` carried as hand-written exceptions (`inspector/ → world/perf` is simply an
 instance of the general rule) and the five that were undocumented.
+
+> **Corrected in Phase 7.** This section used to read "a sibling may import the store and
+> nothing else", which sounds per-domain and is not what §4.1 says. The check encodes §4.1
+> per **edge**: `telemetry/` is granted `world/perf` and not `world/store`. Least privilege,
+> and one table instead of two that can drift.
 
 > **Corrected in Phase 6.** `telemetry/` has **two** public modules, not the one this table
 > first named. The overlay's open/close signal cannot live in the component tree it drives:
@@ -293,20 +305,33 @@ instance of the general rule) and the five that were undocumented.
 
 ### 4.4 How Phase 7 enforces it
 
-One `no-restricted-imports` group per client domain, using minimatch negation to carve out the
-store, applied to every file _outside_ that domain:
+Per scope, the whole contract at once: which domain it owns, and which sibling modules it
+reaches. A closed domain is **two entries, and the split is load-bearing**:
 
 ```ts
-{ group: ["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"], message: … }
-{ group: ["@/command-menu/*", "@/command-menu/**", "!@/command-menu/store"], message: … }
-{ group: ["@/telemetry/*", "@/telemetry/**", "!@/telemetry/vitals"], message: … }
-{ group: ["@/site/*", "@/site/**"], message: … }          // no carve-out
-{ group: ["@/agent", "@/agent/**"], message: … }          // client files only
-{ group: ["@/app", "@/app/**"], message: … }              // everywhere
+paths:    [{ name: "@/world", message: … }]                         // the bare specifier
+patterns: [{ group: ["@/world/**", "!@/world/store"], message: … }] // everything below it
 ```
 
-plus the existing same-domain rule (inside `world/`, import relatively — never through
-`@/world/…`), which is what stops a domain re-growing a barrel by aliasing itself.
+plus the same-domain rule (inside `world/`, import relatively — never through `@/world/…`),
+which is what stops a domain re-growing a barrel by aliasing itself, and a total closure
+`{ group: ["@/**"] }` on `content/` and `ui/`, which is §4.3 rules 2 and 3 exactly.
+
+> **This section was wrong for three phases, and Phase 7 is where it was run.** It read:
+>
+> ```ts
+> { group: ["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"], message: … }
+> ```
+>
+> `no-restricted-imports` matches `group` with **gitignore semantics**, which refuse to
+> re-include a path whose parent directory is excluded. Put the bare `@/world` in that group
+> and **every `!` beneath it stops applying** — the group then denies the very store it exists
+> to permit. So the bare specifier has to be an exact `paths` entry, and the negations have to
+> live in a group that only ever matches below the directory. Two smaller errors rode along:
+> `@/world/*` is redundant (`@/world/**` matches direct children), and the `telemetry` line
+> carved out only `vitals` when §4.2's own Phase-6 correction gives telemetry two public
+> modules. **The lesson is the phase's own verify line** — a boundary rule nobody has watched
+> fail is a paragraph with a linter's name on it.
 
 ### 4.5 The eight edges that break this today
 
@@ -782,9 +807,8 @@ optional final phase.
 > tree. Two assertions were dropped as genuinely redundant and named in the commits; the rest
 > moved. 80 test files are 76.
 
-### Phase 7 — enforce the boundaries
+### Phase 7 — enforce the boundaries ✅ landed 2026-08-15
 
-- **Objective.** Make the architecture checked rather than described.
 - **Scope.** Implement §4.1–4.3 as the globs in §4.4: one group per domain applied to every
   file **outside** it, with the store module carved out by minimatch negation. Promote
   `no-restricted-imports` from `warn` to `error`. Correct the "not yet enforced" paragraphs in
@@ -799,6 +823,38 @@ optional final phase.
 
 > Without this phase the refactor is a one-time tidy that decays. With it, the tree is held in
 > place by a check rather than by a document nobody re-reads.
+
+> **Landed**, in two commits: the check, then the record. No file moved and no edge was
+> resolved — Phase 6 had already left the tree obeying §4.1 — so the whole phase is
+> `eslint.config.ts`, five import specifiers and `tests/boundaries.test.ts`. 864 unit tests
+> in 77 files, coverage flat at 98.97 / 93.94 / 98.79 / 99.72, 19/19 routes static, 212 E2E
+> green. Five things are worth knowing.
+>
+> **§4.4's glob was wrong, and running it is how anyone found out.** The correction is in that
+> section. It had been published across three phases, cited as the design twice, and it denies
+> the store it exists to permit. Everything else here follows from taking the phase's own
+> verify line literally.
+>
+> **The proof is a test, not a demonstration.** `tests/boundaries.test.ts` runs the real
+> `eslint.config.ts` through the ESLint API over 23 cases — 9 that must pass, 14 that must
+> fail — so both directions are held. Reintroducing the footgun into the config was tried:
+> exactly the four carve-out rows go red, by name. A one-time manual check would have proved
+> the config of the day and guarded nothing after it.
+>
+> **The rule is per-edge, which is stricter than §4.2 read.** `telemetry/` is granted
+> `world/perf` and not `world/store`. §4.1 is the adjacency list this phase was told to
+> encode, and the looser reading would have permitted the overlay into scene state silently
+> and forever. §4.2, `architecture.md` rule 2 and `.claude/rules/project-structure.md` were
+> corrected to say so rather than left describing a weaker rule than the one that runs.
+>
+> **`content/` and `ui/` are closed to the whole of `@/`**, one group each, which is §4.3
+> rules 2 and 3 encoded exactly. It cost five imports: `@/ui/cn` → `./cn` inside `ui/`, the
+> same self-alias the domains have been barred from since Phase 5. `content/` had none.
+>
+> **The default is deny.** The base `src/**` scope closes every domain, and each scope below
+> widens it, so a new file at the root of `src/` starts closed rather than in a gap. That is
+> what §4.5's finding was really about: the old glob was one path segment too long, and
+> nothing failed because nothing was watching that shape.
 
 ### Phase 8 — product and documentation
 

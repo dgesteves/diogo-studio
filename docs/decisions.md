@@ -24,6 +24,71 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — The dependency rules are grants per edge, not a public store per domain
+
+Phase 7 had to choose between two readings of the same contract, and the summaries disagreed
+with the contracts they were summarizing.
+
+Per **edge** is what the design always said. `architecture.md` §3's domain contracts grant
+`world/` "two sibling stores: `command-menu/store`, `telemetry/store`", `site/`
+"`command-menu/store` only" and `telemetry/` "one sibling store: `world/perf`". `refactor.md`
+§4.1's adjacency list — which §4 names as the thing Phase 7 encodes — says the same. What
+read as per **domain** was only the one-line summary in `architecture.md` §4 rule 2 and
+`refactor.md` §4.2: "a domain's store module is its public API; a sibling may import the
+store and nothing else." Taken literally that grants every sibling every store, which is
+looser than any contract in the document containing it.
+
+The check encodes the contracts. The loose reading would let `telemetry/` import
+`@/world/store` — hover, day/night and explore state — which is a real architectural smell,
+permitted silently and forever, and the overlay has no business there. Per-edge turns it into
+one red line until someone widens the grant deliberately: the correct price for a new
+cross-domain edge, and the same test §8 rule 6 applies to shared code.
+
+The objection to per-edge was that it would put a rule in `eslint.config.ts` that no document
+teaches. That turned out to be backwards — the documents already taught it, in the tables —
+and the fix was to correct the two summaries rather than weaken the check. `architecture.md`
+rule 2, `.claude/rules/project-structure.md` rule 2 and `refactor.md` §4.2 now state the grant
+model and name `ACCESS` in `eslint.config.ts` as where the grants live.
+
+The residual risk is that a table and `ACCESS` drift. Both summaries are now scoped to what a
+domain may _expose_, so they cannot contradict the grants — only be wider than them, which is
+what "may expose" means. `ACCESS` is the single authority on who gets what.
+
+## 2026-08-15 — A closed domain is two ESLint entries, and merging them voids the carve-out
+
+`docs/refactor.md` §4.4 carried this glob for three phases, cited as the design twice:
+
+```ts
+{ group: ["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"], message: … }
+```
+
+It does not do what it reads as. `no-restricted-imports` matches `group` with **gitignore
+semantics**, and gitignore refuses to re-include a path whose parent directory is excluded.
+The bare `@/world` excludes the directory, so both `!` entries stop applying and the group
+denies the very stores it exists to permit. Verified against the project's own ESLint 9
+before anything was written: with `@/world` in the group, all five fixture imports were
+restricted; without it, only the two private ones.
+
+Because the bare specifier cannot live in that group, it becomes an exact `paths` entry
+instead — which is also what keeps a future `src/world/index.ts` barrel from being importable,
+the thing §4.4 said the rule was for:
+
+```ts
+paths:    [{ name: "@/world", … }]
+patterns: [{ group: ["@/world/**", "!@/world/store", "!@/world/perf"], … }]
+```
+
+The comment on `noBarrel`/`privateFiles` in `eslint.config.ts` says not to merge them, and
+`tests/boundaries.test.ts` is what makes that stick: it runs the real config through the
+ESLint API over 23 cases, 9 that must pass and 14 that must fail. Putting the footgun back
+fails exactly the four carve-out rows, by name.
+
+**The general lesson is the one Phase 4 already recorded about a scanline color that passed
+31 tests:** a rule nobody has watched fail is not a check. Phase 7's verify line said "prove
+the rule can fail before trusting it", and following it literally is the only reason the
+published glob's defect was ever found. A one-time manual demonstration would have proved
+the config of that afternoon and guarded nothing after it, which is why the proof is a spec.
+
 ## 2026-08-15 — `schemas/agent.ts` split into `chat-contract.ts` and `agent/corpus.ts`
 
 One file held two contracts with opposite audiences: the `/api/chat` request and
