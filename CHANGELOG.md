@@ -1,5 +1,66 @@
 # Changelog
 
+## [1.13.0](https://github.com/dgesteves/diogo-studio/compare/v1.12.2...v1.13.0) (2026-08-14)
+
+
+### Features
+
+* **site:** home is a page, not a hidden hero ([12fd9e1](https://github.com/dgesteves/diogo-studio/commit/12fd9e1995803fe1045845ae77356a2cc7664cc2))
+
+
+### Bug Fixes
+
+* **ci:** run Playwright through the script that carries the react-server condition ([904f4fe](https://github.com/dgesteves/diogo-studio/commit/904f4fe013d9e4974a45d5b81b6fdf293e831303))
+* **world,studio:** dispose the canvas textures the screens build ([30ace1d](https://github.com/dgesteves/diogo-studio/commit/30ace1d19279a271847254b71516fee0239e0cc4))
+* **world:** dispose the textures and geometries the scene builds by hand ([2bce1d4](https://github.com/dgesteves/diogo-studio/commit/2bce1d4b1c8a70637abc5103e4c1042721ee140d))
+
+
+### Code Refactoring
+
+* **command-menu:** the route list derives from content ([f7d845b](https://github.com/dgesteves/diogo-studio/commit/f7d845be6452bd2bf451b778e5a8d56478152cee))
+* **content:** content/pages.ts owns the URL map and the station index ([8ae1059](https://github.com/dgesteves/diogo-studio/commit/8ae1059470b7595997c7f7755eaf2d170d857196))
+* **content:** content/profile.ts owns the author record ([4f02358](https://github.com/dgesteves/diogo-studio/commit/4f02358e2dc7342f5d3a57007f63976b9fd16a7b))
+* **content:** the authored prose moves to content/prose ([f755c34](https://github.com/dgesteves/diogo-studio/commit/f755c34352fafe209bce97ba665034c9c6f4de7f))
+* **r3f:** drop the context guard three.js already installs ([c92dfa9](https://github.com/dgesteves/diogo-studio/commit/c92dfa9edbbcdf1e734b74a6bf1868114245b34e))
+* **site:** page metadata derives from the authored record ([b2d9e66](https://github.com/dgesteves/diogo-studio/commit/b2d9e661c9896006356eb9f4d6c6aff1b6e0aa02))
+* **site:** the DOM reading surface leaves the room ([184184d](https://github.com/dgesteves/diogo-studio/commit/184184dcb54b7281eeb2d8c9e0c4f58d0f4c75e6))
+
+
+### Documentation
+
+* decisions.md is a record, not an authority ([aedba39](https://github.com/dgesteves/diogo-studio/commit/aedba393f3df34fa704aa9990b13712959a1a0c7))
+* mark testing-plan Phase 5 complete and record what it found ([8d0b179](https://github.com/dgesteves/diogo-studio/commit/8d0b1795f54ca14b45aab96da7d0d02953c4027c))
+* mark testing-plan Phase 6 complete and record what it found ([fd8cf66](https://github.com/dgesteves/diogo-studio/commit/fd8cf6676484b7d11c048d418be355e96b64aafd))
+* record Phase 2a ([a485fa0](https://github.com/dgesteves/diogo-studio/commit/a485fa01d2c94ca2d641580e6e25c216ddfd6fe3))
+* record Phase 2b ([c948f49](https://github.com/dgesteves/diogo-studio/commit/c948f4977024e502845004f4c939a209470c9d54))
+* retire testing-plan.md and record Phase 7 ([f7335a8](https://github.com/dgesteves/diogo-studio/commit/f7335a8d0e499ee4d177ef7187987f717ce1b575))
+
+
+### Tests
+
+* **about:** cover the pixelated portrait through a recording canvas ([f6f3e46](https://github.com/dgesteves/diogo-studio/commit/f6f3e467012998c503b119fcc427f4ee4fad2375))
+* **app,seo,telemetry:** cover the shell, the route pages and the metadata ([3f682bc](https://github.com/dgesteves/diogo-studio/commit/3f682bcd67017d98219d3a47d7c5677d368d6681))
+* **audio:** cover the sound engine, provider and world cues ([e9d8790](https://github.com/dgesteves/diogo-studio/commit/e9d87908cb1bdbeeb75a336e4dea8a57f0d00d49))
+* **world,studio:** cover the 3D scene graph with RTTR ([435f347](https://github.com/dgesteves/diogo-studio/commit/435f347c7d6d15ab42b2a150d5f49694419129e7))
+* **world,studio:** cover the canvas screens as drawn transcripts ([5033b37](https://github.com/dgesteves/diogo-studio/commit/5033b375c715d6a3624b592cc79bda639c825754))
+* **world,studio:** cover the generated shelf and the scene's texture factories ([28aef17](https://github.com/dgesteves/diogo-studio/commit/28aef17dfc50e9490db792b16c6ff8464c75eb5b))
+
+
+### Build System
+
+* **content:** the prose is server-only ([15ec6c4](https://github.com/dgesteves/diogo-studio/commit/15ec6c47307dd6ec02dceb56bad5560f0c238819))
+* **lint:** drop the max-lines caps and retire "one export per file" ([#217](https://github.com/dgesteves/diogo-studio/issues/217)) ([bf97d4c](https://github.com/dgesteves/diogo-studio/commit/bf97d4c486f5ebc1f07ab91066e3d0140cb14a5c))
+* **lint:** warn on Testing Library's fireEvent in favor of user-event ([c4ffdc5](https://github.com/dgesteves/diogo-studio/commit/c4ffdc5d416442880661ba91dc07af22d0fc07ed))
+* **pnpm:** enforce the Node and pnpm pins from the one file pnpm 11… ([#215](https://github.com/dgesteves/diogo-studio/issues/215)) ([cc49656](https://github.com/dgesteves/diogo-studio/commit/cc4965619020d029e5cbcdf89e7c429098f6a81c))
+* **test:** gate coverage in validate, with a two-entry exclusion list ([11df927](https://github.com/dgesteves/diogo-studio/commit/11df927f33f86c813bd73df1dbbb916f9c0a10ee))
+
+
+### Miscellaneous Chores
+
+* **agents:** add the Claude Code rule set, skills and settings ([98cd044](https://github.com/dgesteves/diogo-studio/commit/98cd044d559f59cc74a7978a4c8fdaff82611bcb))
+* bump dependencies to latest versions ([6441dfa](https://github.com/dgesteves/diogo-studio/commit/6441dfa88a1c81298fbee89d6d2e7227b29110b3))
+* **e2e:** add list reporter to CI so progress is visible ([6a97473](https://github.com/dgesteves/diogo-studio/commit/6a97473cdd4d0e4a3a1fed96f18f220902b794a4))
+
 ## [1.12.2](https://github.com/dgesteves/diogo-studio/compare/v1.12.1...v1.12.2) (2026-08-10)
 
 
