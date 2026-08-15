@@ -2,9 +2,9 @@ import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { MeshBasicMaterial } from "three";
 import { materialOf, renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { worldColors, worldPalettes } from "@/world/materials";
+import { worldColors, worldPalettes } from "../materials";
 import { siteConfig } from "@/content/profile";
-import { setWorldMode, type WorldMode } from "@/world/store";
+import { setWorldMode, type WorldMode } from "../store";
 import { WorldNeon } from "./neon";
 
 /**

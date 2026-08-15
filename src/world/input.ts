@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 import { ORBIT, clampAzimuth, clampPolar, clampZoom } from "./camera";
-import { setExplore } from "@/world/store";
+import { setExplore } from "./store";
 import { EXPLORE, clampPitch } from "./explore";
 
 /**

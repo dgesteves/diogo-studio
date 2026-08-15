@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type ReactElement } from "react";
 import { useTheme } from "next-themes";
-import { resolveWorldMode } from "@/world/materials";
-import { setWorldMode } from "@/world/store";
+import { resolveWorldMode } from "./materials";
+import { setWorldMode } from "./store";
 import dynamic from "next/dynamic";
 import { useReducedMotionPreference } from "@/reduced-motion";
 import { useIsClient } from "@/hooks/use-is-client";

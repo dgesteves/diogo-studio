@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import type { ReactElement, ReactNode } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { press } from "@tests/interactions";
-import { getExploreSnapshot, setExplore } from "@/world/store";
+import { getExploreSnapshot, setExplore } from "./store";
 import { EXPLORE } from "./explore";
 import { ORBIT } from "./camera";
 import { useExploreInput, type ExploreInputState } from "./input";

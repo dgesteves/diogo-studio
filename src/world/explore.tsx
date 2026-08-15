@@ -2,7 +2,7 @@
 
 import { MathUtils, Vector3 } from "three";
 import { useSyncExternalStore, useEffect, useRef, type RefObject } from "react";
-import { getExploreServerSnapshot, getExploreSnapshot, subscribeExplore } from "@/world/store";
+import { getExploreServerSnapshot, getExploreSnapshot, subscribeExplore } from "./store";
 import { useRouter } from "next/navigation";
 import { routes, type RouteKey } from "@/content/pages";
 import { useFrame } from "@react-three/fiber";

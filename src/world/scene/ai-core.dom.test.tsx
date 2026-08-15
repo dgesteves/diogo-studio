@@ -7,7 +7,7 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { setAiCoreHovered } from "@/world/store";
+import { setAiCoreHovered } from "../store";
 import {
   AI_CORE_ACCENT,
   AI_CORE_HITBOX_RADIUS,

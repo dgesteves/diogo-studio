@@ -10,7 +10,7 @@ import {
 import { cn } from "@/utils/cn";
 import { Compass, Activity, MoonStar, Search, Sparkles, Sun, Volume2, VolumeX } from "lucide-react";
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { toggleExplore } from "@/world/store";
+import { toggleExplore } from "../store";
 import { useExplore } from "../explore";
 import { useTheme } from "next-themes";
 import { Kbd } from "@/components/ui/kbd";

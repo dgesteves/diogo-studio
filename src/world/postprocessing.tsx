@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { Bloom, EffectComposer, Vignette } from "@react-three/postprocessing";
-import { useWorldPalette } from "@/world/materials";
+import { useWorldPalette } from "./materials";
 import { BLOOM_LEVELS } from "./quality";
 
 export function WorldPostprocessing(): ReactElement {

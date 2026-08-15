@@ -6,7 +6,7 @@ import { StatusDot } from "@/components/ui/status-dot";
 import { siteConfig } from "@/content/profile";
 import Link from "next/link";
 import { type RouteKey, stationSectors } from "@/content/pages";
-import { setHoveredStation } from "@/world/store";
+import { setHoveredStation } from "../store";
 import { cn } from "@/utils/cn";
 import { getStation, useActiveStation, useHoveredStation } from "../stations";
 import { radarPoints } from "./radar";

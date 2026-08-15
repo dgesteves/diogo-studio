@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ROOM } from "@/world/room";
+import { ROOM } from "./room";
 import {
   clampCameraX,
   framingPullback,

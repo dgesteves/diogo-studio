@@ -2,14 +2,14 @@
 
 import { useFrame, useThree, Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useCallback, useState, type ReactElement } from "react";
-import { markPerfInactive, publishPerf } from "@/world/perf";
+import { markPerfInactive, publishPerf } from "./perf";
 import "./silence-clock-deprecation";
 import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { useCommandMenu } from "@/features/command-menu";
-import { StudioScene } from "@/world/scene/studio";
+import { StudioScene } from "./scene/studio";
 import { type RouteKey, getStationEntry } from "@/content/pages";
-import { useWorldPalette } from "@/world/materials";
+import { useWorldPalette } from "./materials";
 import {
   DPR_DEGRADED,
   DPR_MIN,
@@ -21,15 +21,15 @@ import { getStation } from "./stations";
 import { useExplore, useExploreHandoff, ExploreController } from "./explore";
 import { useExploreInput, useOrbitInput } from "./input";
 import { AiCore } from "./scene/ai-core";
-import { BootProgressReporter } from "@/world/boot";
-import { markWorldReady } from "@/world/store";
-import { Lounge } from "@/world/scene/lounge";
+import { BootProgressReporter } from "./boot";
+import { markWorldReady } from "./store";
+import { Lounge } from "./scene/lounge";
 import { WorldCamera } from "./camera";
 import { WorldInteract } from "./interact";
 import { WorldNeon } from "./scene/neon";
 import { WorldPortals } from "./hotspots";
 import { WorldPostprocessing } from "./postprocessing";
-import { WorldProps } from "@/world/scene/props";
+import { WorldProps } from "./scene/props";
 
 /**
  * The composition root inside the `<Canvas>`: what the renderer is allowed to cost, which

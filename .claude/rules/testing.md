@@ -48,7 +48,7 @@ green. Coverage never decides whether a change is safe; the assertions do.
 Pick by what the code _is_, and don't duplicate what a cheaper layer already proves. Pure logic
 and cross-module invariants run in node. DOM behavior and timer-driven state machines run in
 jsdom with RTL and fake timers — **timing belongs here, not in E2E**; the boot gate is three
-timers and a ready signal asserted in `world/components/boot.dom.test.tsx` in ~200 ms. The
+timers and a ready signal asserted in `world/boot.dom.test.tsx` in ~200 ms. The
 scene graph runs under RTTR. The server surface is driven with a real `Request` and asserted per
 response branch, including its headers.
 

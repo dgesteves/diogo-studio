@@ -6,14 +6,14 @@ import type * as Fiber from "@react-three/fiber";
 import type * as Drei from "@react-three/drei";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { worldPalettes } from "@/world/materials";
+import { worldPalettes } from "./materials";
 
-import { getBootSnapshot, setExplore, setWorldMode, type WorldMode } from "@/world/store";
+import { getBootSnapshot, setExplore, setWorldMode, type WorldMode } from "./store";
 import { DPR_DEGRADED, DPR_MAX, DPR_MIN, type WorldQuality } from "./quality";
 import { EXPLORE } from "./explore";
 import { getStation } from "./stations";
 import { WorldCanvas, PerfReporter, ScenePrecompile } from "./canvas";
-import { getPerfSnapshot } from "@/world/perf";
+import { getPerfSnapshot } from "./perf";
 
 /**
  * The composition root of the 3D world: it decides what the renderer is allowed to cost and

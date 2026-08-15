@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vite
 import { click, press } from "@tests/interactions";
 import { ReducedMotionProvider } from "@/reduced-motion";
 import { persistOverride } from "@/reduced-motion";
-import { setHoveredStation } from "@/world/store";
+import { setHoveredStation } from "./store";
 import { createAudioEngine } from "./audio";
 import { AudioProvider, useAudio } from "./audio";
 import { WorldAudio } from "./audio";

@@ -13,7 +13,7 @@ import {
 } from "react";
 import { useReducedMotionPreference } from "@/reduced-motion";
 import { usePathname } from "next/navigation";
-import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "@/world/store";
+import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "./store";
 
 /**
  * The room's sound: the engine that loads and plays the cues, the provider that owns whether

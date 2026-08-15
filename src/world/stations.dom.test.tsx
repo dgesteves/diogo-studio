@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { routes } from "@/content/pages";
-import { setAiCoreHovered, setExplore, setHoveredStation } from "@/world/store";
+import { setAiCoreHovered, setExplore, setHoveredStation } from "./store";
 import { useActiveStation } from "./stations";
 import { useAiCoreHovered } from "./scene/ai-core";
 import { useExplore } from "./explore";

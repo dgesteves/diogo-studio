@@ -8,7 +8,7 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { setWorldMode, type WorldMode } from "@/world/store";
+import { setWorldMode, type WorldMode } from "../store";
 import { worldColors, worldPalettes } from "../materials";
 import { ROOM } from "../room";
 import { StudioScene } from "./studio";

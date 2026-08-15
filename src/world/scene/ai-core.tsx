@@ -1,6 +1,6 @@
 "use client";
 
-import { type Vec3 } from "@/world/stations";
+import { type Vec3 } from "../stations";
 import {
   type Group,
   type Mesh,
@@ -16,7 +16,7 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "@/world/store";
+import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "../store";
 import { NeonLabel, HotspotGlow } from "../hotspots";
 import { useFrame } from "@react-three/fiber";
 import { registerHotspot, unregisterHotspot } from "../interact";

@@ -8,10 +8,10 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { setHoveredStation } from "@/world/store";
+import { setHoveredStation } from "./store";
 import { FOCUS_LIGHT_INTENSITY, furnitureHotspots, WorldPortals } from "./hotspots";
 import { getStation } from "./stations";
-import { WALL_SCREEN } from "@/world/room";
+import { WALL_SCREEN } from "./room";
 import { getHotspotObjects } from "./interact";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 import type * as RadialGlow from "./hotspots";

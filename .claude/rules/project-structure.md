@@ -30,7 +30,9 @@ src/
 ```
 
 No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `sections/`,
-`constants/`, and no `components/` passthrough level inside a domain.
+`constants/`, and no `components/` passthrough level inside a domain. **`world/` is the first
+domain to reach that shape** (Phase 5); `about/`, `command-menu/` and `inspector/` are still
+under `features/` until Phase 6.
 
 ## Dependency rules — the contract, not yet the check
 
@@ -50,7 +52,8 @@ leaves:  content/ · ui/ · env · telemetry · reduced-motion
    module, not even for a type.
 
 `no-restricted-imports` ships as `warn`, but `--max-warnings` is `0`, so a warning fails the
-build like an error. What it does **not** catch is an import through a domain's `index.ts`
+build like an error. **Inside `src/world/**` the same-domain rule is live**: import relatively,
+never through `@/world/…`. What it does **not** catch is an import through a domain's `index.ts`
 barrel: the glob is `@/features/*/**`, and `@/features/command-menu` is one segment short of
 matching. That is how the eight edges in `docs/refactor.md` §4.5 break rule 2 in silence.
 **Phase 7 rewrites the globs against domain paths and promotes the rule to `error`.** Until

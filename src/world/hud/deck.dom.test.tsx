@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
 import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
 import { persistOverride, ReducedMotionProvider } from "@/reduced-motion";
-import { getExploreSnapshot, getWorldSnapshot } from "@/world/store";
+import { getExploreSnapshot, getWorldSnapshot } from "../store";
 import { stationIndex } from "@/content/pages";
 import { CommandDeck } from "./deck";
 import { DeckComms } from "./map";
@@ -33,7 +33,7 @@ vi.mock("next/navigation", () => ({
 vi.mock("next-themes", () => ({
   useTheme: () => ({ resolvedTheme: theme.resolved, setTheme: theme.setTheme }),
 }));
-vi.mock("@/world/audio", () => ({
+vi.mock("../audio", () => ({
   useAudio: () => ({ enabled: audio.enabled, toggle: audio.toggle }),
 }));
 

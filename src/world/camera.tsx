@@ -1,12 +1,12 @@
 "use client";
 
 import { MathUtils, Spherical, Vector3 } from "three";
-import { ROOM } from "@/world/room";
-import { type Vec3, type WorldStation } from "@/world/stations";
+import { ROOM } from "./room";
+import { type Vec3, type WorldStation } from "./stations";
 import { useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import { type RouteKey } from "@/content/pages";
-import { getExploreSnapshot } from "@/world/store";
+import { getExploreSnapshot } from "./store";
 import { getStation } from "./stations";
 import { type OrbitInputState } from "./input";
 

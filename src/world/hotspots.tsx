@@ -1,8 +1,8 @@
 "use client";
 
 import { type RouteKey, stationIndex } from "@/content/pages";
-import { type Vec3, type WorldStation } from "@/world/stations";
-import { WALL_SCREEN, WALL_SCREEN_Z } from "@/world/room";
+import { type Vec3, type WorldStation } from "./stations";
+import { WALL_SCREEN, WALL_SCREEN_Z } from "./room";
 import {
   CanvasTexture,
   LinearFilter,

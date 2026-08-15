@@ -36,7 +36,7 @@ const theme = vi.hoisted(() => ({ resolved: "light", setTheme: vi.fn() }));
 // drei's loader store, which is the only thing `BootProgressReporter` reads.
 const loader = vi.hoisted(() => ({ progress: 0 }));
 
-vi.mock("@/world/audio", () => ({ useAudio: () => ({ enable: audio.enable }) }));
+vi.mock("./audio", () => ({ useAudio: () => ({ enable: audio.enable }) }));
 vi.mock("@react-three/drei", () => ({ useProgress: () => ({ progress: loader.progress }) }));
 vi.mock("next-themes", () => ({
   useTheme: () => ({ resolvedTheme: theme.resolved, setTheme: theme.setTheme }),
