@@ -1,6 +1,6 @@
 import "server-only";
 
-import { workTimeline } from "../career-timeline";
+import { engagements, orgLine, patternLabels } from "../career";
 import { getStationEntry } from "../pages";
 import type { Destination } from "../schema";
 
@@ -17,7 +17,13 @@ export const work: Destination = {
     },
     {
       kind: "timeline",
-      items: workTimeline,
+      items: engagements.map((engagement) => ({
+        period: engagement.period,
+        title: engagement.role,
+        org: orgLine(engagement),
+        points: engagement.points,
+        tags: engagement.patterns.map((pattern) => patternLabels[pattern]),
+      })),
     },
   ],
 };

@@ -1,3 +1,5 @@
+import { education } from "./career";
+
 /**
  * The author. Identity, role, reach, and the facts the metadata, JSON-LD and the
  * agent all state — declared once, here, because this domain is the only place a
@@ -27,7 +29,7 @@ export const siteConfig = {
     "Streaming reliability",
     "Engineering leadership",
   ],
-  alumniOf: ["ISEL — Instituto Superior de Engenharia de Lisboa", "Universidade Lusófona"],
+  alumniOf: education.map((entry) => entry.institution),
   knowsLanguage: ["pt", "en"],
   links: {
     github: "https://github.com/dgesteves",

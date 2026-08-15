@@ -1,7 +1,38 @@
 import "server-only";
 
+import { education, engagements, orgLine } from "../career";
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { ContentBlock, Destination } from "../schema";
+
+type TimelineItem = Extract<ContentBlock, { kind: "timeline" }>["items"][number];
+
+/**
+ * `/work` is the engagement record; this is the whole arc, education included, in one
+ * chronological run. Both derive from `content/career.ts` — the two pages differ by
+ * projection, never by a second authoring of the same date.
+ */
+const chronological: readonly TimelineItem[] = [
+  ...engagements.map((engagement) => ({
+    start: engagement.start,
+    item: {
+      period: engagement.period,
+      title: engagement.role,
+      org: orgLine(engagement),
+      points: engagement.points,
+    },
+  })),
+  ...education.map((entry) => ({
+    start: entry.start,
+    item: {
+      period: entry.period,
+      title: entry.qualification,
+      org: entry.institution,
+      points: entry.points,
+    },
+  })),
+]
+  .sort((a, b) => b.start.localeCompare(a.start))
+  .map((entry) => entry.item);
 
 export const timeline: Destination = {
   ...getStationEntry("timeline"),
@@ -15,71 +46,7 @@ export const timeline: Destination = {
     },
     {
       kind: "timeline",
-      items: [
-        {
-          period: "2011 — 2014",
-          title: "Law, first",
-          org: "Universidade Lusófona · LLB",
-          points: [
-            "Argumentation, structure, and reading the fine print.",
-            "Skills that still pay off in RFCs and contract negotiations.",
-          ],
-        },
-        {
-          period: "2015 — 2018",
-          title: "The pivot",
-          org: "ISEL · Computer Engineering",
-          points: [
-            "Software engineering, AI, and interactive systems.",
-            "Shipping at Deloitte while finishing the degree.",
-          ],
-        },
-        {
-          period: "2016 — 2018",
-          title: "Enterprise foundations",
-          org: "Deloitte · Software Engineer",
-          points: [
-            "React/Redux frontends and data visualization for regulated clients.",
-            "Learned to operate inside large, structured organizations.",
-          ],
-        },
-        {
-          period: "2018 — 2020",
-          title: "First lead roles",
-          org: "BMW Group → Diligent",
-          points: [
-            "Innovation platforms channeling R&D across the BMW Group.",
-            "Architected Diligent's Fortune 1000 design system.",
-          ],
-        },
-        {
-          period: "2020 — 2022",
-          title: "Streaming scale",
-          org: "Sky · NBCUniversal",
-          points: [
-            "Peacock TV — tens of millions of subscribers.",
-            "Performance, resilience, and release safety as product features.",
-          ],
-        },
-        {
-          period: "2022 — 2025",
-          title: "The AI-native turn",
-          org: "Superglue → eino.ai",
-          points: [
-            "Owned user-facing platforms end to end in seed-stage teams.",
-            "Shipped agentic UX and digital-twin visualization to production.",
-          ],
-        },
-        {
-          period: "2025 — Present",
-          title: "Altitude shifts",
-          org: "Moment (VPE) → Fueled (Lead)",
-          points: [
-            "Built and led an engineering org as VP of Engineering.",
-            "Now the senior frontend voice on enterprise engagements at Fueled.",
-          ],
-        },
-      ],
+      items: chronological,
     },
   ],
 };

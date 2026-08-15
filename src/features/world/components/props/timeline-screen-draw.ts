@@ -1,23 +1,22 @@
+import type { Engagement } from "@/content/career";
 import { MONO } from "@/features/studio/components/screens/canvas-texture";
 
 import { header, INK, paintBackground, section, SOFT } from "./screen-draw-kit";
 
 const ACCENT = "#a78bfa";
 
-type Stop = { year: string; title: string; org: string };
+/** The panel is 600×800 and every stop needs 90px, so it shows the most recent six. */
+const MAX_STOPS = 6;
 
-const STOPS: Stop[] = [
-  { year: "2025", title: "Lead Engineer", org: "Fueled" },
-  { year: "2025", title: "VP of Engineering", org: "Moment" },
-  { year: "2023", title: "Lead Frontend", org: "eino.ai" },
-  { year: "2020", title: "Senior Engineer", org: "Sky · NBCUniversal" },
-  { year: "2018", title: "Lead Frontend", org: "BMW Group" },
-  { year: "2015", title: "Frontend Engineer", org: "Studio era" },
-];
+export function drawTimeline(
+  ctx: CanvasRenderingContext2D,
+  engagements: readonly Engagement[],
+): void {
+  const STOPS = engagements.slice(0, MAX_STOPS);
+  const earliest = STOPS.at(-1)?.start.slice(0, 4) ?? "";
 
-export function drawTimeline(ctx: CanvasRenderingContext2D): void {
   paintBackground(ctx, ACCENT);
-  header(ctx, "TIMELINE", "2015 → NOW", ACCENT);
+  header(ctx, "TIMELINE", `${earliest} → NOW`, ACCENT);
   section(ctx, "● CAREER", 142, ACCENT);
 
   const x = 56;
@@ -42,12 +41,12 @@ export function drawTimeline(ctx: CanvasRenderingContext2D): void {
     ctx.fill();
     ctx.fillStyle = SOFT;
     ctx.font = `13px ${MONO}`;
-    ctx.fillText(stop.year, x + 26, y - 24);
+    ctx.fillText(stop.start.slice(0, 4), x + 26, y - 24);
     ctx.fillStyle = INK;
     ctx.font = `bold 19px ${MONO}`;
-    ctx.fillText(stop.title, x + 26, y - 6);
+    ctx.fillText(stop.role, x + 26, y - 6);
     ctx.fillStyle = SOFT;
     ctx.font = `14px ${MONO}`;
-    ctx.fillText(stop.org, x + 26, y + 20);
+    ctx.fillText(stop.company, x + 26, y + 20);
   }
 }

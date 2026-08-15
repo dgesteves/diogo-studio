@@ -129,6 +129,18 @@ function TimelineBlock({ items }: { items: Timeline }): ReactElement {
               <li key={point}>{point}</li>
             ))}
           </ul>
+          {item.tags?.length ? (
+            <ul className="mt-2 flex flex-wrap gap-1.5">
+              {item.tags.map((tag) => (
+                <li
+                  key={tag}
+                  className="border-border/60 text-subtle-foreground rounded-full border px-2 py-0.5 font-mono text-[10px] tracking-wider uppercase"
+                >
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </li>
       ))}
     </ol>

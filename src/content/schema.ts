@@ -28,6 +28,7 @@ export type ContentBlock =
         title: string;
         org?: string;
         points: readonly string[];
+        tags?: readonly string[];
       }[];
     }
   | {

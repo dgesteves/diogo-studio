@@ -1,8 +1,7 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry } from "./types";
 
-import { careerEngagements, operatingCompanies } from "../../src/constants/career";
-import { patterns as careerPatterns } from "../../src/constants/patterns";
+import { engagements, operatingCompanies, patternLabels } from "../../src/content/career";
 import { routes } from "../../src/content/pages";
 import { siteConfig } from "../../src/content/profile";
 
@@ -25,25 +24,21 @@ export function buildCareerChunks(): IndexEntry[] {
     }),
   );
 
-  for (const engagement of careerEngagements) {
-    const patternLabels = engagement.patterns
-      .map((p) => careerPatterns[p]?.label ?? p)
-      .filter(Boolean)
-      .join(", ");
-    const permalink = routes.home;
+  for (const engagement of engagements) {
+    const labels = engagement.patterns.map((pattern) => patternLabels[pattern]).join(", ");
     out.push(
       finalizeEntry({
         sourceId: `career:${engagement.id}`,
         sourceKind: "career",
-        sourceTitle: engagement.name,
-        permalink,
+        sourceTitle: engagement.company,
+        permalink: routes.work,
         anchor: undefined,
         heading: engagement.role,
         tags: [...engagement.patterns],
         ordinal: 0,
         content:
-          `${engagement.name} (${engagement.years}) — ${engagement.role}. ` +
-          `${engagement.summary} Patterns: ${patternLabels}.`,
+          `${engagement.company} (${engagement.period}) — ${engagement.role}. ` +
+          `${engagement.points.join(" ")} Patterns: ${labels}.`,
       }),
     );
   }

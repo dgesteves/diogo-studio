@@ -2,6 +2,8 @@
 
 import { type ReactElement } from "react";
 
+import { engagements } from "@/content/career";
+
 import {
   WALL_SCREEN,
   WALL_SCREEN_Z,
@@ -14,9 +16,14 @@ import { drawStack } from "./stack-screen-draw";
 import { drawTimeline } from "./timeline-screen-draw";
 import { WallScreen, type ScreenDraw } from "./wall-screen";
 
+/**
+ * Where the authored record meets the canvas. Bound at module scope so each `draw` keeps
+ * a stable identity — `useScreenTexture` has it as an effect dependency, and a new
+ * closure per render would repaint and re-upload the texture every time.
+ */
 const SCREEN_DRAWS: Record<WallScreenSlug, ScreenDraw> = {
-  resume: drawResume,
-  timeline: drawTimeline,
+  resume: (ctx) => drawResume(ctx, engagements),
+  timeline: (ctx) => drawTimeline(ctx, engagements),
   principles: drawPrinciples,
   stack: drawStack,
   playground: drawPlayground,

@@ -1,44 +1,43 @@
 import { brandColors } from "@/config/brand";
+import type { Engagement } from "@/content/career";
+import { siteConfig } from "@/content/profile";
 import { MONO } from "@/features/studio/components/screens/canvas-texture";
 
 import { divider, header, INK, paintBackground, section, SOFT } from "./screen-draw-kit";
 
 const ACCENT = brandColors.accent;
 
-type Role = { role: string; org: string; date: string };
+/** The panel is 600×800 and the FOCUS section starts at 612, so five rows is what fits. */
+const MAX_ROLES = 5;
 
-const ROLES: Role[] = [
-  { role: "LEAD ENGINEER", org: "Fueled · Web Applications", date: "2025 — NOW" },
-  { role: "VP OF ENGINEERING", org: "Moment", date: "2025" },
-  { role: "LEAD FRONTEND", org: "eino.ai", date: "2023 — 25" },
-  { role: "SENIOR ENGINEER", org: "Sky · NBCUniversal", date: "2020 — 22" },
-  { role: "LEAD FRONTEND", org: "BMW Group", date: "2018 — 19" },
-];
-
-export function drawResume(ctx: CanvasRenderingContext2D): void {
+export function drawResume(
+  ctx: CanvasRenderingContext2D,
+  engagements: readonly Engagement[],
+): void {
   const W = ctx.canvas.width;
 
   paintBackground(ctx, ACCENT);
-  header(ctx, "DIOGO ESTEVES", "STAFF · PRINCIPAL ENGINEER", ACCENT);
+  header(ctx, siteConfig.name.toUpperCase(), siteConfig.role.toUpperCase(), ACCENT);
 
   section(ctx, "● EXPERIENCE", 142, ACCENT);
 
-  for (let i = 0; i < ROLES.length; i += 1) {
-    const row = ROLES[i];
+  const rows = engagements.slice(0, MAX_ROLES);
+  for (let i = 0; i < rows.length; i += 1) {
+    const row = rows[i];
     if (!row) continue;
     const y = 184 + i * 82;
     ctx.fillStyle = ACCENT;
     ctx.fillRect(36, y + 2, 4, 40);
     ctx.fillStyle = INK;
     ctx.font = `bold 20px ${MONO}`;
-    ctx.fillText(row.role, 54, y);
+    ctx.fillText(row.role.toUpperCase(), 54, y);
     ctx.fillStyle = SOFT;
     ctx.font = `15px ${MONO}`;
-    ctx.fillText(row.org, 54, y + 28);
+    ctx.fillText(row.company, 54, y + 28);
     ctx.fillStyle = brandColors.accentSoft;
     ctx.font = `14px ${MONO}`;
     ctx.textAlign = "right";
-    ctx.fillText(row.date, W - 36, y + 4);
+    ctx.fillText(row.years, W - 36, y + 4);
     ctx.textAlign = "left";
   }
 

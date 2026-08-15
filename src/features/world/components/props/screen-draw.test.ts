@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { brandColors } from "@/config/brand";
+import { engagements } from "@/content/career";
+import { siteConfig } from "@/content/profile";
 import { createRecordingContext, type RecordingContext, type TextRun } from "@tests/recording-ctx";
 
 import { drawPlayground } from "./playground-screen-draw";
@@ -8,6 +10,11 @@ import { drawPrinciples } from "./principles-screen-draw";
 import { drawResume } from "./resume-screen-draw";
 import { drawStack } from "./stack-screen-draw";
 import { drawTimeline } from "./timeline-screen-draw";
+
+// The two career panels read the authored record; the wall binds it in `wall-screens.tsx`
+// and these bind the same thing, so what is asserted below is the projection onto 600×800.
+const paintResume = (ctx: CanvasRenderingContext2D): void => drawResume(ctx, engagements);
+const paintTimeline = (ctx: CanvasRenderingContext2D): void => drawTimeline(ctx, engagements);
 
 /**
  * The five panels on the world's right wall. A visitor reads them as text at a distance, so
@@ -30,17 +37,18 @@ type Panel = {
 const PANELS: readonly Panel[] = [
   {
     name: "resume",
-    draw: drawResume,
+    draw: paintResume,
     accent: brandColors.accent,
-    title: "DIOGO ESTEVES",
-    subtitle: "STAFF · PRINCIPAL ENGINEER",
+    title: siteConfig.name.toUpperCase(),
+    subtitle: siteConfig.role.toUpperCase(),
   },
   {
     name: "timeline",
-    draw: drawTimeline,
+    draw: paintTimeline,
     accent: "#a78bfa",
     title: "TIMELINE",
-    subtitle: "2015 → NOW",
+    // The sixth-most-recent engagement, which is as far down as 800px reaches.
+    subtitle: "2019 → NOW",
   },
   {
     name: "principles",
@@ -137,44 +145,37 @@ describe.each(PANELS)("$name wall screen", ({ draw, accent, title, subtitle }) =
 });
 
 describe("resume panel", () => {
-  it("lists five roles, each with its organization and dates", () => {
-    const { text } = paint(drawResume);
+  it("projects the five most recent engagements, role uppercased, newest first", () => {
+    const { text } = paint(paintResume);
+    const rows = engagements.slice(0, 5);
 
     expect(text).toEqual([
-      "DIOGO ESTEVES",
-      "STAFF · PRINCIPAL ENGINEER",
+      siteConfig.name.toUpperCase(),
+      siteConfig.role.toUpperCase(),
       "● EXPERIENCE",
-      "LEAD ENGINEER",
-      "Fueled · Web Applications",
-      "2025 — NOW",
-      "VP OF ENGINEERING",
-      "Moment",
-      "2025",
-      "LEAD FRONTEND",
-      "eino.ai",
-      "2023 — 25",
-      "SENIOR ENGINEER",
-      "Sky · NBCUniversal",
-      "2020 — 22",
-      "LEAD FRONTEND",
-      "BMW Group",
-      "2018 — 19",
+      ...rows.flatMap((engagement) => [
+        engagement.role.toUpperCase(),
+        engagement.company,
+        engagement.years,
+      ]),
       "● FOCUS",
       "Frontend Platform · AI-Native UX",
       "Design Systems · Performance",
+      // No PDF exists behind this yet. `docs/refactor.md` Phase 8 owns removing it or
+      // wiring a real file; it is a product decision, not a refactor's.
       "↧  DOWNLOAD RÉSUMÉ",
     ]);
   });
 
   it("hangs the dates off the right edge and the roles off the left", () => {
-    const dates = paint(drawResume).runs.filter((run) => /^20\d\d/.test(run.text));
+    const dates = paint(paintResume).runs.filter((run) => /^20\d\d/.test(run.text));
 
     expect(dates).toHaveLength(5);
     expect(dates.every((run) => run.align === "right" && run.x === WIDTH - 36)).toBe(true);
   });
 
   it("marks each role with an accent tick, so the rows read as a list", () => {
-    const ticks = paint(drawResume)
+    const ticks = paint(paintResume)
       .callsTo("fillRect")
       .filter(([, , width]) => width === 4);
 
@@ -183,33 +184,22 @@ describe("resume panel", () => {
 });
 
 describe("timeline panel", () => {
-  it("reads from the most recent stop down", () => {
-    const { text } = paint(drawTimeline);
+  it("reads from the most recent stop down, year over role over company", () => {
+    const { text } = paint(paintTimeline);
 
-    expect(text.slice(3)).toEqual([
-      "2025",
-      "Lead Engineer",
-      "Fueled",
-      "2025",
-      "VP of Engineering",
-      "Moment",
-      "2023",
-      "Lead Frontend",
-      "eino.ai",
-      "2020",
-      "Senior Engineer",
-      "Sky · NBCUniversal",
-      "2018",
-      "Lead Frontend",
-      "BMW Group",
-      "2015",
-      "Frontend Engineer",
-      "Studio era",
-    ]);
+    expect(text.slice(3)).toEqual(
+      engagements
+        .slice(0, 6)
+        .flatMap((engagement) => [
+          engagement.start.slice(0, 4),
+          engagement.role,
+          engagement.company,
+        ]),
+    );
   });
 
   it("threads one spine through a dot per stop", () => {
-    const { callsTo } = paint(drawTimeline);
+    const { callsTo } = paint(paintTimeline);
     const dots = callsTo("arc");
 
     expect(dots).toHaveLength(6);
