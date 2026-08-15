@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import { cn } from "@/ui/cn";
+import { cn } from "./cn";
 
 type StatusTone = "good" | "warn" | "hot" | "neutral";
 
