@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Metadata } from "next";
 import { renderToStaticMarkup } from "react-dom/server";
 import { routes, type RouteKey } from "@/content/pages";
-import { CommandMenuProvider } from "@/features/command-menu";
+import { CommandMenuProvider } from "@/command-menu/store";
 import { getDestination } from "@/content/prose";
 
 /**

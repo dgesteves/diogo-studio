@@ -5,7 +5,7 @@ import { Color, type Fog, type PerspectiveCamera } from "three";
 import type * as Fiber from "@react-three/fiber";
 import type * as Drei from "@react-three/drei";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { CommandMenuProvider } from "@/features/command-menu";
+import { CommandMenuProvider } from "@/command-menu/store";
 import { worldPalettes } from "./materials";
 
 import { getBootSnapshot, setExplore, setWorldMode, type WorldMode } from "./store";

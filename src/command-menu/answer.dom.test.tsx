@@ -2,8 +2,8 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { AgentCitation } from "@/chat-contract";
-import type { AskStatus, RetrievalMode } from "../types";
-import { AskAnswerSurface } from "./ask-answer-surface";
+import type { AskStatus, RetrievalMode } from "./store";
+import { AskAnswerSurface } from "./answer";
 
 /**
  * What the visitor reads once the agent answers. `ask-agent.dom.test.tsx` owns the states

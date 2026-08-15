@@ -118,8 +118,10 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
   off `next build` / `next start`. Run those through `pnpm`, never bare `tsx` or `playwright`;
   CI ran `pnpm exec playwright test` for a day and every E2E job died on import.
   `playwright.config.ts` now fails fast with that instruction, so the rule is checked.
-- **"Inspector" is two things:** `features/command-menu` is the ⌘K surface, whose agent is
-  branded "the Inspector agent"; `features/inspector` is the Web-Vitals overlay.
+- **"Inspector" is a brand, not a directory.** `command-menu/` is the ⌘K surface, whose agent is
+  branded "the Inspector agent"; `telemetry/` is the Web-Vitals overlay, whose UI is labelled
+  "Inspector · receipts". Phase 6 retired the `features/inspector` folder that made the name
+  ambiguous; the copy and the `Inspector*` identifiers that match it are Phase 8's to revisit.
 - **The AI endpoint's safety properties already hold and break silently.** When touching
   `/api/chat`, `src/ai/**` or the answer UI, keep them: user text stays in the user message and
   is never concatenated into the system prompt; model output renders as text, never HTML, and

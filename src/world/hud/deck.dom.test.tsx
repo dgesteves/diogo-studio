@@ -4,7 +4,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
-import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
+import { CommandMenuProvider, useCommandMenu } from "@/command-menu/store";
 import { persistOverride, ReducedMotionProvider } from "@/reduced-motion";
 import { getExploreSnapshot, getWorldSnapshot } from "../store";
 import { stationIndex } from "@/content/pages";
@@ -45,13 +45,29 @@ function withProviders(children: ReactElement): ReactElement {
   );
 }
 
+/**
+ * The deck's contract with ⌘K is the store, not the menu: a sibling's store module is its
+ * public API and every other file in it is private (`docs/refactor.md` §4.2), so this spec
+ * reads the signal the deck writes rather than mounting another domain's dialog. What the
+ * menu renders for each mode is `command-menu/menu.dom.test.tsx`; that pressing a deck
+ * button lands a visitor in it is `world.spec.ts`.
+ */
+function MenuState(): ReactElement {
+  const { open, mode } = useCommandMenu();
+  return <output data-testid="menu-state">{open ? mode : "closed"}</output>;
+}
+
+function menuState(): string {
+  return screen.getByTestId("menu-state").textContent ?? "";
+}
+
 function renderDeck(): UserEvent {
   const user = userEvent.setup();
   render(
     withProviders(
       <>
         <CommandDeck />
-        <CommandMenu />
+        <MenuState />
       </>,
     ),
   );
@@ -96,19 +112,20 @@ afterEach(() => {
 });
 
 describe("Command deck: the controls", () => {
-  it("opens the command menu, and opens it in Ask mode from the agent button", async () => {
+  it("opens the command menu in Navigate mode", async () => {
     const user = renderDeck();
+    expect(menuState()).toBe("closed");
 
     await click(user, /open command menu/i);
-    expect(screen.getByPlaceholderText(/type a command, page, or question/i)).toBeInTheDocument();
+    expect(menuState()).toBe("navigate");
+  });
 
-    await act(async () => {
-      await user.keyboard("{Escape}");
-    });
-
+  it("opens it straight into Ask mode from the agent button", async () => {
     // Two entry points, two modes: the sparkle skips Navigate entirely.
+    const user = renderDeck();
+
     await click(user, /ask the studio agent/i);
-    expect(screen.getByLabelText(/question for the agent/i)).toBeInTheDocument();
+    expect(menuState()).toBe("ask");
   });
 
   it("labels the sound control by what pressing it will do", async () => {

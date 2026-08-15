@@ -3,7 +3,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
-import { CommandMenuProvider, useCommandMenu } from "./command-menu-store";
+import { CommandMenuProvider, useCommandMenu } from "./store";
 
 /**
  * The store behind ⌘K. Two of its jobs are invisible in the rendered menu and are what

@@ -6,12 +6,12 @@ import { restoreMediaStubs } from "@tests/media";
 import { stationIndex, stationSectors } from "@/content/pages";
 import { siteConfig } from "@/content/profile";
 import type { ReactElement } from "react";
-import { CommandMenuProvider, useCommandMenu } from "../stores/command-menu-store";
-import { CommandMenu } from "./command-menu";
+import { CommandMenuProvider, useCommandMenu } from "./store";
+import { CommandMenu } from "./menu";
 
 /**
  * The ⌘K surface itself: which view the mode shows, what Navigate offers and where each
- * entry goes, and what Ask does with a question. `command-menu-store.dom.test.tsx` owns the
+ * entry goes, and what Ask does with a question. `store.dom.test.tsx` owns the
  * open/close state machine and `ask-agent.dom.test.tsx` the request; `command-menu.spec.ts`
  * drives the same menu in a browser. What is here is what neither of those reaches: every
  * navigation and profile action rather than one of them, the close-then-act ordering that

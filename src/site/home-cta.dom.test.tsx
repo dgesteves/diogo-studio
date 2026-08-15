@@ -4,7 +4,7 @@ import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { click } from "@tests/interactions";
 import { siteConfig } from "@/content/profile";
-import { CommandMenuProvider, useCommandMenu } from "@/features/command-menu";
+import { CommandMenuProvider, useCommandMenu } from "@/command-menu/store";
 import { HomeCta } from "./home-cta";
 
 /** The CTA's whole job is the mode it opens the menu in, which only the store can report. */

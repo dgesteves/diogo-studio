@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AgentCitation, AgentSourcesPayload } from "@/chat-contract";
-import { useAskAgent } from "./use-ask-agent";
+import { useAskAgent } from "./ask";
 
 /**
  * Driven through `useAskAgent` rather than `runAskRequest` directly: the hook is the seam

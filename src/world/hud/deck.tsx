@@ -15,7 +15,7 @@ import { useExplore } from "../explore";
 import { useTheme } from "next-themes";
 import { Kbd } from "@/components/ui/kbd";
 import { useAudio } from "../audio";
-import { useCommandMenu } from "@/features/command-menu";
+import { useCommandMenu } from "@/command-menu/store";
 import { useInspectorOverlay } from "@/telemetry/store";
 import { useIsClient } from "@/hooks/use-is-client";
 import { DeckMapOverlay } from "./map";

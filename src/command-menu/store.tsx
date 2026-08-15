@@ -12,6 +12,16 @@ import {
 
 export type CommandMenuMode = "navigate" | "ask";
 
+/**
+ * The ask flow's vocabulary lives here rather than beside the hook that produces it, so
+ * `ask.tsx` → `answer.tsx` stays a one-way edge: the surface that renders a status must be
+ * able to name it without importing the surface that sets it.
+ */
+export type AskStatus =
+  "idle" | "streaming" | "done" | "refused" | "rate-limited" | "error" | "unconfigured";
+
+export type RetrievalMode = "cosine" | "keyword";
+
 type CommandMenuContextValue = {
   open: boolean;
   setOpen: (value: boolean) => void;
