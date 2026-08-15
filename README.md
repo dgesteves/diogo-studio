@@ -44,11 +44,9 @@ retries. For anything timing- or 3D-sensitive, reproduce the runner with
 
 - Coding standards and file placement: [`.claude/rules/`](./.claude/rules).
   [`docs/architecture.md`](./docs/architecture.md) is authoritative for
-  structural questions — it describes the architecture the code is being built
-  toward, not the tree as it stands. A refactor is in flight;
-  [`docs/refactor.md`](./docs/refactor.md) tracks the phases, and
+  structural questions and normative where the code disagrees.
   [`docs/decisions.md`](./docs/decisions.md) records the reasoning behind the
-  non-obvious calls.
+  non-obvious calls — dated, append-only, and never a rule in itself.
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org/) —
   `release-please` derives the version and [`CHANGELOG.md`](./CHANGELOG.md) from
   them. The `commit-msg` hook enforces this locally via `commitlint`.

@@ -3,7 +3,7 @@ import { createStore } from "@/store";
 /**
  * Frame statistics, produced by the renderer and displayed by the inspector. The world owns
  * them because the world measures them, which is why this module is public to siblings while
- * the rest of `world/` is not — `docs/refactor.md` §4.2.
+ * the rest of `world/` is not — `docs/architecture.md` §4 rule 2.
  */
 
 export type PerfSnapshot = {

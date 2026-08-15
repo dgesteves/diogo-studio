@@ -1,14 +1,16 @@
 # Architecture
 
-**This file is normative.** It describes the architecture this codebase is being built
-toward, and it is the authority when the code disagrees — the opposite of the contract
-this file carried before 2026-08-11, when it described only what existed. That inversion
-is deliberate and recorded in [`decisions.md`](./decisions.md): the destination is the
-source of truth, not the current tree.
+**This file is normative.** It describes the architecture this codebase holds to, and it is
+the authority when the code disagrees — the opposite of the contract this file carried
+before 2026-08-11, when it described only what existed. That inversion is deliberate and
+recorded in [`decisions.md`](./decisions.md): the design is the source of truth, not
+whatever the tree happens to be.
 
-[`refactor.md`](./refactor.md) tracks how far the code has moved toward this document and
-is deleted when it arrives. Where the code and this file disagree today, the gap is a
-phase in that plan — not a licence to write new code against the old shape.
+The code has arrived at what is described here, and the plan that moved it — `refactor.md` —
+was deleted when it did. So a disagreement between this file and the tree is no longer a
+phase waiting to run: it is a defect in one of the two, and which one is settled by §11.
+Most of §4 is now held by `eslint.config.ts` and `tests/boundaries.test.ts` rather than by
+this document, which is the intended end state — a check outranks a paragraph.
 
 ---
 
@@ -217,10 +219,14 @@ leaves (import nothing above them):
 Six rules:
 
 1. **Nothing imports from `app/`.** Routing is a leaf.
-2. **A domain's store module is its public API; every other file in it is private.** A sibling
-   may import the store and nothing else. The public modules are `world/store.ts`,
-   `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx` and `telemetry/vitals.ts`;
-   `site/` exports no state, so it is private whole.
+2. **A domain's store module is its public API; every other file in it is private.** The
+   modules a domain _may_ expose are `world/store.ts`, `world/perf.ts`,
+   `command-menu/store.tsx`, `telemetry/store.tsx` and `telemetry/vitals.ts`; `site/` exports
+   no state, so it is private whole. **Each consumer is then granted a named subset, not the
+   whole list** — `telemetry/` reads `world/perf` and is deliberately not granted
+   `world/store`, because the overlay has no business in hover, day/night or explore state.
+   The grants are the `ACCESS` table in `eslint.config.ts`, and widening one is a one-line
+   edit there: the right price for a new cross-domain edge.
 3. **`site/` never imports `world/`, and `world/` never imports `site/`** — not even a store.
    This is the edge that makes "the 3D room is an enhancement" structural rather than stated.
 4. **`ui/` imports no domain.**
@@ -228,14 +234,21 @@ Six rules:
 6. **`agent/` is reachable only from `app/api/` and build scripts**, never from a client
    module, not even for a type.
 
-**Half of this is enforced.** `no-restricted-imports` ships as `warn`, but the warning budget
-is `0` as of Phase 4, so a warning fails `pnpm lint` exactly like an error. What is live is the
-**same-domain rule** — inside each domain, import relatively, never through its own `@/…`
-alias — which is what stops a flattened domain growing a barrel back, and rule 1 everywhere.
-What is not yet checked is rule 2 from **outside** a domain. Phase 6 deleted the barrels the
-old glob could not see, so every remaining cross-domain import already points at a store;
-**Phase 7** encodes that as one group per domain with the store carved out, and promotes the
-lot to `error`. Until it lands, read rules 2 and 3 as the contract rather than as a check.
+**All six are enforced**, as `no-restricted-imports` errors, since Phase 7. Every scope in
+`src/` gets the whole contract at once — the domains it owns, the siblings it reaches, and the
+grants that let it — built from `ACCESS` in `eslint.config.ts`. The default is deny, so a new
+file at the root of `src/` starts closed rather than in a gap, and the **same-domain rule**
+(inside each domain, import relatively, never through its own `@/…` alias) is what stops a
+flattened domain growing a barrel back.
+
+**Read `eslint.config.ts` before editing a grant, not this section.** A closed domain is two
+entries — an exact `paths` entry for the bare specifier and a `patterns` group for everything
+below it — and merging them silently voids every carve-out, because `group` matches with
+gitignore semantics and those refuse to re-include a path under an excluded parent. That
+mistake was published as the design for three phases before anyone ran it — see the
+2026-08-15 entry "A closed domain is two ESLint entries" in [`decisions.md`](./decisions.md).
+`tests/boundaries.test.ts` holds both directions of every rule above against the real config,
+so a carve-out that is too wide and one that is voided each fail a named test.
 
 **There are no barrel files.** Import the module you need at its real path. With shallow
 domains there are no internals to protect, so a barrel buys nothing and costs two things:
@@ -310,7 +323,7 @@ src/
       layout.tsx              mounts <World/> BESIDE {children}, never around it
       page.tsx  about/  work/ …            17 explicit folders, ~3 lines each
     api/chat/route.ts  api/health/route.ts
-    layout.tsx  error.tsx  global-error.tsx  not-found.tsx  loading.tsx
+    layout.tsx  providers.tsx  error.tsx  global-error.tsx  not-found.tsx  loading.tsx
     icon.tsx  apple-icon.tsx  robots.ts  sitemap.ts
 
   content/                    ★ SOURCE OF TRUTH
@@ -384,7 +397,8 @@ consumers, different lifecycle, different runtime. Never split to satisfy a numb
 merge to reduce one. _(This replaces "one primary, named export per file", which is a
 fragmentation rule wearing a style rule's clothes: if a file may export one thing, a component
 tree with fifteen nodes is fifteen files by arithmetic. It is the measured cause of this
-codebase's 297-file, 49-line-average shape — `refactor.md` §2.1.)_
+codebase's 297-file, 49-line-average shape — see the 2026-08-14 entry in
+[`decisions.md`](./decisions.md).)_
 
 **The folder is the namespace.** Never repeat it in the filename. `world/boot/overlay.tsx`,
 not `world/boot/boot-overlay.tsx`. Read an import path aloud; if a word repeats, rename.

@@ -107,13 +107,16 @@ export default defineConfig({
        * specs themselves. Floored to whole numbers so a rounding difference is not a build
        * failure, and raised only after re-measuring.
        *
-       * **Deliberately global rather than per-directory.** Per-layer thresholds were the
-       * original plan and are the wrong instrument *right now*: `docs/refactor.md`
-       * moves or merges nearly every directory in `src/`, and a threshold keyed on a path that
-       * is about to change either breaks the build during a pure move or silently stops
-       * applying. The two rows below are the exceptions because their locations are fixed by
-       * what they are — the HTTP surface and the abuse limiter — and they are the highest-risk
-       * files in the repo.
+       * **Deliberately global rather than per-directory.** The original reason was that the
+       * refactor moved or merged nearly every directory in `src/`, so a threshold keyed on a
+       * path either broke the build during a pure move or silently stopped applying. That
+       * reason expired when the refactor landed; global is still the choice, on a standing
+       * one. A per-directory threshold encodes a tree shape into a config, which is a second
+       * place the architecture has to be maintained and the first to rot silently — and the
+       * domains here are small enough that a per-domain floor is mostly sampling noise. The
+       * two rows below are the exceptions because their locations are fixed by what they are
+       * — the HTTP surface and the abuse limiter — and they are the highest-risk files in the
+       * repo.
        *
        * Branches sit five points under statements because a handful of `noUncheckedIndexedAccess`
        * guards and `?? fallback`s cannot be reached without testing TypeScript instead of the
