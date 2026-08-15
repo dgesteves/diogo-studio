@@ -24,6 +24,60 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — One `createStore`, and `src/store.ts` as a fourth root leaf
+
+Eight modules hand-rolled `Set<listener>` / `emit` / `subscribe` / `getSnapshot` /
+`getServerSnapshot`. `architecture.md` §9 and `.claude/rules/project-structure.md` both
+already said client state comes "from one factory"; Phase 4 is what made that true. Three
+choices inside it are worth keeping.
+
+**The factory is a root leaf, which neither target tree listed.** `world/`, `telemetry.ts`,
+`reduced-motion.tsx` and `inspector/` all build stores, so the factory belongs to none of them,
+and §4.1's definition of a root leaf — imports nothing from `src/`, importable by anyone — fits
+it exactly. Putting it in `ui/` was the alternative and is worse: `ui/` is primitives a page
+renders, and a state mechanism there invites domain state to follow it in.
+
+**`set` and `update` are separate, and neither emits when the value has not changed.** One
+overloaded setter would have to ask whether its argument is a reducer, which has no honest
+answer once `T` may itself be a function. The `Object.is` guard is the thing every store used
+to hand-write, and returning `prev` from `update` is now how a caller says nothing moved —
+without it, a pointer move over a hotspot re-renders the whole HUD on mouse noise.
+
+**Nothing hydrates from storage during a snapshot read.** The boot flag, the inspector overlay
+and the motion override used to read `localStorage`/`sessionStorage` on the first
+`getSnapshot()`, which React calls during render — safe only because they mutated a plain
+variable and skipped the emit. Reading at module scope instead removes the hazard rather than
+tiptoeing around it, and keeps `getServer()` at the initial value so hydration still matches
+the server's markup.
+
+## 2026-08-15 — The world exposes two store modules; three signals share one of them
+
+`refactor.md` §4.2 says a client domain's store module is its public API and lists exactly two
+for the world. `world/store.ts` is now hover, day/night and explore mode — three
+`createStore` instances in one module, so a hover cannot re-render the sky — and `world/perf.ts`
+is frame statistics, separate because it is the one the inspector reads.
+
+Boot stayed out of both. It is a different lifecycle: it runs once, at startup, and nothing
+reads it afterwards. `world/boot.ts` holds it until Phase 5 folds the fifteen boot files into
+`world/boot.tsx`, which is where it belongs.
+
+This is not "fewer files is better" — see §2.4's corollary. Merging three modules that the HUD
+deck and the camera read together is a cohesion call; `mouse.tsx` and `keyboard.tsx` stay two
+files for the same reason.
+
+## 2026-08-15 — `--max-warnings` is `0`, four phases early
+
+Every one of the eleven warnings under the old budget was the same import: nine files in
+`features/world/` reaching into `features/studio/…/canvas-texture`. Phase 4 gave that module a
+real home in `world/screens/texture.ts`, so the budget went to zero on its own and
+`no-restricted-imports` now fails the build in practice, without waiting for Phase 7.
+
+**What Phase 7 still owns is the glob, not the severity.** `@/features/*/**` does not match
+`@/features/command-menu` — a domain's own `index.ts` is one segment short — so all eight edges
+in `refactor.md` §4.5 import through a barrel and pass silently. A budget of zero over a rule
+that cannot see the violations is worth exactly as much as the rule's reach, and saying so is
+the point of this entry.
+
 ## 2026-08-15 — A block is a chunk, and a chunk's permalink is where it was derived from
 
 Phase 3 rewrote the retrieval chunker. Three properties are worth keeping, because each

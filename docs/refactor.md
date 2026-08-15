@@ -5,8 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14, Phases 2b and 3 on 2026-08-15.** The measurement is in
-§2, the structural review in §4, the evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3 and 4 on 2026-08-15.** The measurement is
+in §2, the structural review in §4, the evidence in §5.
 
 ---
 
@@ -25,8 +25,10 @@ work in. §2 replaces the diagnosis.
 
 **The boundaries were asserted, not enforced.** `architecture.md` §4 and
 `.claude/rules/project-structure.md` both state the dependency rules are "lint-enforced as
-errors." They are `warn`, under a `--max-warnings 11` budget, and **eight live imports break
-them today** with no phase assigned to converge. §4 fixes the rules and Phase 7 enforces them.
+errors." They are `warn`, under what was then a `--max-warnings 11` budget, and **eight live
+imports break them today** with no phase assigned to converge. §4 fixes the rules and Phase 7
+enforces them. _(Phase 4 took the budget to `0`; the eight imports still pass, because they go
+through a barrel the glob does not match — §4.5.)_
 
 **Two phases were mis-sized and one was mis-labelled.** Phase 2 was one revertible unit
 containing the content model, the metadata flip, the layout change and the home page. Phase 5
@@ -173,12 +175,13 @@ src/
   ui/                        button · badge · kbd · status-dot · segmented · brand-icons · cn
 
   env.ts                     the only process.env reader
+  store.ts                   createStore<T>() — every client signal is built from it
   reduced-motion.tsx         provider + store, one concept
   chat-contract.ts           the /api/chat wire format — shared, owned by neither side
   globals.css
 ```
 
-**8 directories and 4 files at the root of `src/`. Maximum depth 3.**
+**8 directories and 5 files at the root of `src/`. Maximum depth 3.**
 
 | Metric                           |      Now |                           Target |
 | -------------------------------- | -------: | -------------------------------: |
@@ -241,8 +244,9 @@ adjacency list, which is what Phase 7 encodes.
 | `content/`       | **nothing**                                                                                      |
 | `ui/`            | **nothing** — no domain, no root leaf that carries product state                                 |
 
-Root leaves — `env.ts`, `reduced-motion.tsx`, `chat-contract.ts` — may be imported by anyone
-permitted above and import nothing from `src/` themselves.
+Root leaves — `env.ts`, `store.ts`, `reduced-motion.tsx`, `chat-contract.ts` — may be imported
+by anyone permitted above and import nothing from `src/` themselves. (`store.ts` is the store
+factory, added in Phase 4: four domains build stores, so it belongs to none of them.)
 
 ### 4.2 The store exception, stated precisely
 
@@ -296,11 +300,17 @@ plus the existing same-domain rule (inside `world/`, import relatively — never
 `architecture.md`'s "no domain imports a sibling, with three named exceptions" is violated in
 eight places:
 
-| Rule as written                           | Broken by                                        |
-| ----------------------------------------- | ------------------------------------------------ |
-| `world/` never imports `command-menu/`    | `world-canvas.tsx:12`, `hud/deck-controls.tsx:8` |
-| `world/` never imports `inspector/`       | `boot-actions.tsx:6`, `hud/deck-controls.tsx:9`  |
-| `site/` imports only `content/` and `ui/` | `home/hero-ask-cta.tsx:7`                        |
+| Rule as written                           | Broken by                                         |
+| ----------------------------------------- | ------------------------------------------------- |
+| `world/` never imports `command-menu/`    | `world-canvas.tsx:12`, `hud/deck-controls.tsx:8`  |
+| `world/` never imports `inspector/`       | `boot-actions.tsx:6`, `hud/deck-controls.tsx:9`   |
+| `site/` imports only `content/` and `ui/` | `site/home-cta.tsx` (was `home/hero-ask-cta.tsx`) |
+
+**Every one of them is invisible to lint, and that is the finding.** They import through a
+domain's `index.ts` — `@/features/command-menu`, not `@/features/command-menu/stores/…` — and
+the guard's glob is `@/features/*/**`, one path segment longer. Phase 4 emptied the warning
+budget (`--max-warnings` is `0`), so the severity is no longer what is missing: **the glob is.**
+Phase 7 rewrites it against domain paths, at which point all eight surface at once.
 
 The escape hatch the document proposes — _"opening the command menu through a callback it is
 handed"_ — means threading a callback from `app/layout.tsx` through `WorldStage` →
@@ -356,6 +366,10 @@ three dead dependencies and six dead CSS classes went in Phase 1.
   each carrying a verbatim four-line `eslint-disable` banner.
 - **Three CRT draw kits**: `screen-draw-kit.ts` defines the primitives,
   `terminal-screen-draw` reimplements them inline, `lounge-tv-screen-draw` redefines `INK`.
+
+> **Resolved in Phase 4.** There were eight stores, not seven — the inspector overlay's was
+> never counted — and seven of the eight are `createStore` calls now. All three items are
+> single modules: `src/store.ts`, `world/screens/texture.ts`, `world/screens/kit.ts`.
 
 ### Retrieval is a data defect, not a layout one
 
@@ -570,7 +584,7 @@ optional final phase.
 > sweeps `world/`, `command-menu/` and `app/`, which is a different change from this one —
 > **added to Phase 6 below** rather than left unassigned.
 
-### Phase 4 — the two real abstractions
+### Phase 4 — the two real abstractions ✅ landed 2026-08-15
 
 - **Objective.** Delete 570 lines of duplication.
 - **Scope.** One `createStore<T>()`; `src/stores/` dissolves into the producing domains. One
@@ -578,6 +592,44 @@ optional final phase.
   `eslint-disable` banners go.
 - **Verify.** `pnpm validate` · `pnpm e2e:ci` · `pnpm size`.
 - **Depends on** Phase 0.
+
+> **Landed**, in three commits: the factory, the texture hook, the CRT kit. 19/19 routes
+> static, 843 unit tests and 212 E2E green, 749 kB gzipped against a 1.3 MB budget. Five
+> things are worth knowing.
+>
+> **There were eight stores, not seven.** `features/inspector/stores/inspector-overlay-store`
+> is the one §5 never counted. Seven convert; reduced motion's system and low-power signals are
+> media-query subscriptions with no listener set of their own, so they stay hand-written.
+>
+> **`src/store.ts` is a fourth root leaf, which no target tree listed.** Four domains build
+> stores, so the factory belongs to none of them, and §4.1's definition of a root leaf fits it
+> exactly. §3 above and `architecture.md` §3 now carry it, and `decisions.md` has the reasoning
+> along with the two runners-up.
+>
+> **`src/stores/` dissolved into the homes the target already named** — `world/store.ts`
+> (hover, day/night, explore, three `createStore`s in one module), `world/perf.ts`,
+> `world/boot.ts`, `telemetry.ts`, `reduced-motion.tsx` — so `src/world/` exists from here
+> rather than being created in Phase 5. The provider merged into `reduced-motion.tsx` on the
+> way, which is what `architecture.md` means by "provider + store, one concept".
+>
+> **The warning budget is gone, four phases early.** Every one of the eleven warnings was
+> `features/world/` reaching into `features/studio/…/canvas-texture`; giving that module a real
+> home retired all eleven, so `--max-warnings` is `0`. What Phase 7 still owns is the glob —
+> see the note under §4.5.
+>
+> **The transcript specs do not assert color, so they were not the proof.** They assert text
+> and geometry, and a deliberately broken scanline color passed all 31 lounge tests. The four
+> rewritten draw routines were instead dumped through `@tests/recording-ctx` before and after
+> the change and diffed: 7,760 lines, identical. **A test that cannot fail is not a gate** —
+> if a later phase needs to prove a draw is unchanged, do this again rather than trusting the
+> suite.
+>
+> One number moved the wrong way and is worth stating plainly: coverage went 99.05 → 98.99
+> statements, 94.00 → 93.94 branches. Nothing became less covered. The uncovered branch count
+> (66) and function count (9) are identical, and the phase deleted ~100 covered statements of
+> duplication, which lowers a ratio whose numerator and denominator both shrink. One uncovered
+> statement is genuinely new: a `typeof window === "undefined"` guard on the server path of the
+> motion override, which jsdom cannot reach. Thresholds were not touched.
 
 ### Phase 5 — the 3D room
 
@@ -618,12 +670,13 @@ optional final phase.
 
 - **Objective.** Make the architecture checked rather than described.
 - **Scope.** Rewrite the `FEATURES` generator in `eslint.config.ts` against domain paths;
-  implement §4.1–4.3 as the globs in §4.4, one group per domain with the store carved out;
-  **promote `no-restricted-imports` from
-  `warn` to `error`**; drop `--max-warnings 11`; resolve the eight violating edges; correct
-  `architecture.md` §4 and `.claude/rules/project-structure.md`, which carry the same false
-  claim.
-- **Verify.** `pnpm lint` with no warning budget.
+  implement §4.1–4.3 as the globs in §4.4, one group per domain with the store carved out —
+  **the glob is the whole point, because the current one cannot see a barrel import and all
+  eight violating edges are barrel imports**; promote `no-restricted-imports` from `warn` to
+  `error`; resolve the eight edges; correct `architecture.md` §4 and
+  `.claude/rules/project-structure.md`, which carry the same false claim.
+- **Verify.** `pnpm lint` — the budget is already `0` as of Phase 4, so this phase is measured
+  by the eight edges going red first and then green, not by the flag.
 
 > Without this phase the refactor is a one-time tidy that decays. With it, the tree is held in
 > place by a check rather than by a document nobody re-reads.

@@ -26,7 +26,7 @@ src/
   inspector/      the performance overlay
   ui/             generic primitives with zero domain knowledge
   styles/         globals.css + design tokens
-  env.ts  telemetry.ts  reduced-motion.tsx
+  env.ts  store.ts  telemetry.ts  reduced-motion.tsx
 ```
 
 No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `sections/`,
@@ -117,8 +117,14 @@ that works — see [Imports](#imports).
 ## State
 
 Client state uses hand-rolled external stores read via `useSyncExternalStore`, built from
-**one shared factory** — there is no store library, and adding one needs a
-`docs/decisions.md` entry.
+**one shared factory** — `createStore<T>()` in `src/store.ts`, which is the only place a
+listener set lives. There is no store library, and adding one needs a `docs/decisions.md`
+entry.
+
+`get` / `getServer` / `set` / `update` / `subscribe`, and **`set` does not emit when the value
+has not changed** — return `prev` from `update` to say nothing moved. Storage is not the
+factory's business: a store that persists reads it **when the module initializes**, never
+inside a snapshot getter, because React calls those during render.
 
 **A signal is owned by whoever produces it, not whoever displays it.** The world produces
 frame statistics, so it owns them; the inspector subscribes. That is why adding a second

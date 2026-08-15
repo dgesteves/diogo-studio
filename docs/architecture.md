@@ -170,9 +170,9 @@ properties are non-negotiable and break silently, so they are listed in `AGENTS.
 | **Talks to others by** | Subscribing. It reads; it never writes to another domain. |
 
 A signal is owned by whoever **produces** it, not whoever displays it. The world produces
-frame statistics, so `world/perf.ts` owns them. `instrumentation-client.ts` produces Web
-Vitals, so `telemetry.ts` owns those. The inspector subscribes to both and owns neither —
-which is why adding a second consumer later requires no move.
+frame statistics, so `world/perf.ts` owns them. `telemetry.ts` starts the `web-vitals`
+collector on its first subscriber, so it owns those. The inspector subscribes to both and owns
+neither — which is why adding a second consumer later requires no move.
 
 ### Supporting modules
 
@@ -180,6 +180,7 @@ which is why adding a second consumer later requires no move.
 | -------------------- | ----------------------------------------------------------- | ---------- |
 | `ui/`                | Generic primitives with zero domain knowledge, plus `cn`    | Isomorphic |
 | `env.ts`             | The **only** reader of `process.env`, Zod-validated         | Isomorphic |
+| `store.ts`           | `createStore<T>()` — the one external-store factory         | Isomorphic |
 | `telemetry.ts`       | Sentry sample rate, the Web Vitals store                    | Isomorphic |
 | `reduced-motion.tsx` | The motion preference: system, low-power, override, storage | Client     |
 | `styles/`            | Design tokens and global CSS                                | —          |
@@ -322,6 +323,7 @@ src/
   ui/                         button · badge · kbd · status-dot · brand-icons · cn.ts
   styles/globals.css
   env.ts                      the only process.env reader
+  store.ts                    createStore<T>() — every client signal is built from it
   reduced-motion.tsx          provider + store, one concept
   telemetry.ts                sample rate + Web Vitals store
 
@@ -329,7 +331,7 @@ scripts/build-index.ts        content → agent/index.json
 tests/                        helpers (@tests/*) + e2e/
 ```
 
-Eight folders and three files at the root of `src/`. Maximum depth four segments. No
+Eight folders and four files at the root of `src/`. Maximum depth four segments. No
 `utils/`, `helpers/`, `common/`, `shared/`, `sections/`, `constants/`, or `components/`
 passthrough level anywhere, and no folder that exists to make the tree look organized.
 
