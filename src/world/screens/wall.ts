@@ -54,11 +54,6 @@ export function drawResume(
   ctx.font = `15px ${MONO}`;
   ctx.fillText("Frontend Platform · AI-Native UX", 36, 668);
   ctx.fillText("Design Systems · Performance", 36, 692);
-
-  divider(ctx, 732);
-  ctx.fillStyle = RESUME_ACCENT;
-  ctx.font = `bold 17px ${MONO}`;
-  ctx.fillText("↧  DOWNLOAD RÉSUMÉ", 36, 752);
 }
 
 const TIMELINE_ACCENT = "#a78bfa";
