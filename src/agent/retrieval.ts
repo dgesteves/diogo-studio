@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import { createOpenAI } from "@ai-sdk/openai";
 import { embed } from "ai";
 
-import { env } from "@/config/env";
+import { env } from "@/env";
 
 import { INDEX, type AgentChunk } from "./corpus";
 

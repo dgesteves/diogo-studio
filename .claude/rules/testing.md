@@ -95,7 +95,7 @@ with no setup.
   `Math.random()`.
 - **`vi.stubEnv` does nothing here** — `createEnv` validates and freezes at import. A spec
   needing a different environment mocks the module:
-  `vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }))`.
+  `vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }))`.
   `tests/env.ts` types its defaults from `typeof env`, so a new required variable fails
   typecheck there until it is accounted for.
 - **A spec covering a `use cache` route must mock `next/cache`** — `cacheLife()` throws outside a
@@ -103,7 +103,7 @@ with no setup.
 - **Reduced motion and the degraded env paths are real branches.** Set the app's own override
   (`persistOverride(true)`) rather than re-stubbing `matchMedia`. The two specs that own those
   platform seams — `reduced-motion.dom.test.tsx` and
-  `providers/providers.dom.test.tsx` — go through `@tests/media`, which `vitest.setup.ts` also
+  `app/providers.dom.test.tsx` — go through `@tests/media`, which `vitest.setup.ts` also
   uses for its no-preference default so the stubs cannot drift. It includes the legacy
   `addListener` pair, without which next-themes throws on mount.
 - **jsdom's `Storage` is a proxy, so `vi.spyOn(window.localStorage, "getItem")` silently does

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { type CanvasTexture } from "three";
-import { mulberry32 } from "@/utils/mulberry32";
+import { mulberry32 } from "../random";
 import { worldColors } from "../materials";
 import { MONO, INK, scanlines } from "./kit";
 import { useScreenTexture } from "../screens/texture";

@@ -15,7 +15,7 @@ import { useTheme } from "next-themes";
 import { useRouter } from "next/navigation";
 import { type ReactElement, type ReactNode } from "react";
 
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
+import { GithubIcon, LinkedinIcon } from "@/ui/brand-icons";
 import { routes, stationSectors } from "@/content/pages";
 import { siteConfig } from "@/content/profile";
 

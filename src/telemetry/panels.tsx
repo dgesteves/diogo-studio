@@ -5,7 +5,7 @@ import { useId, type ReactElement, type ReactNode } from "react";
 
 import { useReducedMotionPreference } from "@/reduced-motion";
 import type { PerfSnapshot } from "@/world/perf";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 
 import type { VitalRating, VitalSample, VitalsSnapshot } from "./vitals";
 

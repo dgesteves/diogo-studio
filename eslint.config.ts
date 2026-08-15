@@ -4,28 +4,21 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 
-// The three domains still under `features/`; Phase 6 empties it. `world/` left in Phase 5
-// and is covered by SAME_DOMAIN_IMPORT below instead.
-const FEATURES = ["about", "command-menu", "inspector"];
+// Every client domain at the root of `src/`. Phase 6 emptied `features/`, so the glob that
+// used to name its slices matches nothing and is gone with it.
+const DOMAINS = ["world", "site", "command-menu", "telemetry", "agent"];
 
 type ImportPattern = { group: string[]; message: string };
 type ImportPath = { name: string; importNames: string[]; message: string };
 
-// The glob and the `warn` severity are Phase 7's to rewrite; the message is corrected here
-// because it recommended a barrel, which docs/architecture.md §4 bans.
-const DEEP_FEATURE_IMPORT: ImportPattern = {
-  group: ["@/features/*/**"],
-  message:
-    "A domain's store module is its public API; every other file in it is private. Import a sibling's store, never a deep path — docs/refactor.md §4.2.",
-};
-
-// `world/` is a real domain now, so the same rule the `features/` slices get applies to it:
-// inside the world, import relatively. Phase 7 turns this into one group per domain with the
-// store carved out, and promotes the lot to `error`.
-const SAME_DOMAIN_IMPORT: ImportPattern = {
-  group: ["@/world", "@/world/**"],
-  message: "Inside world/, import relatively — never through the @/world alias.",
-};
+// Inside a domain, import relatively. This is what stops a flattened domain growing a barrel
+// back by aliasing itself — it caught 45 self-alias imports in `world/` the day it landed.
+// Phase 7 adds the other half: one group per domain applied from *outside* it, with the store
+// module carved out, and the whole lot promoted from `warn` to `error`.
+const sameDomainImport = (domain: string): ImportPattern => ({
+  group: [`@/${domain}`, `@/${domain}/**`],
+  message: `Inside ${domain}/, import relatively — never through the @/${domain} alias.`,
+});
 
 const ROUTING_IS_A_LEAF: ImportPattern = {
   group: ["@/app", "@/app/**"],
@@ -93,13 +86,13 @@ const eslintConfig = defineConfig([
       "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/consistent-type-imports": "error",
       "@typescript-eslint/explicit-module-boundary-types": "error",
-      "no-restricted-imports": restrictedImports(DEEP_FEATURE_IMPORT, ROUTING_IS_A_LEAF),
+      "no-restricted-imports": restrictedImports(ROUTING_IS_A_LEAF),
       "no-restricted-syntax": [
         "error",
         {
           selector:
             "MemberExpression[object.object.name='process'][object.property.name='env']:not([property.name='NODE_ENV'])",
-          message: "Read environment variables via src/config/env.ts, not process.env directly.",
+          message: "Read environment variables via src/env.ts, not process.env directly.",
         },
       ],
     },
@@ -125,31 +118,14 @@ const eslintConfig = defineConfig([
       "jsx-a11y/no-static-element-interactions": "error",
     },
   },
-  {
-    files: ["src/world/**/*.{ts,tsx}"],
+  ...DOMAINS.map((domain) => ({
+    files: [`src/${domain}/**/*.{ts,tsx}`],
     rules: {
-      "no-restricted-imports": restrictedImports(
-        SAME_DOMAIN_IMPORT,
-        DEEP_FEATURE_IMPORT,
-        ROUTING_IS_A_LEAF,
-      ),
-    },
-  },
-  ...FEATURES.map((feature) => ({
-    files: [`src/features/${feature}/**/*.{ts,tsx}`],
-    rules: {
-      "no-restricted-imports": restrictedImports(
-        {
-          group: [`@/features/${feature}`, `@/features/${feature}/**`],
-          message: `Inside features/${feature}, import relatively — never through the @/features/${feature} alias.`,
-        },
-        DEEP_FEATURE_IMPORT,
-        ROUTING_IS_A_LEAF,
-      ),
+      "no-restricted-imports": restrictedImports(sameDomainImport(domain), ROUTING_IS_A_LEAF),
     },
   })),
   {
-    files: ["src/config/env.ts"],
+    files: ["src/env.ts"],
     rules: {
       "no-restricted-syntax": "off",
     },

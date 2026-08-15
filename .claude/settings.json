@@ -19,7 +19,7 @@
       "Read(./.env.local)",
       "Edit(./CHANGELOG.md)",
       "Edit(./pnpm-lock.yaml)",
-      "Edit(./src/constants/agent-index.json)"
+      "Edit(./src/agent/index.generated.json)"
     ]
   }
 }

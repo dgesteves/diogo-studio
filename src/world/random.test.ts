@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mulberry32 } from "./mulberry32";
+import { mulberry32 } from "./random";
 
 function take(seed: number, count: number): number[] {
   const rand = mulberry32(seed);

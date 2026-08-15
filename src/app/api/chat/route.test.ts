@@ -25,7 +25,7 @@ const corpus: { chunks: AgentChunk[]; hasEmbeddings: boolean; embeddingDim: numb
   embeddingDim: 3,
 };
 
-vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
+vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 vi.mock("ai", () => ({ streamText, embed }));
 vi.mock("@ai-sdk/openai", () => ({ createOpenAI }));
 vi.mock("@sentry/nextjs", () => ({ captureException }));

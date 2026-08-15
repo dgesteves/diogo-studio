@@ -1,7 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-import { brand } from "@/components/ui/brand";
+import { brand } from "@/ui/brand";
 import {
   getWorldModeServerSnapshot,
   getWorldModeSnapshot,

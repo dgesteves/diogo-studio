@@ -1,13 +1,13 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { GithubIcon, LinkedinIcon } from "@/components/ui/brand-icons";
-import { StatusDot } from "@/components/ui/status-dot";
+import { GithubIcon, LinkedinIcon } from "@/ui/brand-icons";
+import { StatusDot } from "@/ui/status-dot";
 import { siteConfig } from "@/content/profile";
 import Link from "next/link";
 import { type RouteKey, stationSectors } from "@/content/pages";
 import { setHoveredStation } from "../store";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import { getStation, useActiveStation, useHoveredStation } from "../stations";
 import { radarPoints } from "./radar";
 import * as Dialog from "@radix-ui/react-dialog";

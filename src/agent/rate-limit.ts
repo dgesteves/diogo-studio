@@ -1,7 +1,7 @@
 import "server-only";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
-import { env } from "@/config/env";
+import { env } from "@/env";
 
 export type RateLimitConfig = {
   prefix: string;

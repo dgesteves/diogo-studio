@@ -6,7 +6,7 @@ import { Network, Sparkles } from "lucide-react";
 import { useEffect, type ReactElement, type ReactNode } from "react";
 
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 
 import { CommandMenuAsk } from "./ask";
 import { NavigateView } from "./navigate";

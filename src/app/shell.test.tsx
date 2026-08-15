@@ -18,7 +18,7 @@ vi.mock("next/font/google", () => ({
   Geist_Mono: () => ({ variable: "--font-geist-mono" }),
 }));
 
-vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
+vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 
 /**
  * Both inject their script on mount, so neither leaves a trace in server-rendered markup. The

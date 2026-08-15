@@ -3,8 +3,8 @@
 import { type ReactElement } from "react";
 import { Instance, Instances } from "@react-three/drei";
 import { type CanvasTexture, AdditiveBlending } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
-import { mulberry32 } from "@/utils/mulberry32";
+import { useDisposable } from "../gpu";
+import { mulberry32 } from "../random";
 import { worldColors, frameMaterial } from "../materials";
 import { CITY_WINDOW, ROOM } from "../room";
 import { createCanvasTexture } from "../screens/texture";

@@ -4,7 +4,7 @@ import type { ReactElement, ReactNode } from "react";
 
 import type { AgentCitation, AgentSourceKind } from "@/chat-contract";
 import { asInternalHref } from "@/content/pages";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 
 import type { AskStatus, RetrievalMode } from "./store";
 

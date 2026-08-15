@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { env } from "@/config/env";
+import { env } from "@/env";
 import type { RouteKey } from "@/content/pages";
 import { siteConfig } from "@/content/profile";
 import { getDestination } from "@/content/prose";

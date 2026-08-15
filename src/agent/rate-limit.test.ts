@@ -10,7 +10,7 @@ const { upstashLimit, slidingWindow, RatelimitCtor, RedisCtor } = vi.hoisted(() 
   RedisCtor: vi.fn(),
 }));
 
-vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
+vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 
 vi.mock("@upstash/ratelimit", () => {
   class Ratelimit {

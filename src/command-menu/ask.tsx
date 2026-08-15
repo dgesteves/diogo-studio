@@ -9,7 +9,7 @@ import {
   type AgentCitation,
   type AgentSourcesPayload,
 } from "@/chat-contract";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd } from "@/ui/kbd";
 import { asInternalHref } from "@/content/pages";
 import { useReducedMotionPreference } from "@/reduced-motion";
 

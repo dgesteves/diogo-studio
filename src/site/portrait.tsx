@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState, type ReactElement, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { useIsClient } from "@/hooks/use-is-client";
-import { cn } from "@/utils/cn";
+import { useIsClient } from "@/use-is-client";
+import { cn } from "@/ui/cn";
 import { siteConfig } from "@/content/profile";
 
 /**

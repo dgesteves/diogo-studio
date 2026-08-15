@@ -2,7 +2,6 @@
 paths:
   - "src/content/**"
   - "src/site/**"
-  - "src/seo/**"
   - "src/app/layout.tsx"
   - "src/world/screens/**"
   - "src/world/scene/**"
@@ -19,14 +18,14 @@ refactor, not a copy fix. Also third-party names and APIs, quoted external text,
 nouns.
 
 **Generated files are regenerated, not edited:** `CHANGELOG.md` (release-please),
-`src/constants/agent-index.json` (`pnpm agent:index`), `pnpm-lock.yaml`. Fix the source.
+`src/agent/index.generated.json` (`pnpm agent:index`), `pnpm-lock.yaml`. Fix the source.
 
 **Bulk replacements need guarded patterns** — `optimis[eai]`, or you corrupt `optimistic` — and
 must skip generated files and identifiers.
 
 **Locale settings that must agree:** `<html lang="en">`, `openGraph.locale: "en_US"` in
-`src/seo/root-metadata.ts`, and `Intl` formatters on `"en-US"`. Locale drives order and
-separators, so changing one is a visible UI change: verify the rendered string, and keep
+`rootMetadata` in `src/site/metadata.ts`, and `Intl` formatters on `"en-US"`. Locale drives
+order and separators, so changing one is a visible UI change: verify the rendered string, and keep
 `hourCycle` explicit rather than relying on an `hour12` default.
 
 **Nothing checks any of this.** There is no spell-check gate, deliberately, so it holds by

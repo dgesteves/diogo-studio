@@ -3,7 +3,7 @@
 import { type RouteKey, type RoutePath, stationIndex, getStationEntry } from "@/content/pages";
 import { getStation, useActiveStation, useHoveredStation } from "../stations";
 import { Fragment, type ReactElement } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import { Maximize2 } from "lucide-react";
 
 /** The radar on the deck: where every station sits relative to the one you are on. */

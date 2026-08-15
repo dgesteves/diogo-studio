@@ -7,17 +7,17 @@ import {
   type ReactElement,
   useState,
 } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import { Compass, Activity, MoonStar, Search, Sparkles, Sun, Volume2, VolumeX } from "lucide-react";
 import { useReducedMotionPreference } from "@/reduced-motion";
 import { toggleExplore } from "../store";
 import { useExplore } from "../explore";
 import { useTheme } from "next-themes";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd } from "@/ui/kbd";
 import { useAudio } from "../audio";
 import { useCommandMenu } from "@/command-menu/store";
 import { useInspectorOverlay } from "@/telemetry/store";
-import { useIsClient } from "@/hooks/use-is-client";
+import { useIsClient } from "@/use-is-client";
 import { DeckMapOverlay } from "./map";
 import { DeckRadar } from "./radar";
 

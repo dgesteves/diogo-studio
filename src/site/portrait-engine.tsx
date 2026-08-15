@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type ReactElement } from "react";
 
-import { brand } from "@/components/ui/brand";
+import { brand } from "@/ui/brand";
 
 /**
  * The portrait's canvas, whole: the component, the loop that drives it, the sampler that

@@ -1,5 +1,5 @@
 import { chatRequestSchema, type AgentSourcesPayload } from "@/chat-contract";
-import { env } from "@/config/env";
+import { env } from "@/env";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/agent/corpus";
 import { createRateLimiter } from "@/agent/rate-limit";

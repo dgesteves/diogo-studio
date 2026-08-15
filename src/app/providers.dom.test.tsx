@@ -3,12 +3,12 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import { restoreMediaStubs } from "@tests/media";
 import { persistOverride, useReducedMotionPreference } from "@/reduced-motion";
-import { AppProviders } from "./index";
-import { ThemeProvider } from "./theme-provider";
+import { AppProviders } from "./providers";
 
 /**
- * What the two providers do *together*. Each one on its own is asserted where it lives —
- * the motion preference and its three sources in `reduced-motion.dom.test.tsx`.
+ * What the two providers do *together*, which is the only seam there is now that they are
+ * one module: `ThemeProvider` is private to it. The motion preference and its three sources
+ * are asserted where they live, in `reduced-motion.dom.test.tsx`.
  */
 
 function Preference(): ReactElement {
@@ -17,20 +17,6 @@ function Preference(): ReactElement {
 }
 
 afterEach(restoreMediaStubs);
-
-describe("ThemeProvider", () => {
-  it("applies the resolved theme as a class, which is what Tailwind reads", () => {
-    render(
-      <ThemeProvider>
-        <p>themed</p>
-      </ThemeProvider>,
-    );
-
-    expect(screen.getByText("themed")).toBeInTheDocument();
-    // `attribute="class"` plus the stubbed "no dark preference" query resolves to light.
-    expect(document.documentElement).toHaveClass("light");
-  });
-});
 
 describe("AppProviders", () => {
   it("wires the whole tree, so a page reads both the theme and the preference", () => {
@@ -46,6 +32,7 @@ describe("AppProviders", () => {
 
     expect(screen.getByTestId("reduced-motion")).toHaveTextContent("true");
     // The theme resolves through the same tree; a missing ThemeProvider leaves no class.
+    // `attribute="class"` plus the stubbed "no dark preference" query resolves to light.
     expect(document.documentElement).toHaveClass("light");
   });
 });

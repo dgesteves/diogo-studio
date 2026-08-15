@@ -4,7 +4,6 @@ paths:
   - "src/agent/**"
   - "src/chat-contract.ts"
   - "src/env.ts"
-  - "src/config/env.ts"
   - "src/content/prose/**"
   - "next.config.ts"
   - "instrumentation*.ts"
@@ -17,8 +16,8 @@ The AI-endpoint invariants and the CSP position are in `AGENTS.md`; they are not
 ## Env and secrets
 
 - Only `NEXT_PUBLIC_`-prefixed variables reach the client, and `.env*` stays out of git.
-- **Read env through `@/config/env` only.** Lint errors on any `process.env` access in `src/**`
-  outside `src/config/env.ts` (except `NODE_ENV`). `next.config.ts`, `instrumentation*.ts` and
+- **Read env through `@/env` only.** Lint errors on any `process.env` access in `src/**`
+  outside `src/env.ts` (except `NODE_ENV`). `next.config.ts`, `instrumentation*.ts` and
   `scripts/` read it directly because they run before or outside the validated module — that is
   not a precedent for new code.
 - `createEnv` validates and freezes at import, which is why a test cannot stub it; see

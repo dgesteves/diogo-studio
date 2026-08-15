@@ -2,9 +2,9 @@
 
 import type { ReactElement } from "react";
 import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
-import { StatusDot } from "@/components/ui/status-dot";
+import { Button } from "@/ui/button";
+import { Kbd } from "@/ui/kbd";
+import { StatusDot } from "@/ui/status-dot";
 import { siteConfig } from "@/content/profile";
 import { useCommandMenu } from "@/command-menu/store";
 

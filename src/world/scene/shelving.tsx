@@ -1,6 +1,6 @@
 "use client";
 
-import { mulberry32 } from "@/utils/mulberry32";
+import { mulberry32 } from "../random";
 import { useState, type ReactElement } from "react";
 import { Object3D } from "three";
 import { worldColors } from "../materials";

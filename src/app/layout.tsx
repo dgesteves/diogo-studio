@@ -1,15 +1,15 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { AppProviders } from "@/providers";
+import { AppProviders } from "./providers";
 import { CommandMenu } from "@/command-menu/menu";
 import { CommandMenuProvider } from "@/command-menu/store";
 import { InspectorOverlay } from "@/telemetry/overlay";
 import { InspectorOverlayProvider } from "@/telemetry/store";
-import { env } from "@/config/env";
+import { env } from "@/env";
 import { JsonLd, personJsonLd, websiteJsonLd } from "@/site/structured-data";
-import { cn } from "@/utils/cn";
-import "@/styles/globals.css";
+import { cn } from "@/ui/cn";
+import "@/globals.css";
 
 export { rootMetadata as metadata, rootViewport as viewport } from "@/site/metadata";
 

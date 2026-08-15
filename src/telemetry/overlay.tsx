@@ -5,9 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd } from "@/ui/kbd";
 import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/world/perf";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 
 import { MotionPanel, RouteJsPanel, ScenePanel, VitalsPanel } from "./panels";
 import { useInspectorOverlay } from "./store";

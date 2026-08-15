@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import type { ReactElement } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 
 type SegmentedOption<T extends string> = {
   value: T;

@@ -3,7 +3,7 @@ import { setTestEnv } from "@tests/env";
 import { siteConfig } from "@/content/profile";
 import { getSiteUrl, rootMetadata, rootViewport } from "./metadata";
 
-vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
+vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 
 /**
  * The site-wide metadata every route inherits from, and the origin it resolves against.

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { makeChunk } from "@tests/agent";
-import type { AgentChunk } from "@/agent/corpus";
+import type { AgentChunk } from "./corpus";
 import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieval";
 
 describe("cosine()", () => {
