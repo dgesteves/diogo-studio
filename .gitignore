@@ -31,6 +31,16 @@
 # production
 /build
 
+# scratch files — no tool sees these, so nothing else stops them being committed.
+# Five empty *.ts.tmp files shipped in df512a8 and survived a whole phase: knip scans
+# .ts/.tsx and eslint and prettier glob the same, so a tracked file with an extension
+# none of them read is invisible to `pnpm validate`.
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+
 # misc
 .DS_Store
 *.pem
