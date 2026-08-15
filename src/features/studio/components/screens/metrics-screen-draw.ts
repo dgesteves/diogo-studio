@@ -1,5 +1,5 @@
 import { brandColors } from "@/config/brand";
-import { MONO } from "@/world/screens/texture";
+import { divider, fillScreen, INK, MONO, scanlines, SOFT } from "@/world/screens/kit";
 
 export type MetricsView = {
   fps: number;
@@ -31,31 +31,20 @@ function drawSparkline(ctx: CanvasRenderingContext2D, history: readonly number[]
 }
 
 export function drawMetrics(ctx: CanvasRenderingContext2D, view: MetricsView): void {
-  const W = ctx.canvas.width;
-  const H = ctx.canvas.height;
-
-  ctx.fillStyle = "#03080c";
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(34, 211, 238, 0.025)";
-  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+  fillScreen(ctx);
+  scanlines(ctx);
 
   ctx.textBaseline = "top";
   ctx.fillStyle = brandColors.accent;
   ctx.font = `bold 22px ${MONO}`;
   ctx.fillText("● RENDER · LIVE", 30, 30);
 
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.18)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(30, 70);
-  ctx.lineTo(W - 30, 70);
-  ctx.stroke();
+  divider(ctx, 70, { margin: 30 });
 
-  ctx.fillStyle = "rgba(232,246,252,0.55)";
+  ctx.fillStyle = SOFT;
   ctx.font = `16px ${MONO}`;
   ctx.fillText("FRAMES / SEC", 30, 90);
-  ctx.fillStyle = "#e8f6fc";
+  ctx.fillStyle = INK;
   ctx.font = `bold 64px ${MONO}`;
   ctx.fillText(String(Math.round(view.fps)), 30, 110);
 

@@ -1,6 +1,4 @@
-import { MONO } from "@/world/screens/texture";
-
-import { header, INK, paintBackground, section } from "./screen-draw-kit";
+import { MONO, header, INK, paintBackground, section } from "@/world/screens/kit";
 
 const ACCENT = "#c084fc";
 

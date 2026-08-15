@@ -4,7 +4,8 @@ import type { CanvasTexture } from "three";
 import { brandColors } from "@/config/brand";
 import { useDisposable } from "@/hooks/use-disposable";
 
-import { MONO, createCanvasTexture } from "@/world/screens/texture";
+import { createCanvasTexture } from "@/world/screens/texture";
+import { MONO } from "@/world/screens/kit";
 import { KEYCAPS, KEYCAP_DEPTH, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH } from "./keyboard-layout";
 
 const PIXELS_PER_METER = 1500;

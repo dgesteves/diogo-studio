@@ -1,7 +1,5 @@
 import type { Engagement } from "@/content/career";
-import { MONO } from "@/world/screens/texture";
-
-import { header, INK, paintBackground, section, SOFT } from "./screen-draw-kit";
+import { MONO, header, INK, paintBackground, section, SOFT } from "@/world/screens/kit";
 
 const ACCENT = "#a78bfa";
 

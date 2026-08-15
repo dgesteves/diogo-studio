@@ -1,5 +1,5 @@
 import { brandColors } from "@/config/brand";
-import { MONO } from "@/world/screens/texture";
+import { MONO } from "@/world/screens/kit";
 
 type Ctx = CanvasRenderingContext2D;
 

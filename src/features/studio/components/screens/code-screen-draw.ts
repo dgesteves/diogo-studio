@@ -1,17 +1,17 @@
 import { brandColors } from "@/config/brand";
 
-import { MONO } from "@/world/screens/texture";
+import { divider, fillScreen, MONO, scanlines } from "@/world/screens/kit";
 import { CODE_LINES, CODE_TOKENS } from "./code-screen-data";
+
+/** The editor runs cooler than the rest of the room: blue phosphor rather than cyan. */
+const EDITOR_SCANLINE = "rgba(125, 211, 252, 0.02)";
+const EDITOR_LINE = "rgba(125, 211, 252, 0.18)";
 
 export function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void {
   const W = ctx.canvas.width;
-  const H = ctx.canvas.height;
 
-  ctx.fillStyle = "#03080c";
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(125, 211, 252, 0.02)";
-  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+  fillScreen(ctx);
+  scanlines(ctx, EDITOR_SCANLINE);
 
   ctx.textBaseline = "top";
   ctx.fillStyle = brandColors.accentSoft;
@@ -22,12 +22,7 @@ export function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void 
   ctx.fillStyle = "rgba(232,246,252,0.4)";
   ctx.fillText("ts", W - 60, 34);
 
-  ctx.strokeStyle = "rgba(125, 211, 252, 0.18)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(30, 68);
-  ctx.lineTo(W - 30, 68);
-  ctx.stroke();
+  divider(ctx, 68, { margin: 30, color: EDITOR_LINE });
 
   const startY = 90;
   const gutterX = 30;

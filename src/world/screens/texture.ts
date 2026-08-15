@@ -11,8 +11,6 @@ import { useCallback } from "react";
 import * as THREE from "three";
 import { useDisposable } from "@/hooks/use-disposable";
 
-export const MONO = `"Geist Mono", ui-monospace, Menlo, Consolas, monospace`;
-
 /** A draw routine: it paints a screen and knows nothing about textures or three.js. */
 export type ScreenDraw = (ctx: CanvasRenderingContext2D) => void;
 

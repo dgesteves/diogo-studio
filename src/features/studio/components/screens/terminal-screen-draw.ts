@@ -1,6 +1,6 @@
 import { brandColors } from "@/config/brand";
 
-import { MONO } from "@/world/screens/texture";
+import { divider, fillScreen, MONO, scanlines } from "@/world/screens/kit";
 import type { StatusRow } from "./terminal-screen-data";
 
 export type StatusView = {
@@ -21,13 +21,9 @@ function fitValue(ctx: CanvasRenderingContext2D, text: string, maxWidth: number)
 
 export function drawTerminal(ctx: CanvasRenderingContext2D, view: StatusView): void {
   const W = ctx.canvas.width;
-  const H = ctx.canvas.height;
 
-  ctx.fillStyle = "#03080c";
-  ctx.fillRect(0, 0, W, H);
-
-  ctx.fillStyle = "rgba(34, 211, 238, 0.025)";
-  for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+  fillScreen(ctx);
+  scanlines(ctx);
 
   ctx.textBaseline = "top";
   ctx.fillStyle = brandColors.accent;
@@ -39,12 +35,7 @@ export function drawTerminal(ctx: CanvasRenderingContext2D, view: StatusView): v
   const tw = ctx.measureText(view.time).width;
   ctx.fillText(view.time, W - 30 - tw, 32);
 
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.18)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(30, 70);
-  ctx.lineTo(W - 30, 70);
-  ctx.stroke();
+  divider(ctx, 70, { margin: 30 });
 
   const rows: StatusRow[] = [
     ...view.rows,

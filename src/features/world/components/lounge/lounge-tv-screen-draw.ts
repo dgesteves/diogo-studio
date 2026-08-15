@@ -1,4 +1,4 @@
-import { MONO } from "@/world/screens/texture";
+import { INK, MONO, scanlines } from "@/world/screens/kit";
 import { mulberry32 } from "@/utils/mulberry32";
 
 import { CHANNELS } from "./lounge-tv-channels";
@@ -6,7 +6,9 @@ import { CHANNELS } from "./lounge-tv-channels";
 const PROGRESS_CYCLE = 300;
 const TOTAL_SECONDS = 612;
 const CHANNEL_TICKS = 90;
-const INK = "#e8f6fc";
+
+/** The television is film, not phosphor: its scanlines darken rather than tint. */
+const TV_SCANLINE = "rgba(0, 0, 0, 0.12)";
 
 export type LoungeTvState = { tick: number };
 
@@ -14,12 +16,6 @@ function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
   const s = Math.floor(seconds % 60);
   return `${m}:${String(s).padStart(2, "0")}`;
-}
-
-function drawScanlines(ctx: CanvasRenderingContext2D): void {
-  const { width, height } = ctx.canvas;
-  ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
-  for (let y = 0; y < height; y += 3) ctx.fillRect(0, y, width, 1);
 }
 
 function drawStatic(ctx: CanvasRenderingContext2D, rand: () => number): void {
@@ -86,6 +82,6 @@ export function drawLoungeTv(ctx: CanvasRenderingContext2D, state: LoungeTvState
   if (!channel) return;
   channel.draw(ctx, state.tick);
   if (state.tick % CHANNEL_TICKS < 2) drawStatic(ctx, mulberry32(state.tick));
-  drawScanlines(ctx);
+  scanlines(ctx, TV_SCANLINE);
   drawOverlay(ctx, state.tick, channel.name);
 }
