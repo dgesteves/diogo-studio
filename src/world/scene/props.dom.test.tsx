@@ -2,9 +2,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { InstancedMesh, MeshStandardMaterial } from "three";
 import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
-import { WALL_SCREEN, WALL_SCREEN_Z } from "@/world/room";
-import { SHELF_BOOKS } from "./bookshelf-instances";
-import { WorldProps } from "../world-props";
+import { WALL_SCREEN, WALL_SCREEN_Z } from "../room";
+import { SHELF_BOOKS } from "./shelving";
+import { WorldProps } from "./props";
 
 /**
  * The furniture that carries five of the seventeen stations. `screen-draw.test.ts` already

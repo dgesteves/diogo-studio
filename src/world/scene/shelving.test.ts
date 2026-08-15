@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { SHELF_BOOKS } from "./bookshelf-instances";
-import { buildShelfBooks, type ShelfBook } from "./bookshelf-layout";
+import { buildShelfBooks, SHELF_BOOKS, type ShelfBook } from "./shelving";
 
 /**
  * The books on the shelf behind the desk. They are generated from a seed rather than

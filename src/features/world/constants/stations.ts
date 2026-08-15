@@ -1,5 +1,5 @@
 import type { RouteKey } from "@/content/pages";
-import type { Vec3, WorldObjectKind, WorldStation } from "../types";
+import type { Vec3, WorldObjectKind, WorldStation } from "@/world/stations";
 import { WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "@/world/room";
 
 type RawStation = readonly [WorldObjectKind, string, string, Vec3, Vec3];

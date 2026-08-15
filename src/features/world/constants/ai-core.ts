@@ -1,4 +1,4 @@
-import type { Vec3 } from "../types";
+import type { Vec3 } from "@/world/stations";
 
 export const AI_CORE_POSITION = [-0.55, 1.55, 1.75] as const satisfies Vec3;
 export const AI_CORE_ACCENT = "#22d3ee";

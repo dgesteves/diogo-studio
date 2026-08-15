@@ -2,10 +2,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Box3, Vector3, type MeshBasicMaterial, type MeshStandardMaterial, type Mesh } from "three";
 import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
-import { worldColors } from "@/world/materials";
-import { ROOM } from "@/world/room";
-import { LOUNGE_ORIGIN, SOFA_Z, TABLE_Z, TV_CENTER_Y, TV_WALL_Z } from "./constants";
-import { Lounge } from "./lounge";
+import { worldColors } from "../materials";
+import { ROOM } from "../room";
+import { LOUNGE_ORIGIN, Lounge, SOFA_Z, TABLE_Z, TV_CENTER_Y, TV_WALL_Z } from "./lounge";
 
 /**
  * The corner of the room a visitor explores rather than navigates to: a sofa facing a

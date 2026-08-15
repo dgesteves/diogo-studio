@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { createRecordingContext, type RecordingContext } from "@tests/recording-ctx";
 
-import { CHANNELS } from "./lounge-tv-channels";
-import { drawLoungeTv } from "./lounge-tv-screen-draw";
+import { CHANNELS, drawLoungeTv } from "./tv";
 
 /**
  * The lounge television. `use-lounge-tv-texture.ts` ticks it every 110 ms on a 640×360

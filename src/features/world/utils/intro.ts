@@ -1,4 +1,4 @@
-import type { Vec3, WorldStation } from "../types";
+import type { Vec3, WorldStation } from "@/world/stations";
 
 const SESSION_KEY = "world-intro-played";
 

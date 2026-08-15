@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { worldColors } from "@/world/materials";
+import { worldColors } from "../materials";
 import { engagements } from "@/content/career";
 import { experiments } from "@/content/playground";
 import { practices } from "@/content/principles";
@@ -8,11 +8,7 @@ import { siteConfig } from "@/content/profile";
 import { stackGroups } from "@/content/stack";
 import { createRecordingContext, type RecordingContext, type TextRun } from "@tests/recording-ctx";
 
-import { drawPlayground } from "./playground-screen-draw";
-import { drawPrinciples } from "./principles-screen-draw";
-import { drawResume } from "./resume-screen-draw";
-import { drawStack } from "./stack-screen-draw";
-import { drawTimeline } from "./timeline-screen-draw";
+import { drawPlayground, drawPrinciples, drawResume, drawStack, drawTimeline } from "./wall";
 
 // Every panel reads the authored record; the wall binds it in `wall-screens.tsx` and
 // these bind the same thing, so what is asserted below is the projection onto 600×800.

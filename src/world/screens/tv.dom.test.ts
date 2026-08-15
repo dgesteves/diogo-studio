@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 
-import { useLoungeTvTexture } from "./use-lounge-tv-texture";
+import { useLoungeTvTexture } from "./tv";
 
 /**
  * The hook that drives the lounge television. `lounge-tv.test.ts` owns what each frame

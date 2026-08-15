@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactElement } from "react";
 import type { Mesh } from "three";
 import { useHoveredStation } from "../hooks/use-hovered-station";
 import { registerHotspot, unregisterHotspot } from "../utils/hotspot-registry";
-import type { WorldStation } from "../types";
+import type { WorldStation } from "@/world/stations";
 import type { FurnitureHotspot as Hotspot } from "../constants/hotspots";
 import { WALL_SCREEN } from "@/world/room";
 import { HotspotFocus } from "./hotspot-focus";

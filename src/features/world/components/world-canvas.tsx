@@ -25,13 +25,13 @@ import { useOrbitInput } from "../hooks/use-orbit-input";
 import { AiCore } from "./ai-core";
 import { BootProgressReporter } from "./boot-progress-reporter";
 import { ExploreController } from "./explore-controller";
-import { Lounge } from "./lounge/lounge";
+import { Lounge } from "@/world/scene/lounge";
 import { WorldCamera } from "./world-camera";
 import { WorldInteract } from "./world-interact";
 import { WorldNeon } from "./world-neon";
 import { WorldPortals } from "./world-portals";
 import { WorldPostprocessing } from "./world-postprocessing";
-import { WorldProps } from "./world-props";
+import { WorldProps } from "@/world/scene/props";
 import { WorldQualityGuard } from "./world-quality-guard";
 import type { WorldQuality } from "../utils/frame-budget";
 

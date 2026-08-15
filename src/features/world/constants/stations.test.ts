@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { routes } from "@/content/pages";
-import { worldObjectKinds } from "./object-kinds";
+import { worldObjectKinds } from "@/world/stations";
 import { worldStations } from "./stations";
 import { ROOM, WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "@/world/room";
 

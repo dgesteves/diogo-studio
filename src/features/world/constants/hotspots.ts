@@ -1,5 +1,5 @@
 import type { RouteKey } from "@/content/pages";
-import type { Vec3 } from "../types";
+import type { Vec3 } from "@/world/stations";
 import { WALL_SCREEN, WALL_SCREEN_Z } from "@/world/room";
 
 export type FurnitureHotspot =
