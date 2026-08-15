@@ -11,6 +11,7 @@ export const principles: Destination = {
     "Engineering principles Diogo Esteves applies across platforms, teams, and product lines.",
   blocks: [
     {
+      id: "principles",
       kind: "cards",
       items: [
         {

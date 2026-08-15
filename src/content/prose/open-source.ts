@@ -11,10 +11,12 @@ export const openSource: Destination = {
   summary: "Open-source work and experiments by Diogo Esteves.",
   blocks: [
     {
+      id: "why",
       kind: "lede",
       text: "Most of my production work ships behind enterprise walls. Open source is where the reusable patterns get extracted and shared.",
     },
     {
+      id: "on-the-bench",
       kind: "list",
       title: "On the bench",
       items: [
@@ -24,6 +26,7 @@ export const openSource: Destination = {
       ],
     },
     {
+      id: "elsewhere",
       kind: "links",
       items: [
         { label: "GitHub — @dgesteves", href: siteConfig.links.github, external: true },

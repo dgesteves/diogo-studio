@@ -21,13 +21,17 @@ function renderBlocks(...blocks: ContentBlock[]): void {
 
 describe("Content blocks: prose", () => {
   it("renders a lede as its own paragraph", () => {
-    renderBlocks({ kind: "lede", text: "Systems that survive their authors." });
+    renderBlocks({ id: "lede-block", kind: "lede", text: "Systems that survive their authors." });
 
     expect(screen.getByText("Systems that survive their authors.").tagName).toBe("P");
   });
 
   it("keeps prose paragraphs separate", () => {
-    renderBlocks({ kind: "prose", paragraphs: ["First thought.", "Second thought."] });
+    renderBlocks({
+      id: "prose-block",
+      kind: "prose",
+      paragraphs: ["First thought.", "Second thought."],
+    });
 
     expect(screen.getByText("First thought.").tagName).toBe("P");
     expect(screen.getByText("Second thought.").tagName).toBe("P");
@@ -37,6 +41,7 @@ describe("Content blocks: prose", () => {
 describe("Content blocks: lists", () => {
   it("renders a titled list as a heading and a list", () => {
     renderBlocks({
+      id: "list-block",
       kind: "list",
       title: "What I look for",
       items: ["A real problem", "A team that ships"],
@@ -48,7 +53,7 @@ describe("Content blocks: lists", () => {
   });
 
   it("renders an untitled list as a list on its own", () => {
-    renderBlocks({ kind: "list", items: ["Just the one"] });
+    renderBlocks({ id: "list-block", kind: "list", items: ["Just the one"] });
 
     expect(screen.queryByRole("heading")).not.toBeInTheDocument();
     expect(within(screen.getByRole("list")).getAllByRole("listitem")).toHaveLength(1);
@@ -58,6 +63,7 @@ describe("Content blocks: lists", () => {
 describe("Content blocks: stats", () => {
   it("pairs each label with its value, and shows a hint only when there is one", () => {
     renderBlocks({
+      id: "stats-block",
       kind: "stats",
       items: [
         { label: "Scale", value: "40M users", hint: "peak concurrent" },
@@ -80,6 +86,7 @@ describe("Content blocks: stats", () => {
 describe("Content blocks: cards", () => {
   it("gives every card a heading, and its meta line only when set", () => {
     renderBlocks({
+      id: "cards-block",
       kind: "cards",
       items: [
         { title: "Checkout rebuild", meta: "2024", body: "Rewrote the funnel." },
@@ -104,6 +111,7 @@ describe("Content blocks: cards", () => {
 describe("Content blocks: timeline", () => {
   it("renders an ordered list, with the organisation only when named", () => {
     renderBlocks({
+      id: "timeline-block",
       kind: "timeline",
       items: [
         { period: "2022 — now", title: "Principal engineer", org: "eino.ai", points: ["Shipped."] },
@@ -132,6 +140,7 @@ describe("Content blocks: timeline", () => {
 describe("Content blocks: links", () => {
   it("keeps an internal link internal and an external one at arm's length", () => {
     renderBlocks({
+      id: "links-block",
       kind: "links",
       items: [
         { label: "The résumé", href: "/resume" },
@@ -148,6 +157,24 @@ describe("Content blocks: links", () => {
     const external = screen.getByRole("link", { name: /the repository/i });
     expect(external).toHaveAttribute("target", "_blank");
     expect(external).toHaveAttribute("rel", "noopener noreferrer");
+  });
+});
+
+describe("Content blocks: anchors", () => {
+  it("gives every block its authored id, so a citation's fragment resolves", () => {
+    const { container } = render(
+      <ContentBlocks
+        blocks={[
+          { id: "welcome", kind: "lede", text: "The lede." },
+          { id: "credentials", kind: "list", items: ["A degree"] },
+        ]}
+      />,
+    );
+
+    // A hash fragment is resolved by the browser against element ids, so this is the one
+    // assertion that has to reach for the DOM rather than an accessible role.
+    expect(container.querySelector("#welcome")).toHaveTextContent("The lede.");
+    expect(container.querySelector("#credentials")).toHaveTextContent("A degree");
   });
 });
 

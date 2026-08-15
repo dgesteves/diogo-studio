@@ -10,6 +10,7 @@ export const projects: Destination = {
   summary: "Highlighted projects spanning AI platforms, design systems, and streaming media.",
   blocks: [
     {
+      id: "projects",
       kind: "cards",
       items: [
         {
@@ -45,6 +46,7 @@ export const projects: Destination = {
       ],
     },
     {
+      id: "next",
       kind: "links",
       items: [{ label: "Read the deeper dives", href: routes.caseStudies }],
     },

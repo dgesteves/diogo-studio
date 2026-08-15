@@ -11,6 +11,7 @@ export const speaking: Destination = {
   summary: "Talks, mentoring, and community leadership by Diogo Esteves.",
   blocks: [
     {
+      id: "talks",
       kind: "list",
       title: "Talks I give",
       items: [
@@ -20,6 +21,7 @@ export const speaking: Destination = {
       ],
     },
     {
+      id: "community",
       kind: "list",
       title: "Community",
       items: [
@@ -29,10 +31,12 @@ export const speaking: Destination = {
       ],
     },
     {
+      id: "availability",
       kind: "lede",
       text: "Available for talks, panels, and podcasts — in English or Portuguese, on stage or remote.",
     },
     {
+      id: "invite",
       kind: "links",
       items: [{ label: "Invite me to speak", href: `mailto:${siteConfig.email}`, external: true }],
     },

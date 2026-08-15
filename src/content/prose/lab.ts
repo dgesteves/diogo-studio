@@ -10,6 +10,7 @@ export const lab: Destination = {
   summary: "Research and development explorations by Diogo Esteves — AI tooling and interface R&D.",
   blocks: [
     {
+      id: "experiments",
       kind: "cards",
       items: [
         {
@@ -30,6 +31,7 @@ export const lab: Destination = {
       ],
     },
     {
+      id: "status",
       kind: "lede",
       text: "Experiments here are rough on purpose. The good ones graduate to the playground; the best ones ship for clients.",
     },

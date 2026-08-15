@@ -11,10 +11,12 @@ export const home: Destination = {
     "Staff / Principal frontend & platform engineer. 11+ years shipping AI-native products, design-system infrastructure, and streaming platforms used by tens of millions.",
   blocks: [
     {
+      id: "welcome",
       kind: "lede",
       text: "This is the rig the work ships from — a living studio you can walk through. Every sign, screen, and surface is a door into the record: the work, the principles, the stack, the story.",
     },
     {
+      id: "at-a-glance",
       kind: "stats",
       items: [
         { label: "Years shipping", value: "11+", hint: "frontend & platform" },
@@ -23,6 +25,7 @@ export const home: Destination = {
       ],
     },
     {
+      id: "start-here",
       kind: "links",
       items: [
         { label: "See the work", href: routes.work },

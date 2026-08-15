@@ -11,6 +11,7 @@ export const about: Destination = {
     "Background, leadership philosophy, and how Diogo Esteves works as a Staff/Principal frontend & platform engineer.",
   blocks: [
     {
+      id: "background",
       kind: "prose",
       paragraphs: [
         "I build the engineering systems behind ambitious products. For 11+ years I've been the senior engineering voice on platforms used by millions — streaming at Sky and Peacock, governance software at Diligent, innovation systems at BMW Group, and AI-native products at eino.ai, Moment, and Fueled.",
@@ -19,6 +20,7 @@ export const about: Destination = {
       ],
     },
     {
+      id: "what-i-do",
       kind: "list",
       title: "What I actually do",
       items: [
@@ -29,6 +31,7 @@ export const about: Destination = {
       ],
     },
     {
+      id: "beyond-the-code",
       kind: "list",
       title: "Beyond the code",
       items: [

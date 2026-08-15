@@ -11,10 +11,12 @@ export const writing: Destination = {
     "Essays and field notes from Diogo Esteves on frontend platforms, AI-native UX, and leadership.",
   blocks: [
     {
+      id: "intro",
       kind: "lede",
       text: "Field notes from eleven years of platform work — drafted between shipping cycles, published when they're worth your time.",
     },
     {
+      id: "themes",
       kind: "cards",
       items: [
         {
@@ -40,6 +42,7 @@ export const writing: Destination = {
       ],
     },
     {
+      id: "status",
       kind: "lede",
       text: "These essays are in the drafting queue. Until they land, the work speaks first.",
     },

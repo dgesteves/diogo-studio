@@ -41,10 +41,12 @@ export const timeline: Destination = {
   summary: "The chronological career and education timeline of Diogo Esteves.",
   blocks: [
     {
+      id: "intro",
       kind: "lede",
       text: "Law school first, then the pivot. Every step since has traded up in scale, ambiguity, or altitude.",
     },
     {
+      id: "chronology",
       kind: "timeline",
       items: chronological,
     },

@@ -9,8 +9,11 @@ import type { ContentBlock } from "@/content/schema";
 export function ContentBlocks({ blocks }: { blocks: readonly ContentBlock[] }): ReactElement {
   return (
     <div className="flex flex-col gap-8">
-      {blocks.map((block, index) => (
-        <BlockView key={`${block.kind}-${index}`} block={block} />
+      {blocks.map((block) => (
+        // The id is what a citation's `#fragment` resolves to — see `content/schema.ts`.
+        <div key={block.id} id={block.id} className="scroll-mt-24">
+          <BlockView block={block} />
+        </div>
       ))}
     </div>
   );

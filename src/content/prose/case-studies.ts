@@ -10,6 +10,7 @@ export const caseStudies: Destination = {
   summary: "In-depth case studies on design systems, streaming scale, and agentic UX.",
   blocks: [
     {
+      id: "studies",
       kind: "cards",
       items: [
         {
@@ -35,10 +36,12 @@ export const caseStudies: Destination = {
       ],
     },
     {
+      id: "status",
       kind: "lede",
       text: "Full write-ups are being drafted for this space. Until they land, I'll happily walk you through any of these live — architecture diagrams included.",
     },
     {
+      id: "next",
       kind: "links",
       items: [{ label: "Book a walkthrough", href: routes.contact }],
     },

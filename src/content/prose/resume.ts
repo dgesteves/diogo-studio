@@ -11,10 +11,12 @@ export const resume: Destination = {
     "Résumé of Diogo Esteves — AI-native systems, enterprise UI infrastructure, and scalable web architectures.",
   blocks: [
     {
+      id: "summary",
       kind: "lede",
       text: "AI-native systems, enterprise UI infrastructure, scalable web architectures. Targeting Staff+, Principal, or Founding Engineer roles, and VP / Head of Engineering mandates at AI-native companies.",
     },
     {
+      id: "at-a-glance",
       kind: "stats",
       items: [
         { label: "Experience", value: "11+ yrs", hint: "Deloitte → Fueled" },
@@ -23,6 +25,7 @@ export const resume: Destination = {
       ],
     },
     {
+      id: "credentials",
       kind: "list",
       title: "Credentials",
       items: [
@@ -32,6 +35,7 @@ export const resume: Destination = {
       ],
     },
     {
+      id: "elsewhere",
       kind: "links",
       items: [
         { label: "Selected experience", href: routes.work },

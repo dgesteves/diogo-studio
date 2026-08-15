@@ -10,10 +10,12 @@ export const uses: Destination = {
   summary: "The hardware, software, and rig Diogo Esteves ships the work from.",
   blocks: [
     {
+      id: "rig",
       kind: "lede",
       text: "Live signals from the rig the work ships from — runtime on the left, ops telemetry in the center, perf and latency on the right.",
     },
     {
+      id: "daily-drivers",
       kind: "list",
       title: "Daily drivers",
       items: [
@@ -24,6 +26,7 @@ export const uses: Destination = {
       ],
     },
     {
+      id: "operating-rhythm",
       kind: "list",
       title: "Operating rhythm",
       items: [

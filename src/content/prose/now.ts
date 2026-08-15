@@ -10,10 +10,12 @@ export const now: Destination = {
   summary: "A snapshot of what Diogo Esteves is building, learning, and optimizing for today.",
   blocks: [
     {
+      id: "role",
       kind: "lede",
       text: "Leading web-application engineering at Fueled — the senior frontend voice on enterprise engagements across AI, media, and digital transformation.",
     },
     {
+      id: "currently",
       kind: "list",
       title: "Currently",
       items: [
@@ -24,6 +26,7 @@ export const now: Destination = {
       ],
     },
     {
+      id: "learning",
       kind: "list",
       title: "Learning & sharpening",
       items: [

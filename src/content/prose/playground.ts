@@ -10,10 +10,12 @@ export const playground: Destination = {
   summary: "Interactive experiments powering this studio — 3D, motion, and command-driven UX.",
   blocks: [
     {
+      id: "live",
       kind: "lede",
       text: "Everything here is running live in the site you're standing in. No mockups — view source is the case study.",
     },
     {
+      id: "experiments",
       kind: "cards",
       items: [
         {

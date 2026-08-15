@@ -11,8 +11,9 @@ export const contact: Destination = {
   summary:
     "Get in touch with Diogo Esteves — open to Staff+, Principal, Founding Engineer, and VP / Head of Engineering roles.",
   blocks: [
-    { kind: "lede", text: siteConfig.availability },
+    { id: "availability", kind: "lede", text: siteConfig.availability },
     {
+      id: "best-fit",
       kind: "list",
       title: "Best fit",
       items: [
@@ -22,6 +23,7 @@ export const contact: Destination = {
       ],
     },
     {
+      id: "channels",
       kind: "links",
       items: [
         { label: "Email", href: `mailto:${siteConfig.email}`, external: true },
@@ -31,6 +33,7 @@ export const contact: Destination = {
       ],
     },
     {
+      id: "based-in",
       kind: "list",
       title: "Based in",
       items: [siteConfig.location, "Portuguese (native) · English (full professional)"],
