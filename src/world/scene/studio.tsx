@@ -2,20 +2,21 @@
 
 import { Suspense, type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
-
-import { CeilingLights } from "./ceiling-lights";
 import { Chair } from "./chair";
-import { CityWindow } from "./city-window";
-import { Desk } from "./desk";
-import { DeskExtras } from "./desk-extras";
-import { DeskHardware } from "./desk-hardware";
-import { DeskProps } from "./desk-props";
-import { DeskRug } from "./desk-rug";
-import { GridFloor } from "./grid-floor";
-import { Lighting } from "./lighting";
+import { CityWindow } from "./city";
+import { Desk, DeskExtras, DeskProps } from "./desk";
+import { DeskRug, GridFloor } from "./floor";
+import { CeilingLights, Lighting } from "./lighting";
 import { MonitorRig } from "./monitor-rig";
 import { Room } from "./room";
 import { Speakers } from "./speakers";
+import { DeskHardware } from "./workstation";
+
+/**
+ * The room, assembled. Every object under `scene/` hangs off this one component, and it stays
+ * one component on purpose: `scene.dom.test.tsx` counts its meshes exactly, which is the only
+ * thing that catches a mesh vanishing in a large move.
+ */
 
 export function StudioScene(): ReactElement {
   return (

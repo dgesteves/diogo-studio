@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { Color } from "three";
-import { CITY_WINDOW, ROOM } from "@/world/room";
+import { CITY_WINDOW, ROOM } from "../room";
 
 const SHELL_COLOR = new Color("#1b2630");
 

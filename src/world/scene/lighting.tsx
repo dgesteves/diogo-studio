@@ -1,9 +1,43 @@
 "use client";
 
-import { useMemo, type ReactElement } from "react";
+import { type ReactElement, useMemo } from "react";
 import { Object3D } from "three";
-import { worldColors, frameMaterial, useWorldPalette } from "@/world/materials";
-import { ROOM } from "@/world/room";
+import { worldColors, useWorldPalette, frameMaterial } from "../materials";
+import { ROOM } from "../room";
+
+/**
+ * Two things that are both "light" and cannot be separated: the rig, which is pure lights
+ * swapped by the day/night palette, and the ceiling fixtures, which are meshes that emit and
+ * therefore have to agree with it. Change one without the other and the room stops matching
+ * its own ceiling.
+ */
+
+export function Lighting(): ReactElement {
+  const palette = useWorldPalette();
+
+  return (
+    <>
+      <ambientLight intensity={palette.ambientIntensity} />
+      <hemisphereLight
+        color={palette.hemisphereSky}
+        groundColor={palette.hemisphereGround}
+        intensity={palette.hemisphereIntensity}
+      />
+      <directionalLight
+        position={[3, 5, 3]}
+        intensity={palette.keyLightIntensity}
+        color={palette.keyLightColor}
+      />
+      <pointLight position={[0, 0.6, -1.2]} intensity={0.9} decay={2} color={worldColors.accent} />
+      <pointLight
+        position={[2.4, 1.6, 0.6]}
+        intensity={0.35}
+        decay={2}
+        color={worldColors.accentSoft}
+      />
+    </>
+  );
+}
 
 const PANEL_SPAN = 2;
 const HOUSING_HEIGHT = 0.16;

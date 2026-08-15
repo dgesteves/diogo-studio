@@ -3,10 +3,9 @@ import { renderHook } from "@testing-library/react";
 
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 
-import { createCityFacadeTexture, createSkyTexture } from "./city-textures";
-import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH } from "./keyboard-layout";
-import { useKeyboardLegendTexture } from "./keyboard-legend";
-import { createGlowTexture, createMoonTexture } from "./moon-textures";
+import { createCityFacadeTexture, createSkyTexture } from "./city";
+import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH, useKeyboardLegendTexture } from "./keyboard";
+import { createGlowTexture, createMoonTexture } from "./moon";
 
 /**
  * The canvas textures the scene paints for itself: the lit windows on the city towers, the

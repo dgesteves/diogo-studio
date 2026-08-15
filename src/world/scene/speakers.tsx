@@ -2,9 +2,8 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { worldColors } from "@/world/materials";
-
-import { DESK_TOP_Y } from "@/world/room";
+import { worldColors } from "../materials";
+import { DESK_TOP_Y } from "../room";
 
 export function Speakers(): ReactElement {
   return (

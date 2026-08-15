@@ -8,11 +8,11 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { worldColors, worldPalettes } from "@/world/materials";
-import { ROOM } from "@/world/room";
 import { setWorldMode, type WorldMode } from "@/world/store";
-import { StatusLed } from "./status-led";
-import { StudioScene } from "./studio-scene";
+import { worldColors, worldPalettes } from "../materials";
+import { ROOM } from "../room";
+import { StudioScene } from "./studio";
+import { StatusLed } from "./workstation";
 
 /**
  * An exact count, deliberately. Restructure phases 3-4 move 40 scene files and merge

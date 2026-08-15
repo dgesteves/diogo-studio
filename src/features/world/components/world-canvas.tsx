@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { PerfReporter } from "@/components/r3f/perf-reporter";
 import { ScenePrecompile } from "@/components/r3f/scene-precompile";
 import { useCommandMenu } from "@/features/command-menu";
-import { StudioScene } from "@/features/studio";
+import { StudioScene } from "@/world/scene/studio";
 import type { RouteKey } from "@/content/pages";
 import { useWorldPalette } from "@/world/materials";
 import { markWorldReady } from "@/world/boot";
