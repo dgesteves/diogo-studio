@@ -24,6 +24,23 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — The `THREE.Clock` deprecation warning is no longer filtered
+
+`silence-clock-deprecation.ts` is deleted, with its spec and both import sites
+(`world/canvas.tsx`, `vitest.setup.ts`). It reverses the suppression recorded in the
+2026-08-08 testing-plan entry below.
+
+**The warning is still live** — `@react-three/fiber` 9.7.0 constructs `THREE.Clock` for
+each root, and three r183+ warns from the constructor. So this trades a quieter console
+for an honest one: one line per canvas root at mount, not per frame, and the suite's
+stderr is no longer empty. That is the cost, and it is accepted. Filtering upstream noise
+means owning a `console.warn` wrapper that every other warning in the app has to pass
+through, and the spec that existed to prove the wrapper stayed transparent was more code
+than the noise it hid. The fix belongs upstream: when fiber migrates to `THREE.Timer` the
+line disappears on a dependency bump, with nothing here to remove.
+
+Do not reintroduce a console filter to quiet a dependency. Pin, patch or upgrade instead.
+
 ## 2026-08-15 — `refactor.md` is deleted, and its cross-references land on `architecture.md`
 
 The refactor's own charter was "delete this file when the last phase lands", restated in its

@@ -3,7 +3,6 @@
 import { useFrame, useThree, Canvas } from "@react-three/fiber";
 import { useEffect, useRef, useCallback, useState, type ReactElement } from "react";
 import { markPerfInactive, publishPerf } from "./perf";
-import "./silence-clock-deprecation";
 import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera } from "@react-three/drei";
 import { useRouter } from "next/navigation";
 import { useCommandMenu } from "@/command-menu/store";
