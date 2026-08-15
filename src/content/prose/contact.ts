@@ -2,9 +2,9 @@ import "server-only";
 
 import { getStationEntry, routes } from "../pages";
 import { siteConfig } from "../profile";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const contact: Destination = {
+export const contact: Page = {
   ...getStationEntry("contact"),
   eyebrow: "Say hello",
   title: "Let's build something out of this world.",

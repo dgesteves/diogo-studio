@@ -4,7 +4,7 @@ import { Vector3, type PerspectiveCamera } from "three";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { setExplore } from "./store";
 import { ROOM } from "./room";
-import { type RouteKey } from "@/content/pages";
+import { type PageSlug } from "@/content/pages";
 import { ORBIT, WorldCamera, consumeIntro, introStartPosition } from "./camera";
 import { getStation } from "./stations";
 import { neutralOrbitState, type OrbitInputState } from "./input";
@@ -45,7 +45,7 @@ function neutralInput(): RefObject<OrbitInputState> {
 }
 
 async function mount(
-  active: RouteKey = "about",
+  active: PageSlug = "about",
   viewport: { width: number; height: number } = WIDE,
 ): Promise<Harness> {
   const input = neutralInput();
@@ -60,11 +60,11 @@ async function settle(scene: SceneQuery, frames = 600): Promise<void> {
   await scene.advance(frames, 1 / 60);
 }
 
-function stationPosition(slug: RouteKey): Vector3 {
+function stationPosition(slug: PageSlug): Vector3 {
   return new Vector3(...getStation(slug).position);
 }
 
-function distanceToTarget(camera: PerspectiveCamera, slug: RouteKey): number {
+function distanceToTarget(camera: PerspectiveCamera, slug: PageSlug): number {
   return camera.position.distanceTo(new Vector3(...getStation(slug).target));
 }
 

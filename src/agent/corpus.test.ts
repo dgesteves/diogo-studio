@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { asInternalHref, routes } from "@/content/pages";
-import { worldDestinations } from "@/content/prose";
+import { pages } from "@/content/prose";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS, INDEX } from "./corpus";
 import { buildCitations } from "./response";
@@ -49,10 +49,7 @@ describe("corpus ↔ routes", () => {
 
   it("anchors every chunk to a block that exists on the page it links to", () => {
     const blocksByHref = new Map<string, Set<string>>(
-      worldDestinations.map((destination) => [
-        destination.href,
-        new Set(destination.blocks.map((block) => block.id)),
-      ]),
+      pages.map((page) => [page.href, new Set(page.blocks.map((block) => block.id))]),
     );
 
     const dangling = CHUNKS.filter(
@@ -65,7 +62,7 @@ describe("corpus ↔ routes", () => {
     // Anchorless chunks are the 17 page overviews plus the identity chunk, and nothing
     // else: a corpus where most chunks lack an anchor is the one this replaced.
     const anchorless = CHUNKS.filter((c) => c.anchor === undefined);
-    expect(anchorless).toHaveLength(worldDestinations.length + 1);
+    expect(anchorless).toHaveLength(pages.length + 1);
     expect(buildCitations(CHUNKS).filter((c) => c.href.includes("#")).length).toBe(
       CHUNKS.length - anchorless.length,
     );

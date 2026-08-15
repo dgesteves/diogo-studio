@@ -1,10 +1,10 @@
 import "server-only";
 
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 import { stackGroups } from "../stack";
 
-export const stack: Destination = {
+export const stack: Page = {
   ...getStationEntry("stack"),
   eyebrow: "The toolkit",
   title: "The technical stack behind the work.",

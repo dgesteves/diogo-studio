@@ -1,8 +1,8 @@
 import { finalizeEntry } from "./entry";
 import type { IndexEntry, SourceKind } from "./types";
 
-import { worldDestinations } from "../../src/content/prose";
-import type { ContentBlock, Destination } from "../../src/content/schema";
+import { pages } from "../../src/content/prose";
+import type { Block, Page } from "../../src/content/schema";
 
 /**
  * The whole retrieval corpus, derived from the authored record and nothing else.
@@ -18,7 +18,7 @@ import type { ContentBlock, Destination } from "../../src/content/schema";
  */
 
 /** A block's text, or `null` where a block has no prose to retrieve. */
-function blockText(block: ContentBlock): string | null {
+function blockText(block: Block): string | null {
   switch (block.kind) {
     case "lede":
       return block.text;
@@ -44,7 +44,7 @@ function blockText(block: ContentBlock): string | null {
 }
 
 /** Where a block splits into one chunk per item, that item's text and heading. */
-function itemChunks(block: ContentBlock): { heading: string; text: string; kind: SourceKind }[] {
+function itemChunks(block: Block): { heading: string; text: string; kind: SourceKind }[] {
   switch (block.kind) {
     case "cards":
       return block.items.map((item) => ({
@@ -67,27 +67,27 @@ function itemChunks(block: ContentBlock): { heading: string; text: string; kind:
   }
 }
 
-function pageChunks(destination: Destination): IndexEntry[] {
-  const sourceId = `page:${destination.slug}`;
-  const lede = destination.blocks.find((block) => block.kind === "lede");
+function pageChunks(page: Page): IndexEntry[] {
+  const sourceId = `page:${page.slug}`;
+  const lede = page.blocks.find((block) => block.kind === "lede");
 
   // Ordinal 0 is the page as a whole, so "what is on /work" retrieves something, and it
   // is the one chunk with no anchor — its permalink already lands at the top of the page.
   const overview = finalizeEntry({
     sourceId,
     sourceKind: "site",
-    sourceTitle: destination.label,
-    permalink: destination.href,
+    sourceTitle: page.label,
+    permalink: page.href,
     anchor: undefined,
-    heading: destination.eyebrow,
+    heading: page.eyebrow,
     tags: undefined,
     ordinal: 0,
-    content: [destination.title, destination.summary, lede?.kind === "lede" ? lede.text : ""]
+    content: [page.title, page.summary, lede?.kind === "lede" ? lede.text : ""]
       .filter(Boolean)
       .join("\n"),
   });
 
-  const rest = destination.blocks.flatMap((block, index) => {
+  const rest = page.blocks.flatMap((block, index) => {
     // The lede is already the overview's third line; a second copy would compete with it.
     if (block.kind === "lede" && block === lede) return [];
 
@@ -97,8 +97,8 @@ function pageChunks(destination: Destination): IndexEntry[] {
         finalizeEntry({
           sourceId,
           sourceKind: item.kind,
-          sourceTitle: destination.label,
-          permalink: destination.href,
+          sourceTitle: page.label,
+          permalink: page.href,
           anchor: block.id,
           heading: item.heading,
           tags: undefined,
@@ -116,10 +116,10 @@ function pageChunks(destination: Destination): IndexEntry[] {
       finalizeEntry({
         sourceId,
         sourceKind: "site",
-        sourceTitle: destination.label,
-        permalink: destination.href,
+        sourceTitle: page.label,
+        permalink: page.href,
         anchor: block.id,
-        heading: block.kind === "list" ? (block.title ?? destination.eyebrow) : destination.eyebrow,
+        heading: block.kind === "list" ? (block.title ?? page.eyebrow) : page.eyebrow,
         tags: undefined,
         ordinal: index + 1,
         content: text,
@@ -131,5 +131,5 @@ function pageChunks(destination: Destination): IndexEntry[] {
 }
 
 export function buildPageChunks(): IndexEntry[] {
-  return worldDestinations.flatMap(pageChunks);
+  return pages.flatMap(pageChunks);
 }

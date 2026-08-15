@@ -3,7 +3,7 @@
 import { type Object3D, Vector2, type Camera, type Raycaster } from "three";
 import { useEffect, useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
-import { type RouteKey } from "@/content/pages";
+import { type PageSlug } from "@/content/pages";
 import { setAiCoreHovered, setHoveredStation } from "./store";
 import { type OrbitInputState } from "./input";
 
@@ -29,18 +29,18 @@ export function getHotspotObjects(): Object3D[] {
 
 type WorldInteractProps = {
   input: RefObject<OrbitInputState>;
-  onSelect: (slug: RouteKey) => void;
+  onSelect: (slug: PageSlug) => void;
   onAskAi: () => void;
 };
 
-type HotspotPick = { kind: "route"; slug: RouteKey } | { kind: "ai-core" };
+type HotspotPick = { kind: "route"; slug: PageSlug } | { kind: "ai-core" };
 
 function pickHotspot(raycaster: Raycaster, camera: Camera, ndc: Vector2): HotspotPick | null {
   raycaster.setFromCamera(ndc, camera);
   for (const hit of raycaster.intersectObjects(getHotspotObjects(), false)) {
     if (hit.object.userData.aiCore === true) return { kind: "ai-core" };
     const slug = hit.object.userData.hotspotSlug;
-    if (typeof slug === "string") return { kind: "route", slug: slug as RouteKey };
+    if (typeof slug === "string") return { kind: "route", slug: slug as PageSlug };
   }
   return null;
 }
@@ -50,7 +50,7 @@ export function WorldInteract({ input, onSelect, onAskAi }: WorldInteractProps):
   const lastX = useRef(-1);
   const lastY = useRef(-1);
   const lastClick = useRef(0);
-  const hoveredSlug = useRef<RouteKey | null>(null);
+  const hoveredSlug = useRef<PageSlug | null>(null);
   const hoveredAi = useRef(false);
 
   function applyHover(pick: HotspotPick | null): void {

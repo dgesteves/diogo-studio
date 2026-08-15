@@ -1,11 +1,11 @@
-import type { InternalHref, RouteKey, RoutePath } from "./pages";
+import type { InternalHref, PageSlug, PagePath } from "./pages";
 
 /**
  * The shape of the authored record. Every renderer — the DOM reading surface, the 3D
  * room's canvas screens, the agent's retrieval index — derives from these types and
  * none of them may restate a fact.
  */
-type ContentLink =
+type BlockLink =
   | { label: string; href: string; external: true }
   | { label: string; href: InternalHref; external?: false };
 
@@ -18,7 +18,7 @@ type ContentLink =
  */
 type BlockId = { id: string };
 
-export type ContentBlock =
+export type Block =
   | ({ kind: "lede"; text: string } & BlockId)
   | ({ kind: "prose"; paragraphs: readonly string[] } & BlockId)
   | ({ kind: "list"; title?: string; items: readonly string[] } & BlockId)
@@ -42,15 +42,15 @@ export type ContentBlock =
     } & BlockId)
   | ({
       kind: "links";
-      items: readonly ContentLink[];
+      items: readonly BlockLink[];
     } & BlockId);
 
-export type Destination = {
-  slug: RouteKey;
-  href: RoutePath;
+export type Page = {
+  slug: PageSlug;
+  href: PagePath;
   label: string;
   eyebrow: string;
   title: string;
   summary: string;
-  blocks: readonly ContentBlock[];
+  blocks: readonly Block[];
 };

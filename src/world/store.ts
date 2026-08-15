@@ -1,4 +1,4 @@
-import type { RouteKey } from "@/content/pages";
+import type { PageSlug } from "@/content/pages";
 import { createStore } from "@/store";
 
 /**
@@ -11,7 +11,7 @@ import { createStore } from "@/store";
  */
 
 type WorldState = {
-  hovered: RouteKey | null;
+  hovered: PageSlug | null;
   aiCoreHovered: boolean;
 };
 
@@ -21,7 +21,7 @@ const world = createStore<WorldState>({ hovered: null, aiCoreHovered: false });
 const worldMode = createStore<WorldMode>("night");
 const explore = createStore(false);
 
-export function setHoveredStation(slug: RouteKey | null): void {
+export function setHoveredStation(slug: PageSlug | null): void {
   world.update((prev) => (prev.hovered === slug ? prev : { ...prev, hovered: slug }));
 }
 

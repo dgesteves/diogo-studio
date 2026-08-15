@@ -2,9 +2,9 @@ import "server-only";
 
 import { getStationEntry } from "../pages";
 import { practices, principles as stances } from "../principles";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const principles: Destination = {
+export const principles: Page = {
   ...getStationEntry("principles"),
   eyebrow: "How I build",
   title: "The non-negotiables behind the work.",

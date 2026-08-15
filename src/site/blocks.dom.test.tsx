@@ -1,8 +1,8 @@
 import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { getDestination } from "@/content/prose";
-import type { ContentBlock } from "@/content/schema";
-import { ContentBlocks } from "./blocks";
+import { getPage } from "@/content/prose";
+import type { Block } from "@/content/schema";
+import { Blocks } from "./blocks";
 import { PageView } from "./page-view";
 
 /**
@@ -15,8 +15,8 @@ import { PageView } from "./page-view";
  * about markup, and every optional field can be asserted both ways.
  */
 
-function renderBlocks(...blocks: ContentBlock[]): void {
-  render(<ContentBlocks blocks={blocks} />);
+function renderBlocks(...blocks: Block[]): void {
+  render(<Blocks blocks={blocks} />);
 }
 
 describe("Content blocks: prose", () => {
@@ -163,7 +163,7 @@ describe("Content blocks: links", () => {
 describe("Content blocks: anchors", () => {
   it("gives every block its authored id, so a citation's fragment resolves", () => {
     const { container } = render(
-      <ContentBlocks
+      <Blocks
         blocks={[
           { id: "welcome", kind: "lede", text: "The lede." },
           { id: "credentials", kind: "list", items: ["A degree"] },
@@ -183,7 +183,7 @@ describe("Content blocks: an unknown kind", () => {
     // The union is exhaustive at compile time, so this can only happen through data that
     // was never typechecked — and a station that silently drops a section is worse than a
     // build that stops.
-    const rogue = { kind: "carousel", items: [] } as unknown as ContentBlock;
+    const rogue = { kind: "carousel", items: [] } as unknown as Block;
 
     expect(() => renderBlocks(rogue)).toThrow(/unhandled content block/i);
   });
@@ -191,14 +191,14 @@ describe("Content blocks: an unknown kind", () => {
 
 describe("Page view", () => {
   it("frames a station with exactly one first-level heading", () => {
-    const destination = getDestination("about");
+    const page = getPage("about");
     render(<PageView slug="about" />);
 
     const headings = screen.getAllByRole("heading", { level: 1 });
     expect(headings).toHaveLength(1);
-    expect(headings[0]).toHaveTextContent(destination.title);
-    expect(screen.getByText(destination.eyebrow)).toBeInTheDocument();
-    expect(screen.getByText(destination.summary)).toBeInTheDocument();
+    expect(headings[0]).toHaveTextContent(page.title);
+    expect(screen.getByText(page.eyebrow)).toBeInTheDocument();
+    expect(screen.getByText(page.summary)).toBeInTheDocument();
   });
 
   it("makes room for a page's own media, actions and extras", () => {

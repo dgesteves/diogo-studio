@@ -1,7 +1,7 @@
 // `content/prose` is `server-only`, so this spec — and only the `e2e*` scripts — runs
 // under `--conditions=react-server`. Never invoke `playwright` bare.
-import { worldDestinations } from "@/content/prose";
-import type { ContentBlock } from "@/content/schema";
+import { pages } from "@/content/prose";
+import type { Block } from "@/content/schema";
 import { expect, test } from "./fixtures";
 
 /**
@@ -21,7 +21,7 @@ import { expect, test } from "./fixtures";
  * in one project is worse.
  */
 test.describe("Server-rendered content", () => {
-  for (const destination of worldDestinations) {
+  for (const destination of pages) {
     // No route is exempt. `/` used to be: it rendered a bespoke hero inside an `sr-only`
     // wrapper, so its lede, stats and links were in the agent's index and nowhere a
     // crawler could read them. Phase 2b made it a `PageView` like the other sixteen.
@@ -48,7 +48,7 @@ test.describe("Server-rendered content", () => {
   }
 });
 
-function authoredStrings(block: ContentBlock): string[] {
+function authoredStrings(block: Block): string[] {
   switch (block.kind) {
     case "lede":
       return [block.text];

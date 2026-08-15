@@ -1,22 +1,22 @@
 import { describe, expect, it } from "vitest";
 import {
   asInternalHref,
-  isRoutePath,
+  isPagePath,
   resolveStation,
   routes,
   stationIndex,
   stationSectors,
-  type RouteKey,
+  type PageSlug,
 } from "./pages";
 
-describe("isRoutePath", () => {
+describe("isPagePath", () => {
   it("accepts every declared route and nothing else", () => {
     for (const path of Object.values(routes)) {
-      expect(isRoutePath(path)).toBe(true);
+      expect(isPagePath(path)).toBe(true);
     }
-    expect(isRoutePath("/nope")).toBe(false);
-    expect(isRoutePath("/work/")).toBe(false);
-    expect(isRoutePath("")).toBe(false);
+    expect(isPagePath("/nope")).toBe(false);
+    expect(isPagePath("/work/")).toBe(false);
+    expect(isPagePath("")).toBe(false);
   });
 });
 
@@ -70,7 +70,7 @@ describe("stationSectors", () => {
 
   it("covers every station exactly once", () => {
     expect(sectorSlugs).toHaveLength(stationIndex.length);
-    expect(new Set<RouteKey>(sectorSlugs).size).toBe(sectorSlugs.length);
+    expect(new Set<PageSlug>(sectorSlugs).size).toBe(sectorSlugs.length);
     for (const station of stationIndex) {
       expect(sectorSlugs).toContain(station.slug);
     }

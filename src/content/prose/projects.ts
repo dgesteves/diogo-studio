@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry, routes } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const projects: Destination = {
+export const projects: Page = {
   ...getStationEntry("projects"),
   eyebrow: "Highlighted work",
   title: "Platforms, design systems, and AI-native products.",

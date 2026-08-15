@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { worldDestinations } from "@/content/prose";
+import { pages } from "@/content/prose";
 import { buildRadarPoints, radarPoints } from "./radar";
 
 describe("buildRadarPoints", () => {
-  it("projects every destination to a radar point", () => {
-    expect(radarPoints).toHaveLength(worldDestinations.length);
+  it("projects every page to a radar point", () => {
+    expect(radarPoints).toHaveLength(pages.length);
     const slugs = new Set(radarPoints.map((p) => p.slug));
-    for (const destination of worldDestinations) {
-      expect(slugs.has(destination.slug)).toBe(true);
+    for (const page of pages) {
+      expect(slugs.has(page.slug)).toBe(true);
     }
   });
 
@@ -20,7 +20,7 @@ describe("buildRadarPoints", () => {
     }
   });
 
-  it("carries label, href, and accent through from the destination", () => {
+  it("carries label, href, and accent through from the page", () => {
     const home = buildRadarPoints().find((p) => p.slug === "home");
     expect(home).toBeDefined();
     expect(home?.href).toBe("/");

@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { env } from "@/env";
-import type { RouteKey } from "@/content/pages";
+import type { PageSlug } from "@/content/pages";
 import { siteConfig } from "@/content/profile";
-import { getDestination } from "@/content/prose";
+import { getPage } from "@/content/prose";
 
 /**
  * Everything the document says about itself: the origin it resolves against, the metadata
@@ -120,8 +120,8 @@ export const rootViewport: Viewport = {
  * description are the site's own and its canonical is already `/`, so deriving there would
  * retitle the most-shared surface after a station.
  */
-export function pageMetadata(slug: RouteKey): Metadata {
-  const page = getDestination(slug);
+export function pageMetadata(slug: PageSlug): Metadata {
+  const page = getPage(slug);
 
   return {
     title: page.label,

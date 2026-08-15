@@ -1,5 +1,5 @@
 import { siteConfig } from "@/content/profile";
-import { routes, type RoutePath } from "@/content/pages";
+import { routes, type PagePath } from "@/content/pages";
 import { expect, readMeta, readTitle, test } from "./fixtures";
 
 /**
@@ -14,7 +14,7 @@ import { expect, readMeta, readTitle, test } from "./fixtures";
  * "declared → listed in the sitemap → serves a page", with each link asserted once at
  * the cheapest layer that can see it.
  */
-const ROUTE_PATHS: readonly RoutePath[] = Object.values(routes);
+const ROUTE_PATHS: readonly PagePath[] = Object.values(routes);
 
 const TITLE_SUFFIX = ` · ${siteConfig.name}`;
 
@@ -69,8 +69,8 @@ test.describe("Every route", () => {
    * seventeen more page loads would buy nothing.
    */
   test("every route ships its own title and description", async ({ request }) => {
-    const titles = new Map<string, RoutePath>();
-    const descriptions = new Map<string, RoutePath>();
+    const titles = new Map<string, PagePath>();
+    const descriptions = new Map<string, PagePath>();
 
     for (const path of ROUTE_PATHS) {
       const response = await request.get(path);

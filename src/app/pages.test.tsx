@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { Metadata } from "next";
 import { renderToStaticMarkup } from "react-dom/server";
-import { routes, type RouteKey } from "@/content/pages";
+import { routes, type PageSlug } from "@/content/pages";
 import { CommandMenuProvider } from "@/command-menu/store";
-import { getDestination } from "@/content/prose";
+import { getPage } from "@/content/prose";
 
 /**
  * All 17 route pages, discovered rather than listed, so a new one is asserted the moment the
@@ -35,8 +35,8 @@ function routePathOf(file: string): string {
   return `/${segments.join("/")}`;
 }
 
-const KEYS = Object.keys(routes) as RouteKey[];
-const BY_PATH = new Map<string, RouteKey>(KEYS.map((key) => [routes[key], key]));
+const KEYS = Object.keys(routes) as PageSlug[];
+const BY_PATH = new Map<string, PageSlug>(KEYS.map((key) => [routes[key], key]));
 
 const pages = Object.entries(modules).map(([file, page]) => {
   const path = routePathOf(file);
@@ -91,7 +91,7 @@ describe("route pages", () => {
    */
   it("derives every station's title and description from its own record", () => {
     for (const [slug, page] of stations) {
-      const record = getDestination(slug);
+      const record = getPage(slug);
 
       expect(page.metadata?.title, slug).toBe(record.label);
       expect(page.metadata?.description, slug).toBe(record.summary);
@@ -131,7 +131,7 @@ describe("route pages", () => {
       );
 
       expect(html, slug).toContain("<h1");
-      expect(html, slug).toContain(getDestination(slug).title);
+      expect(html, slug).toContain(getPage(slug).title);
     }
   });
 });

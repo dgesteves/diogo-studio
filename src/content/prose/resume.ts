@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry, routes } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const resume: Destination = {
+export const resume: Page = {
   ...getStationEntry("resume"),
   eyebrow: "The full record",
   title: "Staff / Principal Frontend & Platform Engineer.",

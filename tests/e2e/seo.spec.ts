@@ -1,5 +1,5 @@
 import { siteConfig } from "@/content/profile";
-import { routes, type RoutePath } from "@/content/pages";
+import { routes, type PagePath } from "@/content/pages";
 import { expect, readMeta, readTitle, test } from "./fixtures";
 
 /**
@@ -16,7 +16,7 @@ import { expect, readMeta, readTitle, test } from "./fixtures";
  * `metadata-routes.test.ts` and `structured-data.test.ts` already pin the payloads in
  * milliseconds, so nothing here re-checks a field either of them owns.
  */
-const ROUTE_PATHS: readonly RoutePath[] = Object.values(routes);
+const ROUTE_PATHS: readonly PagePath[] = Object.values(routes);
 
 const SITEMAP = "/sitemap.xml";
 

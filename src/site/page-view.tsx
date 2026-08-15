@@ -1,10 +1,10 @@
 import { type ReactElement, type ReactNode } from "react";
-import type { RouteKey } from "@/content/pages";
-import { getDestination } from "@/content/prose";
-import { ContentBlocks } from "./blocks";
+import type { PageSlug } from "@/content/pages";
+import { getPage } from "@/content/prose";
+import { Blocks } from "./blocks";
 
 type PageViewProps = {
-  slug: RouteKey;
+  slug: PageSlug;
   /** Rendered after the panel, outside it — a station's own extra surface. */
   children?: ReactNode;
   /** Rendered above the eyebrow: the about page's portrait. */
@@ -19,7 +19,7 @@ type PageViewProps = {
  * only path to the content (`docs/architecture.md` §3).
  */
 export function PageView({ slug, children, media, actions }: PageViewProps): ReactElement {
-  const page = getDestination(slug);
+  const page = getPage(slug);
 
   return (
     <>
@@ -34,7 +34,7 @@ export function PageView({ slug, children, media, actions }: PageViewProps): Rea
           </h1>
           <p className="text-muted-foreground mt-4 leading-relaxed">{page.summary}</p>
           <div className="mt-8">
-            <ContentBlocks blocks={page.blocks} />
+            <Blocks blocks={page.blocks} />
           </div>
           {actions ? <div className="border-border/60 mt-8 border-t pt-6">{actions}</div> : null}
         </article>
