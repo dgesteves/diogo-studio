@@ -24,6 +24,54 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — A block is a chunk, and a chunk's permalink is where it was derived from
+
+Phase 3 rewrote the retrieval chunker. Three properties are worth keeping, because each
+replaces something that failed silently and would come back the same way.
+
+**Granularity is per block, and per item for `cards` and `timeline`.** The old chunker emitted
+one chunk per page — the largest 2,979 characters — so a question about one engagement
+retrieved the whole of `/work`. A timeline entry is a self-contained record, so it is a chunk.
+86 chunks now, median 166 characters, largest 749. `TOP_K` rose 6 → 10 to compensate: the same
+K over chunks a fifth of the size is a fifth of the prompt context.
+
+**`ContentBlock.id` is required, not optional.** `anchor` was undefined on all 25 chunks of the
+old index, so `buildCitations`' `#${anchor}` machinery had never once fired, and the cause was
+that nothing in the authored record could be anchored to. Required makes an un-anchorable chunk
+unrepresentable rather than guarded, and `site/blocks.tsx` renders the id, so the fragment
+resolves against real markup.
+
+**A chunk's permalink is the page it was derived from — there is no parameter for it.** Eight
+of 25 chunks permalinked to `/` because the career chunks hard-coded `routes.home`, so the
+agent cited the home page when asked about Peacock. Deleting those chunks fixed it by
+construction: the career facts are `/work`'s and `/timeline`'s timeline blocks now. Do not
+reintroduce a chunk source that invents a permalink for content that is not on that page.
+
+`SourceKind` is `"career" | "site"`, both emitted. `"case-study"` and `"essay"` shipped in the
+Zod schema, the script's types and six test fixtures for as long as the index existed, and
+nothing ever produced either.
+
+## 2026-08-15 — `/work` and `/timeline` are two projections of one record
+
+`refactor.md` §5 counted four copies of the career record. There were five: `/timeline`
+hand-wrote its own, with editorial groupings ("First lead roles", "The AI-native turn") that
+merged two engagements into one stop and restated every date a fourth time.
+
+`content/career.ts` is the record. `/work` projects the engagements with their points;
+`/timeline` projects engagements plus education, merged chronologically on a sortable
+`start`. The groupings are gone, and that is the cost: `/timeline` reads as a record rather
+than as a narrative. It is the right trade only because the alternative was two hand-written
+timelines that had already drifted — the wall panel invented a "2015 · Studio era" stop that
+existed nowhere else, and `career.ts` listed Superglue as an operating company with no matching
+engagement.
+
+**`content/career.ts` carries no `server-only` marker, deliberately.** The 3D room is a client
+island and its canvas screens read the record directly, which is what makes "a draw function
+may not contain a fact" enforceable by construction rather than by review. The same reasoning
+put `content/{principles,stack,playground}.ts` beside it rather than inside `prose/`. The rule
+in `.claude/rules/three-r3f-world.md` is unchanged and still binds: a client island may read
+these, never `content/prose`, which carries every page's text.
+
 ## 2026-08-15 — The home page renders its record visibly, and keeps one client island
 
 `/` rendered a bespoke `HeroSection` inside a `.sr-only` wrapper, on the reasoning that the 3D

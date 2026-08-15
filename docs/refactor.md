@@ -5,8 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14, Phase 2b on 2026-08-15.** The measurement is in §2, the
-structural review in §4, the evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14, Phases 2b and 3 on 2026-08-15.** The measurement is in
+§2, the structural review in §4, the evidence in §5.
 
 ---
 
@@ -144,7 +144,8 @@ src/
     schema.ts                Block · Page · Sector · Role · PageSlug · PagePath
     pages.ts                 the 17 entries + derived `routes` + asInternalHref()
     profile.ts               identity, role, links, availability
-    career.ts                the ONE career record
+    career.ts                the ONE career record — engagements + education
+    principles.ts  stack.ts  playground.ts    the other records a canvas screen reads
     prose/                   server-only page bodies, ONE FILE PER SLUG
       home.ts  about.ts  work.ts  projects.ts  …  (17)
 
@@ -208,6 +209,13 @@ of the target tree and are expected to hold.
 
 `world/tuning.ts` and `world/palette.ts` are **not** created: the first is a category folder in
 file form whose only membership rule is "is a number", the second is material color.
+
+The four records above `prose/` are the client-safe half of `content/`, and the split is the
+same one `pages.ts` documents: `prose/**` is `server-only`, and a canvas screen in the 3D
+client island has to read the facts it paints from somewhere. Phase 3 added `principles.ts`,
+`stack.ts` and `playground.ts` for exactly the pages whose wall panels were carrying their own
+copies. **A record earns a file here only when a client module reads it** — otherwise it is
+prose, and it goes in `prose/`.
 
 ---
 
@@ -331,6 +339,9 @@ exists nowhere else; `career.ts` lists an operating company with no matching eng
 author's role line exists in three variants. All seventeen `page.tsx` files hand-copy their
 destination's summary into `metadata`.
 
+> **Resolved.** The metadata copies went in 2b; the career copies — five of them, not four —
+> went in Phase 3, along with every fact in a draw function. `content/career.ts` is the record.
+
 ### Dead code the tooling cannot see
 
 `knip` sees real imports, so none of this is flagged: `config/navigation.ts` (a second, partial
@@ -353,11 +364,21 @@ three dead dependencies and six dead CSS classes went in Phase 1.
 `/`** because career chunks hardcode `routes.home`. The agent cites the home page for Peacock
 work. `agentSourceKindSchema` ships `"case-study"` and `"essay"`, neither ever emitted.
 
+> **Resolved in Phase 3.** 86 chunks, median 166 characters, largest 749; every chunk but the
+> 17 page overviews and the identity chunk carries an anchor; nothing but `/`'s own chunks
+> permalinks to `/`. Both dead source kinds are gone. `agent-index.test.ts` holds all three
+> claims against the committed corpus, so none of them can quietly come back.
+
 ### Statements the product makes that are not true
 
 The résumé screen renders "↧ DOWNLOAD RÉSUMÉ" with no PDF behind it; the boot gate advertises
 "Alpha · Work in progress"; five pages promise content that does not exist. `world-poster.png`
 is 3.19 MB at 5116×2084, served raw as the Open Graph card.
+
+> **Partly resolved.** The OG card went in Phase 1 and the five pages in Phase 3. The résumé
+> download and the alpha notice are product decisions rather than refactoring, so **Phase 8
+> still owns both** — Phase 3 rewrote `resume-screen-draw.ts` around them deliberately and left
+> the affordance in place, with a comment in `screen-draw.test.ts` saying so.
 
 ---
 
@@ -498,7 +519,7 @@ optional final phase.
 > for the retrieval index alone, and `knip` will not say so. **Phase 3 inherits it** with the
 > career record it belongs to.
 
-### Phase 3 — one career record, one index
+### Phase 3 — one career record, one index ✅ landed 2026-08-15
 
 - **Objective.** Kill the four-copy defect and fix retrieval.
 - **Scope.** Collapse four career copies into `content/career.ts`. Every draw function takes
@@ -509,6 +530,45 @@ optional final phase.
 - **Verify.** `ask-agent.spec.ts` · `pnpm agent:index:check` · assert no citation resolves
   to `/` for a career answer.
 - **Rollback.** Independent of 2b.
+
+> **Landed**, in five commits plus one unrelated fix. 19/19 routes static, 835 unit tests and
+> 212 E2E green, coverage up at 99.05% / 94.00% / 98.83% / 99.73%, and the index rebuilt to 86
+> fully embedded chunks. Six things are worth knowing.
+>
+> **There were five career copies, not four.** `content/prose/timeline.ts` hand-wrote its own,
+> which this document never counted. It is gone: `/work` and `/timeline` are now two
+> projections of one record, and `/timeline`'s editorial groupings went with it — see
+> `decisions.md` for the trade.
+>
+> **All five wall screens took data, not two.** The scope named the career screens, but the
+> stack panel advertised GSAP and shadcn/ui — neither a dependency — and the playground panel
+> listed five experiments that do not exist. Fixing those without a single source would have
+> been fixing the symptom. `content/{principles,stack,playground}.ts` are new, client-safe
+> beside `content/career.ts`, because `prose/**` is `server-only` and the room is a client
+> island.
+>
+> **`ContentBlock.id` is required.** It is what an anchor resolves against, so all 17 prose
+> files gained ids and `site/blocks.tsx` renders them. `prose.test.ts` holds uniqueness and
+> URL-safety, neither of which is visible on a page.
+>
+> **`TOP_K` rose 6 → 10.** Per-block chunking cut the median chunk from a page to 166
+> characters; the same K over smaller chunks is a smaller prompt.
+>
+> **`scripts/agent-index/` was not renamed, and this scope line was wrong to ask.** The folder
+> matches the `pnpm agent:index` script it backs, so renaming it would make the two disagree
+> for no gain. `destination-chunks.ts` → `page-chunks.ts` and `virtual-chunks.ts` →
+> `profile-chunks.ts` did land — those were named for a model that no longer exists.
+>
+> **One unrelated fix rode along**, because it blocked the gate: `playwright.config.ts`'s
+> react-server guard ran at module scope, and `knip` loads that config, so `pnpm validate` had
+> been red on `main` since 904f4fe. It is a `globalSetup` now, with the fail-fast behavior
+> unchanged.
+>
+> **Phase 6 inherits a rename this phase did not do.** §3's target schema is
+> `Block · Page · Sector · Role · PageSlug · PagePath`, but the code still says `Destination`,
+> `ContentBlock`, `worldDestinations`, `RouteKey` and `RoutePath`, and no phase owned it. It
+> sweeps `world/`, `command-menu/` and `app/`, which is a different change from this one —
+> **added to Phase 6 below** rather than left unassigned.
 
 ### Phase 4 — the two real abstractions
 
@@ -547,6 +607,10 @@ optional final phase.
   into owners — `use-disposable`, `use-world-palette` and `mulberry32` are 100% world-consumed;
   `use-in-view` has one importer; only `use-is-client` is genuinely shared.
   `styles/globals.css` → `src/globals.css`, updating `components.json`.
+  **Rename the content model to §3's names** — `Destination` → `Page`, `ContentBlock` →
+  `Block`, `worldDestinations` → the prose collection, `RouteKey`/`RoutePath` →
+  `PageSlug`/`PagePath`. Inherited from Phase 3, which found it unassigned; it is a sweep
+  through `world/`, `command-menu/` and `app/` and belongs with the other renames here.
 - **Verify.** `pnpm validate` · `pnpm e2e:ci` · expect new `knip` findings as barrels
   disappear, and treat them as findings rather than something to silence.
 

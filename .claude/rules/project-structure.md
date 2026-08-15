@@ -62,15 +62,26 @@ and the 3D canvas screens.
 
 The rule for the 3D layer specifically: **a draw function decides layout, typography, color,
 spacing, animation, truncation and decoration — it may not contain a fact.** Enforce it by
-construction: every draw function takes its data as a parameter.
+construction: every draw function takes its data as a parameter. Truncation is the draw's call,
+not the record's: a panel that cannot fit the list drops what does not fit, and the page carries
+the whole of it.
+
+That parameter has to come from somewhere a client module may import, so `content/` is split.
+`prose/**` is `server-only`; the records beside it — `pages.ts`, `profile.ts`, `career.ts`,
+`principles.ts`, `stack.ts`, `playground.ts` — are client-safe, and **a record earns a file
+there only when a client module reads it.** Everything else is prose and belongs in `prose/`.
 
 Three things that are not content and must not share a folder with it:
 
-| Kind          | Example                                  | Home              |
-| ------------- | ---------------------------------------- | ----------------- |
-| Content       | a role, a date, a page summary           | `content/`        |
-| Tuning        | camera damping, DPR ladder, fog distance | `world/tuning.ts` |
-| Configuration | an env var, a deployment URL             | `env.ts`          |
+| Kind          | Example                                  | Home                     |
+| ------------- | ---------------------------------------- | ------------------------ |
+| Content       | a role, a date, a page summary           | `content/`               |
+| Tuning        | camera damping, DPR ladder, fog distance | the domain that reads it |
+| Configuration | an env var, a deployment URL             | `env.ts`                 |
+
+Tuning has no home of its own: `docs/refactor.md` §3 declines to create `world/tuning.ts`,
+because "is a number" is not an ownership boundary. Name a magic value at the narrowest scope
+that works — see [Imports](#imports).
 
 ## Imports
 

@@ -107,11 +107,11 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
 - **Judge the environment by what the test touches, not what the module is about.**
   `*.dom.test.{ts,tsx}` runs under jsdom with `vitest.setup.ts`; everything else runs under
   node. Node is the default so a missing marker fails loudly with `document is not defined`.
-- **`src/constants/agent-index.json` is generated.** Edit a source
-  (`src/content/{pages,profile,career-timeline}.ts`, `src/content/prose/**`,
-  `src/constants/{career,patterns}.ts`) then run `pnpm agent:index`.
-  `src/constants/career.ts` has no runtime consumer and is still load-bearing — `knip` will not
-  tell you that.
+- **`src/constants/agent-index.json` is generated.** It derives from `src/content/**` and
+  nothing else, so edit a source there — most often `src/content/prose/**` or
+  `src/content/career.ts` — then run `pnpm agent:index` and commit the result. Every chunk's
+  permalink and anchor come from the page it was derived from; there is no parameter for
+  either, and reintroducing one is how the agent last ended up citing `/` for Peacock work.
 - **`src/content/prose/**` is `server-only`, and that reaches the scripts.** The package throws
   outside a server module graph, so anything in node that reads the corpus runs under
   `--conditions=react-server` — it is on the `agent:index*` and `e2e*` scripts, and must stay
