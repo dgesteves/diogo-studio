@@ -6,7 +6,7 @@ import { useHoveredStation } from "../hooks/use-hovered-station";
 import { registerHotspot, unregisterHotspot } from "../utils/hotspot-registry";
 import type { WorldStation } from "../types";
 import type { FurnitureHotspot as Hotspot } from "../constants/hotspots";
-import { WALL_SCREEN } from "../constants/wall-screen-layout";
+import { WALL_SCREEN } from "@/world/room";
 import { HotspotFocus } from "./hotspot-focus";
 
 const GLOW_SPREAD = 1.6;

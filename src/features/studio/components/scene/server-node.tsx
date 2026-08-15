@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import {
   HARDWARE_CENTER_Z,
   HARDWARE_DEPTH,
@@ -56,7 +56,7 @@ export function ServerNode(): ReactElement {
         intensity={0.07}
         distance={0.34}
         decay={2}
-        color={brandColors.statusOk}
+        color={worldColors.statusOk}
       />
     </group>
   );

@@ -1,4 +1,46 @@
-import type { WorldMode } from "@/world/store";
+"use client";
+
+import { useSyncExternalStore } from "react";
+import { brand } from "@/components/ui/brand";
+import {
+  getWorldModeServerSnapshot,
+  getWorldModeSnapshot,
+  subscribeWorldTheme,
+  type WorldMode,
+} from "./store";
+
+/**
+ * Every color, surface finish and light level the room is allowed to use.
+ *
+ * Two kinds of token live here and they are not interchangeable. `worldColors` and the four
+ * material presets are *fixed* — a mesh reads them once and they never change. The palettes
+ * are *swapped*: day and night are the same geometry under a different rig, which is why the
+ * theme is a store subscription rather than a remount.
+ *
+ * Nothing in the room may inline a hex, a roughness or a metalness value. Add a token here
+ * instead — see `.claude/rules/three-r3f-world.md`.
+ */
+
+export const worldColors = {
+  accent: brand.accent,
+  accentBright: "#67e8f9",
+  accentSoft: "#7dd3fc",
+  coolLight: "#bfe9f5",
+  coolLightCore: "#f2fbff",
+  statusOk: "#34d399",
+} as const;
+
+export const frameMaterial = { color: "#0b1016", roughness: 0.5, metalness: 0.6 } as const;
+
+export const darkMetalMaterial = { color: "#11161b", roughness: 0.5, metalness: 0.6 } as const;
+
+export const anodizedMetalMaterial = {
+  color: "#1a212a",
+  roughness: 0.28,
+  metalness: 0.7,
+} as const;
+
+export const portMaterial = { color: "#04070a", roughness: 0.9, metalness: 0.15 } as const;
 
 export type WorldPalette = {
   background: string;
@@ -63,4 +105,13 @@ export const worldPalettes: Record<WorldMode, WorldPalette> = {
 
 export function resolveWorldMode(resolvedTheme: string | undefined): WorldMode {
   return resolvedTheme === "light" ? "day" : "night";
+}
+
+export function useWorldPalette(): WorldPalette {
+  const mode = useSyncExternalStore(
+    subscribeWorldTheme,
+    getWorldModeSnapshot,
+    getWorldModeServerSnapshot,
+  );
+  return worldPalettes[mode];
 }

@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { DoubleSide } from "three";
-import { brandColors, darkMetalMaterial } from "@/config/brand";
+import { worldColors, darkMetalMaterial } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { Headphones } from "./headphones";
 
 export function DeskExtras(): ReactElement {
@@ -46,18 +46,18 @@ function DeskLamp(): ReactElement {
         </mesh>
         <mesh position={[0, -0.056, 0]} rotation={[Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.076, 24]} />
-          <meshBasicMaterial color={brandColors.coolLight} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.coolLight} toneMapped={false} />
         </mesh>
         <mesh position={[0, -0.026, 0]}>
           <sphereGeometry args={[0.019, 12, 12]} />
-          <meshBasicMaterial color={brandColors.coolLightCore} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.coolLightCore} toneMapped={false} />
         </mesh>
         <pointLight
           position={[0, -0.1, 0]}
           intensity={0.9}
           distance={1.8}
           decay={2}
-          color={brandColors.coolLight}
+          color={worldColors.coolLight}
         />
       </group>
     </group>

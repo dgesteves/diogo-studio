@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { MONO } from "@/world/screens/kit";
 
 type Ctx = CanvasRenderingContext2D;
@@ -43,7 +43,7 @@ export function drawWaveChannel(ctx: Ctx, tick: number): void {
   ctx.fillStyle = fill;
   ctx.fill();
 
-  ctx.strokeStyle = brandColors.accentBright;
+  ctx.strokeStyle = worldColors.accentBright;
   ctx.lineWidth = 2;
   ctx.beginPath();
   for (let x = 0; x <= w; x += 6) {
@@ -53,7 +53,7 @@ export function drawWaveChannel(ctx: Ctx, tick: number): void {
   }
   ctx.stroke();
 
-  ctx.fillStyle = brandColors.accentSoft;
+  ctx.fillStyle = worldColors.accentSoft;
   ctx.font = `bold 16px ${MONO}`;
   ctx.textBaseline = "top";
   ctx.textAlign = "left";

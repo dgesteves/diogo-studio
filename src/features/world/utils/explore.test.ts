@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ROOM } from "@/constants/room";
+import { ROOM } from "@/world/room";
 import { EXPLORE } from "../constants/explore";
 import { clampPitch, clampToBounds, derivePitch, deriveYaw, moveVector } from "./explore";
 

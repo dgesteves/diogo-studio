@@ -1,8 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors } from "@/config/brand";
-import { useWorldPalette } from "@/hooks/use-world-palette";
+import { worldColors, useWorldPalette } from "@/world/materials";
 
 export function Lighting(): ReactElement {
   const palette = useWorldPalette();
@@ -20,12 +19,12 @@ export function Lighting(): ReactElement {
         intensity={palette.keyLightIntensity}
         color={palette.keyLightColor}
       />
-      <pointLight position={[0, 0.6, -1.2]} intensity={0.9} decay={2} color={brandColors.accent} />
+      <pointLight position={[0, 0.6, -1.2]} intensity={0.9} decay={2} color={worldColors.accent} />
       <pointLight
         position={[2.4, 1.6, 0.6]}
         intensity={0.35}
         decay={2}
-        color={brandColors.accentSoft}
+        color={worldColors.accentSoft}
       />
     </>
   );

@@ -3,10 +3,10 @@
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import type { Texture } from "three";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { useCenterScreenTexture, useLeftScreenTexture, useRightScreenTexture } from "../screens";
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { Webcam } from "./webcam";
 
 const MONITOR_Y = DESK_TOP_Y + 0.47;
@@ -41,7 +41,7 @@ export function MonitorRig(): ReactElement {
         intensity={0.9}
         distance={2.6}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
       <Webcam />
     </>

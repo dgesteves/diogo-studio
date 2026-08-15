@@ -1,4 +1,4 @@
-import { ROOM } from "@/constants/room";
+import { ROOM } from "@/world/room";
 
 const REFERENCE_ASPECT = 16 / 9;
 const MAX_PULLBACK = 3.5;

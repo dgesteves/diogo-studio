@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { divider, fillScreen, MONO, scanlines } from "@/world/screens/kit";
 import type { StatusRow } from "./terminal-screen-data";
@@ -26,7 +26,7 @@ export function drawTerminal(ctx: CanvasRenderingContext2D, view: StatusView): v
   scanlines(ctx);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = brandColors.accent;
+  ctx.fillStyle = worldColors.accent;
   ctx.font = `bold 22px ${MONO}`;
   ctx.fillText("● STUDIO · LIVE", 30, 30);
 

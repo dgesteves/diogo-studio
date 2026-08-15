@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { darkMetalMaterial, frameMaterial } from "@/config/brand";
+import { darkMetalMaterial, frameMaterial } from "@/world/materials";
 
 import type { Vec3 } from "../../types";
 

@@ -1,10 +1,9 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors, frameMaterial } from "@/config/brand";
-import { ROOM } from "@/constants/room";
+import { worldColors, frameMaterial } from "@/world/materials";
+import { CITY_WINDOW, ROOM } from "@/world/room";
 
-import { CITY_WINDOW } from "./constants";
 import { Cityscape } from "./cityscape";
 
 const W = CITY_WINDOW.width;
@@ -39,7 +38,7 @@ export function CityWindow(): ReactElement {
       <mesh position={[0, 0, 0.04]}>
         <planeGeometry args={[W, H]} />
         <meshStandardMaterial
-          color={brandColors.accent}
+          color={worldColors.accent}
           transparent
           opacity={0.05}
           roughness={0.08}
@@ -57,7 +56,7 @@ export function CityWindow(): ReactElement {
 
       <mesh position={[0, -H / 2 - FRAME / 2, FRAME_DEPTH / 2]}>
         <boxGeometry args={[W, 0.012, 0.012]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
 
       <pointLight position={[0, 0.1, 0.6]} intensity={0.5} distance={5} decay={2} color="#bfe9ff" />

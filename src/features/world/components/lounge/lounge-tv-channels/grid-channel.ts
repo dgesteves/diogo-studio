@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 type Ctx = CanvasRenderingContext2D;
 
@@ -14,7 +14,7 @@ function drawSun(ctx: Ctx, w: number): void {
   ctx.beginPath();
   ctx.arc(cx, cy, 92, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = brandColors.accentBright;
+  ctx.fillStyle = worldColors.accentBright;
   ctx.beginPath();
   ctx.arc(cx, cy, 46, 0, Math.PI * 2);
   ctx.fill();
@@ -23,7 +23,7 @@ function drawSun(ctx: Ctx, w: number): void {
 }
 
 function drawGrid(ctx: Ctx, w: number, h: number, tick: number): void {
-  ctx.strokeStyle = brandColors.accent;
+  ctx.strokeStyle = worldColors.accent;
   ctx.lineWidth = 1.4;
   const vanishX = w / 2;
   const scroll = (tick * 0.04) % 1;
@@ -53,7 +53,7 @@ export function drawGridChannel(ctx: Ctx, tick: number): void {
   sky.addColorStop(1, "#0a1a26");
   ctx.fillStyle = sky;
   ctx.fillRect(0, 0, w, HORIZON);
-  ctx.fillStyle = brandColors.accentSoft;
+  ctx.fillStyle = worldColors.accentSoft;
   for (let i = 0; i < 40; i += 1) {
     ctx.globalAlpha = 0.15 + Math.abs(Math.sin(tick * 0.08 + i)) * 0.5;
     ctx.fillRect((i * 67) % w, (i * 31) % (HORIZON - 30), 2, 2);

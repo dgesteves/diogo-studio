@@ -1,9 +1,9 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import type { Engagement } from "@/content/career";
 import { siteConfig } from "@/content/profile";
 import { MONO, divider, header, INK, paintBackground, section, SOFT } from "@/world/screens/kit";
 
-const ACCENT = brandColors.accent;
+const ACCENT = worldColors.accent;
 
 /** The panel is 600×800 and the FOCUS section starts at 612, so five rows is what fits. */
 const MAX_ROLES = 5;
@@ -32,7 +32,7 @@ export function drawResume(
     ctx.fillStyle = SOFT;
     ctx.font = `15px ${MONO}`;
     ctx.fillText(row.company, 54, y + 28);
-    ctx.fillStyle = brandColors.accentSoft;
+    ctx.fillStyle = worldColors.accentSoft;
     ctx.font = `14px ${MONO}`;
     ctx.textAlign = "right";
     ctx.fillText(row.years, W - 36, y + 4);

@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { anodizedMetalMaterial, brandColors, portMaterial } from "@/config/brand";
+import { anodizedMetalMaterial, worldColors, portMaterial } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import {
   HARDWARE_CENTER_Z,
   HARDWARE_DEPTH,
@@ -73,11 +73,11 @@ function FrontPanel(): ReactElement {
       ))}
       <mesh position={[0, PEDESTAL_HEIGHT + 0.0022, -0.001]}>
         <boxGeometry args={[MAC_STUDIO_WIDTH * 0.34, 0.0009, 0.002]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <StatusLed
         position={[-0.104, PORT_Y, 0.0012]}
-        color={brandColors.coolLightCore}
+        color={worldColors.coolLightCore}
         radius={0.0022}
       />
     </group>

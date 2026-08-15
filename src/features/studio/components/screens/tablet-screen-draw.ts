@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { drawGrid, drawHeader, drawTools } from "./tablet-screen-chrome";
 
 export type TabletView = {
@@ -39,7 +39,7 @@ function drawStroke(ctx: CanvasRenderingContext2D, view: TabletView): void {
   ctx.stroke();
 
   const [headX, headY] = strokeAt((count - 1) / (STROKE_SAMPLES - 1), W, H);
-  ctx.fillStyle = brandColors.accentBright;
+  ctx.fillStyle = worldColors.accentBright;
   ctx.beginPath();
   ctx.arc(headX, headY, 5.5, 0, Math.PI * 2);
   ctx.fill();

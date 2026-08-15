@@ -1,6 +1,6 @@
 import type { RouteKey } from "@/content/pages";
 import type { Vec3 } from "../types";
-import { WALL_SCREEN, WALL_SCREEN_Z } from "./wall-screen-layout";
+import { WALL_SCREEN, WALL_SCREEN_Z } from "@/world/room";
 
 export type FurnitureHotspot =
   | { center: Vec3; size: Vec3; glow: "floor"; groundY: number }

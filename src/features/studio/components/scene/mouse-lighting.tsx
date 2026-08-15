@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { DoubleSide } from "three";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { useDisposable } from "@/hooks/use-disposable";
 
 import { createMouseBandGeometry, type MouseBand } from "./mouse-trim-geometry";
@@ -24,11 +24,11 @@ export function MouseGlow(): ReactElement {
         <meshStandardMaterial color="#070c11" roughness={0.72} metalness={0.35} side={DoubleSide} />
       </mesh>
       <mesh geometry={bands.led}>
-        <meshBasicMaterial color={brandColors.accentBright} toneMapped={false} side={DoubleSide} />
+        <meshBasicMaterial color={worldColors.accentBright} toneMapped={false} side={DoubleSide} />
       </mesh>
       <mesh geometry={bands.halo}>
         <meshBasicMaterial
-          color={brandColors.accent}
+          color={worldColors.accent}
           toneMapped={false}
           side={DoubleSide}
           transparent
@@ -41,14 +41,14 @@ export function MouseGlow(): ReactElement {
         intensity={0.05}
         distance={0.14}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
       <pointLight
         position={[0, 0.006, 0.03]}
         intensity={0.07}
         distance={0.16}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
     </>
   );

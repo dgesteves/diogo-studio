@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { FRAME } from "./constants";
 
@@ -38,7 +38,7 @@ export function LoungeLamp(): ReactElement {
       {STRIP_ZS.map((z) => (
         <mesh key={z} position={[0, BLADE_Y, z]}>
           <boxGeometry args={[STRIP_W, STRIP_H, 0.006]} />
-          <meshBasicMaterial color={brandColors.coolLight} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.coolLight} toneMapped={false} />
         </mesh>
       ))}
 
@@ -47,14 +47,14 @@ export function LoungeLamp(): ReactElement {
         intensity={1.1}
         distance={3}
         decay={2}
-        color={brandColors.coolLight}
+        color={worldColors.coolLight}
       />
       <pointLight
         position={[0, 0.45, 0.14]}
         intensity={0.5}
         distance={2}
         decay={2}
-        color={brandColors.coolLight}
+        color={worldColors.coolLight}
       />
     </group>
   );

@@ -8,9 +8,8 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { brandColors } from "@/config/brand";
-import { worldPalettes } from "@/config/world-theme";
-import { ROOM } from "@/constants/room";
+import { worldColors, worldPalettes } from "@/world/materials";
+import { ROOM } from "@/world/room";
 import { setWorldMode, type WorldMode } from "@/world/store";
 import { StatusLed } from "./status-led";
 import { StudioScene } from "./studio-scene";
@@ -47,8 +46,8 @@ describe("StudioScene", () => {
     expect(scene.lightsOfType("DirectionalLight")).toHaveLength(1);
 
     const pointColors = scene.lightsOfType("PointLight").map((light) => light.color.getHexString());
-    expect(pointColors).toContain(new Color(brandColors.accent).getHexString());
-    expect(pointColors).toContain(new Color(brandColors.accentSoft).getHexString());
+    expect(pointColors).toContain(new Color(worldColors.accent).getHexString());
+    expect(pointColors).toContain(new Color(worldColors.accentSoft).getHexString());
   });
 
   it("swaps the light rig with the world palette instead of remounting the scene", async () => {
@@ -97,7 +96,7 @@ describe("StatusLed", () => {
 
   async function led(props: Partial<Parameters<typeof StatusLed>[0]> = {}) {
     const scene = await renderScene(
-      <StatusLed position={[0, 0, 0]} color={brandColors.statusOk} radius={0.01} {...props} />,
+      <StatusLed position={[0, 0, 0]} color={worldColors.statusOk} radius={0.01} {...props} />,
     );
     const opacities = (): { core: number; halo: number } => {
       const [core, halo] = scene.refresh().meshes.map((mesh) => materialOf(mesh).opacity);

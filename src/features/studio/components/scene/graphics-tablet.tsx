@@ -2,10 +2,10 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { useTabletScreenTexture } from "../screens";
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { STYLUS_RADIUS, Stylus } from "./stylus";
 
 const SLAB_WIDTH = 0.2;
@@ -50,7 +50,7 @@ export function GraphicsTablet(): ReactElement {
       </mesh>
       <mesh position={[0.062, SLAB_TOP - 0.0006, BEZEL_GROOVE_Z]}>
         <sphereGeometry args={[0.0026, 8, 8]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <Stylus
         position={[STYLUS_X, STYLUS_RADIUS - SLAB_LIFT, 0.02]}
@@ -61,7 +61,7 @@ export function GraphicsTablet(): ReactElement {
         intensity={0.09}
         distance={0.38}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
     </group>
   );

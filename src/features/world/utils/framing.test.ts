@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ROOM } from "@/constants/room";
+import { ROOM } from "@/world/room";
 import { clampCameraX, framingPullback } from "./framing";
 
 describe("framingPullback", () => {

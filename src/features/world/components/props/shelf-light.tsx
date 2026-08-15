@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import { Object3D } from "three";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 const HOUSING = { color: "#10151b", roughness: 0.5, metalness: 0.6 } as const;
 const BAR_POS: [number, number, number] = [0.12, 2.34, 0];
@@ -21,12 +21,12 @@ export function ShelfLight(): ReactElement {
       </mesh>
       <mesh position={[BAR_POS[0], BAR_POS[1] - 0.018, BAR_POS[2]]}>
         <boxGeometry args={[0.04, 0.006, 0.78]} />
-        <meshBasicMaterial color={brandColors.accentSoft} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accentSoft} toneMapped={false} />
       </mesh>
       {STRIP_YS.map((y) => (
         <mesh key={y} position={[STRIP_X, y, 0]}>
           <boxGeometry args={[0.012, 0.006, 1.0]} />
-          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
       ))}
       <primitive object={target} position={TARGET_POS} />
@@ -38,14 +38,14 @@ export function ShelfLight(): ReactElement {
         intensity={3}
         distance={4}
         decay={2}
-        color={brandColors.coolLight}
+        color={worldColors.coolLight}
       />
       <pointLight
         position={[0.5, 1.15, 0]}
         intensity={1.1}
         distance={2.6}
         decay={2}
-        color={brandColors.accentSoft}
+        color={worldColors.accentSoft}
       />
     </group>
   );

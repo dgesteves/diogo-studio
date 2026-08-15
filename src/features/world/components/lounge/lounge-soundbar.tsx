@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 const BAR_W = 1.2;
 const BAR_H = 0.08;
@@ -29,7 +29,7 @@ export function LoungeSoundbar({ topY }: LoungeSoundbarProps): ReactElement {
       </mesh>
       <mesh position={[BAR_W / 2 - 0.06, 0, BAR_D / 2 + 0.002]}>
         <circleGeometry args={[0.006, 12]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
     </group>
   );

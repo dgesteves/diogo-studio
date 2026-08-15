@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { ROOM } from "@/constants/room";
 import { routes } from "@/content/pages";
 import { worldObjectKinds } from "./object-kinds";
 import { worldStations } from "./stations";
-import { WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "./wall-screen-layout";
+import { ROOM, WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "@/world/room";
 
 describe("world object kinds", () => {
   it("declares each kind exactly once", () => {

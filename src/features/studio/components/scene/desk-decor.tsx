@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 
 export function CoffeeMug(): ReactElement {
   return (

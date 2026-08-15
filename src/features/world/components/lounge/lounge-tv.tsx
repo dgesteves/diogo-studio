@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { CONSOLE_Z, SURFACE, TV_CENTER_Y, TV_WALL_Z } from "./constants";
 import { LoungeSoundbar } from "./lounge-soundbar";
@@ -32,7 +32,7 @@ export function LoungeTv(): ReactElement {
         </RoundedBox>
         <mesh position={[0, 0.12, CONSOLE_D / 2 + 0.001]}>
           <boxGeometry args={[CONSOLE_W - 0.1, 0.01, 0.004]} />
-          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
         <LoungeSoundbar topY={CONSOLE_H + 0.02} />
       </group>
@@ -58,7 +58,7 @@ export function LoungeTv(): ReactElement {
         intensity={0.65}
         distance={3.6}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
     </group>
   );

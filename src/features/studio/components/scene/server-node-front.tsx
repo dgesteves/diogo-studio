@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import {
   HARDWARE_DEPTH,
@@ -28,10 +28,10 @@ const TRAY_X = [-0.045, 0.017] as const;
 const TRAY_SLOT_Y = [0.03, 0, -0.03] as const;
 
 const LEDS = [
-  { y: 0.13, color: brandColors.accent, blinkSpeed: 0 },
-  { y: 0.108, color: brandColors.statusOk, blinkSpeed: 1.1 },
-  { y: 0.086, color: brandColors.statusOk, blinkSpeed: 6.2 },
-  { y: 0.064, color: brandColors.statusOk, blinkSpeed: 8.7 },
+  { y: 0.13, color: worldColors.accent, blinkSpeed: 0 },
+  { y: 0.108, color: worldColors.statusOk, blinkSpeed: 1.1 },
+  { y: 0.086, color: worldColors.statusOk, blinkSpeed: 6.2 },
+  { y: 0.064, color: worldColors.statusOk, blinkSpeed: 8.7 },
 ] as const;
 
 export function ServerNodeFront(): ReactElement {
@@ -56,7 +56,7 @@ export function ServerNodeFront(): ReactElement {
       ))}
       <mesh position={[0, SERVER_FOOT_HEIGHT + 0.004, LED_Z]}>
         <boxGeometry args={[SERVER_WIDTH * 0.5, 0.0009, 0.002]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
     </>
   );

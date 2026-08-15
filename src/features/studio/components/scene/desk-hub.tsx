@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { anodizedMetalMaterial, brandColors, portMaterial } from "@/config/brand";
+import { anodizedMetalMaterial, worldColors, portMaterial } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { HARDWARE_CENTER_Z, HUB_DEPTH, HUB_HEIGHT, HUB_WIDTH, HUB_X } from "./desk-hardware-layout";
 import { StatusLed } from "./status-led";
 
@@ -54,7 +54,7 @@ export function DeskHub(): ReactElement {
       </mesh>
       <mesh position={[0, HUB_HEIGHT + 0.0004, FRONT_Z - 0.034]}>
         <boxGeometry args={[HUB_WIDTH * 0.42, 0.0008, 0.0022]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <FrontPanel />
     </group>
@@ -72,7 +72,7 @@ function FrontPanel(): ReactElement {
       ))}
       <StatusLed
         position={[-0.054, PORT_Y, 0.0012]}
-        color={brandColors.accentBright}
+        color={worldColors.accentBright}
         radius={0.0024}
         blinkSpeed={1.6}
       />

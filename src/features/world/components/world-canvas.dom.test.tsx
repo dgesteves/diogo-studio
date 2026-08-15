@@ -7,7 +7,7 @@ import type * as Fiber from "@react-three/fiber";
 import type * as Drei from "@react-three/drei";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { CommandMenuProvider } from "@/features/command-menu";
-import { worldPalettes } from "@/config/world-theme";
+import { worldPalettes } from "@/world/materials";
 import { getBootSnapshot } from "@/world/boot";
 import { setExplore, setWorldMode, type WorldMode } from "@/world/store";
 import { DPR_DEGRADED, DPR_MAX, DPR_MIN } from "../constants/render";

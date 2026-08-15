@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
 import { useDisposable } from "@/hooks/use-disposable";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { MouseControls } from "./mouse-controls";
 import { createMouseShellGeometry } from "./mouse-geometry";
 import { MouseGlow } from "./mouse-lighting";

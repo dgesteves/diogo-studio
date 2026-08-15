@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 
 export function Speakers(): ReactElement {
   return (
@@ -39,15 +39,15 @@ function Speaker({ position }: { position: [number, number, number] }): ReactEle
       </mesh>
       <mesh position={[0, -0.04, 0.075]}>
         <torusGeometry args={[0.047, 0.0032, 10, 32]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0, 0.09, 0.075]}>
         <torusGeometry args={[0.025, 0.0022, 8, 24]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0.045, -0.14, 0.072]}>
         <sphereGeometry args={[0.0035, 8, 8]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
     </group>
   );

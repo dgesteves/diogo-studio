@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { engagements } from "@/content/career";
 import { experiments } from "@/content/playground";
 import { practices } from "@/content/principles";
@@ -44,7 +44,7 @@ const PANELS: readonly Panel[] = [
   {
     name: "resume",
     draw: paintResume,
-    accent: brandColors.accent,
+    accent: worldColors.accent,
     title: siteConfig.name.toUpperCase(),
     subtitle: siteConfig.role.toUpperCase(),
   },

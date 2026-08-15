@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { MONO } from "@/world/screens/kit";
 
 type Ctx = CanvasRenderingContext2D;
@@ -47,7 +47,7 @@ export function drawCodeChannel(ctx: Ctx, tick: number): void {
     ctx.fillText(line, 54, y);
   }
   if (tick % 8 < 4) {
-    ctx.fillStyle = brandColors.accentBright;
+    ctx.fillStyle = worldColors.accentBright;
     ctx.fillRect(54, top + (LINES.length - 1) * lineHeight, 9, 17);
   }
 }

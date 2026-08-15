@@ -7,11 +7,7 @@ import { experiments } from "@/content/playground";
 import { practices } from "@/content/principles";
 import { stackGroups } from "@/content/stack";
 
-import {
-  WALL_SCREEN,
-  WALL_SCREEN_Z,
-  type WallScreenSlug,
-} from "../../constants/wall-screen-layout";
+import { WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "@/world/room";
 import { drawPlayground } from "./playground-screen-draw";
 import { drawPrinciples } from "./principles-screen-draw";
 import { drawResume } from "./resume-screen-draw";

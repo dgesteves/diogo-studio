@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors, darkMetalMaterial } from "@/config/brand";
+import { worldColors, darkMetalMaterial } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 
 const EARCUP_SIDES = [-1, 1] as const;
 const EARCUP_X = 0.108;
@@ -30,7 +30,7 @@ export function Headphones(): ReactElement {
       </mesh>
       <mesh position={[0, 0.019, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.072, 0.0024, 10, 32]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0, (BASE_TOP + POST_TOP) / 2, 0]}>
         <cylinderGeometry args={[0.015, 0.018, POST_TOP - BASE_TOP, 14]} />
@@ -48,7 +48,7 @@ export function Headphones(): ReactElement {
         intensity={0.12}
         distance={0.6}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
     </group>
   );
@@ -86,7 +86,7 @@ function Earcup({ side }: { side: number }): ReactElement {
       </mesh>
       <mesh position={[side * (EARCUP_HALF_DEPTH + 0.001), 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         <torusGeometry args={[EARCUP_RADIUS - 0.006, 0.003, 10, 32]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
     </group>
   );

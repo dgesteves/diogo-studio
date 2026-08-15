@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { MONO } from "@/world/screens/kit";
 
 const GRID_STEP = 42;
@@ -24,7 +24,7 @@ export function drawGrid(ctx: CanvasRenderingContext2D): void {
 export function drawHeader(ctx: CanvasRenderingContext2D): void {
   const { width: W } = ctx.canvas;
   ctx.textBaseline = "top";
-  ctx.fillStyle = brandColors.accent;
+  ctx.fillStyle = worldColors.accent;
   ctx.font = `bold 20px ${MONO}`;
   ctx.fillText("SKETCH", 22, 20);
   ctx.fillStyle = "rgba(232, 246, 252, 0.4)";
@@ -47,7 +47,7 @@ export function drawTools(ctx: CanvasRenderingContext2D): void {
 
   for (let i = 0; i < TOOL_COUNT; i += 1) {
     const centerX = (W - span) / 2 + radius + i * (radius * 2 + gap);
-    ctx.fillStyle = i === ACTIVE_TOOL ? brandColors.accent : "rgba(232, 246, 252, 0.14)";
+    ctx.fillStyle = i === ACTIVE_TOOL ? worldColors.accent : "rgba(232, 246, 252, 0.14)";
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
     ctx.fill();

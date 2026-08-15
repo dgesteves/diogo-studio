@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { createRecordingContext, type Path, type RecordingContext } from "@tests/recording-ctx";
 
 import { drawCode } from "./code-screen-draw";
@@ -99,7 +99,7 @@ describe("code screen", () => {
     // Line index 5 of the window, immediately after `execute(step);`.
     const [, y] = caret(on)[0] ?? [];
     expect(y).toBe(220);
-    expect(on.valuesOf("fillStyle")).toContain(brandColors.accentSoft);
+    expect(on.valuesOf("fillStyle")).toContain(worldColors.accentSoft);
   });
 });
 
@@ -243,7 +243,7 @@ describe("tablet screen", () => {
     expect(
       paths
         .filter((path) => path.points.length === 1 && path.paints[0]?.kind === "fill")
-        .filter((path) => path.paints[0]?.style === brandColors.accent),
+        .filter((path) => path.paints[0]?.style === worldColors.accent),
     ).toHaveLength(1);
   });
 });

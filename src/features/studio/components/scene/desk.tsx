@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
-import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS } from "./constants";
+import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS } from "@/world/room";
 
 const LEG_POSITIONS = [
   [-1.35, -0.45],
@@ -21,7 +21,7 @@ export function Desk(): ReactElement {
       </RoundedBox>
       <mesh position={[0, 0.005, 0.555]}>
         <boxGeometry args={[2.8, 0.006, 0.006]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       {LEG_POSITIONS.map(([x, z]) => (
         <mesh key={`${x},${z}`} position={[x, -DESK_LEG_HEIGHT / 2, z]}>

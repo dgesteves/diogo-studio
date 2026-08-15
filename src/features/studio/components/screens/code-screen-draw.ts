@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { divider, fillScreen, MONO, scanlines } from "@/world/screens/kit";
 import { CODE_LINES, CODE_TOKENS } from "./code-screen-data";
@@ -14,7 +14,7 @@ export function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void 
   scanlines(ctx, EDITOR_SCANLINE);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = brandColors.accentSoft;
+  ctx.fillStyle = worldColors.accentSoft;
   ctx.font = `bold 20px ${MONO}`;
   ctx.fillText("● src/lib/agents/runtime.ts", 30, 30);
 
@@ -49,7 +49,7 @@ export function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void 
     }
 
     if (i === 5 && caretOn) {
-      ctx.fillStyle = brandColors.accentSoft;
+      ctx.fillStyle = worldColors.accentSoft;
       ctx.fillRect(x + 2, y, 2, 22);
     }
   }

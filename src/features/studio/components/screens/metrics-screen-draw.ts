@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { divider, fillScreen, INK, MONO, scanlines, SOFT } from "@/world/screens/kit";
 
 export type MetricsView = {
@@ -17,7 +17,7 @@ function drawSparkline(ctx: CanvasRenderingContext2D, history: readonly number[]
   const sparkY = 116;
   const sparkW = W - sparkX - 30;
   const sparkH = 64;
-  ctx.strokeStyle = brandColors.accent;
+  ctx.strokeStyle = worldColors.accent;
   ctx.lineWidth = 2.4;
   ctx.beginPath();
   for (let i = 0; i < history.length; i += 1) {
@@ -35,7 +35,7 @@ export function drawMetrics(ctx: CanvasRenderingContext2D, view: MetricsView): v
   scanlines(ctx);
 
   ctx.textBaseline = "top";
-  ctx.fillStyle = brandColors.accent;
+  ctx.fillStyle = worldColors.accent;
   ctx.font = `bold 22px ${MONO}`;
   ctx.fillText("● RENDER · LIVE", 30, 30);
 

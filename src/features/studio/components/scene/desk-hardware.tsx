@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import { HARDWARE_CENTER_Z } from "./desk-hardware-layout";
 import { DeskHub } from "./desk-hub";
 import { MacStudio } from "./mac-studio";

@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 const LAPTOP_BODY = { color: "#0e1419", roughness: 0.45, metalness: 0.5 } as const;
 const REMOTE_BODY = { color: "#0b1014", roughness: 0.6, metalness: 0.25 } as const;
@@ -39,7 +39,7 @@ export function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement 
         </RoundedBox>
         <mesh position={[0.12, 0.016, 0.111]}>
           <circleGeometry args={[0.004, 10]} />
-          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
       </group>
 
@@ -58,7 +58,7 @@ export function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement 
         </RoundedBox>
         <mesh position={[0, 0.009, -0.05]} rotation={[-Math.PI / 2, 0, 0]}>
           <circleGeometry args={[0.005, 10]} />
-          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
       </group>
     </group>

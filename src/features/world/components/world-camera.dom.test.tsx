@@ -3,7 +3,7 @@ import { createRef, type RefObject } from "react";
 import { Vector3, type PerspectiveCamera } from "three";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { setExplore } from "@/world/store";
-import { ROOM } from "@/constants/room";
+import { ROOM } from "@/world/room";
 import type { RouteKey } from "@/content/pages";
 import { ORBIT } from "../constants/orbit";
 import { getStation } from "../constants/stations";

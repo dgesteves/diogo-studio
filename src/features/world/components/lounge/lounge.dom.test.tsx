@@ -2,8 +2,8 @@ import { afterEach, describe, expect, it } from "vitest";
 import { Box3, Vector3, type MeshBasicMaterial, type MeshStandardMaterial, type Mesh } from "three";
 import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
-import { brandColors } from "@/config/brand";
-import { ROOM } from "@/constants/room";
+import { worldColors } from "@/world/materials";
+import { ROOM } from "@/world/room";
 import { LOUNGE_ORIGIN, SOFA_Z, TABLE_Z, TV_CENTER_Y, TV_WALL_Z } from "./constants";
 import { Lounge } from "./lounge";
 
@@ -132,7 +132,7 @@ describe("Lounge", () => {
 
     const accent = scene
       .lightsOfType("PointLight")
-      .filter((light) => `#${light.color.getHexString()}` === brandColors.accent);
+      .filter((light) => `#${light.color.getHexString()}` === worldColors.accent);
 
     expect(accent).toHaveLength(1);
     // In front of the screen, or the glow lands behind the wall.
@@ -144,7 +144,7 @@ describe("Lounge", () => {
 
     const cool = scene
       .lightsOfType("PointLight")
-      .filter((light) => `#${light.color.getHexString()}` === brandColors.coolLight);
+      .filter((light) => `#${light.color.getHexString()}` === worldColors.coolLight);
 
     expect(cool).toHaveLength(2);
     expect(cool.map((light) => light.intensity).sort()).toEqual([0.5, 1.1]);
@@ -157,7 +157,7 @@ describe("Lounge", () => {
     const strips = scene.meshes.filter(
       (mesh) =>
         mesh.geometry.type === "BoxGeometry" &&
-        `#${materialOf<MeshBasicMaterial>(mesh).color.getHexString()}` === brandColors.coolLight,
+        `#${materialOf<MeshBasicMaterial>(mesh).color.getHexString()}` === worldColors.coolLight,
     );
 
     expect(strips).toHaveLength(2);

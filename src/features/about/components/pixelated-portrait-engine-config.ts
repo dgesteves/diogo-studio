@@ -1,4 +1,4 @@
-import { brandColors } from "@/config/brand";
+import { brand } from "@/components/ui/brand";
 
 export const CELL_GAP = 1;
 export const DISTURB_RADIUS_RATIO = 0.42;
@@ -21,7 +21,7 @@ function hexToRgb(hex: string): Rgb {
   };
 }
 
-export const TINT = hexToRgb(brandColors.accent);
+export const TINT = hexToRgb(brand.accent);
 
 export type PortraitEngineOptions = {
   src: string;

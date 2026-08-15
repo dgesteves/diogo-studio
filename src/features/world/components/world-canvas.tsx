@@ -12,7 +12,7 @@ import { ScenePrecompile } from "@/components/r3f/scene-precompile";
 import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/content/pages";
-import { useWorldPalette } from "@/hooks/use-world-palette";
+import { useWorldPalette } from "@/world/materials";
 import { markWorldReady } from "@/world/boot";
 
 import { getStationEntry } from "@/content/pages";

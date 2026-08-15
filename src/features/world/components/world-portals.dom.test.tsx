@@ -12,7 +12,7 @@ import { setHoveredStation } from "@/world/store";
 import { FOCUS_LIGHT_INTENSITY } from "../constants/focus";
 import { furnitureHotspots } from "../constants/hotspots";
 import { getStation } from "../constants/stations";
-import { WALL_SCREEN } from "../constants/wall-screen-layout";
+import { WALL_SCREEN } from "@/world/room";
 import { getHotspotObjects } from "../utils/hotspot-registry";
 import { WorldPortals } from "./world-portals";
 

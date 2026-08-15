@@ -1,7 +1,7 @@
 "use client";
 
 import type { CanvasTexture } from "three";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 import { useDisposable } from "@/hooks/use-disposable";
 
 import { createCanvasTexture } from "@/world/screens/texture";
@@ -19,8 +19,8 @@ function drawLegends(ctx: CanvasRenderingContext2D): void {
   ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillStyle = brandColors.accentSoft;
-  ctx.shadowColor = brandColors.accent;
+  ctx.fillStyle = worldColors.accentSoft;
+  ctx.shadowColor = worldColors.accent;
   ctx.shadowBlur = FONT_SIZE * 0.8;
 
   for (const cap of KEYCAPS) {

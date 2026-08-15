@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { Instance, Instances, RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 import {
   KEYCAPS,
   KEYCAP_DEPTH,
@@ -34,7 +34,7 @@ export function Keyboard(): ReactElement {
         <boxGeometry args={[KEY_FIELD_WIDTH + 0.008, 0.003, KEY_FIELD_DEPTH + 0.008]} />
         <meshStandardMaterial
           color="#04121a"
-          emissive={brandColors.accent}
+          emissive={worldColors.accent}
           emissiveIntensity={0.85}
           roughness={0.9}
           metalness={0.1}
@@ -47,14 +47,14 @@ export function Keyboard(): ReactElement {
       </mesh>
       <mesh position={[0, DECK_TOP - 0.0016, -CASE_DEPTH / 2 + 0.009]}>
         <boxGeometry args={[KEY_FIELD_WIDTH * 0.5, 0.0008, 0.0022]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <pointLight
         position={[0, -0.012, 0.02]}
         intensity={0.18}
         distance={0.45}
         decay={2}
-        color={brandColors.accent}
+        color={worldColors.accent}
       />
     </group>
   );

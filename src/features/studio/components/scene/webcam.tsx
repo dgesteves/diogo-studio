@@ -2,9 +2,9 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
-import { DESK_TOP_Y } from "./constants";
+import { DESK_TOP_Y } from "@/world/room";
 
 const WEBCAM_Y = DESK_TOP_Y + 0.78;
 const BODY_WIDTH = 0.168;
@@ -45,11 +45,11 @@ export function Webcam(): ReactElement {
       </mesh>
       <mesh position={[0, BODY_Y, BODY_FRONT + 0.0155]}>
         <torusGeometry args={[0.0185, 0.0016, 8, 32]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0.004, BODY_Y + 0.004, BODY_FRONT + 0.021]}>
         <sphereGeometry args={[0.0026, 10, 10]} />
-        <meshBasicMaterial color={brandColors.accentBright} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accentBright} toneMapped={false} />
       </mesh>
       {MIC_SLOT_OFFSETS.map((x) => (
         <mesh key={x} position={[x, BODY_Y, BODY_FRONT + 0.0025]}>
@@ -63,7 +63,7 @@ export function Webcam(): ReactElement {
       </mesh>
       <mesh position={[0.058, BODY_Y, BODY_FRONT + 0.0035]}>
         <sphereGeometry args={[0.0028, 10, 10]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <RoundedBox
         args={[0.11, 0.07, 0.008]}

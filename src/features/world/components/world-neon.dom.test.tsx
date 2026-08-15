@@ -2,9 +2,8 @@ import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { MeshBasicMaterial } from "three";
 import { materialOf, renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { brandColors } from "@/config/brand";
+import { worldColors, worldPalettes } from "@/world/materials";
 import { siteConfig } from "@/content/profile";
-import { worldPalettes } from "@/config/world-theme";
 import { setWorldMode, type WorldMode } from "@/world/store";
 import { WorldNeon } from "./world-neon";
 
@@ -71,7 +70,7 @@ describe("WorldNeon", () => {
     const scene = await neon();
 
     // Two different tokens: the back tube and the side tube are not the same neon.
-    expect(tubeColors(scene)).toEqual([brandColors.accent, brandColors.accentSoft]);
+    expect(tubeColors(scene)).toEqual([worldColors.accent, worldColors.accentSoft]);
   });
 
   /** Tone mapping would fold a light source back into the room's exposure and it would read as paint. */

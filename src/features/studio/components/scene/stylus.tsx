@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 const BARREL_LENGTH = 0.126;
 const BARREL_HALF = BARREL_LENGTH / 2;
@@ -38,7 +38,7 @@ export function Stylus({ position, rotation }: StylusProps): ReactElement {
       </mesh>
       <mesh position={[0, -BARREL_HALF + GRIP_LENGTH + 0.003, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.0055, 0.0011, 8, 20]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0.0048, 0.014, 0]}>
         <capsuleGeometry args={[0.0015, 0.013, 4, 10]} />

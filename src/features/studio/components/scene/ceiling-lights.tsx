@@ -2,9 +2,8 @@
 
 import { useMemo, type ReactElement } from "react";
 import { Object3D } from "three";
-import { brandColors, frameMaterial } from "@/config/brand";
-import { ROOM } from "@/constants/room";
-import { useWorldPalette } from "@/hooks/use-world-palette";
+import { worldColors, frameMaterial, useWorldPalette } from "@/world/materials";
+import { ROOM } from "@/world/room";
 
 const PANEL_SPAN = 2;
 const HOUSING_HEIGHT = 0.16;
@@ -65,18 +64,18 @@ function CeilingPanel({ x, z, intensity }: CeilingPanelProps): ReactElement {
 
       <mesh position={[0, DIFFUSER_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[DIFFUSER_SPAN, DIFFUSER_SPAN]} />
-        <meshBasicMaterial color={brandColors.coolLight} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.coolLight} toneMapped={false} />
       </mesh>
 
       <mesh position={[0, CORE_Y, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <planeGeometry args={[CORE_SPAN, CORE_SPAN]} />
-        <meshBasicMaterial color={brandColors.coolLightCore} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.coolLightCore} toneMapped={false} />
       </mesh>
 
       {TRIM_BARS.map((bar) => (
         <mesh key={bar.position.join(",")} position={bar.position}>
           <boxGeometry args={bar.size} />
-          <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
       ))}
 
@@ -84,7 +83,7 @@ function CeilingPanel({ x, z, intensity }: CeilingPanelProps): ReactElement {
       <spotLight
         position={[0, LIGHT_Y, 0]}
         target={target}
-        color={brandColors.coolLight}
+        color={worldColors.coolLight}
         intensity={LIGHT_INTENSITY * intensity}
         angle={LIGHT_ANGLE}
         penumbra={1}

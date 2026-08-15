@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { ROOM } from "@/constants/room";
 import { routes } from "@/content/pages";
 import { furnitureHotspots, isFurnitureRoute } from "./hotspots";
-import { WALL_SCREEN_Z, type WallScreenSlug } from "./wall-screen-layout";
+import { ROOM, WALL_SCREEN_Z, type WallScreenSlug } from "@/world/room";
 
 const wallScreenSlugs = Object.keys(WALL_SCREEN_Z) as WallScreenSlug[];
 

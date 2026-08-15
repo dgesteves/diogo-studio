@@ -2,7 +2,7 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { brandColors } from "@/config/brand";
+import { worldColors } from "@/world/materials";
 
 import { FRAME, SURFACE, TABLE_Z } from "./constants";
 import { LoungeTableItems } from "./lounge-table-items";
@@ -31,7 +31,7 @@ export function LoungeCoffeeTable(): ReactElement {
 
       <mesh position={[0, TOP_Y + 0.026, 0.352]}>
         <boxGeometry args={[1.2, 0.005, 0.005]} />
-        <meshBasicMaterial color={brandColors.accent} toneMapped={false} />
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
 
       {[-LEG_X, LEG_X].map((x) =>
