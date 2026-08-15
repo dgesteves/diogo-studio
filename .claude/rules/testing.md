@@ -102,7 +102,7 @@ with no setup.
   Next build. The real guard that a route stays static is `prerender:check`.
 - **Reduced motion and the degraded env paths are real branches.** Set the app's own override
   (`persistOverride(true)`) rather than re-stubbing `matchMedia`. The two specs that own those
-  platform seams — `stores/reduced-motion-store.dom.test.ts` and
+  platform seams — `reduced-motion.dom.test.tsx` and
   `providers/providers.dom.test.tsx` — go through `@tests/media`, which `vitest.setup.ts` also
   uses for its no-preference default so the stubs cannot drift. It includes the legacy
   `addListener` pair, without which next-themes throws on mount.
@@ -115,9 +115,9 @@ with no setup.
   `act(...)` warning, which counts as a failure by the rule above.
 - **`user-event`, never Testing Library's `fireEvent`** — one synthetic event is not the
   sequence a real interaction produces, so a `fireEvent.click` passes against a control nobody
-  can operate. `no-restricted-imports` warns on the import, and `--max-warnings` is at the
-  current count, so it fails the build; an event a user cannot perform (`error` on an image, a
-  media or animation event) is the real exception, taken with a one-line reason.
+  can operate. `no-restricted-imports` warns on the import and `--max-warnings` is `0`, so it
+  fails the build; an event a user cannot perform (`error` on an image, a media or animation
+  event) is the real exception, taken with a one-line reason.
   **`renderer.fireEvent` from RTTR is a different API and is not covered by that rule:** R3F
   raycasts its events from the `<canvas>` and no mesh has a DOM node, so user-event cannot
   reach the scene. It proves the handler and the state; whether a pointer at given coordinates

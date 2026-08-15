@@ -1,5 +1,5 @@
 import { brandColors } from "@/config/brand";
-import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 type Ctx = CanvasRenderingContext2D;
 

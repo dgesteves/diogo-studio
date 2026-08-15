@@ -1,4 +1,4 @@
-import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 export const INK = "#e8f6fc";
 export const SOFT = "rgba(232,246,252,0.55)";

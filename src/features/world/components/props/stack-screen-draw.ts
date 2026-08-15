@@ -1,5 +1,5 @@
 import type { StackGroup } from "@/content/stack";
-import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 import { header, INK, paintBackground, section } from "./screen-draw-kit";
 

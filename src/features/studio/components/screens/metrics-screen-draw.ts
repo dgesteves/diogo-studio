@@ -1,5 +1,5 @@
 import { brandColors } from "@/config/brand";
-import { MONO } from "./canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 export type MetricsView = {
   fps: number;

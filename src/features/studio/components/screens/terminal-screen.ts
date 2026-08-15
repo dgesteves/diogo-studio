@@ -1,15 +1,9 @@
 "use client";
 
-/* eslint-disable react-hooks/immutability --
- * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
- */
-
 import { useEffect, useRef, useState } from "react";
 import type { CanvasTexture } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
+import { useScreenTexture } from "@/world/screens/texture";
 
-import { createCanvasTexture } from "./canvas-texture";
 import { FOCUS_POOL, STATUS_ROWS } from "./terminal-screen-data";
 import { drawTerminal } from "./terminal-screen-draw";
 
@@ -37,7 +31,7 @@ function formatUptime(ms: number): string {
 }
 
 export function useCenterScreenTexture(): CanvasTexture {
-  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 400));
+  const { texture, paint } = useScreenTexture(640, 400);
   const bootAt = useRef<number | null>(null);
   const [now, setNow] = useState(() => Date.now());
 
@@ -48,18 +42,17 @@ export function useCenterScreenTexture(): CanvasTexture {
   }, []);
 
   useEffect(() => {
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
     const focus = FOCUS_POOL[Math.floor(now / FOCUS_INTERVAL_MS) % FOCUS_POOL.length] ?? "";
-    drawTerminal(ctx, {
-      rows: STATUS_ROWS,
-      time: LISBON_TIME.format(now),
-      date: LISBON_DATE.format(now),
-      uptime: formatUptime(now - (bootAt.current ?? now)),
-      focus,
-    });
-    texture.needsUpdate = true;
-  }, [canvas, texture, now]);
+    paint((ctx) =>
+      drawTerminal(ctx, {
+        rows: STATUS_ROWS,
+        time: LISBON_TIME.format(now),
+        date: LISBON_DATE.format(now),
+        uptime: formatUptime(now - (bootAt.current ?? now)),
+        focus,
+      }),
+    );
+  }, [paint, now]);
 
   return texture;
 }

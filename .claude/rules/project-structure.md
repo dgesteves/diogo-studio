@@ -49,9 +49,12 @@ leaves:  content/ · ui/ · env · telemetry · reduced-motion
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
    module, not even for a type.
 
-`no-restricted-imports` ships as `warn` under `--max-warnings 11`, and eight live imports
-break rule 2 today (`docs/refactor.md` §4.5). **Phase 7 resolves them and promotes the rule to
-`error`.** Until then lint will not stop you: hold the rules yourself, and never add a ninth.
+`no-restricted-imports` ships as `warn`, but `--max-warnings` is `0`, so a warning fails the
+build like an error. What it does **not** catch is an import through a domain's `index.ts`
+barrel: the glob is `@/features/*/**`, and `@/features/command-menu` is one segment short of
+matching. That is how the eight edges in `docs/refactor.md` §4.5 break rule 2 in silence.
+**Phase 7 rewrites the globs against domain paths and promotes the rule to `error`.** Until
+then the barrel is on you: hold the rules yourself, and never add a ninth edge.
 
 ## Where a fact lives
 

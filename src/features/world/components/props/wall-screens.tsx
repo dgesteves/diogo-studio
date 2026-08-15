@@ -17,7 +17,8 @@ import { drawPrinciples } from "./principles-screen-draw";
 import { drawResume } from "./resume-screen-draw";
 import { drawStack } from "./stack-screen-draw";
 import { drawTimeline } from "./timeline-screen-draw";
-import { WallScreen, type ScreenDraw } from "./wall-screen";
+import { WallScreen } from "./wall-screen";
+import type { ScreenDraw } from "@/world/screens/texture";
 
 /**
  * Where the authored record meets the canvas. Bound at module scope so each `draw` keeps

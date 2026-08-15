@@ -1,21 +1,15 @@
 "use client";
 
-/* eslint-disable react-hooks/immutability --
- * CanvasTexture's `needsUpdate = true` marks the canvas pixels dirty so three.js
- * re-uploads them to the GPU; the texture the hook holds is intentionally mutated here.
- */
-
 import { useEffect, useState } from "react";
 import type { CanvasTexture } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
-import { createCanvasTexture } from "@/features/studio/components/screens/canvas-texture";
+import { useScreenTexture } from "@/world/screens/texture";
 
 import { drawLoungeTv, type LoungeTvState } from "./lounge-tv-screen-draw";
 
 const TICK_MS = 110;
 
 export function useLoungeTvTexture(): CanvasTexture {
-  const { canvas, texture } = useDisposable(() => createCanvasTexture(640, 360));
+  const { texture, paint } = useScreenTexture(640, 360);
   const [state, setState] = useState<LoungeTvState>(() => ({ tick: 0 }));
 
   useEffect(() => {
@@ -26,11 +20,8 @@ export function useLoungeTvTexture(): CanvasTexture {
   }, []);
 
   useEffect(() => {
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    drawLoungeTv(ctx, state);
-    texture.needsUpdate = true;
-  }, [canvas, state, texture]);
+    paint((ctx) => drawLoungeTv(ctx, state));
+  }, [paint, state]);
 
   return texture;
 }

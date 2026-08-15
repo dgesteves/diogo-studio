@@ -1,6 +1,6 @@
 import { brandColors } from "@/config/brand";
 
-import { MONO } from "./canvas-texture";
+import { MONO } from "@/world/screens/texture";
 import { CODE_LINES, CODE_TOKENS } from "./code-screen-data";
 
 export function drawCode(ctx: CanvasRenderingContext2D, caretOn: boolean): void {

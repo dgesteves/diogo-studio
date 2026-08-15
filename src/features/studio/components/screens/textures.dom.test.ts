@@ -4,7 +4,7 @@ import { LinearFilter, SRGBColorSpace, type CanvasTexture } from "three";
 
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 
-import { createCanvasTexture } from "./canvas-texture";
+import { createCanvasTexture } from "@/world/screens/texture";
 import { useLeftScreenTexture } from "./code-screen";
 import { useCenterScreenTexture } from "./terminal-screen";
 import { FOCUS_POOL } from "./terminal-screen-data";

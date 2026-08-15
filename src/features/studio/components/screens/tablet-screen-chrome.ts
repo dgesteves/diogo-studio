@@ -1,5 +1,5 @@
 import { brandColors } from "@/config/brand";
-import { MONO } from "./canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 const GRID_STEP = 42;
 const TOOL_COUNT = 5;

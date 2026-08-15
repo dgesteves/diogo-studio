@@ -51,10 +51,13 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
   place it needs no justification.
 - **Dispose what you create.** R3F auto-disposes what it reconciles; textures and geometries
   built imperatively (`createCanvasTexture`, the `*-textures.ts` factories) must be disposed on
-  unmount and never rebuilt per render.
+  unmount and never rebuilt per render. A canvas-backed **screen** does not hand-roll that:
+  `useScreenTexture(width, height)` in `world/screens/texture.ts` owns the disposal, and its
+  `paint(draw)` is the only place `needsUpdate` is set — the one `react-hooks/immutability`
+  exemption in `src/` lives there, so never copy the banner to a new file.
 - Prefer instancing for repeated geometry over N sibling meshes. Resolve device pixel ratio via
   `dprForFactor()` — never hardcode it, and never raise it to fix a visual bug.
-- Publish scene stats to `perf-store` (world writes, inspector reads); don't add a second
+- Publish scene stats to `world/perf` (world writes, inspector reads); don't add a second
   telemetry path.
 
 ## Quality tiers — the world downgrades itself

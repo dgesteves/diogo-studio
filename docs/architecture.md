@@ -206,12 +206,14 @@ Five rules:
 4. **`content/` imports nothing.**
 5. **`agent/` is reachable only from `app/api/` and build scripts.**
 
-**These are not yet enforced as errors.** `no-restricted-imports` ships as `warn` under a
-`--max-warnings 11` budget, and eight live imports break rule 2 today — the count is in
-[`refactor.md`](./refactor.md) §4.5. **Phase 7 of the refactor** is what makes this section
-true: it resolves the eight edges, replaces the three hand-written exceptions with the
-store rule in `refactor.md` §4.2, promotes the rule to `error` and drops the warning budget.
-Until it lands, read this list as the contract, not as something the build checks.
+**These are not yet enforced against the right paths.** `no-restricted-imports` ships as
+`warn`, but the warning budget is `0` as of Phase 4, so a warning fails `pnpm lint` exactly
+like an error. The gap left is the glob rather than the severity: `@/features/*/**` does not
+match a domain's own `index.ts`, so the eight edges that break rule 2 — counted in
+[`refactor.md`](./refactor.md) §4.5 — all import through a barrel and pass. **Phase 7 of the
+refactor** is what makes this section true: it resolves those edges, replaces the three
+hand-written exceptions with the store rule in `refactor.md` §4.2 and promotes the rule to
+`error`. Until it lands, read this list as the contract, not as something the build checks.
 
 **There are no barrel files.** Import the module you need at its real path. With shallow
 domains there are no internals to protect, so a barrel buys nothing and costs two things:

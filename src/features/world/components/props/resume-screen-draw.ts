@@ -1,7 +1,7 @@
 import { brandColors } from "@/config/brand";
 import type { Engagement } from "@/content/career";
 import { siteConfig } from "@/content/profile";
-import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { MONO } from "@/world/screens/texture";
 
 import { divider, header, INK, paintBackground, section, SOFT } from "./screen-draw-kit";
 

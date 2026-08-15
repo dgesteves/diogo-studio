@@ -1,4 +1,4 @@
-import { MONO } from "@/features/studio/components/screens/canvas-texture";
+import { MONO } from "@/world/screens/texture";
 import { mulberry32 } from "@/utils/mulberry32";
 
 import { CHANNELS } from "./lounge-tv-channels";

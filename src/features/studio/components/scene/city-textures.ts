@@ -1,6 +1,6 @@
 import type { CanvasTexture } from "three";
 import { mulberry32 } from "@/utils/mulberry32";
-import { createCanvasTexture } from "../screens/canvas-texture";
+import { createCanvasTexture } from "@/world/screens/texture";
 
 const LIT_WINDOW_COLORS = ["#22d3ee", "#67e8f9", "#7dd3fc", "#fbbf24", "#f6efe1"] as const;
 const FACADE_BASE = "#070b10";
