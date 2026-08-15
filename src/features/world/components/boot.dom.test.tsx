@@ -5,14 +5,14 @@ import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
 import { useInspectorOverlay } from "@/features/inspector";
-import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
+import { ReducedMotionProvider } from "@/reduced-motion";
 import {
   BOOT_SESSION_KEY,
   BOOT_SPLASH_ID,
   hasBootedThisSession,
   markWorldReady,
-} from "@/stores/boot-store";
-import { persistOverride } from "@/stores/reduced-motion-store";
+} from "@/world/boot";
+import { persistOverride } from "@/reduced-motion";
 import {
   BOOT_EXIT_MS,
   BOOT_MAX_MS,

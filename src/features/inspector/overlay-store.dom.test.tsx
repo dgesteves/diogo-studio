@@ -1,15 +1,11 @@
-import type * as InspectorStore from "./inspector-overlay-store";
+import type * as InspectorStore from "./overlay-store";
 import type { ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { act, render, screen } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
-import {
-  InspectorOverlayProvider,
-  setInspectorOpen,
-  useInspectorOverlay,
-} from "./inspector-overlay-store";
+import { InspectorOverlayProvider, setInspectorOpen, useInspectorOverlay } from "./overlay-store";
 
 /**
  * The Web-Vitals overlay is bound to Ctrl+` and persisted for the session, so a reload does
@@ -60,7 +56,7 @@ async function freshStore(): Promise<typeof InspectorStore> {
   // `hydrated` latches on the first read, and `resetStores()` has already tripped it on the
   // shared instance before any test here runs.
   vi.resetModules();
-  return import("./inspector-overlay-store");
+  return import("./overlay-store");
 }
 
 describe("inspector overlay store", () => {

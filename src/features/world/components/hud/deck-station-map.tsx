@@ -3,7 +3,7 @@
 import type { ReactElement } from "react";
 import Link from "next/link";
 import type { RouteKey } from "@/content/pages";
-import { setHoveredStation } from "@/stores/world-store";
+import { setHoveredStation } from "@/world/store";
 import { cn } from "@/utils/cn";
 import { radarPoints } from "../../utils/radar-layout";
 

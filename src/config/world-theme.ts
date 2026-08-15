@@ -1,4 +1,4 @@
-import type { WorldMode } from "@/stores/world-theme-store";
+import type { WorldMode } from "@/world/store";
 
 export type WorldPalette = {
   background: string;

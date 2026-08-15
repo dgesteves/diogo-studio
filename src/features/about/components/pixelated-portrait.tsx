@@ -2,7 +2,7 @@
 
 import { useState, type ReactElement } from "react";
 import dynamic from "next/dynamic";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/reduced-motion";
 import { useInView } from "@/hooks/use-in-view";
 import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/utils/cn";

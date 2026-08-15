@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { act } from "@testing-library/react";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { getPerfSnapshot } from "@/stores/perf-store";
+import { getPerfSnapshot } from "@/world/perf";
 import { PerfReporter } from "./perf-reporter";
 import { ScenePrecompile } from "./scene-precompile";
 

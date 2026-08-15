@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { setExplore } from "@/stores/explore-store";
+import { setExplore } from "@/world/store";
 import { EXPLORE } from "../constants/explore";
 import { clampPitch } from "../utils/explore";
 import { isWorldSurface } from "./orbit-input-state";

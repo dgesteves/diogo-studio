@@ -6,7 +6,7 @@ import { type ReactElement, type SyntheticEvent, useEffect, useRef } from "react
 
 import { Kbd } from "@/components/ui/kbd";
 import { asInternalHref } from "@/content/pages";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/reduced-motion";
 
 import { useAskAgent } from "../hooks/use-ask-agent";
 import { AskAnswerSurface } from "./ask-answer-surface";

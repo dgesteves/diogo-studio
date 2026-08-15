@@ -8,7 +8,7 @@ import {
   unmountScenes,
   type SceneQuery,
 } from "@tests/r3f";
-import { setHoveredStation } from "@/stores/world-store";
+import { setHoveredStation } from "@/world/store";
 import { FOCUS_LIGHT_INTENSITY } from "../constants/focus";
 import { furnitureHotspots } from "../constants/hotspots";
 import { getStation } from "../constants/stations";

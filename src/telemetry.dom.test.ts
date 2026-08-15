@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { VitalName, VitalRating } from "./web-vitals-store";
-import { getVitalsServerSnapshot, getVitalsSnapshot, subscribeVitals } from "./web-vitals-store";
+import type { VitalName, VitalRating } from "./telemetry";
+import { getVitalsServerSnapshot, getVitalsSnapshot, subscribeVitals } from "./telemetry";
 
 // The three fields the store reads off a `Metric`. Declaring the shape the *store* needs,
 // rather than casting a partial object to the library's union, is what keeps this spec
@@ -53,7 +53,7 @@ async function settleImports(): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 0));
 }
 
-describe("web-vitals-store", () => {
+describe("the Web Vitals store", () => {
   it("starts collection once, however many components subscribe", async () => {
     const first = await subscribeAndStart();
     const second = subscribeVitals(() => {});

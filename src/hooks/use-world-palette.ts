@@ -6,7 +6,7 @@ import {
   getWorldModeServerSnapshot,
   getWorldModeSnapshot,
   subscribeWorldTheme,
-} from "@/stores/world-theme-store";
+} from "@/world/store";
 
 export function useWorldPalette(): WorldPalette {
   const mode = useSyncExternalStore(

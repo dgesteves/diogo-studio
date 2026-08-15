@@ -5,7 +5,7 @@ import { materialOf, renderScene, unmountScenes, type SceneQuery } from "@tests/
 import { brandColors } from "@/config/brand";
 import { siteConfig } from "@/content/profile";
 import { worldPalettes } from "@/config/world-theme";
-import { setWorldMode, type WorldMode } from "@/stores/world-theme-store";
+import { setWorldMode, type WorldMode } from "@/world/store";
 import { WorldNeon } from "./world-neon";
 
 /**

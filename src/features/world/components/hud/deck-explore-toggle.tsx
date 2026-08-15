@@ -2,8 +2,8 @@
 
 import type { ReactElement } from "react";
 import { Compass } from "lucide-react";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
-import { toggleExplore } from "@/stores/explore-store";
+import { useReducedMotionPreference } from "@/reduced-motion";
+import { toggleExplore } from "@/world/store";
 import { useExplore } from "../../hooks/use-explore";
 import { DeckButton } from "./deck-button";
 

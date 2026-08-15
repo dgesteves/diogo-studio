@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useProgress } from "@react-three/drei";
-import { setBootProgress } from "@/stores/boot-store";
+import { setBootProgress } from "@/world/boot";
 
 export function BootProgressReporter(): null {
   const { progress } = useProgress();

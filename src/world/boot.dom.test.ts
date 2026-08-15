@@ -10,9 +10,9 @@ import {
   markWorldReady,
   setBootProgress,
   subscribeBoot,
-} from "./boot-store";
+} from "./boot";
 
-describe("boot-store progress", () => {
+describe("boot progress", () => {
   it("clamps and rounds reported progress", () => {
     setBootProgress(-10);
     expect(getBootSnapshot().progress).toBe(0);
@@ -57,7 +57,7 @@ describe("boot-store progress", () => {
   });
 });
 
-describe("boot-store session gate", () => {
+describe("boot session gate", () => {
   it("tracks the once-per-session flag", () => {
     expect(hasBootedThisSession()).toBe(false);
     markBootedThisSession();
@@ -86,7 +86,7 @@ describe("boot-store session gate", () => {
   });
 });
 
-describe("boot-store splash handoff", () => {
+describe("boot splash handoff", () => {
   it("hides the server-rendered splash, and tolerates its absence", () => {
     // The splash is markup in the document head's layout, not React's — the store is what
     // hands over to the client boot sequence.

@@ -5,7 +5,7 @@ import {
   markPerfInactive,
   publishPerf,
   subscribePerf,
-} from "./perf-store";
+} from "./perf";
 
 // `publishPerf` timestamps every sample, and the inspector renders staleness from it.
 const T0 = new Date("2026-01-01T00:00:00.000Z");
@@ -20,7 +20,7 @@ afterEach(() => {
   markPerfInactive();
 });
 
-describe("perf-store", () => {
+describe("the perf store", () => {
   it("merges a partial sample, activates and timestamps it", () => {
     publishPerf({ fps: 60, drawCalls: 120 });
 

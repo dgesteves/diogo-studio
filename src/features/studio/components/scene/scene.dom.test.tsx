@@ -11,7 +11,7 @@ import {
 import { brandColors } from "@/config/brand";
 import { worldPalettes } from "@/config/world-theme";
 import { ROOM } from "@/constants/room";
-import { setWorldMode, type WorldMode } from "@/stores/world-theme-store";
+import { setWorldMode, type WorldMode } from "@/world/store";
 import { StatusLed } from "./status-led";
 import { StudioScene } from "./studio-scene";
 

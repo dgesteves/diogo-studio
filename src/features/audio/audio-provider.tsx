@@ -10,7 +10,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/reduced-motion";
 import { createAudioEngine, type AudioEngine } from "./audio-engine";
 import { AUDIO_STORAGE_KEY, type SfxName } from "./constants";
 

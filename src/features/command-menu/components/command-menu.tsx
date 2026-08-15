@@ -4,7 +4,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useEffect, type ReactElement } from "react";
 
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/reduced-motion";
 import { useCommandMenu } from "../stores/command-menu-store";
 import { cn } from "@/utils/cn";
 

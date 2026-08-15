@@ -3,7 +3,7 @@
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 import { useAudio } from "@/features/audio";
 import { useIsClient } from "@/hooks/use-is-client";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useReducedMotionPreference } from "@/reduced-motion";
 import {
   getBootServerSnapshot,
   getBootSnapshot,
@@ -11,7 +11,7 @@ import {
   hideBootSplash,
   markBootedThisSession,
   subscribeBoot,
-} from "@/stores/boot-store";
+} from "@/world/boot";
 import { BOOT_EXIT_MS, BOOT_MAX_MS, BOOT_MIN_MS } from "../constants/boot";
 import { BootOverlay } from "./boot-overlay";
 

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createRef, type RefObject } from "react";
 import { Vector3, type PerspectiveCamera } from "three";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { setExplore } from "@/stores/explore-store";
+import { setExplore } from "@/world/store";
 import { ROOM } from "@/constants/room";
 import type { RouteKey } from "@/content/pages";
 import { ORBIT } from "../constants/orbit";

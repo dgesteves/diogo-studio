@@ -4,7 +4,7 @@ export { expect };
 
 export const MODIFIER = process.platform === "darwin" ? "Meta" : "Control";
 
-/** Mirrors `BOOT_SESSION_KEY` in `src/stores/boot-store.ts`. */
+/** Mirrors `BOOT_SESSION_KEY` in `src/world/boot.ts`. */
 const BOOT_SESSION_KEY = "studio-booted";
 
 /** Exported so `playwright.config.ts` can type the `use` blocks that set these. */

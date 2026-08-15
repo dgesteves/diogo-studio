@@ -3,7 +3,7 @@ import { createRef, type ReactElement, type RefObject } from "react";
 import { BoxGeometry, Mesh } from "three";
 import type { PerspectiveCamera } from "three";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
-import { getWorldSnapshot } from "@/stores/world-store";
+import { getWorldSnapshot } from "@/world/store";
 import { neutralOrbitState, type OrbitInputState } from "../hooks/orbit-input-state";
 import { registerHotspot, unregisterHotspot } from "../utils/hotspot-registry";
 import { WorldInteract } from "./world-interact";

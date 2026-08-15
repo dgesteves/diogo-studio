@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
-import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "@/stores/world-store";
+import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "@/world/store";
 import { useAudio } from "../audio-provider";
 
 export function WorldAudio(): null {

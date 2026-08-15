@@ -1,6 +1,6 @@
 import { useId, type ReactElement, type ReactNode } from "react";
 
-import type { VitalSample } from "@/stores/web-vitals-store";
+import type { VitalSample } from "@/telemetry";
 import { cn } from "@/utils/cn";
 
 import { formatVital, ratingTone } from "./inspector-format";

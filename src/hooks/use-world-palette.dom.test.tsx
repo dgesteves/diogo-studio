@@ -2,7 +2,7 @@ import type { ReactElement } from "react";
 import { act, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { worldPalettes } from "@/config/world-theme";
-import { setWorldMode } from "@/stores/world-theme-store";
+import { setWorldMode } from "@/world/store";
 import { useWorldPalette } from "./use-world-palette";
 
 function Probe(): ReactElement {

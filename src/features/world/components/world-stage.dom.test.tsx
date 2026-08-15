@@ -1,8 +1,8 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
-import { persistOverride } from "@/stores/reduced-motion-store";
+import { ReducedMotionProvider } from "@/reduced-motion";
+import { persistOverride } from "@/reduced-motion";
 import { WorldStage } from "./world-stage";
 
 /**

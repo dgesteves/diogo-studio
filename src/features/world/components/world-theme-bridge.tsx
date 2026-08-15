@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import { useTheme } from "next-themes";
 import { resolveWorldMode } from "@/config/world-theme";
-import { setWorldMode } from "@/stores/world-theme-store";
+import { setWorldMode } from "@/world/store";
 
 export function WorldThemeBridge(): null {
   const { resolvedTheme } = useTheme();

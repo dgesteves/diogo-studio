@@ -3,18 +3,18 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
-import { ReducedMotionProvider } from "@/providers/reduced-motion-provider";
-import { publishPerf } from "@/stores/perf-store";
-import type { VitalName, VitalRating } from "@/stores/web-vitals-store";
-import { persistOverride } from "@/stores/reduced-motion-store";
+import { ReducedMotionProvider } from "@/reduced-motion";
+import { publishPerf } from "@/world/perf";
+import type { VitalName, VitalRating } from "@/telemetry";
+import { persistOverride } from "@/reduced-motion";
 import { InspectorOverlay } from "./inspector-overlay";
-import { InspectorOverlayProvider } from "../stores/inspector-overlay-store";
+import { InspectorOverlayProvider } from "../overlay-store";
 
 /**
  * The Web-Vitals overlay — the "receipts" panel, not the ⌘K menu. It is the one surface in
  * the app whose entire content comes from live measurement, so this spec supplies the
  * measurements: `web-vitals` is mocked at the library boundary the way the store's own spec
- * does it, perf is published through `perf-store`, and route JS is read from a stubbed
+ * does it, perf is published through `world/perf`, and route JS is read from a stubbed
  * Resource Timing buffer. `inspector-overlay.spec.ts` proves the shortcut and the panels
  * exist in a browser; the numbers, the units and the empty states are here.
  */

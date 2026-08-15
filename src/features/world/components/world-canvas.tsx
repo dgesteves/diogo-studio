@@ -13,7 +13,7 @@ import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/features/studio";
 import type { RouteKey } from "@/content/pages";
 import { useWorldPalette } from "@/hooks/use-world-palette";
-import { markWorldReady } from "@/stores/boot-store";
+import { markWorldReady } from "@/world/boot";
 
 import { getStationEntry } from "@/content/pages";
 import { DPR_DEGRADED, DPR_MIN, dprForFactor } from "../constants/render";

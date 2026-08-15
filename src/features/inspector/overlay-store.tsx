@@ -1,10 +1,19 @@
 "use client";
 
 import { useEffect, useSyncExternalStore, type ReactElement, type ReactNode } from "react";
+import { createStore } from "@/store";
 
 const STORAGE_KEY = "studio-inspector-open";
 
+/**
+ * Whether the Web-Vitals overlay is showing. Persisted for the session so a reload does not
+ * close it mid-measurement, and read at module scope rather than on first snapshot: restoring
+ * it during a render pass would notify subscribers while React is rendering.
+ */
+const overlay = createStore(false);
+
 function readStored(): boolean {
+  if (typeof window === "undefined") return false;
   try {
     return window.sessionStorage.getItem(STORAGE_KEY) === "1";
   } catch {
@@ -12,51 +21,26 @@ function readStored(): boolean {
   }
 }
 
+overlay.set(readStored());
+
 function persist(open: boolean): void {
   try {
     window.sessionStorage.setItem(STORAGE_KEY, open ? "1" : "0");
   } catch {
-    /* storage unavailable */
+    /* storage unavailable — the overlay still opens for this session */
   }
 }
 
-let isOpen = false;
-let hydrated = false;
-const listeners = new Set<() => void>();
-
-function hydrate(): void {
-  if (hydrated || typeof window === "undefined") return;
-  hydrated = true;
-  isOpen = readStored();
-}
-
-function subscribe(callback: () => void): () => void {
-  hydrate();
-  listeners.add(callback);
-  return () => {
-    listeners.delete(callback);
-  };
-}
-
-function getSnapshot(): boolean {
-  hydrate();
-  return isOpen;
-}
-
-function getServerSnapshot(): boolean {
-  return false;
-}
-
 export function setInspectorOpen(next: boolean): void {
-  hydrated = true;
-  if (isOpen === next) return;
-  isOpen = next;
+  // Guarded here as well as in the store, because the write to storage is the part that has
+  // to not happen on a no-op.
+  if (overlay.get() === next) return;
+  overlay.set(next);
   persist(next);
-  for (const listener of listeners) listener();
 }
 
 export function toggleInspector(): void {
-  setInspectorOpen(!isOpen);
+  setInspectorOpen(!overlay.get());
 }
 
 type InspectorOverlayValue = {
@@ -66,7 +50,7 @@ type InspectorOverlayValue = {
 };
 
 export function useInspectorOverlay(): InspectorOverlayValue {
-  const open = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  const open = useSyncExternalStore(overlay.subscribe, overlay.get, overlay.getServer);
   return { open, setOpen: setInspectorOpen, toggle: toggleInspector };
 }
 
@@ -76,7 +60,7 @@ export function InspectorOverlayProvider({ children }: { children: ReactNode }):
       if (event.key === "`" && event.ctrlKey && !event.metaKey && !event.altKey) {
         event.preventDefault();
         toggleInspector();
-      } else if (event.key === "Escape" && isOpen) {
+      } else if (event.key === "Escape" && overlay.get()) {
         setInspectorOpen(false);
       }
     }

@@ -4,15 +4,11 @@ import { Activity, X } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore, type ReactElement } from "react";
 
-import { useInspectorOverlay } from "../stores/inspector-overlay-store";
-import { useReducedMotionPreference } from "@/providers/reduced-motion-provider";
+import { useInspectorOverlay } from "../overlay-store";
+import { useReducedMotionPreference } from "@/reduced-motion";
 import { Kbd } from "@/components/ui/kbd";
-import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/stores/perf-store";
-import {
-  getVitalsServerSnapshot,
-  getVitalsSnapshot,
-  subscribeVitals,
-} from "@/stores/web-vitals-store";
+import { getPerfServerSnapshot, getPerfSnapshot, subscribePerf } from "@/world/perf";
+import { getVitalsServerSnapshot, getVitalsSnapshot, subscribeVitals } from "@/telemetry";
 import { cn } from "@/utils/cn";
 
 import { measureRouteJs } from "./inspector-route-js";

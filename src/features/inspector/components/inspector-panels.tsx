@@ -1,8 +1,8 @@
 import { Gauge, Layers, Zap } from "lucide-react";
 import type { ReactElement } from "react";
 
-import type { PerfSnapshot } from "@/stores/perf-store";
-import type { VitalsSnapshot } from "@/stores/web-vitals-store";
+import type { PerfSnapshot } from "@/world/perf";
+import type { VitalsSnapshot } from "@/telemetry";
 
 import { Panel, Stat, Vital } from "./inspector-atoms";
 import { fpsTone, formatCount } from "./inspector-format";
