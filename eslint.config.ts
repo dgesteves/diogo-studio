@@ -4,14 +4,13 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 
-// Every domain at the root of `src/`. Phase 6 emptied `features/`, so the glob that used to
-// name its slices matches nothing and is gone with it.
+// Every domain at the root of `src/`.
 const DOMAINS = ["world", "site", "command-menu", "telemetry", "agent"] as const;
 type Domain = (typeof DOMAINS)[number];
 
 /**
  * Who may reach which sibling module — the "May import" rows of docs/architecture.md §3,
- * which are the authority, and the adjacency list in docs/refactor.md §4.1.
+ * which are the authority.
  *
  * Grants are per *edge*, not per domain: a domain's store modules are what it may expose,
  * and each consumer gets the named subset it actually needs. `telemetry/` reads `world/perf`

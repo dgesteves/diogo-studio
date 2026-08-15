@@ -9,9 +9,9 @@ Eight directories at the root of `src/`, one dependency direction, and ownership
 who produces a thing rather than who displays it. The full contracts are in
 [`docs/architecture.md`](../../docs/architecture.md) §3 — this file is the working summary.
 
-**A refactor is in flight.** `docs/architecture.md` is the target and wins; the current tree
-is being moved toward it and is **not a pattern to copy**. `docs/refactor.md` says which
-phase owns which move. Phase 6 landed the tree below; **Phase 7 owns making it a check.**
+`docs/architecture.md` is normative and wins where the code disagrees — a disagreement is a
+defect in one of the two, not a phase waiting to run. The tree below is the tree, and the
+dependency rules below it are lint errors.
 
 ## The domains
 
@@ -94,9 +94,10 @@ Three things that are not content and must not share a folder with it:
 | Tuning        | camera damping, DPR ladder, fog distance | the domain that reads it |
 | Configuration | an env var, a deployment URL             | `env.ts`                 |
 
-Tuning has no home of its own: `docs/refactor.md` §3 declines to create `world/tuning.ts`,
-because "is a number" is not an ownership boundary. Name a magic value at the narrowest scope
-that works — see [Imports](#imports).
+**Tuning has no home of its own, and `world/tuning.ts` is the file not to create** — "is a
+number" is not an ownership boundary, so such a file is a technical-category folder wearing a
+filename. Name a magic value at the narrowest scope that works — see [Imports](#imports), and
+`docs/architecture.md` §8 for the table this one summarizes.
 
 ## Imports
 
@@ -119,8 +120,8 @@ that works — see [Imports](#imports).
 - **A file exports what its concept needs.** Split when responsibilities differ — different
   consumers, different lifecycle, different runtime; a file mixing rendering with state, pure
   helpers with effects, or data with behavior. _Not_ one primary export per file: that rule
-  is the measured cause of this codebase's 297-file, 49-line-average shape
-  (`docs/refactor.md` §2.1) and was retired in Phase 0.
+  was the measured cause of this codebase's 297-file, 49-line-average shape and was retired —
+  see the 2026-08-14 entry in [`docs/decisions.md`](../../docs/decisions.md).
 - **File length is not a design signal and there is no cap on it** — no `max-lines` rule
   exists; don't add one. `max-lines-per-function` is 100 as an error, because function length
   tracks complexity and file length tracks nothing. Never split a cohesive module to hit a

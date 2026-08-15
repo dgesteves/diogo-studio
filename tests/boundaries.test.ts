@@ -5,10 +5,10 @@ import { describe, expect, it } from "vitest";
  * The dependency rules of `docs/architecture.md` §4, asserted against the real
  * `eslint.config.ts` rather than against a copy of its intent.
  *
- * This exists because the rule was published wrong. `docs/refactor.md` §4.4 carried the
- * glob `["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"]` through three
- * phases, and it does not do what it reads as: `no-restricted-imports` matches `group`
- * with gitignore semantics, which refuse to re-include a path under an excluded parent, so
+ * This exists because the rule was published wrong. The glob
+ * `["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"]` was carried as the design
+ * for three phases, and it does not do what it reads as: `no-restricted-imports` matches
+ * `group` with gitignore semantics, which refuse to re-include a path under an excluded parent, so
  * the bare `@/world` voids both carve-outs and the group denies the store it exists to
  * permit. A boundary rule that is never proven to fail permits everything and says nothing.
  *

@@ -83,6 +83,6 @@ forcing an interaction.
   `content/prose.test.ts` asserts the two agree. This one is enforced: the prose is
   `server-only`, so reaching for it from a client module fails the build.
 - Scene code must not reach into a sibling domain. **A domain's store module is its public
-  API; every other file in it is private** (`docs/refactor.md` §4.2) — the world exposes its
-  stores and nothing else, and reads a sibling only through that sibling's store. Inside the
-  world, import relatively, never through its own `@/` alias.
+  API; every other file in it is private** (`docs/architecture.md` §4 rule 2) — the world
+  exposes its stores and nothing else, and reads a sibling only through that sibling's store.
+  Inside the world, import relatively, never through its own `@/` alias.
