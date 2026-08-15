@@ -24,6 +24,160 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — `refactor.md` is deleted, and its cross-references land on `architecture.md`
+
+The refactor's own charter was "delete this file when the last phase lands", restated in its
+header and in the entry below dated 2026-08-11. Phase 8 is where that came due.
+
+The deletion was mostly a repointing job. Fifteen live references in code, rules and configs
+pointed _into_ its sections, and a document is not deletable while things cite it by section
+number. Each moved to whatever now carries the claim: `architecture.md` §4 rule 2 for
+store-is-public-API (`world/store.ts`, `world/perf.ts`, `world/hud/deck.dom.test.tsx`,
+`.claude/rules/three-r3f-world.md`), §4 rule 6 for no-client-imports-`agent/`
+(`chat-contract.ts`), and the closed-domain entry below for the gitignore-semantics finding
+(`tests/boundaries.test.ts`).
+
+**The "a refactor is in flight, so this tree is not a pattern to copy" framing went with it**,
+from `project-structure.md`, `AGENTS.md`, `CLAUDE.md` and `README.md`. That warning was
+load-bearing for eight phases and is now the most misleading thing an agent could read: it
+tells a reader to distrust a tree that is, at this point, the design.
+
+**This file keeps all twenty-five of its own references to `refactor.md`, deliberately.** Its
+header says entries are true as of their date and are never rewritten, and that old entries
+may name things that have since moved. Editing them to point somewhere else would break the
+rule the file is built on, to buy accuracy the file explicitly does not promise. A reader who
+wants the deleted document has `git log`.
+
+What is genuinely lost is §2 (the measurement: 297 files, 49-line average, the fragmentation
+mechanism) and §5 (the evidence: five career copies, eight stores, 25 chunks with no anchors).
+Folding them in here was considered and declined — the findings that mattered already have
+their own entries below, and an archive of superseded measurements is the kind of document
+this file's header exists to discourage.
+
+## 2026-08-15 — Coverage thresholds stay global now that the refactor's reason has expired
+
+`vitest.config.ts` justified global-rather-than-per-directory thresholds by saying the
+refactor moved or merged nearly every directory in `src/`, so a threshold keyed on a path
+either broke the build during a pure move or silently stopped applying. True, and now spent.
+
+Global stays, on a reason that outlives the refactor. A per-directory threshold encodes a tree
+shape into a config: a second place the architecture has to be maintained, and the first to
+rot silently, since a threshold on a path that no longer exists fails open rather than red.
+The domains here are also small — a per-domain floor over a few hundred statements moves
+several points when one branch is added, which is noise presented as a gate.
+
+The comment now names the expired reason as history rather than quietly swapping it. An
+argument that has been overtaken is worth one sentence; deleting it invites the next reader to
+re-derive it and reach the opposite conclusion.
+
+## 2026-08-15 — The boot gate keeps its alpha notice
+
+`refactor.md` §9 listed the "Alpha · Work in progress" notice with the fake résumé download,
+as a statement the product makes that is not true, and gave Phase 8 the job of removing it.
+Half of that pairing was wrong.
+
+The notice is true. The site _is_ early — there are rough edges, and more of them than a
+visitor would guess from a boot sequence and a 3D room that both look finished. The people who
+land here are recruiters, clients and peers, and the notice is the only thing that sets their
+expectation before the polish sets a different one. Removing it would not make the product
+more honest; it would make it quieter about something real, which is the opposite of what the
+refactor's charter was about.
+
+So it stays, and its removal becomes a decision for the day the claim stops being true rather
+than a tidy-up a refactor gets to take on the way past. Only the copy was touched: the
+sentence was missing its punctuation ("my new portfolio an immersive, interactive 3D world").
+
+Contrast the résumé download in the next entry. The test is not whether a line sounds
+promotional — it is whether the thing it names exists.
+
+## 2026-08-15 — The résumé panel drops its download affordance
+
+`world/screens/wall.ts` painted "↧ DOWNLOAD RÉSUMÉ" at the foot of the résumé panel. There is
+no PDF in `public/` and never has been, and a click on the panel resolves through
+`world/interact.tsx` to a route push to `/resume` — a page. The line promised a file and
+delivered a web page.
+
+Removed rather than wired, per `refactor.md` §9: a real document is wanted eventually, and
+until it exists the honest move is to not advertise it. The `divider()` above it went too — it
+existed only to separate that line, and left behind it is a rule with nothing under it. When a
+PDF lands, the panel and `/resume` both get it.
+
+**"▶ PRESS START" on the playground panel was checked and deliberately left.** It is the same
+shape of line and not the same case. What it names is real: that panel is a registered hotspot
+in `world/hotspots.tsx` and a click on it starts something — `/playground`. It is also of a
+piece with the panel's own register (`● HIGH SCORES`, the `P1`–`P5` row markers), so changing
+it alone would leave two-thirds of an arcade framing behind and read as an oversight rather
+than a decision.
+
+The rule this pair establishes, for the next panel: **a canvas screen may use any register it
+likes, and may not name an artifact that does not exist.** Decoration is free; a deliverable
+is a promise.
+
+## 2026-08-15 — The dependency rules are grants per edge, not a public store per domain
+
+Phase 7 had to choose between two readings of the same contract, and the summaries disagreed
+with the contracts they were summarizing.
+
+Per **edge** is what the design always said. `architecture.md` §3's domain contracts grant
+`world/` "two sibling stores: `command-menu/store`, `telemetry/store`", `site/`
+"`command-menu/store` only" and `telemetry/` "one sibling store: `world/perf`". `refactor.md`
+§4.1's adjacency list — which §4 names as the thing Phase 7 encodes — says the same. What
+read as per **domain** was only the one-line summary in `architecture.md` §4 rule 2 and
+`refactor.md` §4.2: "a domain's store module is its public API; a sibling may import the
+store and nothing else." Taken literally that grants every sibling every store, which is
+looser than any contract in the document containing it.
+
+The check encodes the contracts. The loose reading would let `telemetry/` import
+`@/world/store` — hover, day/night and explore state — which is a real architectural smell,
+permitted silently and forever, and the overlay has no business there. Per-edge turns it into
+one red line until someone widens the grant deliberately: the correct price for a new
+cross-domain edge, and the same test §8 rule 6 applies to shared code.
+
+The objection to per-edge was that it would put a rule in `eslint.config.ts` that no document
+teaches. That turned out to be backwards — the documents already taught it, in the tables —
+and the fix was to correct the two summaries rather than weaken the check. `architecture.md`
+rule 2, `.claude/rules/project-structure.md` rule 2 and `refactor.md` §4.2 now state the grant
+model and name `ACCESS` in `eslint.config.ts` as where the grants live.
+
+The residual risk is that a table and `ACCESS` drift. Both summaries are now scoped to what a
+domain may _expose_, so they cannot contradict the grants — only be wider than them, which is
+what "may expose" means. `ACCESS` is the single authority on who gets what.
+
+## 2026-08-15 — A closed domain is two ESLint entries, and merging them voids the carve-out
+
+`docs/refactor.md` §4.4 carried this glob for three phases, cited as the design twice:
+
+```ts
+{ group: ["@/world/*", "@/world/**", "!@/world/store", "!@/world/perf"], message: … }
+```
+
+It does not do what it reads as. `no-restricted-imports` matches `group` with **gitignore
+semantics**, and gitignore refuses to re-include a path whose parent directory is excluded.
+The bare `@/world` excludes the directory, so both `!` entries stop applying and the group
+denies the very stores it exists to permit. Verified against the project's own ESLint 9
+before anything was written: with `@/world` in the group, all five fixture imports were
+restricted; without it, only the two private ones.
+
+Because the bare specifier cannot live in that group, it becomes an exact `paths` entry
+instead — which is also what keeps a future `src/world/index.ts` barrel from being importable,
+the thing §4.4 said the rule was for:
+
+```ts
+paths:    [{ name: "@/world", … }]
+patterns: [{ group: ["@/world/**", "!@/world/store", "!@/world/perf"], … }]
+```
+
+The comment on `noBarrel`/`privateFiles` in `eslint.config.ts` says not to merge them, and
+`tests/boundaries.test.ts` is what makes that stick: it runs the real config through the
+ESLint API over 23 cases, 9 that must pass and 14 that must fail. Putting the footgun back
+fails exactly the four carve-out rows, by name.
+
+**The general lesson is the one Phase 4 already recorded about a scanline color that passed
+31 tests:** a rule nobody has watched fail is not a check. Phase 7's verify line said "prove
+the rule can fail before trusting it", and following it literally is the only reason the
+published glob's defect was ever found. A one-time manual demonstration would have proved
+the config of that afternoon and guarded nothing after it, which is why the proof is a spec.
+
 ## 2026-08-15 — `schemas/agent.ts` split into `chat-contract.ts` and `agent/corpus.ts`
 
 One file held two contracts with opposite audiences: the `/api/chat` request and

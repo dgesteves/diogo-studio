@@ -1,5 +1,5 @@
 import * as React from "react";
-import { cn } from "@/ui/cn";
+import { cn } from "./cn";
 
 export const Kbd = React.forwardRef<HTMLElement, React.HTMLAttributes<HTMLElement>>(
   ({ className, children, ...props }, ref) => {

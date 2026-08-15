@@ -9,9 +9,9 @@ Eight directories at the root of `src/`, one dependency direction, and ownership
 who produces a thing rather than who displays it. The full contracts are in
 [`docs/architecture.md`](../../docs/architecture.md) §3 — this file is the working summary.
 
-**A refactor is in flight.** `docs/architecture.md` is the target and wins; the current tree
-is being moved toward it and is **not a pattern to copy**. `docs/refactor.md` says which
-phase owns which move. Phase 6 landed the tree below; **Phase 7 owns making it a check.**
+`docs/architecture.md` is normative and wins where the code disagrees — a disagreement is a
+defect in one of the two, not a phase waiting to run. The tree below is the tree, and the
+dependency rules below it are lint errors.
 
 ## The domains
 
@@ -34,7 +34,7 @@ No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `section
 and none of them may come back — a new top-level directory needs a `docs/decisions.md` entry
 naming the ownership or runtime boundary it marks.
 
-## Dependency rules — the contract, not yet the check
+## Dependency rules — checked, as errors
 
 ```
 app/  →  site/ · world/ · command-menu/ · telemetry/  →  content/ · ui/
@@ -46,19 +46,27 @@ leaves:  content/ · ui/ · env · store · reduced-motion · use-is-client · c
 2. **No domain imports a sibling's private files.** A domain's **store module is its public
    API** — `world/store.ts`, `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx`,
    `telemetry/vitals.ts` — and everything else in it is private. `site/` exports no state, so
-   it is private whole; `site/` and `world/` never see each other at all.
+   it is private whole; `site/` and `world/` never see each other at all. **A consumer is
+   granted a named subset of that list, never the whole of it:** `telemetry/` gets
+   `world/perf` and not `world/store`. The grants are `ACCESS` in `eslint.config.ts`.
 3. **`ui/` imports no domain.** If a primitive needs to know what a `Page` is, it is not a
    primitive.
 4. **`content/` imports nothing outside itself** — its own modules may compose each other.
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
    module, not even for a type. `chat-contract.ts` is the wire format both ends share.
 
-`no-restricted-imports` ships as `warn`, but `--max-warnings` is `0`, so a warning fails the
-build like an error. What is live today is the **same-domain rule**, one entry per domain:
-inside `world/`, `site/`, `command-menu/`, `telemetry/` and `agent/`, import relatively, never
-through the domain's own `@/…` alias. That is what stops a flattened domain growing a barrel
-back. What is **not** yet checked is rule 2 from outside — Phase 7 adds one group per domain
-with the store carved out, and promotes the lot to `error`. Until then rule 2 is on you.
+All five are `no-restricted-imports` **errors** as of Phase 7 — including the **same-domain
+rule** (inside `world/`, `site/`, `command-menu/`, `telemetry/` and `agent/`, import
+relatively, never through the domain's own `@/…` alias), which is what stops a flattened
+domain growing a barrel back. `content/` and `ui/` are closed to the whole of `@/`. The
+default is deny: a new file starts closed, so if lint objects to an import, the boundary is
+the thing to think about, not the message.
+
+**Never widen a rule inline.** No `eslint-disable` for this one — a cross-domain edge is
+either right, in which case it is one line in `ACCESS` in `eslint.config.ts` plus a note in
+`docs/decisions.md`, or it is the design telling you the code is in the wrong domain.
+`tests/boundaries.test.ts` asserts both directions of every rule against the real config, so
+a grant that is too wide fails a named test rather than passing quietly.
 
 ## Where a fact lives
 
@@ -86,9 +94,10 @@ Three things that are not content and must not share a folder with it:
 | Tuning        | camera damping, DPR ladder, fog distance | the domain that reads it |
 | Configuration | an env var, a deployment URL             | `env.ts`                 |
 
-Tuning has no home of its own: `docs/refactor.md` §3 declines to create `world/tuning.ts`,
-because "is a number" is not an ownership boundary. Name a magic value at the narrowest scope
-that works — see [Imports](#imports).
+**Tuning has no home of its own, and `world/tuning.ts` is the file not to create** — "is a
+number" is not an ownership boundary, so such a file is a technical-category folder wearing a
+filename. Name a magic value at the narrowest scope that works — see [Imports](#imports), and
+`docs/architecture.md` §8 for the table this one summarizes.
 
 ## Imports
 
@@ -111,8 +120,8 @@ that works — see [Imports](#imports).
 - **A file exports what its concept needs.** Split when responsibilities differ — different
   consumers, different lifecycle, different runtime; a file mixing rendering with state, pure
   helpers with effects, or data with behavior. _Not_ one primary export per file: that rule
-  is the measured cause of this codebase's 297-file, 49-line-average shape
-  (`docs/refactor.md` §2.1) and was retired in Phase 0.
+  was the measured cause of this codebase's 297-file, 49-line-average shape and was retired —
+  see the 2026-08-14 entry in [`docs/decisions.md`](../../docs/decisions.md).
 - **File length is not a design signal and there is no cap on it** — no `max-lines` rule
   exists; don't add one. `max-lines-per-function` is 100 as an error, because function length
   tracks complexity and file length tracks nothing. Never split a cohesive module to hit a

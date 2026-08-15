@@ -4,7 +4,7 @@ import { z } from "zod";
  * The `/api/chat` wire format — request in, sources header out. It is a root leaf rather
  * than part of `agent/` because both ends read it and neither owns it: the route validates
  * against it, the ⌘K answer surface decodes against it, and no client module may import
- * `agent/` even for a type. See `docs/refactor.md` §4.3 rule 4.
+ * `agent/` even for a type. See `docs/architecture.md` §4 rule 6.
  */
 
 // Both are emitted by the chunker; `"case-study"` and `"essay"` shipped here for as long

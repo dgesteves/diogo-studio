@@ -85,18 +85,18 @@ user. **When an instruction here is wrong, fix it in the same change** — claim
 have shipped wrong before, and a rule nobody corrects is how. If a check can enforce it
 (TypeScript, ESLint, a test, CI), prefer the check over the rule.
 
-**A refactor is in flight, so this repository is unusually unsafe to imitate.** It contains
-temporary 3D work, duplicated content, abandoned experiments and historical structure.
-`docs/architecture.md` is **normative** — it describes the six-domain architecture the code is
-being built toward and wins when the code disagrees. `docs/refactor.md` holds the phases and
-the evidence; `docs/decisions.md` holds the reasoning, append-only, so read the entry rather
-than the file. Standards and placement live in `.claude/rules/` (activated by file type).
+**`docs/architecture.md` is normative.** It describes the six-domain architecture and wins
+when the code disagrees — and a disagreement is now a defect in one of the two rather than
+work waiting to happen, because the architecture is held by `eslint.config.ts` and
+`tests/boundaries.test.ts`. `docs/decisions.md` holds the reasoning, append-only, so read the
+entry rather than the file. Standards and placement live in `.claude/rules/` (activated by
+file type).
 
 ## Constraints that are easy to trip over
 
-- **The suite is the refactor's safety net, and `pnpm validate` now gates it.** Coverage
-  thresholds live in `vitest.config.ts` — global, not per-directory, because the refactor
-  moves the directories. Re-measure with `pnpm test:coverage` before citing any figure, and
+- **`pnpm validate` gates coverage.** Thresholds live in `vitest.config.ts` — global rather
+  than per-directory, for the reason commented there. Re-measure with `pnpm test:coverage`
+  before citing any figure, and
   raise a threshold only from a measured run. **Never lower one to make a change pass**: the
   number went up because a test was written, so it comes down only when code is deleted.
 - **Test helpers live in `tests/` and are imported through `@tests/*`** — `r3f` for the scene
@@ -119,9 +119,10 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
   CI ran `pnpm exec playwright test` for a day and every E2E job died on import.
   `playwright.config.ts` now fails fast with that instruction, so the rule is checked.
 - **"Inspector" is a brand, not a directory.** `command-menu/` is the ⌘K surface, whose agent is
-  branded "the Inspector agent"; `telemetry/` is the Web-Vitals overlay, whose UI is labelled
-  "Inspector · receipts". Phase 6 retired the `features/inspector` folder that made the name
-  ambiguous; the copy and the `Inspector*` identifiers that match it are Phase 8's to revisit.
+  branded "the Inspector agent"; `telemetry/` is the Web-Vitals overlay, whose UI is labeled
+  "Inspector · receipts". The `features/inspector` folder that made the name ambiguous is gone;
+  the copy and the `Inspector*` identifiers that match it stay, deliberately — four E2E specs
+  assert on those strings. See `docs/decisions.md`.
 - **The AI endpoint's safety properties already hold and break silently.** When touching
   `/api/chat`, `src/agent/**` or the answer UI, keep them: user text stays in the user message and
   is never concatenated into the system prompt; model output renders as text, never HTML, and
