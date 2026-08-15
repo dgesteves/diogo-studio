@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
 import { siteConfig } from "@/content/profile";
 import { useAudio } from "./audio";
-import { useInspectorOverlay } from "@/features/inspector";
+import { useInspectorOverlay } from "@/telemetry/store";
 import { useIsClient } from "@/hooks/use-is-client";
 import { useReducedMotionPreference } from "@/reduced-motion";
 import { cn } from "@/utils/cn";

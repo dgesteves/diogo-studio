@@ -16,7 +16,7 @@ import { useTheme } from "next-themes";
 import { Kbd } from "@/components/ui/kbd";
 import { useAudio } from "../audio";
 import { useCommandMenu } from "@/features/command-menu";
-import { useInspectorOverlay } from "@/features/inspector";
+import { useInspectorOverlay } from "@/telemetry/store";
 import { useIsClient } from "@/hooks/use-is-client";
 import { DeckMapOverlay } from "./map";
 import { DeckRadar } from "./radar";

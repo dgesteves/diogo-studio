@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { VitalName, VitalRating } from "./telemetry";
-import { getVitalsServerSnapshot, getVitalsSnapshot, subscribeVitals } from "./telemetry";
+import type { VitalName, VitalRating } from "./vitals";
+import { getVitalsServerSnapshot, getVitalsSnapshot, subscribeVitals } from "./vitals";
 
 // The three fields the store reads off a `Metric`. Declaring the shape the *store* needs,
 // rather than casting a partial object to the library's union, is what keeps this spec

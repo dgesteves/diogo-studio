@@ -5,10 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click, press } from "@tests/interactions";
 import { ReducedMotionProvider } from "@/reduced-motion";
 import { publishPerf } from "@/world/perf";
-import type { VitalName, VitalRating } from "@/telemetry";
+import type { VitalName, VitalRating } from "./vitals";
 import { persistOverride } from "@/reduced-motion";
-import { InspectorOverlay } from "./inspector-overlay";
-import { InspectorOverlayProvider } from "../overlay-store";
+import { InspectorOverlay } from "./overlay";
+import { InspectorOverlayProvider } from "./store";
 
 /**
  * The Web-Vitals overlay — the "receipts" panel, not the ⌘K menu. It is the one surface in

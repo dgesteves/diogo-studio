@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatCount, formatVital, fpsTone } from "./inspector-format";
+import { formatCount, formatVital, fpsTone } from "./panels";
 
 /**
  * The overlay's job is to be readable at a glance, which is entirely a question of units
