@@ -1,22 +1,36 @@
 "use client";
 
-import { useState, type ReactElement } from "react";
+import { useEffect, useRef, useState, type ReactElement, type RefObject } from "react";
 import dynamic from "next/dynamic";
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { useInView } from "@/hooks/use-in-view";
 import { useIsClient } from "@/hooks/use-is-client";
 import { cn } from "@/utils/cn";
 import { siteConfig } from "@/content/profile";
 
-const PixelatedPortraitCanvas = dynamic(
-  () => import("./pixelated-portrait-canvas").then((m) => m.PixelatedPortraitCanvas),
-  { ssr: false, loading: () => null },
-);
+/**
+ * The About page's portrait: a DOM frame that describes itself, and a canvas that only ever
+ * loads when a visitor can see it. `portrait-engine.tsx` is a separate module because this
+ * `dynamic` import is what keeps the sampler and the animation loop out of the initial
+ * bundle — merging the two would ship the engine to every route.
+ */
+const PortraitCanvas = dynamic(() => import("./portrait-engine").then((m) => m.PortraitCanvas), {
+  ssr: false,
+  loading: () => null,
+});
+
+const PORTRAIT = {
+  src: "/images/diogo-esteves.png",
+  alt: `Pixelated portrait of ${siteConfig.name}`,
+} as const;
 
 const VIEWPORT_MARGIN = "200px 0px";
 const DEFAULT_CELL_SIZE = 8;
 
 type PortraitStatus = "loading" | "loaded" | "error";
+
+export function AboutPortrait(): ReactElement {
+  return <PixelatedPortrait src={PORTRAIT.src} alt={PORTRAIT.alt} className="w-40 sm:w-48" />;
+}
 
 export type PixelatedPortraitProps = {
   src: string;
@@ -75,7 +89,7 @@ export function PixelatedPortrait({
             status === "loaded" ? "opacity-100" : "opacity-0",
           )}
         >
-          <PixelatedPortraitCanvas
+          <PortraitCanvas
             src={src}
             cellSize={cellSize}
             interactive={!reducedMotion}
@@ -96,4 +110,37 @@ export function PixelatedPortrait({
       </div>
     </div>
   );
+}
+
+/**
+ * Defers the canvas until the visitor can see it, and degrades to visible where
+ * `IntersectionObserver` is missing — hiding content forever is the failure mode that
+ * matters here, not a wasted frame of work.
+ */
+function useInView<T extends Element>(
+  rootMargin = "0px",
+): { ref: RefObject<T | null>; inView: boolean } {
+  const ref = useRef<T>(null);
+  const [inView, setInView] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === "undefined") {
+      setInView(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry?.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin, threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [rootMargin]);
+
+  return { ref, inView };
 }

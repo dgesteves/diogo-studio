@@ -1,7 +1,7 @@
 import { cacheLife } from "next/cache";
 import type { MetadataRoute } from "next";
 import { routes } from "@/content/pages";
-import { getSiteUrl } from "@/config/site-url";
+import { getSiteUrl } from "@/site/metadata";
 
 // `new Date()` is an uncached dynamic API under `cacheComponents`, which would drop
 // this route out of static rendering. The content only changes on deploy, so cache

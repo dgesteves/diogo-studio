@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { restoreMediaStubs } from "@tests/media";
 import { stubCanvasContexts } from "@tests/recording-ctx";
 
-import { createPortraitEngine } from "./pixelated-portrait-engine";
-import { sampleGrid } from "./pixelated-portrait-sampler";
+import { createPortraitEngine } from "./portrait-engine";
+import { sampleGrid } from "./portrait-engine";
 
 /**
  * The engine behind the About portrait: it samples an image into a grid of cells and

@@ -2,14 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { createRecordingContext, type RecordingContext } from "@tests/recording-ctx";
 
-import {
-  CELL_GAP,
-  DISTURB_RADIUS_RATIO,
-  TINT,
-  type Pointer,
-} from "./pixelated-portrait-engine-config";
-import { drawPortraitFrame } from "./pixelated-portrait-frame";
-import type { Cell, Dims } from "./pixelated-portrait-sampler";
+import { CELL_GAP, DISTURB_RADIUS_RATIO, TINT, type Pointer } from "./portrait-engine";
+import { drawPortraitFrame } from "./portrait-engine";
+import type { Cell, Dims } from "./portrait-engine";
 
 /**
  * One frame of the portrait. The engine calls this on every animation frame and stops when
