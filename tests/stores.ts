@@ -1,5 +1,5 @@
 import { setInspectorOpen } from "@/features/inspector/overlay-store";
-import { resetBoot } from "@/world/boot";
+
 import { getPerfServerSnapshot, markPerfInactive, publishPerf } from "@/world/perf";
 import { persistOverride } from "@/reduced-motion";
 import {
@@ -10,6 +10,7 @@ import {
   setExplore,
   setHoveredStation,
   setWorldMode,
+  resetBoot,
 } from "@/world/store";
 
 // Every store below is a module singleton read through `useSyncExternalStore`, so state

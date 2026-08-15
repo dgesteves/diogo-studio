@@ -4,25 +4,25 @@ import type { LucideIcon } from "lucide-react";
 import type { ReactElement } from "react";
 import { cn } from "@/utils/cn";
 
-type BootSegmentedOption<T extends string> = {
+type SegmentedOption<T extends string> = {
   value: T;
   label: string;
   Icon: LucideIcon;
 };
 
-type BootSegmentedProps<T extends string> = {
+type SegmentedProps<T extends string> = {
   label: string;
-  options: ReadonlyArray<BootSegmentedOption<T>>;
+  options: ReadonlyArray<SegmentedOption<T>>;
   value: T | undefined;
   onChange: (value: T) => void;
 };
 
-export function BootSegmented<T extends string>({
+export function Segmented<T extends string>({
   label,
   options,
   value,
   onChange,
-}: BootSegmentedProps<T>): ReactElement {
+}: SegmentedProps<T>): ReactElement {
   return (
     <div role="group" aria-label={label} className="inline-flex items-center gap-1">
       {options.map(({ value: optionValue, label: optionLabel, Icon }) => {

@@ -1,6 +1,7 @@
 import { type ReactElement, type ReactNode } from "react";
 import { AudioProvider, WorldAudio } from "@/features/audio";
-import { BootSequence, BootSplash, CommandDeck, ExploreHud, WorldStage } from "@/features/world";
+import { CommandDeck, ExploreHud, WorldStage } from "@/features/world";
+import { BootSequence, BootSplash } from "@/world/boot";
 
 export default function WorldLayout({ children }: { children: ReactNode }): ReactElement {
   return (

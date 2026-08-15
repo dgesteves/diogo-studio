@@ -13,7 +13,6 @@ import { useCommandMenu } from "@/features/command-menu";
 import { StudioScene } from "@/world/scene/studio";
 import type { RouteKey } from "@/content/pages";
 import { useWorldPalette } from "@/world/materials";
-import { markWorldReady } from "@/world/boot";
 
 import { getStationEntry } from "@/content/pages";
 import { DPR_DEGRADED, DPR_MIN, dprForFactor } from "../constants/render";
@@ -23,7 +22,8 @@ import { useExploreHandoff } from "../hooks/use-explore-handoff";
 import { useExploreInput } from "../hooks/use-explore-input";
 import { useOrbitInput } from "../hooks/use-orbit-input";
 import { AiCore } from "./ai-core";
-import { BootProgressReporter } from "./boot-progress-reporter";
+import { BootProgressReporter } from "@/world/boot";
+import { markWorldReady } from "@/world/store";
 import { ExploreController } from "./explore-controller";
 import { Lounge } from "@/world/scene/lounge";
 import { WorldCamera } from "./world-camera";
