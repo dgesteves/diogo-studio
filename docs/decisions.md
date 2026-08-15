@@ -24,6 +24,68 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — Two brand hexes live in `ui/`, the rest of `brand.ts` is the world's
+
+`config/brand.ts` was the room's three.js material tokens under a name that said
+otherwise, so it became `world/materials.ts` and `brandColors` became `worldColors`.
+Three of its 43 importers are not the world: the two `ImageResponse` icons use
+`accent` and `edge`, and the portrait engine uses `accent`. The portrait moves to
+`site/` in Phase 6, where §4.3 rule 5 forbids importing `world/`.
+
+So the two hexes are `components/ui/brand.ts` — mirroring `--brand-cyan` and
+`--brand-edge`, which is where every DOM surface already reads them — and
+`world/materials.ts` builds its accent on that import rather than duplicating the
+value. It sits under `components/ui/` rather than a new `src/ui/` because Phase 6
+moves that whole folder; two `ui` directories at once would be worse than one in the
+wrong place. `brandColors.ink` had zero uses and is gone.
+
+The alternative was to move the file whole and let three modules import
+`@/world/materials`. That is legal for `app/` and illegal for `site/`, and it would
+have handed Phase 6 an edge to unpick.
+
+## 2026-08-15 — The boot signal lives in `world/store.ts`, not beside the boot screen
+
+Phase 5 merged fifteen boot components into `world/boot.tsx` and took the boot store
+in with them — one concept, one file, which is what `reduced-motion.tsx` already
+models. It broke three unrelated specs.
+
+`tests/stores.ts` imports `resetBoot` and `vitest.setup.ts` calls it in every
+`afterEach`, so the moment `@/world/boot` became a component module that import
+pulled `@/features/audio` and `@/features/inspector` into every test file's module
+graph — evaluated during setup, before the spec's own `vi.mock` could register.
+`world-audio.tsx` closed over the real `next/navigation` and the audio and inspector
+specs failed on **behavior**, not resolution.
+
+The signal is a store of exactly the kind `world/store.ts` already holds: the canvas
+publishes progress and readiness, the overlay reads them. It moves there. What stays
+in `boot.tsx` is the overlay and the session/splash helpers only it uses.
+
+The general form, which is the part worth keeping: **a store that cannot be imported
+without pulling in a DOM overlay is not usable as a store.** "Provider + store, one
+concept" holds when the provider is small; it does not survive a 600-line client tree.
+
+## 2026-08-15 — `world/room.ts` holds dimensions, `world/materials.ts` holds surfaces
+
+`docs/refactor.md` Phase 5 scoped `scene/constants.ts` into `materials.ts`. It holds
+`DESK_TOP_Y` and `CITY_WINDOW` — dimensions, not surfaces — and the camera framing
+derives from the same measurements `ROOM` carries. They went to `room.ts` instead.
+
+The split that matters is not "constants vs. components". It is that `room.ts` is
+what a camera has to respect and `materials.ts` is what a mesh looks like, and those
+two change for different reasons.
+
+## 2026-08-15 — There is no `world/scene/server-rack.tsx`
+
+Phase 5's scope named one. The server node, the Mac Studio and the desk hub are laid
+out as a single row from one shared layout module and all three use `StatusLed`, so
+splitting them means either an import cycle or a layout file belonging to neither.
+They are `workstation.tsx`.
+
+The evidence was in the merge: eleven top-level identifiers collided, because three
+files were describing the same measurements under the same names. Each box namespaces
+its own now (`HUB_`, `MAC_`, `SERVER_`), which is what the shared layout module had
+been doing all along.
+
 ## 2026-08-15 — `knip` reports every export nothing else imports
 
 `ignoreExportsUsedInFile: true` switched off the whole check: an `export` no other file
