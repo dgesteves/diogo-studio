@@ -4,10 +4,8 @@ import { LinearFilter, SRGBColorSpace, type CanvasTexture } from "three";
 
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 
-import { createCanvasTexture } from "@/world/screens/texture";
-import { useLeftScreenTexture } from "./code-screen";
-import { useCenterScreenTexture } from "./terminal-screen";
-import { FOCUS_POOL } from "./terminal-screen-data";
+import { createCanvasTexture } from "./texture";
+import { useLeftScreenTexture, useCenterScreenTexture, FOCUS_POOL } from "./monitors";
 
 /**
  * The four desk screens are a canvas each, repainted on a clock and re-uploaded to the GPU.

@@ -5,9 +5,11 @@ import { RoundedBox } from "@react-three/drei";
 import { type Texture } from "three";
 import { worldColors } from "../materials";
 import { DESK_TOP_Y } from "../room";
-import { useLeftScreenTexture } from "../screens/code-screen";
-import { useRightScreenTexture } from "../screens/metrics-screen";
-import { useCenterScreenTexture } from "../screens/terminal-screen";
+import {
+  useCenterScreenTexture,
+  useLeftScreenTexture,
+  useRightScreenTexture,
+} from "../screens/monitors";
 
 /**
  * The two displays and the webcam clipped to them. The screens themselves are canvas textures

@@ -4,7 +4,7 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { worldColors } from "../materials";
 import { DESK_TOP_Y } from "../room";
-import { useTabletScreenTexture } from "../screens/tablet-screen";
+import { useTabletScreenTexture } from "../screens/tablet";
 
 /**
  * The drawing tablet and the stylus lying on it. One file because the stylus has no meaning

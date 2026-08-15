@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { worldColors } from "@/world/materials";
+import { worldColors } from "../materials";
 import { createRecordingContext, type Path, type RecordingContext } from "@tests/recording-ctx";
 
-import { drawCode } from "./code-screen-draw";
-import { CODE_TOKENS } from "./code-screen-data";
-import { drawMetrics, type MetricsView } from "./metrics-screen-draw";
-import { drawTablet } from "./tablet-screen-draw";
-import { drawTerminal, type StatusView } from "./terminal-screen-draw";
-import { STATUS_ROWS } from "./terminal-screen-data";
+import {
+  drawCode,
+  CODE_TOKENS,
+  drawMetrics,
+  type MetricsView,
+  drawTerminal,
+  type StatusView,
+  STATUS_ROWS,
+} from "./monitors";
+import { drawTablet } from "./tablet";
 
 /**
  * The three screens on the studio desk and the tablet beside them. They redraw on a frame

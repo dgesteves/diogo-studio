@@ -4,8 +4,8 @@ import type { CanvasTexture } from "three";
 import { renderScene, unmountScenes, type SceneQuery } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 
-import { useRightScreenTexture } from "./metrics-screen";
-import { useTabletScreenTexture } from "./tablet-screen";
+import { useRightScreenTexture } from "./monitors";
+import { useTabletScreenTexture } from "./tablet";
 
 /**
  * The two desk screens driven by the frame loop rather than by a timer: the metrics panel
