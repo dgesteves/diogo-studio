@@ -163,9 +163,6 @@ describe("resume panel", () => {
       "● FOCUS",
       "Frontend Platform · AI-Native UX",
       "Design Systems · Performance",
-      // No PDF exists behind this yet. `docs/refactor.md` Phase 8 owns removing it or
-      // wiring a real file; it is a product decision, not a refactor's.
-      "↧  DOWNLOAD RÉSUMÉ",
     ]);
   });
 

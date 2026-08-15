@@ -47,10 +47,10 @@ function withProviders(children: ReactElement): ReactElement {
 
 /**
  * The deck's contract with ⌘K is the store, not the menu: a sibling's store module is its
- * public API and every other file in it is private (`docs/refactor.md` §4.2), so this spec
- * reads the signal the deck writes rather than mounting another domain's dialog. What the
- * menu renders for each mode is `command-menu/menu.dom.test.tsx`; that pressing a deck
- * button lands a visitor in it is `world.spec.ts`.
+ * public API and every other file in it is private (`docs/architecture.md` §4 rule 2), so
+ * this spec reads the signal the deck writes rather than mounting another domain's dialog.
+ * What the menu renders for each mode is `command-menu/menu.dom.test.tsx`; that pressing a
+ * deck button lands a visitor in it is `world.spec.ts`.
  */
 function MenuState(): ReactElement {
   const { open, mode } = useCommandMenu();

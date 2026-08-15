@@ -7,7 +7,7 @@ import { createStore } from "@/store";
  * because the HUD deck reads all three and a hover must not re-render the sky.
  *
  * This module is the world's public API to its siblings; every other file under `world/` is
- * private to it — `docs/refactor.md` §4.2.
+ * private to it — `docs/architecture.md` §4 rule 2.
  */
 
 type WorldState = {
