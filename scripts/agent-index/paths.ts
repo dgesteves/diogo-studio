@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 export const ROOT = resolve(HERE, "..", "..");
-export const CONSTANTS_ROOT = join(ROOT, "src", "constants");
+const CONSTANTS_ROOT = join(ROOT, "src", "constants");
 export const INDEX_PATH = join(CONSTANTS_ROOT, "agent-index.json");
 
 export function loadEnvFiles(): void {

@@ -1,7 +1,7 @@
 export const HARDWARE_DEPTH = 0.27;
-export const HARDWARE_BACK_Z = -0.31;
+const HARDWARE_BACK_Z = -0.31;
 export const HARDWARE_CENTER_Z = HARDWARE_BACK_Z + HARDWARE_DEPTH / 2;
-export const HARDWARE_GAP = 0.04;
+const HARDWARE_GAP = 0.04;
 
 export const SERVER_WIDTH = 0.16;
 export const SERVER_HEIGHT = 0.16;

@@ -24,6 +24,25 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — `knip` reports an export nothing else imports, except in a type position
+
+`ignoreExportsUsedInFile: true` switched off the whole check: an `export` no other file
+imported was invisible as long as the module used the value itself. That is precisely the
+over-export the store rule in `refactor.md` §4.2 depends on catching — a domain whose files
+export more than their consumers read gives a sibling something to reach for.
+
+Turned off, the check reported sixteen. Eleven were exported types, plus consts read in their
+own file **in a type position** — `VariantProps<typeof buttonVariants>`,
+`z.infer<typeof agentChunkSchema>`. Those exports are a module's documented shape: the Zod
+schemas are the `/api/chat` wire contract that Phase 6 promotes to `chat-contract.ts`, and the
+`cva` variants are shadcn's own convention, so unexporting them is churn that comes straight
+back. The remaining five were plain over-exports and were fixed.
+
+`ignoreExportsUsedInFile: { "type": true, "interface": true }` is the setting that separates
+the two: a value used only inside its own file is reported, a shape is not. **Never widen it
+back to `true` to make `pnpm validate` green** — a finding here means an `export` keyword to
+delete, which is a one-character fix.
+
 ## 2026-08-15 — One `createStore`, and `src/store.ts` as a fourth root leaf
 
 Eight modules hand-rolled `Set<listener>` / `emit` / `subscribe` / `getSnapshot` /

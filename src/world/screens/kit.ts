@@ -15,8 +15,8 @@ export const MONO = `"Geist Mono", ui-monospace, Menlo, Consolas, monospace`;
 
 export const INK = "#e8f6fc";
 export const SOFT = "rgba(232,246,252,0.55)";
-export const LINE = "rgba(34, 211, 238, 0.18)";
 
+const LINE = "rgba(34, 211, 238, 0.18)";
 const BACKDROP = "#03080c";
 const SCANLINE = "rgba(34, 211, 238, 0.025)";
 const SCANLINE_STEP = 3;

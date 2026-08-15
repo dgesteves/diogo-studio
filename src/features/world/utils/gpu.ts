@@ -11,9 +11,7 @@ export function isSoftwareRenderer(renderer: string | null): boolean {
   return renderer !== null && SOFTWARE_RENDERERS.test(renderer);
 }
 
-export function readRendererName(
-  gl: WebGLRenderingContext | WebGL2RenderingContext,
-): string | null {
+function readRendererName(gl: WebGLRenderingContext | WebGL2RenderingContext): string | null {
   const debugInfo = gl.getExtension("WEBGL_debug_renderer_info");
   const unmasked = debugInfo
     ? gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL as number)
