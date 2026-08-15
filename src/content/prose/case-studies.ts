@@ -7,8 +7,13 @@ export const caseStudies: Destination = {
   ...getStationEntry("caseStudies"),
   eyebrow: "Deeper dives",
   title: "How the hard problems got solved.",
-  summary: "In-depth case studies on design systems, streaming scale, and agentic UX.",
+  summary: "Case-study summaries on design systems, streaming scale, and agentic UX.",
   blocks: [
+    {
+      id: "intro",
+      kind: "lede",
+      text: "Four problems worth the space to explain. These are the summaries; most of the detail sits under NDA, which is why the walkthrough is a conversation rather than a page.",
+    },
     {
       id: "studies",
       kind: "cards",
@@ -36,14 +41,12 @@ export const caseStudies: Destination = {
       ],
     },
     {
-      id: "status",
-      kind: "lede",
-      text: "Full write-ups are being drafted for this space. Until they land, I'll happily walk you through any of these live — architecture diagrams included.",
-    },
-    {
       id: "next",
       kind: "links",
-      items: [{ label: "Book a walkthrough", href: routes.contact }],
+      items: [
+        { label: "Book a walkthrough", href: routes.contact },
+        { label: "The engagements behind them", href: routes.work },
+      ],
     },
   ],
 };

@@ -7,18 +7,18 @@ import type { Destination } from "../schema";
 export const openSource: Destination = {
   ...getStationEntry("openSource"),
   eyebrow: "In the open",
-  title: "Where the patterns get distilled.",
-  summary: "Open-source work and experiments by Diogo Esteves.",
+  title: "Where the patterns would get distilled.",
+  summary: "Open-source work and reusable patterns from Diogo Esteves.",
   blocks: [
     {
       id: "why",
       kind: "lede",
-      text: "Most of my production work ships behind enterprise walls. Open source is where the reusable patterns get extracted and shared.",
+      text: "Eleven years of production work, almost all of it behind enterprise walls or an NDA. There is no substantial public catalogue to point at yet — the honest state of things — so what follows is what would be worth extracting first.",
     },
     {
-      id: "on-the-bench",
+      id: "worth-extracting",
       kind: "list",
-      title: "On the bench",
+      title: "Worth extracting",
       items: [
         "Design-token pipelines and system primitives.",
         "React + Three.js interaction patterns — including the ones powering this studio.",
@@ -30,7 +30,7 @@ export const openSource: Destination = {
       kind: "links",
       items: [
         { label: "GitHub — @dgesteves", href: siteConfig.links.github, external: true },
-        { label: "This studio's playground", href: routes.playground },
+        { label: "The patterns, running live", href: routes.playground },
       ],
     },
   ],

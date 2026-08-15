@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getStationEntry } from "../pages";
+import { getStationEntry, routes } from "../pages";
 import type { Destination } from "../schema";
 
 export const writing: Destination = {
@@ -8,12 +8,12 @@ export const writing: Destination = {
   eyebrow: "Field notes",
   title: "Notes on platforms, AI, and engineering leadership.",
   summary:
-    "Essays and field notes from Diogo Esteves on frontend platforms, AI-native UX, and leadership.",
+    "The arguments Diogo Esteves keeps making about frontend platforms, AI-native UX, and leadership.",
   blocks: [
     {
       id: "intro",
       kind: "lede",
-      text: "Field notes from eleven years of platform work — drafted between shipping cycles, published when they're worth your time.",
+      text: "Nothing is published here yet. What follows is what I would write about — the arguments I keep making in RFCs, design reviews, and hiring conversations after eleven years of platform work.",
     },
     {
       id: "themes",
@@ -42,9 +42,12 @@ export const writing: Destination = {
       ],
     },
     {
-      id: "status",
-      kind: "lede",
-      text: "These essays are in the drafting queue. Until they land, the work speaks first.",
+      id: "elsewhere",
+      kind: "links",
+      items: [
+        { label: "The short version", href: routes.principles },
+        { label: "Ask me about any of these", href: routes.contact },
+      ],
     },
   ],
 };
