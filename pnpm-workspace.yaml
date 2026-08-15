@@ -22,9 +22,9 @@ allowBuilds:
   "@sentry/cli": true
   esbuild: true
 
-overrides:
-  "esbuild@<0.28.1": ">=0.28.1"
-  "postcss@<8.5.10": ">=8.5.10"
-  "sharp@<0.35.0": ">=0.35.0"
-  "fast-uri@<3.1.4": ">=3.1.4"
-  "brace-expansion@>=5.0.0 <5.0.8": ">=5.0.8"
+# No `overrides:` block. The five advisory floors that used to live here are gone
+# because every dependent now resolves above them on its own — re-add one only for
+# an advisory that natural resolution does not already clear, and delete it again
+# once it does. An override whose floor the tree has passed is not free: pnpm
+# matches the selector against the *declared range*, so `fast-uri@<3.1.4` still
+# matched ajv's `^3` and rewrote it to `>=3.1.4`, silently pulling in 4.1.2.

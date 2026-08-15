@@ -24,17 +24,25 @@ updates:
       prefix-development: chore
       include: scope
     ignore:
-      # eslint-config-next pulls in eslint-plugin-react, whose latest release
-      # (7.37.5) does not support ESLint 10 (it uses the removed
-      # context.getFilename() API). Block ESLint major bumps until upstream
-      # adds ESLint 10 support.
+      # Both entries below are peer-range blocks, so each has an exact recheck:
+      # read the peer range off the named package and drop the entry when the
+      # version we would bump to falls inside it. Re-verified 2026-08-15.
+      #
+      # eslint-config-next pulls in eslint-plugin-react, still latest at 7.37.5,
+      # which peers `^3 || ... || ^9.7` — no ESLint 10 (it uses the removed
+      # context.getFilename() API). typescript-eslint already peers ^10, so this
+      # one package is the whole blocker.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
-      # typescript-eslint does not support TypeScript 7 yet (lint crashes with
-      # "Cannot read properties of undefined (reading 'Cjs')"). Block TS major
-      # bumps until the ESLint toolchain supports TS 7.
+      # typescript-eslint 8.67.0 peers `typescript >=4.8.4 <6.1.0`. This mirrors that
+      # ceiling instead of blocking majors, because the range breaks at a *minor*:
+      # TS 7 crashes the lint run outright ("Cannot read properties of undefined
+      # (reading 'Cjs')"), but 6.1 would leave the supported range just as quietly,
+      # and a major-only block does not stop it. 6.0.x patches still come through.
+      # Recheck by reading typescript-eslint's peer range and raising this to its
+      # new ceiling; drop the entry when it has none.
       - dependency-name: "typescript"
-        update-types: ["version-update:semver-major"]
+        versions: [">=6.1.0"]
     groups:
       next:
         patterns:

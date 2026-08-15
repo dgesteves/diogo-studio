@@ -24,6 +24,39 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — The five pnpm overrides are deleted; the Dependabot ignores stay
+
+Two cleanups that looked alike and were not. Both were checked the same way: remove the
+thing, re-resolve, and see what the tree actually does.
+
+**The overrides were dead, and one was worse than dead.** Resolving the lockfile with the
+`overrides:` block removed leaves `esbuild` at 0.28.2, `postcss` at 8.5.23/8.5.26, `sharp`
+at 0.35.3 and `brace-expansion` at 1.1.18/5.0.9 — every dependent had already moved above
+its advisory floor, so four of the five changed nothing. `pnpm audit --audit-level low`
+(dev included, not just the scheduled `--prod --audit-level high`) is clean without them.
+
+The fifth is the reason to look rather than assume. **pnpm matches an override selector
+against the declared range, not the resolved version**, so `fast-uri@<3.1.4` still matched
+`ajv`'s `^3` — the ranges intersect — and rewrote it to the open `>=3.1.4`, which resolves
+to **4.1.2**. A floor written for a 3.1.3 advisory was silently holding a major upgrade
+`ajv` never asked for. Removing it drops the tree to 3.1.5, still above the advisory.
+So: re-add an override for an advisory natural resolution does not clear, and **delete it
+once it does** — a stale one is a version pin wearing a security label.
+
+**The Dependabot ignores are still load-bearing, and now say how to check.** Both are peer
+ranges, not opinions. `eslint-plugin-react` is still latest at 7.37.5 peering
+`^3 || … || ^9.7`, so ESLint 10 is out; `typescript-eslint` 8.67.0 already peers `^10`,
+which makes that one transitive package the entire blocker. `typescript-eslint` peers
+`typescript >=4.8.4 <6.1.0`, so TS 7 is out. Each comment now names the package and range
+to re-read, so the entry expires on evidence instead of on someone's memory.
+
+**The `typescript` ignore is a version bound, not a major block**, because of what that
+peer range says: it ends at `<6.1.0`, so the break arrives on a **minor**. `versions:
+[">=6.1.0"]` mirrors the ceiling exactly — majors are a subset of it, 6.0.x patches still
+come through, and the entry now fails the same way the toolchain does. An
+`update-types: semver-major` block would have waved 6.1 straight past. Raise the bound to
+typescript-eslint's new ceiling when it moves; delete the entry when it has none.
+
 ## 2026-08-15 — The `THREE.Clock` deprecation warning is no longer filtered
 
 `silence-clock-deprecation.ts` is deleted, with its spec and both import sites
