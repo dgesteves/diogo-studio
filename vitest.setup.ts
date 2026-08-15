@@ -1,7 +1,7 @@
 import "@testing-library/jest-dom/vitest";
-// The app applies this at its canvas entry point (world-canvas.tsx), which RTTR bypasses
+// The app applies this at its canvas entry point (world/canvas.tsx), which RTTR bypasses
 // by mounting the scene directly. Same upstream fiber/three deprecation, same suppression.
-import "@/components/r3f/silence-clock-deprecation";
+import "@/world/silence-clock-deprecation";
 import { afterEach } from "vitest";
 import { cleanup } from "@testing-library/react";
 import { stubMatchMedia } from "@tests/media";

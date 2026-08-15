@@ -25,7 +25,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Segmented } from "@/components/ui/segmented";
 import { siteConfig } from "@/content/profile";
-import { useAudio } from "@/features/audio";
+import { useAudio } from "./audio";
 import { useInspectorOverlay } from "@/features/inspector";
 import { useIsClient } from "@/hooks/use-is-client";
 import { useReducedMotionPreference } from "@/reduced-motion";
