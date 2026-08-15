@@ -1,12 +1,6 @@
 ---
 paths:
   - "src/world/**"
-  - "src/features/world/**"
-  - "src/features/studio/**"
-  - "src/components/r3f/**"
-  - "src/config/brand.ts"
-  - "src/constants/room.ts"
-  - "src/hooks/use-world-palette.ts"
 ---
 
 # The 3D world — R3F, three.js & canvas
@@ -21,7 +15,7 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
 - **Content stays in the DOM.** Reveal-on-focus is a visual affordance, not a data change.
   Server-rendered destination content stays crawlable and reachable by assistive tech. Never
   gate content behind a 3D-only interaction.
-- **Reduced motion is a real code path.** `world-stage.tsx` does not mount the canvas when it is
+- **Reduced motion is a real code path.** `world/world.tsx` does not mount the canvas when it is
   set, and the site must be fully navigable with no 3D at all. Anything added to the scene needs
   a no-3D equivalent.
 - **3D objects are never the only navigation:** keyboard-reachable index, visible focus, labeled
@@ -30,17 +24,19 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
   and `metadata` keep working.
 - **The world never crops.** Check ultrawide, laptop, tablet and portrait phone: the focused
   object stays visible and unoccluded. Responsiveness moves the **camera**, not the objects
-  (`utils/framing.ts` pulls back on narrow viewports).
+  (`world/camera.tsx` pulls back on narrow viewports).
 
 ## Materials, geometry and theme
 
 - **Never inline a hex, roughness or metalness value.** Use the shared tokens in
-  `src/config/brand.ts` — misleadingly named: it is three.js material tokens, not brand colors,
-  with ~40 importers. Add a token rather than a literal.
+  `world/materials.ts` — `worldColors` plus the four material presets, ~40 importers. Add a
+  token rather than a literal. The two hexes in `components/ui/brand.ts` are the exception and
+  are not the world's: they exist for the `ImageResponse` icons and the portrait tint, which
+  render pixels no stylesheet reaches.
 - Read theme colors through `useWorldPalette()`, never by branching on the store inline;
   day/night is a palette swap, so check both.
-- Dimensions come from the shared geometry constants (`constants/room.ts`, `*-layout.ts`), not
-  numbers typed at the call site.
+- Dimensions come from `world/room.ts` — the room shell, the desk surface, the window and
+  where the wall panels hang — not numbers typed at the call site.
 
 ## Frame loop and resources
 
@@ -50,7 +46,7 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
   `Geometry`, `Material` or `CanvasTexture` must be referentially stable, and this is the one
   place it needs no justification.
 - **Dispose what you create.** R3F auto-disposes what it reconciles; textures and geometries
-  built imperatively (`createCanvasTexture`, the `*-textures.ts` factories) must be disposed on
+  built imperatively (`createCanvasTexture`, the texture factories in `world/scene/`) must be disposed on
   unmount and never rebuilt per render. A canvas-backed **screen** does not hand-roll that:
   `useScreenTexture(width, height)` in `world/screens/texture.ts` owns the disposal, and its
   `paint(draw)` is the only place `needsUpdate` is set — the one `react-hooks/immutability`

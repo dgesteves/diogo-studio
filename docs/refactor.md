@@ -5,8 +5,8 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3 and 4 on 2026-08-15.** The measurement is
-in §2, the structural review in §4, the evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3, 4 and 5 on 2026-08-15.** The measurement
+is in §2, the structural review in §4, the evidence in §5.
 
 ---
 
@@ -631,7 +631,7 @@ optional final phase.
 > statement is genuinely new: a `typeof window === "undefined"` guard on the server path of the
 > motion override, which jsdom cannot reach. Thresholds were not touched.
 
-### Phase 5 — the 3D room
+### Phase 5 — the 3D room ✅ landed 2026-08-15
 
 - **Objective.** Merge the 3D layer by object, so a reader looking for the lounge finds one
   file. _(Scale estimate, not a target: 176 files → roughly 40.)_
@@ -648,6 +648,52 @@ optional final phase.
   (`boot.dom.test.tsx`, `lounge.dom.test.tsx`, `scene.dom.test.tsx`), so merging the sources
   under them moves almost no test code.
 
+> **Landed**, in eight commits: the `.tmp` deletion, tokens and dimensions, the scene, the
+> screens, the lounge and props, boot, the world root, and the lint config. **174 source files
+> become 48**, `src/world/` is the first domain to reach the shape `architecture.md` §3
+> describes, and `features/` holds only the three domains Phase 6 owns. 19/19 routes static,
+> 843 unit tests in 80 files and 212 E2E green, 754 kB gzipped against a 1.3 MB budget,
+> coverage flat at 98.98 / 93.94 / 98.79 / 99.72. Eight things are worth knowing.
+>
+> **The mesh count never moved.** 228 before, 228 after, through a move of 40 scene files. It
+> is the only thing that could have caught a mesh vanishing, and the phase is the reason it
+> exists.
+>
+> **The draw transcripts were dumped and diffed, twice.** 16 routines — four desk screens,
+> five wall panels, three TV channels — through `@tests/recording-ctx` before the screens were
+> touched and again after the wall and TV merged: 14,260 lines, byte-identical both times.
+> Phase 4 recorded that a broken scanline color passed 31 tests; that finding is why this was
+> done rather than trusting the suite.
+>
+> **`knip` counted the fragmentation for us: 95 exports existed only so a parent could reach
+> them.** They were stripped as each merge landed. That number is the measurable form of §2.1 —
+> not a style preference, a count of seams that were never seams.
+>
+> **Five empty `.tmp` files had been tracked since Phase 4.** `knip` scans `.ts`/`.tsx`,
+> prettier and eslint glob the same, so nothing saw them through a phase that reported clean.
+> Deleted in the first commit. **The lesson is about the gate, not the files:** `pnpm validate`
+> does not notice a tracked file no tool is configured to read.
+>
+> **Merging the boot store into the boot screen broke three unrelated specs**, on behavior
+> rather than resolution — `tests/stores.ts` drags whatever `@/world/boot` imports into every
+> test file's graph before its `vi.mock` can register. The signal moved to `world/store.ts`;
+> the reasoning is in `decisions.md`, and the general form is that "provider + store, one
+> concept" does not survive a 600-line client tree.
+>
+> **The identifier collisions were the finding, not the obstacle.** Eleven in the hardware
+> cluster, five `ACCENT`s across the wall panels, three `Ctx` aliases and two `drawGrid`s in
+> the TV channels, three `OPTIONS` in the boot toggles, and a `FurnitureHotspot` that was both
+> a type and the component rendering it. Every one is two files describing the same thing under
+> the same name, which is invisible until they share a scope.
+>
+> **Three scope items came out differently, all recorded in `decisions.md`:** `brand.ts` split
+> two hexes into `components/ui/brand.ts` rather than moving whole; `scene/constants.ts` went
+> to `room.ts` rather than `materials.ts`; and there is no `server-rack.tsx`.
+>
+> **`src/world/**` now has a live same-domain import rule**, and it caught 45 self-alias
+> imports the day it landed. That is the mechanism by which a flattened domain grows a barrel
+> back, and it is checked now rather than described. Phase 7 still owns the rest of §4.4.
+
 ### Phase 6 — the remaining domains
 
 - **Objective.** Empty every technical-category folder. _(Counts below are estimates.)_
@@ -659,6 +705,9 @@ optional final phase.
   into owners — `use-disposable`, `use-world-palette` and `mulberry32` are 100% world-consumed;
   `use-in-view` has one importer; only `use-is-client` is genuinely shared.
   `styles/globals.css` → `src/globals.css`, updating `components.json`.
+  **Phase 5 left three modules here on purpose:** `hooks/use-disposable`, `utils/mulberry32`
+  and `hooks/use-is-client` still work through their aliases, and `components/ui/` still holds
+  `brand.ts` and `segmented.tsx` that Phase 5 added — the folder move carries them.
   **Rename the content model to §3's names** — `Destination` → `Page`, `ContentBlock` →
   `Block`, `worldDestinations` → the prose collection, `RouteKey`/`RoutePath` →
   `PageSlug`/`PagePath`. Inherited from Phase 3, which found it unassigned; it is a sweep

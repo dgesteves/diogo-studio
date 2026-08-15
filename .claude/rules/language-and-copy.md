@@ -4,9 +4,8 @@ paths:
   - "src/site/**"
   - "src/seo/**"
   - "src/app/layout.tsx"
-  - "src/**/*-draw.ts"
-  - "src/**/*-textures.ts"
   - "src/world/screens/**"
+  - "src/world/scene/**"
 ---
 
 # Language and copy

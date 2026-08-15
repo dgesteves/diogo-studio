@@ -4,9 +4,9 @@ import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
 
-// Add a folder here when a new vertical slice lands, so the same-feature import
-// guardrail below covers it.
-const FEATURES = ["about", "audio", "command-menu", "inspector", "studio", "world"];
+// The three domains still under `features/`; Phase 6 empties it. `world/` left in Phase 5
+// and is covered by SAME_DOMAIN_IMPORT below instead.
+const FEATURES = ["about", "command-menu", "inspector"];
 
 type ImportPattern = { group: string[]; message: string };
 type ImportPath = { name: string; importNames: string[]; message: string };
@@ -17,6 +17,14 @@ const DEEP_FEATURE_IMPORT: ImportPattern = {
   group: ["@/features/*/**"],
   message:
     "A domain's store module is its public API; every other file in it is private. Import a sibling's store, never a deep path — docs/refactor.md §4.2.",
+};
+
+// `world/` is a real domain now, so the same rule the `features/` slices get applies to it:
+// inside the world, import relatively. Phase 7 turns this into one group per domain with the
+// store carved out, and promotes the lot to `error`.
+const SAME_DOMAIN_IMPORT: ImportPattern = {
+  group: ["@/world", "@/world/**"],
+  message: "Inside world/, import relatively — never through the @/world alias.",
 };
 
 const ROUTING_IS_A_LEAF: ImportPattern = {
@@ -115,6 +123,16 @@ const eslintConfig = defineConfig([
       "jsx-a11y/no-autofocus": "error",
       "jsx-a11y/no-noninteractive-element-interactions": "error",
       "jsx-a11y/no-static-element-interactions": "error",
+    },
+  },
+  {
+    files: ["src/world/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": restrictedImports(
+        SAME_DOMAIN_IMPORT,
+        DEEP_FEATURE_IMPORT,
+        ROUTING_IS_A_LEAF,
+      ),
     },
   },
   ...FEATURES.map((feature) => ({
