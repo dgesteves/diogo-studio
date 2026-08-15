@@ -2,9 +2,9 @@ import "server-only";
 
 import { engagements, orgLine, patternLabels } from "../career";
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const work: Destination = {
+export const work: Page = {
   ...getStationEntry("work"),
   eyebrow: "Selected experience",
   title: "Eleven years on the surfaces users touch.",

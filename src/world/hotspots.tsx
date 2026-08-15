@@ -1,6 +1,6 @@
 "use client";
 
-import { type RouteKey, stationIndex } from "@/content/pages";
+import { type PageSlug, stationIndex } from "@/content/pages";
 import { type Vec3, type WorldStation } from "./stations";
 import { WALL_SCREEN, WALL_SCREEN_Z } from "./room";
 import {
@@ -79,11 +79,11 @@ export const furnitureHotspots = {
   principles: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.principles], size: WALL_SIZE, glow: "wall" },
   stack: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.stack], size: WALL_SIZE, glow: "wall" },
   playground: { center: [WALL_X, WALL_Y, WALL_SCREEN_Z.playground], size: WALL_SIZE, glow: "wall" },
-} as const satisfies Partial<Record<RouteKey, HotspotVolume>>;
+} as const satisfies Partial<Record<PageSlug, HotspotVolume>>;
 
 type FurnitureRoute = keyof typeof furnitureHotspots;
 
-export function isFurnitureRoute(slug: RouteKey): slug is FurnitureRoute {
+export function isFurnitureRoute(slug: PageSlug): slug is FurnitureRoute {
   return slug in furnitureHotspots;
 }
 
@@ -239,7 +239,7 @@ export function HotspotFocus(props: HotspotFocusProps): ReactElement | null {
  * the stall repeats on every single hover. Keeping the count constant and only
  * animating uniforms costs nothing.
  */
-export function HotspotFocusLight({ slug }: { slug: RouteKey | null }): ReactElement {
+export function HotspotFocusLight({ slug }: { slug: PageSlug | null }): ReactElement {
   const lightRef = useRef<PointLight>(null);
   const amount = useRef(0);
   const accent = useRef(new Color());
@@ -326,7 +326,7 @@ export function FurnitureHotspot({
   );
 }
 
-export function WorldPortals({ active }: { active: RouteKey }): ReactElement {
+export function WorldPortals({ active }: { active: PageSlug }): ReactElement {
   const hovered = useHoveredStation();
 
   return (

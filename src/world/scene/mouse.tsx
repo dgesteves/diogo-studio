@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { ContactShadows } from "@react-three/drei";
 import { BufferGeometry, DoubleSide, Float32BufferAttribute, Vector3 } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
+import { useDisposable } from "../gpu";
 import { worldColors } from "../materials";
 import { DESK_TOP_Y } from "../room";
 

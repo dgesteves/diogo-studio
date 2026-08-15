@@ -2,9 +2,9 @@ import "server-only";
 
 import { education, engagements, orgLine } from "../career";
 import { getStationEntry } from "../pages";
-import type { ContentBlock, Destination } from "../schema";
+import type { Block, Page } from "../schema";
 
-type TimelineItem = Extract<ContentBlock, { kind: "timeline" }>["items"][number];
+type TimelineItem = Extract<Block, { kind: "timeline" }>["items"][number];
 
 /**
  * `/work` is the engagement record; this is the whole arc, education included, in one
@@ -34,7 +34,7 @@ const chronological: readonly TimelineItem[] = [
   .sort((a, b) => b.start.localeCompare(a.start))
   .map((entry) => entry.item);
 
-export const timeline: Destination = {
+export const timeline: Page = {
   ...getStationEntry("timeline"),
   eyebrow: "The long arc",
   title: "From law school to leading AI-native platforms.",

@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { Kbd } from "@/components/ui/kbd";
+import { Kbd } from "@/ui/kbd";
 import { useExplore } from "../explore";
 
 export function ExploreHud(): ReactElement {

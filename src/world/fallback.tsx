@@ -1,5 +1,5 @@
 import { type ReactElement } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import Image from "next/image";
 
 type NeonGridSceneProps = {

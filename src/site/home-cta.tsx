@@ -2,11 +2,11 @@
 
 import type { ReactElement } from "react";
 import { Sparkles } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
-import { StatusDot } from "@/components/ui/status-dot";
+import { Button } from "@/ui/button";
+import { Kbd } from "@/ui/kbd";
+import { StatusDot } from "@/ui/status-dot";
 import { siteConfig } from "@/content/profile";
-import { useCommandMenu } from "@/features/command-menu";
+import { useCommandMenu } from "@/command-menu/store";
 
 /**
  * The landing's two affordances that the authored record cannot express: the author is

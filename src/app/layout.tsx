@@ -1,16 +1,17 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { AppProviders } from "@/providers";
-import { JsonLd } from "@/components/seo/json-ld";
-import { CommandMenu, CommandMenuProvider } from "@/features/command-menu";
-import { InspectorOverlay, InspectorOverlayProvider } from "@/features/inspector";
-import { env } from "@/config/env";
-import { personJsonLd, websiteJsonLd } from "@/seo/structured-data";
-import { cn } from "@/utils/cn";
-import "@/styles/globals.css";
+import { AppProviders } from "./providers";
+import { CommandMenu } from "@/command-menu/menu";
+import { CommandMenuProvider } from "@/command-menu/store";
+import { InspectorOverlay } from "@/telemetry/overlay";
+import { InspectorOverlayProvider } from "@/telemetry/store";
+import { env } from "@/env";
+import { JsonLd, personJsonLd, websiteJsonLd } from "@/site/structured-data";
+import { cn } from "@/ui/cn";
+import "@/globals.css";
 
-export { rootMetadata as metadata, rootViewport as viewport } from "@/seo/root-metadata";
+export { rootMetadata as metadata, rootViewport as viewport } from "@/site/metadata";
 
 const isVercel = env.VERCEL === "1";
 

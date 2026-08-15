@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { Instance, Instances, RoundedBox } from "@react-three/drei";
 import { type CanvasTexture } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
+import { useDisposable } from "../gpu";
 import { worldColors } from "../materials";
 import { DESK_TOP_Y } from "../room";
 import { MONO } from "../screens/kit";

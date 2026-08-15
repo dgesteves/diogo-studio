@@ -1,17 +1,17 @@
 "use client";
 
-import { type RouteKey, type RoutePath, stationIndex, getStationEntry } from "@/content/pages";
+import { type PageSlug, type PagePath, stationIndex, getStationEntry } from "@/content/pages";
 import { getStation, useActiveStation, useHoveredStation } from "../stations";
 import { Fragment, type ReactElement } from "react";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import { Maximize2 } from "lucide-react";
 
 /** The radar on the deck: where every station sits relative to the one you are on. */
 
 export type RadarPoint = {
-  slug: RouteKey;
+  slug: PageSlug;
   label: string;
-  href: RoutePath;
+  href: PagePath;
   accent: string;
   x: number;
   y: number;
@@ -50,8 +50,8 @@ export function buildRadarPoints(): readonly RadarPoint[] {
 export const radarPoints: readonly RadarPoint[] = buildRadarPoints();
 
 type DeckRadarPlotProps = {
-  active: RouteKey;
-  hovered: RouteKey | null;
+  active: PageSlug;
+  hovered: PageSlug | null;
 };
 
 function DeckRadarPlot({ active, hovered }: DeckRadarPlotProps): ReactElement {

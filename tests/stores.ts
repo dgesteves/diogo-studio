@@ -1,4 +1,4 @@
-import { setInspectorOpen } from "@/features/inspector/overlay-store";
+import { setInspectorOpen } from "@/telemetry/store";
 
 import { getPerfServerSnapshot, markPerfInactive, publishPerf } from "@/world/perf";
 import { persistOverride } from "@/reduced-motion";

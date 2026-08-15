@@ -2,9 +2,9 @@ import "server-only";
 
 import { getStationEntry } from "../pages";
 import { experiments } from "../playground";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const playground: Destination = {
+export const playground: Page = {
   ...getStationEntry("playground"),
   eyebrow: "Interactive toys",
   title: "Where the interface gets to play.",

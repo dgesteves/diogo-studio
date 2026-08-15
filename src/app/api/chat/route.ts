@@ -1,12 +1,11 @@
-import { chatRequestSchema, type AgentSourcesPayload } from "@/schemas/agent";
-import { retrieve } from "@/ai/retrieve";
-import { createRateLimiter } from "@/rate-limit";
-import { env } from "@/config/env";
+import { chatRequestSchema, type AgentSourcesPayload } from "@/chat-contract";
+import { env } from "@/env";
 
-import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/ai/agent-index";
-import { buildCitations, jsonResponse, REFUSAL_TEXT, textResponse } from "@/ai/agent-response";
-import { embedQuery } from "@/ai/embed-query";
-import { streamAgentResponse } from "@/ai/agent-stream";
+import { CHUNKS, CORPUS_HAS_EMBEDDINGS } from "@/agent/corpus";
+import { createRateLimiter } from "@/agent/rate-limit";
+import { buildCitations, jsonResponse, REFUSAL_TEXT, textResponse } from "@/agent/response";
+import { embedQuery, retrieve } from "@/agent/retrieval";
+import { streamAgentResponse } from "@/agent/stream";
 
 export const maxDuration = 30;
 

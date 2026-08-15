@@ -2,9 +2,9 @@ import "server-only";
 
 import { getStationEntry } from "../pages";
 import { siteConfig } from "../profile";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const speaking: Destination = {
+export const speaking: Page = {
   ...getStationEntry("speaking"),
   eyebrow: "Stage & community",
   title: "Sharing the craft with the community.",

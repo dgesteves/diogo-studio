@@ -1,12 +1,12 @@
 import { type ReactElement } from "react";
 import Link from "next/link";
-import type { ContentBlock } from "@/content/schema";
+import type { Block } from "@/content/schema";
 
 /**
  * How an authored block becomes markup — the whole of it, because every renderer below
  * has exactly one consumer: the switch. `blocks.dom.test.tsx` is the spec.
  */
-export function ContentBlocks({ blocks }: { blocks: readonly ContentBlock[] }): ReactElement {
+export function Blocks({ blocks }: { blocks: readonly Block[] }): ReactElement {
   return (
     <div className="flex flex-col gap-8">
       {blocks.map((block) => (
@@ -19,7 +19,7 @@ export function ContentBlocks({ blocks }: { blocks: readonly ContentBlock[] }): 
   );
 }
 
-function BlockView({ block }: { block: ContentBlock }): ReactElement {
+function BlockView({ block }: { block: Block }): ReactElement {
   switch (block.kind) {
     case "lede":
       return (
@@ -71,10 +71,10 @@ function BlockView({ block }: { block: ContentBlock }): ReactElement {
   }
 }
 
-type Stats = Extract<ContentBlock, { kind: "stats" }>["items"];
-type Cards = Extract<ContentBlock, { kind: "cards" }>["items"];
-type Timeline = Extract<ContentBlock, { kind: "timeline" }>["items"];
-type Links = Extract<ContentBlock, { kind: "links" }>["items"];
+type Stats = Extract<Block, { kind: "stats" }>["items"];
+type Cards = Extract<Block, { kind: "cards" }>["items"];
+type Timeline = Extract<Block, { kind: "timeline" }>["items"];
+type Links = Extract<Block, { kind: "links" }>["items"];
 
 const CHIP =
   "border-border bg-surface/60 text-foreground hover:border-accent/60 hover:text-accent focus-visible:border-accent inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition-colors";

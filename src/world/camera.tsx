@@ -5,7 +5,7 @@ import { ROOM } from "./room";
 import { type Vec3, type WorldStation } from "./stations";
 import { useRef, type RefObject } from "react";
 import { useFrame } from "@react-three/fiber";
-import { type RouteKey } from "@/content/pages";
+import { type PageSlug } from "@/content/pages";
 import { getExploreSnapshot } from "./store";
 import { getStation } from "./stations";
 import { type OrbitInputState } from "./input";
@@ -101,7 +101,7 @@ export function introStartPosition(station: WorldStation): Vec3 {
 }
 
 type WorldCameraProps = {
-  active: RouteKey;
+  active: PageSlug;
   input: RefObject<OrbitInputState>;
 };
 

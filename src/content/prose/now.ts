@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const now: Destination = {
+export const now: Page = {
   ...getStationEntry("now"),
   eyebrow: "Present tense",
   title: "What I'm focused on right now.",

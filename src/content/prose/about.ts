@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const about: Destination = {
+export const about: Page = {
   ...getStationEntry("about"),
   eyebrow: "Background · philosophy",
   title: "The senior engineering voice on the surfaces users touch.",

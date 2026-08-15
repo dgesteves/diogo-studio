@@ -2,7 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect, type ReactElement } from "react";
-import "@/styles/globals.css";
+import "@/globals.css";
 
 export default function GlobalError({
   error,

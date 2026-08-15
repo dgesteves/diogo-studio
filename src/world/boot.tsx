@@ -22,14 +22,14 @@ import {
   VolumeX,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
-import { Segmented } from "@/components/ui/segmented";
+import { Button } from "@/ui/button";
+import { Segmented } from "@/ui/segmented";
 import { siteConfig } from "@/content/profile";
 import { useAudio } from "./audio";
-import { useInspectorOverlay } from "@/features/inspector";
-import { useIsClient } from "@/hooks/use-is-client";
+import { useInspectorOverlay } from "@/telemetry/store";
+import { useIsClient } from "@/use-is-client";
 import { useReducedMotionPreference } from "@/reduced-motion";
-import { cn } from "@/utils/cn";
+import { cn } from "@/ui/cn";
 import { getBootServerSnapshot, getBootSnapshot, setBootProgress, subscribeBoot } from "./store";
 
 /**

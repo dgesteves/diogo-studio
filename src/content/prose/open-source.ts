@@ -2,9 +2,9 @@ import "server-only";
 
 import { getStationEntry, routes } from "../pages";
 import { siteConfig } from "../profile";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const openSource: Destination = {
+export const openSource: Page = {
   ...getStationEntry("openSource"),
   eyebrow: "In the open",
   title: "Where the patterns would get distilled.",

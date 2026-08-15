@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry, routes } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const lab: Destination = {
+export const lab: Page = {
   ...getStationEntry("lab"),
   eyebrow: "R&D",
   title: "The questions I'm still chewing on.",

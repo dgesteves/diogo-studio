@@ -2,7 +2,6 @@
 paths:
   - "src/app/**"
   - "src/site/**"
-  - "src/seo/**"
   - "next.config.ts"
 ---
 
@@ -38,9 +37,9 @@ Metadata inheritance does not exist until a route renders, so it is asserted in
 ## Route boundaries
 
 - Keep `app/` to routing: thin `page.tsx`/`layout.tsx` that resolve, set metadata and compose
-  UI from the domains — `site/`, `world/`, `command-menu/`, `inspector/`, `content/`, `ui/`.
-  During the migration several of those still sit under `features/`, `components/` and
-  `config/`; compose from wherever the domain lives today, and never build a new umbrella.
+  UI from the domains — `site/`, `world/`, `command-menu/`, `telemetry/`, `content/`, `ui/`.
+  Import a sibling domain's component at its real path; there are no barrels, and never build
+  a new umbrella. Inside `app/`, import relatively — the leaf rule fires on `@/app/…`.
 - **URL state here is the pathname.** Each station is its own route, read with `usePathname`
   and written with a typed `router.push`. If a genuine query parameter arrives, `nuqs` is the
   pre-approved typed helper but is not installed, so it needs a `docs/decisions.md` entry.

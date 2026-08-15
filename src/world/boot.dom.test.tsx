@@ -4,7 +4,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
-import { useInspectorOverlay } from "@/features/inspector";
+import { useInspectorOverlay } from "@/telemetry/store";
 import { persistOverride, ReducedMotionProvider } from "@/reduced-motion";
 import {
   BOOT_EXIT_MS,

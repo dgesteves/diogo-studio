@@ -43,18 +43,18 @@ Two consequences carry the whole architecture:
       └───────────┘   └──────┬──────┘  └─────────────┘   └──────────────┘
                              │ perf signal
                        ┌─────▼──────┐
-                       │ inspector/ │
+                       │ telemetry/ │
                        └────────────┘
 ```
 
-| Domain          | One-line charter                                           |
-| --------------- | ---------------------------------------------------------- |
-| `content/`      | The authored record. Every fact the product states.        |
-| `site/`         | Renders content to the DOM. Metadata, SEO, page shell.     |
-| `world/`        | Renders content as a navigable 3D room.                    |
-| `agent/`        | Retrieves over content and generates answers. Server-only. |
-| `command-menu/` | The ⌘K surface: navigate the site, ask the agent.          |
-| `inspector/`    | Developer-facing overlay for performance and Web Vitals.   |
+| Domain          | One-line charter                                              |
+| --------------- | ------------------------------------------------------------- |
+| `content/`      | The authored record. Every fact the product states.           |
+| `site/`         | Renders content to the DOM. Metadata, SEO, page shell.        |
+| `world/`        | Renders content as a navigable 3D room.                       |
+| `agent/`        | Retrieves over content and generates answers. Server-only.    |
+| `command-menu/` | The ⌘K surface: navigate the site, ask the agent.             |
+| `telemetry/`    | Web Vitals, and the developer-facing overlay that shows them. |
 
 There is no `features/` umbrella. Six domains at the root of `src/` are easier to hold in
 your head than six domains inside a folder that says nothing.
@@ -99,7 +99,7 @@ through a mapped type, so `typedRoutes` still sees a literal per route.
 | ---------------------- | ------------------------------------------------------------------------------------------------------- |
 | **Owns**               | The DOM reading surface: page shell, the block renderer, page and root metadata, JSON-LD, the portrait. |
 | **May import**         | `content/`, `ui/`                                                                                       |
-| **Must never import**  | `world/`, `agent/`, `command-menu/`, `inspector/`, `app/`                                               |
+| **Must never import**  | `world/`, `agent/`, `app/`, or any sibling's private file — `command-menu/store` only                   |
 | **Runtime**            | Server-first. Client only where interaction demands it.                                                 |
 | **Source of truth**    | None — it derives everything from `content/`. It owns presentation, never facts.                        |
 | **Talks to others by** | Being composed by `app/`. It is a leaf renderer and calls nothing.                                      |
@@ -114,11 +114,11 @@ by the layout, never around it.
 |                        |                                                                                                                                             |
 | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Owns**               | The 3D room: scene geometry, materials, camera, input, boot, HUD, audio, canvas screens, and the spatial placement of each page.            |
-| **May import**         | `content/`, `ui/`, `reduced-motion`                                                                                                         |
-| **Must never import**  | `site/`, `agent/`, `inspector/`, `app/`                                                                                                     |
+| **May import**         | `content/`, `ui/`, `reduced-motion`, and two sibling stores: `command-menu/store`, `telemetry/store`                                        |
+| **Must never import**  | `site/`, `agent/`, `app/`, or any other file of a sibling                                                                                   |
 | **Runtime**            | Client-only. Nothing here renders on the server.                                                                                            |
 | **Source of truth**    | Spatial and visual tuning only — where a station sits, how the camera moves, what a material looks like. **Never a fact about the author.** |
-| **Talks to others by** | Publishing a perf signal (`world/perf.ts`) that `inspector/` reads; opening the command menu through a callback it is handed.               |
+| **Talks to others by** | Publishing a perf signal (`world/perf.ts`) that `telemetry/` reads, and reading the ⌘K and overlay stores to open them.                     |
 
 The rule that keeps this domain honest:
 
@@ -134,56 +134,71 @@ between "what a page says" and "where it lives in the room" is a slug, and nothi
 
 ### `agent/`
 
-|                        |                                                                                                                                   |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Owns**               | The Zod contract for `/api/chat`, retrieval, prompting, streaming, the response envelope, rate limiting, and the generated index. |
-| **May import**         | `content/` (including `content/prose/**`), `env`                                                                                  |
-| **Must never import**  | `site/`, `world/`, `command-menu/`, `inspector/`, `ui/`, `app/`                                                                   |
-| **Runtime**            | **Server-only**, every module. `import "server-only"` is the first line.                                                          |
-| **Source of truth**    | The generated index is derived from `content/` and never hand-edited.                                                             |
-| **Talks to others by** | HTTP, and only HTTP. `app/api/chat/route.ts` is its single entry point.                                                           |
+|                        |                                                                                                             |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Owns**               | The corpus, retrieval, prompting, streaming, the response envelope, rate limiting, and the generated index. |
+| **May import**         | `content/` (including `content/prose/**`), `env`, `chat-contract`                                           |
+| **Must never import**  | `site/`, `world/`, `command-menu/`, `telemetry/`, `ui/`, `app/`                                             |
+| **Runtime**            | **Server-only**, every module. `import "server-only"` is the first line.                                    |
+| **Source of truth**    | The generated index is derived from `content/` and never hand-edited.                                       |
+| **Talks to others by** | HTTP, and only HTTP. `app/api/chat/route.ts` is its single entry point.                                     |
 
-No client module may import from `agent/`, including its types — the schema is imported by
-the client through its own module, and the boundary is the wire format. Its safety
-properties are non-negotiable and break silently, so they are listed in `AGENTS.md`.
+No client module may import from `agent/`, including its types. That is what `chat-contract.ts`
+is for: the `/api/chat` request and sources schemas are a root leaf both ends read, and the
+boundary between them is the wire format rather than a module. Its safety properties are
+non-negotiable and break silently, so they are listed in `AGENTS.md`.
 
 ### `command-menu/`
 
-|                        |                                                                               |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| **Owns**               | The ⌘K dialog, its two modes, and the client-side ask/stream state.           |
-| **May import**         | `content/` (the client-safe page projection), `ui/`, `reduced-motion`         |
-| **Must never import**  | `agent/`, `world/`, `site/`, `inspector/`, `app/`                             |
-| **Runtime**            | Client.                                                                       |
-| **Source of truth**    | None. Its route list derives from `content/pages.ts` — all seventeen of them. |
-| **Talks to others by** | `fetch("/api/chat")`. It never imports the agent.                             |
+|                        |                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------------------- |
+| **Owns**               | The ⌘K dialog, its two modes, and the client-side ask/stream state.                    |
+| **May import**         | `content/` (the client-safe page projection), `ui/`, `reduced-motion`, `chat-contract` |
+| **Must never import**  | `agent/`, `world/`, `site/`, `telemetry/`, `app/`                                      |
+| **Runtime**            | Client.                                                                                |
+| **Source of truth**    | None. Its route list derives from `content/pages.ts` — all seventeen of them.          |
+| **Talks to others by** | `fetch("/api/chat")`. It never imports the agent.                                      |
 
-### `inspector/`
+### `telemetry/`
 
-|                        |                                                           |
-| ---------------------- | --------------------------------------------------------- |
-| **Owns**               | The performance overlay and its open/closed state.        |
-| **May import**         | `world/perf`, `telemetry`, `ui/`, `reduced-motion`        |
-| **Must never import**  | `content/`, `agent/`, `site/`, `app/`                     |
-| **Runtime**            | Client.                                                   |
-| **Source of truth**    | None. It is a dashboard over signals produced elsewhere.  |
-| **Talks to others by** | Subscribing. It reads; it never writes to another domain. |
+|                        |                                                                             |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Owns**               | The Web Vitals collector, the overlay that displays it, and its open state. |
+| **May import**         | `ui/`, `reduced-motion`, and one sibling store: `world/perf`                |
+| **Must never import**  | `content/`, `agent/`, `site/`, `command-menu/`, `app/`                      |
+| **Runtime**            | Client.                                                                     |
+| **Source of truth**    | Web Vitals. Everything else on the overlay is a signal produced elsewhere.  |
+| **Talks to others by** | Subscribing. It reads; it never writes to another domain.                   |
 
 A signal is owned by whoever **produces** it, not whoever displays it. The world produces
-frame statistics, so `world/perf.ts` owns them. `telemetry.ts` starts the `web-vitals`
-collector on its first subscriber, so it owns those. The inspector subscribes to both and owns
-neither — which is why adding a second consumer later requires no move.
+frame statistics, so `world/perf.ts` owns them; `telemetry/vitals.ts` starts the `web-vitals`
+collector on its first subscriber, so it owns those. The overlay subscribes to both — which is
+why adding a second consumer later requires no move.
+
+It has **two** public modules rather than the one a domain usually has: `vitals.ts` for the
+metrics and `store.tsx` for whether the overlay is showing. Keeping the open/close signal out
+of the component tree it drives is not a style choice — `tests/stores.ts` pulls whatever that
+module imports into every spec's module graph, which is how merging the two broke three
+unrelated specs in Phase 5.
+
+The name "Inspector" survives in the UI copy and in the identifiers that match it. It is a
+brand, not a directory: the `features/inspector` folder that made it ambiguous is gone.
 
 ### Supporting modules
 
-| Module               | Owns                                                        | Runtime    |
-| -------------------- | ----------------------------------------------------------- | ---------- |
-| `ui/`                | Generic primitives with zero domain knowledge, plus `cn`    | Isomorphic |
-| `env.ts`             | The **only** reader of `process.env`, Zod-validated         | Isomorphic |
-| `store.ts`           | `createStore<T>()` — the one external-store factory         | Isomorphic |
-| `telemetry.ts`       | Sentry sample rate, the Web Vitals store                    | Isomorphic |
-| `reduced-motion.tsx` | The motion preference: system, low-power, override, storage | Client     |
-| `styles/`            | Design tokens and global CSS                                | —          |
+| Module               | Owns                                                          | Runtime    |
+| -------------------- | ------------------------------------------------------------- | ---------- |
+| `ui/`                | Generic primitives with zero domain knowledge, plus `cn`      | Isomorphic |
+| `env.ts`             | The **only** reader of `process.env`, Zod-validated           | Isomorphic |
+| `store.ts`           | `createStore<T>()` — the one external-store factory           | Isomorphic |
+| `chat-contract.ts`   | The `/api/chat` wire format, owned by neither end             | Isomorphic |
+| `reduced-motion.tsx` | The motion preference: system, low-power, override, storage   | Client     |
+| `use-is-client.ts`   | Whether hydration has happened — read by `world/` and `site/` | Client     |
+| `globals.css`        | Design tokens and global CSS                                  | —          |
+
+A root leaf is measured, never assumed: it earns its place when a **second** domain imports
+it, and it goes back into a domain when that stops being true. `use-is-client.ts` is the newest
+and the whole argument for it is that `world/` and `site/` both read it.
 
 `ui/` is the hardest boundary to keep clean and the easiest to test: **if a primitive needs
 to know what a `Page` is, it does not belong in `ui/`.**
@@ -193,28 +208,34 @@ to know what a `Page` is, it does not belong in `ui/`.**
 ## 4. Dependency rules
 
 ```
-app/  →  site/ · world/ · command-menu/ · inspector/  →  content/ · ui/
+app/  →  site/ · world/ · command-menu/ · telemetry/  →  content/ · ui/
 app/api/  →  agent/  →  content/
-leaves (import nothing above them):  content/ · ui/ · env · telemetry · reduced-motion
+leaves (import nothing above them):
+  content/ · ui/ · env · store · reduced-motion · use-is-client · chat-contract
 ```
 
-Five rules:
+Six rules:
 
 1. **Nothing imports from `app/`.** Routing is a leaf.
-2. **No domain imports a sibling domain**, with three named exceptions that are part of the
-   design: `inspector/` → `world/perf`, `world/` → `content/`, `site/` → `content/`.
-3. **`ui/` imports no domain.**
-4. **`content/` imports nothing.**
-5. **`agent/` is reachable only from `app/api/` and build scripts.**
+2. **A domain's store module is its public API; every other file in it is private.** A sibling
+   may import the store and nothing else. The public modules are `world/store.ts`,
+   `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx` and `telemetry/vitals.ts`;
+   `site/` exports no state, so it is private whole.
+3. **`site/` never imports `world/`, and `world/` never imports `site/`** — not even a store.
+   This is the edge that makes "the 3D room is an enhancement" structural rather than stated.
+4. **`ui/` imports no domain.**
+5. **`content/` imports nothing.**
+6. **`agent/` is reachable only from `app/api/` and build scripts**, never from a client
+   module, not even for a type.
 
-**These are not yet enforced against the right paths.** `no-restricted-imports` ships as
-`warn`, but the warning budget is `0` as of Phase 4, so a warning fails `pnpm lint` exactly
-like an error. The gap left is the glob rather than the severity: `@/features/*/**` does not
-match a domain's own `index.ts`, so the eight edges that break rule 2 — counted in
-[`refactor.md`](./refactor.md) §4.5 — all import through a barrel and pass. **Phase 7 of the
-refactor** is what makes this section true: it resolves those edges, replaces the three
-hand-written exceptions with the store rule in `refactor.md` §4.2 and promotes the rule to
-`error`. Until it lands, read this list as the contract, not as something the build checks.
+**Half of this is enforced.** `no-restricted-imports` ships as `warn`, but the warning budget
+is `0` as of Phase 4, so a warning fails `pnpm lint` exactly like an error. What is live is the
+**same-domain rule** — inside each domain, import relatively, never through its own `@/…`
+alias — which is what stops a flattened domain growing a barrel back, and rule 1 everywhere.
+What is not yet checked is rule 2 from **outside** a domain. Phase 6 deleted the barrels the
+old glob could not see, so every remaining cross-domain import already points at a store;
+**Phase 7** encodes that as one group per domain with the store carved out, and promotes the
+lot to `error`. Until it lands, read rules 2 and 3 as the contract rather than as a check.
 
 **There are no barrel files.** Import the module you need at its real path. With shallow
 domains there are no internals to protect, so a barrel buys nothing and costs two things:
@@ -230,20 +251,20 @@ paths, which is what the barrels were standing in for.
 
 ```ts
 // content/schema.ts
+// `id` is required on every variant, not optional — see below.
 export type Block =
-  | { kind: "lede"; id?: string; text: string }
-  | { kind: "prose"; id?: string; paragraphs: readonly string[] }
-  | { kind: "list"; id?: string; title?: string; items: readonly string[] }
-  | { kind: "stats"; id?: string; items: readonly Stat[] }
-  | { kind: "cards"; id?: string; items: readonly Card[] }
-  | { kind: "timeline"; id?: string; items: readonly Role[] }
-  | { kind: "links"; id?: string; items: readonly Link[] };
+  | { kind: "lede"; id: string; text: string }
+  | { kind: "prose"; id: string; paragraphs: readonly string[] }
+  | { kind: "list"; id: string; title?: string; items: readonly string[] }
+  | { kind: "stats"; id: string; items: readonly Stat[] }
+  | { kind: "cards"; id: string; items: readonly Card[] }
+  | { kind: "timeline"; id: string; items: readonly Role[] }
+  | { kind: "links"; id: string; items: readonly BlockLink[] };
 
 export type Page = {
   slug: PageSlug;
-  path: PagePath;
+  href: PagePath;
   label: string; // short form: nav, HUD, radar, citations
-  sector: SectorId; // editorial grouping
   eyebrow: string;
   title: string;
   summary: string; // the ONE description — page metadata, OG, agent
@@ -251,24 +272,30 @@ export type Page = {
 };
 ```
 
+Sector is not on `Page`. The editorial grouping lives in `content/pages.ts` beside the URL
+map, because it is a property of the client-safe projection — the ⌘K list and the studio map
+both read it, and neither may touch `blocks`.
+
 `id` on a block is the mechanism that makes single-authoring real: it is the DOM anchor, the
 `#fragment` in an agent citation, and the chunk boundary in the retrieval index. All three
-derive from one declaration.
+derive from one declaration — which is why it is **required**. Optional would make an
+un-anchorable chunk representable, and the 25-chunk index that preceded this had `anchor`
+undefined on every one of them for exactly that reason.
 
 ### Derivation
 
 Every representation below is generated from the table above. None of them may restate it.
 
-| Representation       | Derived from                    | Built by                    |
-| -------------------- | ------------------------------- | --------------------------- |
-| Page body (DOM)      | `page.blocks`                   | `site/blocks.tsx`           |
-| Page metadata / OG   | `page.title`, `page.summary`    | `site/metadata.ts`          |
-| `sitemap.xml`        | `content/pages.ts`              | `app/sitemap.ts`            |
-| JSON-LD              | `content/profile.ts`            | `site/structured-data.tsx`  |
-| Retrieval index      | blocks, with `id` as the anchor | `scripts/build-index.ts`    |
-| 3D canvas screens    | `content/career.ts` and friends | `world/screens/*`           |
-| HUD, radar, deck map | `content/pages.ts`              | `world/hud/*`               |
-| ⌘K route list        | `content/pages.ts`              | `command-menu/navigate.tsx` |
+| Representation       | Derived from                    | Built by                       |
+| -------------------- | ------------------------------- | ------------------------------ |
+| Page body (DOM)      | `page.blocks`                   | `site/blocks.tsx`              |
+| Page metadata / OG   | `page.title`, `page.summary`    | `site/metadata.ts`             |
+| `sitemap.xml`        | `content/pages.ts`              | `app/sitemap.ts`               |
+| JSON-LD              | `content/profile.ts`            | `site/structured-data.tsx`     |
+| Retrieval index      | blocks, with `id` as the anchor | `scripts/build-agent-index.ts` |
+| 3D canvas screens    | `content/career.ts` and friends | `world/screens/*`              |
+| HUD, radar, deck map | `content/pages.ts`              | `world/hud/*`                  |
+| ⌘K route list        | `content/pages.ts`              | `command-menu/navigate.tsx`    |
 
 If a fact needs changing, exactly one file changes.
 
@@ -287,53 +314,57 @@ src/
     icon.tsx  apple-icon.tsx  robots.ts  sitemap.ts
 
   content/                    ★ SOURCE OF TRUTH
-    schema.ts                 Block · Page · Sector · Role
-    pages.ts                  client-safe: slug · path · label · sector
-                              + the derived URL map and asInternalHref()
+    schema.ts                 Block · BlockLink · Page
+    pages.ts                  client-safe: slug · href · label · sector
+                              + the derived URL map, asInternalHref(), the station index
     profile.ts                identity, role, links, availability
     career.ts                 the ONE career record
+    principles.ts  stack.ts  playground.ts   records a canvas screen reads
     prose.ts                  server-only: the join — slug → page with blocks
     prose/                    server-only prose, ONE FILE PER SLUG
       home.ts  about.ts  work.ts  projects.ts  case-studies.ts …  (17)
 
   site/                       THE DOM READING SURFACE
     page-view.tsx  blocks.tsx  metadata.ts  structured-data.tsx
-    portrait.tsx  portrait-engine.ts  home-cta.tsx
+    portrait.tsx  portrait-engine.tsx  home-cta.tsx
 
   world/                      THE 3D ROOM
     world.tsx                 mount point: fallback · gate · dynamic canvas
     canvas.tsx  camera.tsx  interact.tsx  quality.tsx  postprocessing.tsx  fallback.tsx
     stations.ts               slug → camera · anchor · accent · object (spatial only)
-    hotspots.tsx  materials.ts  room.ts  palette.ts  tuning.ts  input.ts
-    store.ts  perf.ts  audio.ts
-    boot/                     gate · overlay · splash · backdrop
-    hud/                      deck · radar · map · explore-hud
+    hotspots.tsx  materials.ts  room.ts  input.ts  explore.tsx  gpu.ts  random.ts
+    boot.tsx  store.ts  perf.ts  audio.tsx
+    hud/                      deck · radar · map · explore
     scene/                    room · desk · workstation · lounge · shelving
                               lighting · city  + geometry modules
-    screens/                  canvas.ts (one texture hook) · kit.ts (one CRT kit)
-                              wall-screens · monitors · tv — DRAW FROM content
+    screens/                  texture.ts (one texture hook) · kit.ts (one CRT kit)
+                              wall · monitors · tv — DRAW FROM content
 
   agent/                      SERVER-ONLY
-    schema.ts  retrieval.ts  prompt.ts  stream.ts  response.ts  rate-limit.ts
-    index.json                generated — per-block chunks with anchors
+    corpus.ts  retrieval.ts  prompt.ts  stream.ts  response.ts  rate-limit.ts
+    index.generated.json      generated — per-block chunks with anchors
 
   command-menu/               menu · navigate · ask · answer · store
-  inspector/                  overlay · panels
+  telemetry/                  vitals · store · overlay · panels
 
-  ui/                         button · badge · kbd · status-dot · brand-icons · cn.ts
-  styles/globals.css
+  ui/                         button · badge · kbd · status-dot · segmented
+                              brand-icons · brand.ts · cn.ts
+  globals.css
   env.ts                      the only process.env reader
   store.ts                    createStore<T>() — every client signal is built from it
   reduced-motion.tsx          provider + store, one concept
-  telemetry.ts                sample rate + Web Vitals store
+  use-is-client.ts            hydration, read by world/ and site/
+  chat-contract.ts            the /api/chat wire format — owned by neither end
 
-scripts/build-index.ts        content → agent/index.json
+scripts/build-agent-index.ts  content → agent/index.generated.json
 tests/                        helpers (@tests/*) + e2e/
 ```
 
-Eight folders and four files at the root of `src/`. Maximum depth four segments. No
-`utils/`, `helpers/`, `common/`, `shared/`, `sections/`, `constants/`, or `components/`
-passthrough level anywhere, and no folder that exists to make the tree look organized.
+Eight folders and six files at the root of `src/`. Maximum depth four segments. No
+`utils/`, `helpers/`, `common/`, `shared/`, `sections/`, `constants/`, `config/`, `hooks/`,
+`providers/`, `schemas/`, `seo/`, `styles/`, or `components/` passthrough level anywhere, and
+no folder that exists to make the tree look organized. Every one of those existed before
+Phase 6; adding one back needs a `decisions.md` entry naming the boundary it marks.
 
 ### Path aliases
 
@@ -392,7 +423,7 @@ Helpers live in `tests/` and are imported through `@tests/*`.
 | A route or API handler              | `src/app/…` (thin)                               |
 | DOM rendering of content            | `site/`                                          |
 | 3D geometry, materials, camera work | `world/scene/`, `world/materials.ts`             |
-| A number that tunes rendering       | `world/tuning.ts` — never beside content         |
+| A number that tunes rendering       | the module that reads it — never beside content  |
 | A canvas screen                     | `world/screens/` — takes its data as an argument |
 | Retrieval, prompting, streaming     | `agent/` + `import "server-only"`                |
 | A generic primitive                 | `ui/`                                            |

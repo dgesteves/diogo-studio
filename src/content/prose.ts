@@ -1,7 +1,7 @@
 import "server-only";
 
-import { STATION_ORDER, type RouteKey } from "./pages";
-import type { Destination } from "./schema";
+import { STATION_ORDER, type PageSlug } from "./pages";
+import type { Page } from "./schema";
 import { about } from "./prose/about";
 import { caseStudies } from "./prose/case-studies";
 import { contact } from "./prose/contact";
@@ -24,7 +24,7 @@ import { writing } from "./prose/writing";
  * The authored record, whole: every page's prose joined to the page list. Server-side
  * only — a client island reads `./pages` instead, which carries no `blocks`.
  */
-const bySlug: Record<RouteKey, Destination> = {
+const bySlug: Record<PageSlug, Page> = {
   home,
   about,
   work,
@@ -44,8 +44,8 @@ const bySlug: Record<RouteKey, Destination> = {
   lab,
 };
 
-export const worldDestinations: readonly Destination[] = STATION_ORDER.map((slug) => bySlug[slug]);
+export const pages: readonly Page[] = STATION_ORDER.map((slug) => bySlug[slug]);
 
-export function getDestination(slug: RouteKey): Destination {
+export function getPage(slug: PageSlug): Page {
   return bySlug[slug];
 }

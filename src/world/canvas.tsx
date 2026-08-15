@@ -6,9 +6,9 @@ import { markPerfInactive, publishPerf } from "./perf";
 import "./silence-clock-deprecation";
 import { AdaptiveEvents, PerformanceMonitor, PerspectiveCamera } from "@react-three/drei";
 import { useRouter } from "next/navigation";
-import { useCommandMenu } from "@/features/command-menu";
+import { useCommandMenu } from "@/command-menu/store";
 import { StudioScene } from "./scene/studio";
-import { type RouteKey, getStationEntry } from "@/content/pages";
+import { type PageSlug, getStationEntry } from "@/content/pages";
 import { useWorldPalette } from "./materials";
 import {
   DPR_DEGRADED,
@@ -110,7 +110,7 @@ export function ScenePrecompile({ onCompiled }: { onCompiled: () => void }): nul
 }
 
 type WorldCanvasProps = {
-  active: RouteKey;
+  active: PageSlug;
   quality: WorldQuality;
   onQuality: (quality: WorldQuality) => void;
   onReady?: () => void;

@@ -1,9 +1,9 @@
 import "server-only";
 
 import { getStationEntry } from "../pages";
-import type { Destination } from "../schema";
+import type { Page } from "../schema";
 
-export const uses: Destination = {
+export const uses: Page = {
   ...getStationEntry("uses"),
   eyebrow: "The rig",
   title: "Three monitors, one focus.",

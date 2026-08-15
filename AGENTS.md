@@ -31,7 +31,7 @@ workflows: `/gates` picks the gates and reads a failure, `/e2e` runs and triages
    defensive checks. (`any`, non-null assertions and loose casts are already lint errors.)
 5. **Secrets stay server-side, and every env var is optional** — features degrade instead of
    failing (no `OPENAI_API_KEY` → `503`, no `UPSTASH_*` → in-memory limiter, no Sentry DSN →
-   skipped). Preserve that when adding one; read env only through `@/config/env`.
+   skipped). Preserve that when adding one; read env only through `@/env`.
 
 ## Framework behavior that isn't visible in the source
 
@@ -54,7 +54,7 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
   layout and are unaffected — but new stateful client UI inside a station page must not assume
   a fresh mount.
 - **Tailwind 4 is CSS-first:** no `tailwind.config.*` exists or should be added; tokens live in
-  `src/styles/globals.css` under `@theme`. Don't reintroduce a legacy config because older
+  `src/globals.css` under `@theme`. Don't reintroduce a legacy config because older
   examples use one.
 - **Prefer the React 19 `ref` prop** for new code. `forwardRef` is deprecated but supported —
   no ban, no migration.
@@ -107,7 +107,7 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
 - **Judge the environment by what the test touches, not what the module is about.**
   `*.dom.test.{ts,tsx}` runs under jsdom with `vitest.setup.ts`; everything else runs under
   node. Node is the default so a missing marker fails loudly with `document is not defined`.
-- **`src/constants/agent-index.json` is generated.** It derives from `src/content/**` and
+- **`src/agent/index.generated.json` is generated.** It derives from `src/content/**` and
   nothing else, so edit a source there — most often `src/content/prose/**` or
   `src/content/career.ts` — then run `pnpm agent:index` and commit the result. Every chunk's
   permalink and anchor come from the page it was derived from; there is no parameter for
@@ -118,10 +118,12 @@ than the file. Standards and placement live in `.claude/rules/` (activated by fi
   off `next build` / `next start`. Run those through `pnpm`, never bare `tsx` or `playwright`;
   CI ran `pnpm exec playwright test` for a day and every E2E job died on import.
   `playwright.config.ts` now fails fast with that instruction, so the rule is checked.
-- **"Inspector" is two things:** `features/command-menu` is the ⌘K surface, whose agent is
-  branded "the Inspector agent"; `features/inspector` is the Web-Vitals overlay.
+- **"Inspector" is a brand, not a directory.** `command-menu/` is the ⌘K surface, whose agent is
+  branded "the Inspector agent"; `telemetry/` is the Web-Vitals overlay, whose UI is labelled
+  "Inspector · receipts". Phase 6 retired the `features/inspector` folder that made the name
+  ambiguous; the copy and the `Inspector*` identifiers that match it are Phase 8's to revisit.
 - **The AI endpoint's safety properties already hold and break silently.** When touching
-  `/api/chat`, `src/ai/**` or the answer UI, keep them: user text stays in the user message and
+  `/api/chat`, `src/agent/**` or the answer UI, keep them: user text stays in the user message and
   is never concatenated into the system prompt; model output renders as text, never HTML, and
   never becomes a URL or route; citations resolve only against the server-built citation list,
   with hrefs through `asInternalHref()`; the input cap, output-token cap, `maxDuration` and

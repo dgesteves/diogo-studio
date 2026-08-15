@@ -8,7 +8,7 @@ import sitemap from "./sitemap";
 
 const { cacheLife } = vi.hoisted(() => ({ cacheLife: vi.fn() }));
 
-vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv }));
+vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 // `cacheLife()` throws outside a Next build ("only available with the `cacheComponents`
 // config"), so the profile is asserted through the mock rather than its effect.
 vi.mock("next/cache", () => ({ cacheLife }));

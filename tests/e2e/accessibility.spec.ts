@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page } from "@playwright/test";
-import { routes, type RoutePath } from "@/content/pages";
+import { routes, type PagePath } from "@/content/pages";
 import { expect, openWithShortcut, settleWorld, test, WCAG_TAGS } from "./fixtures";
 
 /**
@@ -13,7 +13,7 @@ import { expect, openWithShortcut, settleWorld, test, WCAG_TAGS } from "./fixtur
  * and `target-size` are exactly the rules that catch a regression there. `settleWorld`
  * is what makes the second run mean something.
  */
-const ROUTE_PATHS: readonly RoutePath[] = Object.values(routes);
+const ROUTE_PATHS: readonly PagePath[] = Object.values(routes);
 
 async function scan(page: Page): Promise<void> {
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();

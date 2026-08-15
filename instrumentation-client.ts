@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
-import { DEFAULT_TRACES_SAMPLE_RATE } from "@/telemetry";
+import { DEFAULT_TRACES_SAMPLE_RATE } from "@/telemetry/vitals";
 
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 

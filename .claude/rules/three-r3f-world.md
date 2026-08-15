@@ -30,7 +30,7 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
 
 - **Never inline a hex, roughness or metalness value.** Use the shared tokens in
   `world/materials.ts` — `worldColors` plus the four material presets, ~40 importers. Add a
-  token rather than a literal. The two hexes in `components/ui/brand.ts` are the exception and
+  token rather than a literal. The two hexes in `ui/brand.ts` are the exception and
   are not the world's: they exist for the `ImageResponse` icons and the portrait tint, which
   render pixels no stylesheet reaches.
 - Read theme colors through `useWorldPalette()`, never by branching on the store inline;
@@ -69,7 +69,7 @@ forcing an interaction.
 
 - Keep the draw routine pure: take `ctx` plus a state object, return nothing, read no globals.
 - **Deterministic, always.** Never `Math.random()` — take a seeded PRNG from
-  `@/utils/mulberry32`, which lives in `utils/` because two features use it, so never
+  `world/random.ts`, which is where the world's four callers of it agree, so never
   re-declare it locally. The suite snapshots these transcripts, so non-determinism makes them
   worthless.
 

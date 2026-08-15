@@ -5,13 +5,13 @@ paths:
 
 # Placement and boundaries
 
-Six domains at the root of `src/`, one dependency direction, and ownership decided by who
-produces a thing rather than who displays it. The full contracts are in
+Eight directories at the root of `src/`, one dependency direction, and ownership decided by
+who produces a thing rather than who displays it. The full contracts are in
 [`docs/architecture.md`](../../docs/architecture.md) §3 — this file is the working summary.
 
 **A refactor is in flight.** `docs/architecture.md` is the target and wins; the current tree
 is being moved toward it and is **not a pattern to copy**. `docs/refactor.md` says which
-phase owns which move.
+phase owns which move. Phase 6 landed the tree below; **Phase 7 owns making it a check.**
 
 ## The domains
 
@@ -23,41 +23,42 @@ src/
   world/          renders content as a 3D room: scene, HUD, boot, audio, screens
   agent/          retrieval + generation, server-only, reachable only over HTTP
   command-menu/   the ⌘K surface
-  inspector/      the performance overlay
+  telemetry/      Web Vitals, scene stats and the overlay that shows them
   ui/             generic primitives with zero domain knowledge
-  styles/         globals.css + design tokens
-  env.ts  store.ts  telemetry.ts  reduced-motion.tsx
+  env.ts  store.ts  reduced-motion.tsx  use-is-client.ts  chat-contract.ts  globals.css
 ```
 
 No `features/` umbrella, no `utils/`, `helpers/`, `common/`, `shared/`, `sections/`,
-`constants/`, and no `components/` passthrough level inside a domain. **`world/` is the first
-domain to reach that shape** (Phase 5); `about/`, `command-menu/` and `inspector/` are still
-under `features/` until Phase 6.
+`constants/`, `styles/`, `hooks/`, `providers/`, `config/`, `schemas/`, `seo/`, and no
+`components/` passthrough level inside a domain. Every one of those existed before Phase 6
+and none of them may come back — a new top-level directory needs a `docs/decisions.md` entry
+naming the ownership or runtime boundary it marks.
 
 ## Dependency rules — the contract, not yet the check
 
 ```
-app/  →  site/ · world/ · command-menu/ · inspector/  →  content/ · ui/
+app/  →  site/ · world/ · command-menu/ · telemetry/  →  content/ · ui/
 app/api/  →  agent/  →  content/
-leaves:  content/ · ui/ · env · telemetry · reduced-motion
+leaves:  content/ · ui/ · env · store · reduced-motion · use-is-client · chat-contract
 ```
 
 1. **Nothing imports from `app/`.** Routing is a leaf.
-2. **No domain imports a sibling**, except three by design: `inspector/` → `world/perf`,
-   and `site/` / `world/` → `content/`.
+2. **No domain imports a sibling's private files.** A domain's **store module is its public
+   API** — `world/store.ts`, `world/perf.ts`, `command-menu/store.tsx`, `telemetry/store.tsx`,
+   `telemetry/vitals.ts` — and everything else in it is private. `site/` exports no state, so
+   it is private whole; `site/` and `world/` never see each other at all.
 3. **`ui/` imports no domain.** If a primitive needs to know what a `Page` is, it is not a
    primitive.
 4. **`content/` imports nothing outside itself** — its own modules may compose each other.
 5. **`agent/` is reachable only from `app/api/` and build scripts** — never from a client
-   module, not even for a type.
+   module, not even for a type. `chat-contract.ts` is the wire format both ends share.
 
 `no-restricted-imports` ships as `warn`, but `--max-warnings` is `0`, so a warning fails the
-build like an error. **Inside `src/world/**` the same-domain rule is live**: import relatively,
-never through `@/world/…`. What it does **not** catch is an import through a domain's `index.ts`
-barrel: the glob is `@/features/*/**`, and `@/features/command-menu` is one segment short of
-matching. That is how the eight edges in `docs/refactor.md` §4.5 break rule 2 in silence.
-**Phase 7 rewrites the globs against domain paths and promotes the rule to `error`.** Until
-then the barrel is on you: hold the rules yourself, and never add a ninth edge.
+build like an error. What is live today is the **same-domain rule**, one entry per domain:
+inside `world/`, `site/`, `command-menu/`, `telemetry/` and `agent/`, import relatively, never
+through the domain's own `@/…` alias. That is what stops a flattened domain growing a barrel
+back. What is **not** yet checked is rule 2 from outside — Phase 7 adds one group per domain
+with the store carved out, and promotes the lot to `error`. Until then rule 2 is on you.
 
 ## Where a fact lives
 
@@ -130,7 +131,7 @@ factory's business: a store that persists reads it **when the module initializes
 inside a snapshot getter, because React calls those during render.
 
 **A signal is owned by whoever produces it, not whoever displays it.** The world produces
-frame statistics, so it owns them; the inspector subscribes. That is why adding a second
+frame statistics, so it owns them; `telemetry/` subscribes. That is why adding a second
 consumer later requires no move.
 
 ## Tests

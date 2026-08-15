@@ -9,7 +9,7 @@
 
 import { useCallback } from "react";
 import * as THREE from "three";
-import { useDisposable } from "@/hooks/use-disposable";
+import { useDisposable } from "../gpu";
 
 /** A draw routine: it paints a screen and knows nothing about textures or three.js. */
 export type ScreenDraw = (ctx: CanvasRenderingContext2D) => void;

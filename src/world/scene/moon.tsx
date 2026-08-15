@@ -2,8 +2,8 @@
 
 import { type ReactElement } from "react";
 import { type CanvasTexture, AdditiveBlending } from "three";
-import { useDisposable } from "@/hooks/use-disposable";
-import { mulberry32 } from "@/utils/mulberry32";
+import { useDisposable } from "../gpu";
+import { mulberry32 } from "../random";
 import { createCanvasTexture } from "../screens/texture";
 
 /**

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactElement } from "react";
-import { AboutPortrait } from "@/features/about";
+import { AboutPortrait } from "@/site/portrait";
 import { pageMetadata } from "@/site/metadata";
 import { PageView } from "@/site/page-view";
 

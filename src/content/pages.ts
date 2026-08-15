@@ -35,8 +35,8 @@ const PAGES = [
 
 type PageEntry = (typeof PAGES)[number];
 
-export type RouteKey = PageEntry["slug"];
-export type RoutePath = PageEntry["path"];
+export type PageSlug = PageEntry["slug"];
+export type PagePath = PageEntry["path"];
 
 /**
  * The URL map, keyed by slug. The assertion is what keeps each value a string literal
@@ -48,11 +48,11 @@ export const routes = Object.fromEntries(PAGES.map((page) => [page.slug, page.pa
   readonly [P in PageEntry as P["slug"]]: P["path"];
 };
 
-export type InternalHref = RoutePath | `${RoutePath}#${string}`;
+export type InternalHref = PagePath | `${PagePath}#${string}`;
 
 const ROUTE_PATHS: readonly string[] = Object.values(routes);
 
-export function isRoutePath(value: string): value is RoutePath {
+export function isPagePath(value: string): value is PagePath {
   return ROUTE_PATHS.includes(value);
 }
 
@@ -60,24 +60,24 @@ export function asInternalHref(href: string): InternalHref | null {
   const hashIndex = href.indexOf("#");
   if (hashIndex === 0) return null;
   const path = hashIndex === -1 ? href : href.slice(0, hashIndex);
-  if (!isRoutePath(path)) return null;
+  if (!isPagePath(path)) return null;
   return hashIndex === -1 ? path : `${path}#${href.slice(hashIndex + 1)}`;
 }
 
 export type StationEntry = {
-  slug: RouteKey;
-  href: RoutePath;
+  slug: PageSlug;
+  href: PagePath;
   label: string;
 };
 
-export const STATION_ORDER: readonly RouteKey[] = PAGES.map((page) => page.slug);
+export const STATION_ORDER: readonly PageSlug[] = PAGES.map((page) => page.slug);
 
 const LABELS = Object.fromEntries(PAGES.map((page) => [page.slug, page.label])) as Record<
-  RouteKey,
+  PageSlug,
   string
 >;
 
-export function getStationEntry(slug: RouteKey): StationEntry {
+export function getStationEntry(slug: PageSlug): StationEntry {
   return { slug, href: routes[slug], label: LABELS[slug] };
 }
 
@@ -88,7 +88,7 @@ export const stationIndex: readonly StationEntry[] = STATION_ORDER.map(getStatio
  * sector is not the order they sit in the room, so it cannot come from `PAGES`.
  * `pages.test.ts` asserts every slug appears in exactly one sector.
  */
-const SECTOR_SLUGS: readonly { label: string; slugs: readonly RouteKey[] }[] = [
+const SECTOR_SLUGS: readonly { label: string; slugs: readonly PageSlug[] }[] = [
   { label: "Core", slugs: ["home", "about"] },
   { label: "Experience", slugs: ["work"] },
   { label: "Projects", slugs: ["projects", "caseStudies"] },
@@ -110,7 +110,7 @@ export const stationSectors: readonly StationSector[] = SECTOR_SLUGS.map((sector
   stations: sector.slugs.map(getStationEntry),
 }));
 
-export function resolveStation(pathname: string | null): RouteKey {
+export function resolveStation(pathname: string | null): PageSlug {
   if (!pathname || pathname === "/") return "home";
   const match = stationIndex.find(
     (station) =>
