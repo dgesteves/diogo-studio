@@ -41,7 +41,12 @@ export function NavigateView({ onClose }: { onClose: () => void }): ReactElement
         </span>
       </div>
 
-      <Command.List className="max-h-[420px] overflow-y-auto px-2 py-2">
+      {/*
+       * `max-h-105` is 26.25rem, not 420px: the scale is rem-based, so the list grows with a
+       * visitor's own font size instead of clipping the seventeen routes into a fixed pixel
+       * box when text is enlarged (WCAG 1.4.4).
+       */}
+      <Command.List className="max-h-105 overflow-y-auto px-2 py-2">
         <Command.Empty className="text-muted-foreground px-3 py-6 text-center text-sm">
           No results. Try <span className="text-foreground font-medium">studio</span> or{" "}
           <span className="text-foreground font-medium">about</span>.
