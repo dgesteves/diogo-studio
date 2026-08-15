@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { AgentChunk } from "@/schemas/agent";
+import type { AgentChunk } from "./corpus";
 
 export const SYSTEM_PROMPT = `You are the Inspector agent on Diogo Esteves's portfolio (diogo-studio).
 You answer questions about Diogo — his career, background, and operating

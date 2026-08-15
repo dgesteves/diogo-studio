@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { makeChunk } from "@tests/agent";
-import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/schemas/agent";
+import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/chat-contract";
 
 import {
   buildCitations,
@@ -9,7 +9,7 @@ import {
   REFUSAL_TEXT,
   sourcesHeaderValue,
   textResponse,
-} from "./agent-response";
+} from "./response";
 
 function decodeHeader(value: string): unknown {
   return JSON.parse(decodeURIComponent(escape(atob(value))));

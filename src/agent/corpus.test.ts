@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { asInternalHref, routes } from "@/content/pages";
 import { worldDestinations } from "@/content/prose";
 
-import { CHUNKS, CORPUS_HAS_EMBEDDINGS, INDEX } from "./agent-index";
-import { buildCitations } from "./agent-response";
+import { CHUNKS, CORPUS_HAS_EMBEDDINGS, INDEX } from "./corpus";
+import { buildCitations } from "./response";
 
 describe("the generated corpus", () => {
   it("parses against the schema and is not empty", () => {

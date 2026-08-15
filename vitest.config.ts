@@ -126,7 +126,7 @@ export default defineConfig({
         functions: 98,
         lines: 99,
         "src/app/api/**": { statements: 100, functions: 100, lines: 100, branches: 93 },
-        "src/rate-limit.ts": { statements: 100, functions: 100, lines: 100, branches: 100 },
+        "src/agent/rate-limit.ts": { statements: 100, functions: 100, lines: 100, branches: 100 },
       },
     },
   },

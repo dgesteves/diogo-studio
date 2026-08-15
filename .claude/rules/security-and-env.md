@@ -2,11 +2,9 @@
 paths:
   - "src/app/api/**"
   - "src/agent/**"
-  - "src/ai/**"
-  - "src/schemas/**"
+  - "src/chat-contract.ts"
   - "src/env.ts"
   - "src/config/env.ts"
-  - "src/rate-limit.ts"
   - "src/content/prose/**"
   - "next.config.ts"
   - "instrumentation*.ts"
@@ -29,7 +27,7 @@ The AI-endpoint invariants and the CSP position are in `AGENTS.md`; they are not
 ## Untrusted input and output
 
 - **Validate at the boundary with Zod** and treat every client input as hostile — including its
-  size. Rate-limit expensive or unauthenticated endpoints with `src/rate-limit.ts`.
+  size. Rate-limit expensive or unauthenticated endpoints with `src/agent/rate-limit.ts`.
 - Authenticate **and** authorize inside each Route Handler or Server Action. A proxy sits at the
   network boundary and is explicitly not an authorization boundary.
 - Validate redirect and navigation targets against the typed route SSOT (`asInternalHref()`),

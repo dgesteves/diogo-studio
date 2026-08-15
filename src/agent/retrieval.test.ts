@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { makeChunk } from "@tests/agent";
-import type { AgentChunk } from "@/schemas/agent";
-import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieve";
+import type { AgentChunk } from "@/agent/corpus";
+import { cosine, retrieve, retrieveByCosine, retrieveByKeyword, TOP_K } from "./retrieval";
 
 describe("cosine()", () => {
   it("returns 1 for parallel unit vectors", () => {

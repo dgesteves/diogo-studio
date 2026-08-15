@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { makeChunk } from "@tests/agent";
 
-import { REFUSAL_TEXT } from "./agent-response";
-import { formatUserPrompt, SYSTEM_PROMPT } from "./system-prompt";
+import { REFUSAL_TEXT } from "./response";
+import { formatUserPrompt, SYSTEM_PROMPT } from "./prompt";
 
 function unwrap(text: string): string {
   return text.replace(/\s+/g, " ").trim();

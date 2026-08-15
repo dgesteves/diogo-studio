@@ -1,4 +1,4 @@
-import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/schemas/agent";
+import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/chat-contract";
 
 export async function safeText(res: Response): Promise<string> {
   try {

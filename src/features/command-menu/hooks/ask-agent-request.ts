@@ -1,4 +1,4 @@
-import type { AgentCitation, AgentSourcesPayload } from "@/schemas/agent";
+import type { AgentCitation, AgentSourcesPayload } from "@/chat-contract";
 
 import type { AskStatus, RetrievalMode } from "../types";
 import { decodeAgentSources, safeText } from "./ask-agent-sources";

@@ -2,12 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { makeChunk } from "@tests/agent";
 import { setTestEnv } from "@tests/env";
-import { REFUSAL_TEXT } from "@/ai/agent-response";
-import {
-  agentSourcesPayloadSchema,
-  type AgentChunk,
-  type AgentSourcesPayload,
-} from "@/schemas/agent";
+import { REFUSAL_TEXT } from "@/agent/response";
+import type { AgentChunk } from "@/agent/corpus";
+import { agentSourcesPayloadSchema, type AgentSourcesPayload } from "@/chat-contract";
 
 import { POST } from "./route";
 
@@ -32,7 +29,7 @@ vi.mock("@/config/env", async () => ({ env: (await import("@tests/env")).testEnv
 vi.mock("ai", () => ({ streamText, embed }));
 vi.mock("@ai-sdk/openai", () => ({ createOpenAI }));
 vi.mock("@sentry/nextjs", () => ({ captureException }));
-vi.mock("@/ai/agent-index", () => ({
+vi.mock("@/agent/corpus", () => ({
   get CHUNKS() {
     return corpus.chunks;
   },

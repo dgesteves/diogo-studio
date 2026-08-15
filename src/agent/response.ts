@@ -1,6 +1,8 @@
 import "server-only";
 
-import type { AgentChunk, AgentCitation, AgentSourcesPayload } from "@/schemas/agent";
+import type { AgentCitation, AgentSourcesPayload } from "@/chat-contract";
+
+import type { AgentChunk } from "./corpus";
 
 export const REFUSAL_TEXT =
   "I don't have that in the indexed material yet. The contact page has direct links if you'd like to ask Diogo about it.";

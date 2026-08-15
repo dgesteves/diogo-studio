@@ -5,10 +5,12 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 
 import { env } from "@/config/env";
-import type { AgentChunk, AgentSourcesPayload } from "@/schemas/agent";
+import type { AgentSourcesPayload } from "@/chat-contract";
 
-import { sourcesHeaderValue } from "./agent-response";
-import { formatUserPrompt, SYSTEM_PROMPT } from "./system-prompt";
+import type { AgentChunk } from "./corpus";
+
+import { sourcesHeaderValue } from "./response";
+import { formatUserPrompt, SYSTEM_PROMPT } from "./prompt";
 
 export function streamAgentResponse(
   query: string,

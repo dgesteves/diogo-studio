@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import type { AgentCitation } from "@/schemas/agent";
+import type { AgentCitation } from "@/chat-contract";
 
 import type { AskStatus, RetrievalMode } from "../types";
 import { runAskRequest } from "./ask-agent-request";
