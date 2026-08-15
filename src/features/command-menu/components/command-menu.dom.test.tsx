@@ -71,7 +71,7 @@ function citation(href: string) {
       {
         marker: 1,
         chunkId: "case-studies-1",
-        sourceKind: "case-study",
+        sourceKind: "career",
         sourceTitle: "Rebuilding the checkout",
         href,
       },

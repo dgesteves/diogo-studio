@@ -16,7 +16,7 @@ import { AskAnswerSurface } from "./ask-answer-surface";
 const CITATION: AgentCitation = {
   marker: 1,
   chunkId: "case-studies-1",
-  sourceKind: "case-study",
+  sourceKind: "career",
   sourceTitle: "Rebuilding the checkout",
   href: "/case-studies#checkout",
 };

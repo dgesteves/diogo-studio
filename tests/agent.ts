@@ -5,7 +5,7 @@ export function makeChunk(
 ): AgentChunk {
   return {
     sourceId: overrides.sourceId ?? overrides.id,
-    sourceKind: overrides.sourceKind ?? "case-study",
+    sourceKind: overrides.sourceKind ?? "career",
     sourceTitle: overrides.sourceTitle ?? overrides.id,
     permalink: overrides.permalink ?? "/work",
     contentHash: overrides.contentHash ?? "deadbeef",

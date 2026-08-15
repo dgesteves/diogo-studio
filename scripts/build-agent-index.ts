@@ -14,8 +14,8 @@ import { INDEX_PATH, ROOT, loadEnvFiles } from "./agent-index/paths";
 import { indexById, loadExistingIndex, serialize } from "./agent-index/store";
 import { CHUNKER_VERSION, EMBED_DIMENSIONS } from "./agent-index/types";
 import type { AgentIndex, IndexEntry } from "./agent-index/types";
-import { buildDestinationChunks } from "./agent-index/destination-chunks";
-import { buildCareerChunks } from "./agent-index/virtual-chunks";
+import { buildPageChunks } from "./agent-index/page-chunks";
+import { buildProfileChunks } from "./agent-index/profile-chunks";
 
 const DEFAULT_EMBED_MODEL = "text-embedding-3-small";
 
@@ -28,12 +28,12 @@ const flags = {
 async function main(): Promise<void> {
   loadEnvFiles();
   console.log("[agent:index] gathering source chunks…");
-  const career = buildCareerChunks();
-  const destinations = buildDestinationChunks();
-  const chunks = [...career, ...destinations];
+  const profile = buildProfileChunks();
+  const pages = buildPageChunks();
+  const chunks = [...profile, ...pages];
 
   console.log(
-    `[agent:index] ${chunks.length} chunks (career=${career.length}, routes=${destinations.length})`,
+    `[agent:index] ${chunks.length} chunks (profile=${profile.length}, pages=${pages.length})`,
   );
 
   const existing = loadExistingIndex();

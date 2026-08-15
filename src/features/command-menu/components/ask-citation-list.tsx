@@ -1,11 +1,4 @@
-import {
-  ArrowUpRight,
-  Briefcase,
-  FileText,
-  Network,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowUpRight, Briefcase, FileText, type LucideIcon } from "lucide-react";
 import type { ReactElement } from "react";
 
 import type { AgentCitation, AgentSourceKind } from "@/schemas/agent";
@@ -72,10 +65,8 @@ export function AskCitationList({
 // A record rather than a chain of guards with a fallback, so a new source kind in
 // `schemas/agent.ts` fails to typecheck here instead of quietly rendering a person.
 const KIND_ICONS: Record<AgentSourceKind, LucideIcon> = {
-  "case-study": Briefcase,
-  essay: FileText,
-  career: Network,
-  site: UserRound,
+  career: Briefcase,
+  site: FileText,
 };
 
 function iconForKind(kind: AgentSourceKind): ReactElement {

@@ -58,7 +58,7 @@ const DESIGN_SYSTEM = makeChunk({
 
 const STREAMING = makeChunk({
   id: "peacock#1",
-  sourceKind: "essay",
+  sourceKind: "site",
   sourceTitle: "Peacock streaming reliability",
   permalink: "/writing",
   content:
@@ -316,7 +316,7 @@ describe("streaming answer", () => {
     expect(payload.citations[0]).toMatchObject({
       chunkId: DESIGN_SYSTEM.id,
       sourceTitle: "Diligent design system",
-      sourceKind: "case-study",
+      sourceKind: "career",
       href: "/work#diligent",
       heading: "Governance",
     });

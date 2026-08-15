@@ -26,8 +26,8 @@ test.describe("Ask the agent", () => {
       body: "He led the design system at Diligent [1], then agentic UX at Fueled [2].",
       sources: {
         citations: [
-          citation(1, { sourceTitle: "Design system at scale", sourceKind: "case-study" }),
-          citation(2, { sourceTitle: "Agentic UX in production", sourceKind: "essay" }),
+          citation(1, { sourceTitle: "Design system at scale", sourceKind: "career" }),
+          citation(2, { sourceTitle: "Agentic UX in production", sourceKind: "site" }),
         ],
         retrieval: "cosine",
         refused: false,
@@ -196,7 +196,7 @@ function citation(marker: number, overrides: Partial<AgentCitation> = {}): Agent
   return {
     marker,
     chunkId: `chunk-${marker}`,
-    sourceKind: "case-study",
+    sourceKind: "career",
     sourceTitle: `Source ${marker}`,
     href: routes.work,
     ...overrides,

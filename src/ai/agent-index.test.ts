@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { asInternalHref, routes } from "@/content/pages";
+import { worldDestinations } from "@/content/prose";
 
 import { CHUNKS, CORPUS_HAS_EMBEDDINGS, INDEX } from "./agent-index";
 import { buildCitations } from "./agent-response";
@@ -37,6 +38,37 @@ describe("corpus ↔ routes", () => {
   it("produces citation hrefs that survive the typed-route guard", () => {
     const rejected = buildCitations(CHUNKS).filter((c) => !asInternalHref(c.href));
     expect(rejected.map((c) => c.href)).toEqual([]);
+  });
+
+  // The defect this replaced: every career chunk hard-coded `routes.home`, so 8 of 25
+  // chunks permalinked to `/` and the agent cited the home page when asked about Peacock.
+  it("sends no chunk to the home page but the home page's own", () => {
+    const home = CHUNKS.filter((c) => c.permalink === routes.home);
+    expect(home.map((c) => c.id).filter((id) => !id.startsWith("page:home#"))).toEqual([]);
+  });
+
+  it("anchors every chunk to a block that exists on the page it links to", () => {
+    const blocksByHref = new Map<string, Set<string>>(
+      worldDestinations.map((destination) => [
+        destination.href,
+        new Set(destination.blocks.map((block) => block.id)),
+      ]),
+    );
+
+    const dangling = CHUNKS.filter(
+      (c) => c.anchor !== undefined && !blocksByHref.get(c.permalink)?.has(c.anchor),
+    );
+    expect(dangling.map((c) => `${c.id} → ${c.permalink}#${c.anchor}`)).toEqual([]);
+  });
+
+  it("deep-links the blocks, rather than citing the top of a page every time", () => {
+    // Anchorless chunks are the 17 page overviews plus the identity chunk, and nothing
+    // else: a corpus where most chunks lack an anchor is the one this replaced.
+    const anchorless = CHUNKS.filter((c) => c.anchor === undefined);
+    expect(anchorless).toHaveLength(worldDestinations.length + 1);
+    expect(buildCitations(CHUNKS).filter((c) => c.href.includes("#")).length).toBe(
+      CHUNKS.length - anchorless.length,
+    );
   });
 });
 

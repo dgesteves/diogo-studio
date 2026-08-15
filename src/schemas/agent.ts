@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-export const agentSourceKindSchema = z.enum(["case-study", "essay", "career", "site"]);
+// Both are emitted by the chunker; `"case-study"` and `"essay"` shipped here for as long
+// as the index existed and nothing ever produced either.
+export const agentSourceKindSchema = z.enum(["career", "site"]);
 
 export const agentChunkSchema = z.object({
   id: z.string(),
