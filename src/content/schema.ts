@@ -5,7 +5,7 @@ import type { InternalHref, RouteKey, RoutePath } from "./pages";
  * room's canvas screens, the agent's retrieval index — derives from these types and
  * none of them may restate a fact.
  */
-export type ContentLink =
+type ContentLink =
   | { label: string; href: string; external: true }
   | { label: string; href: InternalHref; external?: false };
 

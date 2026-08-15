@@ -2,9 +2,9 @@ import { z } from "zod";
 
 // Both are emitted by the chunker; `"case-study"` and `"essay"` shipped here for as long
 // as the index existed and nothing ever produced either.
-export const agentSourceKindSchema = z.enum(["career", "site"]);
+const agentSourceKindSchema = z.enum(["career", "site"]);
 
-export const agentChunkSchema = z.object({
+const agentChunkSchema = z.object({
   id: z.string(),
   sourceId: z.string(),
   sourceKind: agentSourceKindSchema,
@@ -26,7 +26,7 @@ export const agentIndexSchema = z.object({
   chunks: z.array(agentChunkSchema),
 });
 
-export const agentCitationSchema = z.object({
+const agentCitationSchema = z.object({
   marker: z.number(),
   chunkId: z.string(),
   sourceKind: agentSourceKindSchema,

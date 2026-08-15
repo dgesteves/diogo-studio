@@ -24,24 +24,29 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
-## 2026-08-15 — `knip` reports an export nothing else imports, except in a type position
+## 2026-08-15 — `knip` reports every export nothing else imports
 
 `ignoreExportsUsedInFile: true` switched off the whole check: an `export` no other file
 imported was invisible as long as the module used the value itself. That is precisely the
 over-export the store rule in `refactor.md` §4.2 depends on catching — a domain whose files
 export more than their consumers read gives a sibling something to reach for.
 
-Turned off, the check reported sixteen. Eleven were exported types, plus consts read in their
-own file **in a type position** — `VariantProps<typeof buttonVariants>`,
-`z.infer<typeof agentChunkSchema>`. Those exports are a module's documented shape: the Zod
-schemas are the `/api/chat` wire contract that Phase 6 promotes to `chat-contract.ts`, and the
-`cva` variants are shadcn's own convention, so unexporting them is churn that comes straight
-back. The remaining five were plain over-exports and were fixed.
+There is no setting now; the check runs on everything. It reported sixteen and all sixteen
+were fixed by deleting a keyword: five plain values, six types, and five consts read in their
+own file **in a type position** (`VariantProps<typeof buttonVariants>`,
+`z.infer<typeof agentChunkSchema>`), which knip's object form would have exempted.
 
-`ignoreExportsUsedInFile: { "type": true, "interface": true }` is the setting that separates
-the two: a value used only inside its own file is reported, a shape is not. **Never widen it
-back to `true` to make `pnpm validate` green** — a finding here means an `export` keyword to
-delete, which is a one-character fix.
+Exempting them was considered and rejected. The argument for it was that a type or a Zod
+schema is a module's documented shape rather than dead surface — but nothing consumes those
+shapes, and `export` is not documentation: `z.infer<typeof agentChunkSchema>` and
+`VariantProps<typeof buttonVariants>` read a local const perfectly well. The AI boundary got
+narrower for it, which is the direction `AGENTS.md` wants that file to move, and the
+`cva` variants that shadcn exports by convention are ours now. **If one is ever needed
+elsewhere, the `export` comes back in the commit that needs it** — that is rule 6 in
+`refactor.md` §8, measured rather than assumed.
+
+**Never reintroduce the option to make `pnpm validate` green.** A finding here is one
+character to delete.
 
 ## 2026-08-15 — One `createStore`, and `src/store.ts` as a fourth root leaf
 

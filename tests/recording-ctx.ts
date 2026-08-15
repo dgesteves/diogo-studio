@@ -59,7 +59,7 @@ const PRECISION = 1000;
 
 const GRADIENT_LABEL = Symbol("gradient label");
 
-export type Pixel = readonly [r: number, g: number, b: number, a: number];
+type Pixel = readonly [r: number, g: number, b: number, a: number];
 
 export type RecordingContextOptions = {
   width?: number;
@@ -84,7 +84,7 @@ export type TextRun = {
 };
 
 /** One `stroke()` or `fill()`, with the state that decided how it looked. */
-export type Paint = {
+type Paint = {
   kind: string;
   style: string;
   lineWidth: number;

@@ -10,7 +10,7 @@ import { createStore } from "@/store";
  * private to it — `docs/refactor.md` §4.2.
  */
 
-export type WorldState = {
+type WorldState = {
   hovered: RouteKey | null;
   aiCoreHovered: boolean;
 };

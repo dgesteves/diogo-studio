@@ -9,7 +9,7 @@ import { createStore } from "@/store";
  * and nothing reads it afterwards.
  */
 
-export type BootSignal = { progress: number; ready: boolean };
+type BootSignal = { progress: number; ready: boolean };
 
 export const BOOT_SESSION_KEY = "studio-booted";
 export const BOOT_SPLASH_ID = "boot-splash";
