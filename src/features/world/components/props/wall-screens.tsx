@@ -3,6 +3,9 @@
 import { type ReactElement } from "react";
 
 import { engagements } from "@/content/career";
+import { experiments } from "@/content/playground";
+import { practices } from "@/content/principles";
+import { stackGroups } from "@/content/stack";
 
 import {
   WALL_SCREEN,
@@ -24,9 +27,9 @@ import { WallScreen, type ScreenDraw } from "./wall-screen";
 const SCREEN_DRAWS: Record<WallScreenSlug, ScreenDraw> = {
   resume: (ctx) => drawResume(ctx, engagements),
   timeline: (ctx) => drawTimeline(ctx, engagements),
-  principles: drawPrinciples,
-  stack: drawStack,
-  playground: drawPlayground,
+  principles: (ctx) => drawPrinciples(ctx, practices),
+  stack: (ctx) => drawStack(ctx, stackGroups),
+  playground: (ctx) => drawPlayground(ctx, experiments),
 };
 
 const SLUGS = Object.keys(SCREEN_DRAWS) as WallScreenSlug[];

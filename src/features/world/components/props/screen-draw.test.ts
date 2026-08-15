@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { brandColors } from "@/config/brand";
 import { engagements } from "@/content/career";
+import { experiments } from "@/content/playground";
+import { practices } from "@/content/principles";
 import { siteConfig } from "@/content/profile";
+import { stackGroups } from "@/content/stack";
 import { createRecordingContext, type RecordingContext, type TextRun } from "@tests/recording-ctx";
 
 import { drawPlayground } from "./playground-screen-draw";
@@ -11,10 +14,13 @@ import { drawResume } from "./resume-screen-draw";
 import { drawStack } from "./stack-screen-draw";
 import { drawTimeline } from "./timeline-screen-draw";
 
-// The two career panels read the authored record; the wall binds it in `wall-screens.tsx`
-// and these bind the same thing, so what is asserted below is the projection onto 600×800.
+// Every panel reads the authored record; the wall binds it in `wall-screens.tsx` and
+// these bind the same thing, so what is asserted below is the projection onto 600×800.
 const paintResume = (ctx: CanvasRenderingContext2D): void => drawResume(ctx, engagements);
 const paintTimeline = (ctx: CanvasRenderingContext2D): void => drawTimeline(ctx, engagements);
+const paintPrinciples = (ctx: CanvasRenderingContext2D): void => drawPrinciples(ctx, practices);
+const paintStack = (ctx: CanvasRenderingContext2D): void => drawStack(ctx, stackGroups);
+const paintPlayground = (ctx: CanvasRenderingContext2D): void => drawPlayground(ctx, experiments);
 
 /**
  * The five panels on the world's right wall. A visitor reads them as text at a distance, so
@@ -52,21 +58,21 @@ const PANELS: readonly Panel[] = [
   },
   {
     name: "principles",
-    draw: drawPrinciples,
+    draw: paintPrinciples,
     accent: "#c084fc",
     title: "PRINCIPLES",
     subtitle: "HOW I BUILD",
   },
   {
     name: "stack",
-    draw: drawStack,
+    draw: paintStack,
     accent: "#7dd3fc",
     title: "STACK",
     subtitle: "TOOLS OF THE TRADE",
   },
   {
     name: "playground",
-    draw: drawPlayground,
+    draw: paintPlayground,
     accent: "#facc15",
     title: "PLAYGROUND",
     subtitle: "EXPERIMENTS · DEMOS",
@@ -213,50 +219,34 @@ describe("timeline panel", () => {
 });
 
 describe("principles panel", () => {
-  it("numbers all seven principles from 01", () => {
-    const { text } = paint(drawPrinciples);
+  it("numbers the authored practices from 01, in order", () => {
+    const { text } = paint(paintPrinciples);
 
-    expect(text.slice(3)).toEqual([
-      "01",
-      "Ship small, ship often",
-      "02",
-      "Accessibility is non-negotiable",
-      "03",
-      "Performance is a feature",
-      "04",
-      "Type-safe at every boundary",
-      "05",
-      "Design systems scale teams",
-      "06",
-      "Automate the boring parts",
-      "07",
-      "Clarity over cleverness",
-    ]);
+    expect(text.slice(3)).toEqual(
+      practices.flatMap((practice, i) => [String(i + 1).padStart(2, "0"), practice]),
+    );
   });
 });
 
 describe("stack panel", () => {
-  it("groups every tool under a heading", () => {
-    const { runs, text } = paint(drawStack);
+  it("heads every row with its authored group label", () => {
+    const { runs, text } = paint(paintStack);
 
-    expect(groupLabels(runs)).toEqual([
-      "FRONTEND",
-      "3D / MOTION",
-      "STYLING",
-      "PLATFORM",
-      "QUALITY",
-      "AI",
-    ]);
-    expect(text).toContain("React 19");
-    expect(text).toContain("Playwright");
+    expect(groupLabels(runs)).toEqual(stackGroups.map((group) => group.label.toUpperCase()));
+    // Every group gets at least its first tool: a row that fits only its heading would
+    // read as an empty category.
+    for (const group of stackGroups) expect.soft(text).toContain(group.items[0]);
   });
 
-  it("sizes each chip to the text inside it and keeps the row on the panel", () => {
-    const { callsTo, runs } = paint(drawStack);
+  it("sizes each chip to the text inside it and drops the ones that would not fit", () => {
+    const { callsTo, runs } = paint(paintStack);
     const chips = callsTo("roundRect");
     const items = chipLabels(runs);
 
-    expect(chips).toHaveLength(18);
+    // One chip per drawn item, and fewer than the record holds: the panel is 600px wide
+    // and `/stack` is where the full list lives.
+    expect(chips).toHaveLength(items.length);
+    expect(items.length).toBeLessThan(stackGroups.flatMap((group) => group.items).length);
     for (const [index, chip] of chips.entries()) {
       const x = Number(chip[0]);
       const width = Number(chip[2]);
@@ -268,25 +258,11 @@ describe("stack panel", () => {
 });
 
 describe("playground panel", () => {
-  it("scores the experiments and invites a start", () => {
-    const { text } = paint(drawPlayground);
+  it("scores the real experiments and invites a start", () => {
+    const { text } = paint(paintPlayground);
 
     expect(text.slice(3)).toEqual([
-      "P1",
-      "Shader playground",
-      "WebGL",
-      "P2",
-      "Generative art",
-      "Canvas",
-      "P3",
-      "Game prototypes",
-      "R3F",
-      "P4",
-      "Creative coding",
-      "p5",
-      "P5",
-      "Audio-reactive viz",
-      "WebAudio",
+      ...experiments.flatMap((experiment, i) => [`P${i + 1}`, experiment.title, experiment.meta]),
       "▶ PRESS START",
     ]);
   });
