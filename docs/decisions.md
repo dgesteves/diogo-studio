@@ -24,6 +24,95 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — `refactor.md` is deleted, and its cross-references land on `architecture.md`
+
+The refactor's own charter was "delete this file when the last phase lands", restated in its
+header and in the entry below dated 2026-08-11. Phase 8 is where that came due.
+
+The deletion was mostly a repointing job. Fifteen live references in code, rules and configs
+pointed _into_ its sections, and a document is not deletable while things cite it by section
+number. Each moved to whatever now carries the claim: `architecture.md` §4 rule 2 for
+store-is-public-API (`world/store.ts`, `world/perf.ts`, `world/hud/deck.dom.test.tsx`,
+`.claude/rules/three-r3f-world.md`), §4 rule 6 for no-client-imports-`agent/`
+(`chat-contract.ts`), and the closed-domain entry below for the gitignore-semantics finding
+(`tests/boundaries.test.ts`).
+
+**The "a refactor is in flight, so this tree is not a pattern to copy" framing went with it**,
+from `project-structure.md`, `AGENTS.md`, `CLAUDE.md` and `README.md`. That warning was
+load-bearing for eight phases and is now the most misleading thing an agent could read: it
+tells a reader to distrust a tree that is, at this point, the design.
+
+**This file keeps all twenty-five of its own references to `refactor.md`, deliberately.** Its
+header says entries are true as of their date and are never rewritten, and that old entries
+may name things that have since moved. Editing them to point somewhere else would break the
+rule the file is built on, to buy accuracy the file explicitly does not promise. A reader who
+wants the deleted document has `git log`.
+
+What is genuinely lost is §2 (the measurement: 297 files, 49-line average, the fragmentation
+mechanism) and §5 (the evidence: five career copies, eight stores, 25 chunks with no anchors).
+Folding them in here was considered and declined — the findings that mattered already have
+their own entries below, and an archive of superseded measurements is the kind of document
+this file's header exists to discourage.
+
+## 2026-08-15 — Coverage thresholds stay global now that the refactor's reason has expired
+
+`vitest.config.ts` justified global-rather-than-per-directory thresholds by saying the
+refactor moved or merged nearly every directory in `src/`, so a threshold keyed on a path
+either broke the build during a pure move or silently stopped applying. True, and now spent.
+
+Global stays, on a reason that outlives the refactor. A per-directory threshold encodes a tree
+shape into a config: a second place the architecture has to be maintained, and the first to
+rot silently, since a threshold on a path that no longer exists fails open rather than red.
+The domains here are also small — a per-domain floor over a few hundred statements moves
+several points when one branch is added, which is noise presented as a gate.
+
+The comment now names the expired reason as history rather than quietly swapping it. An
+argument that has been overtaken is worth one sentence; deleting it invites the next reader to
+re-derive it and reach the opposite conclusion.
+
+## 2026-08-15 — The boot gate keeps its alpha notice
+
+`refactor.md` §9 listed the "Alpha · Work in progress" notice with the fake résumé download,
+as a statement the product makes that is not true, and gave Phase 8 the job of removing it.
+Half of that pairing was wrong.
+
+The notice is true. The site _is_ early — there are rough edges, and more of them than a
+visitor would guess from a boot sequence and a 3D room that both look finished. The people who
+land here are recruiters, clients and peers, and the notice is the only thing that sets their
+expectation before the polish sets a different one. Removing it would not make the product
+more honest; it would make it quieter about something real, which is the opposite of what the
+refactor's charter was about.
+
+So it stays, and its removal becomes a decision for the day the claim stops being true rather
+than a tidy-up a refactor gets to take on the way past. Only the copy was touched: the
+sentence was missing its punctuation ("my new portfolio an immersive, interactive 3D world").
+
+Contrast the résumé download in the next entry. The test is not whether a line sounds
+promotional — it is whether the thing it names exists.
+
+## 2026-08-15 — The résumé panel drops its download affordance
+
+`world/screens/wall.ts` painted "↧ DOWNLOAD RÉSUMÉ" at the foot of the résumé panel. There is
+no PDF in `public/` and never has been, and a click on the panel resolves through
+`world/interact.tsx` to a route push to `/resume` — a page. The line promised a file and
+delivered a web page.
+
+Removed rather than wired, per `refactor.md` §9: a real document is wanted eventually, and
+until it exists the honest move is to not advertise it. The `divider()` above it went too — it
+existed only to separate that line, and left behind it is a rule with nothing under it. When a
+PDF lands, the panel and `/resume` both get it.
+
+**"▶ PRESS START" on the playground panel was checked and deliberately left.** It is the same
+shape of line and not the same case. What it names is real: that panel is a registered hotspot
+in `world/hotspots.tsx` and a click on it starts something — `/playground`. It is also of a
+piece with the panel's own register (`● HIGH SCORES`, the `P1`–`P5` row markers), so changing
+it alone would leave two-thirds of an arcade framing behind and read as an oversight rather
+than a decision.
+
+The rule this pair establishes, for the next panel: **a canvas screen may use any register it
+likes, and may not name an artifact that does not exist.** Decoration is free; a deliverable
+is a promise.
+
 ## 2026-08-15 — The dependency rules are grants per edge, not a public store per domain
 
 Phase 7 had to choose between two readings of the same contract, and the summaries disagreed
