@@ -24,6 +24,84 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-15 — `schemas/agent.ts` split into `chat-contract.ts` and `agent/corpus.ts`
+
+One file held two contracts with opposite audiences: the `/api/chat` request and
+sources schemas, which a browser must be able to read, and the retrieval index
+schema, which is server-only. That is why five client files under
+`features/command-menu` imported a module inside the server boundary for a type —
+a violation of the "no client module imports `agent/`" rule that no glob could
+see, because the file was in neither domain. The wire half is `src/chat-contract.ts`,
+a root leaf owned by neither end; the index half went into `agent/corpus.ts` with
+the corpus it validates. The shared source-kind enum lives in the contract, which
+`agent/` may import.
+
+## 2026-08-15 — `agent/corpus.ts` is separate from `agent/retrieval.ts`
+
+The plan said fold the index loader into `retrieval.ts` and get one file.
+`app/api/chat/route.test.ts` mocks the loader so the real scoring runs against a
+two-chunk fake corpus; merging them would have meant mocking the module under
+test to test it. The boundary that resolves it is a lifecycle rather than a
+convenience: `corpus.ts` reads and Zod-validates a build artifact at module scope,
+`retrieval.ts` is pure functions over whatever chunks it is handed. Six files in
+`agent/` rather than five, and the seam is where a reader would predict.
+
+## 2026-08-15 — `telemetry/` has two public store modules
+
+`docs/refactor.md` §4.2 named `telemetry/vitals.ts` as the domain's single public
+module, which would have put the overlay's open/close signal inside `overlay.tsx`.
+Phase 5 already paid for that mistake once: `tests/stores.ts` imports the setter,
+and that import drags everything the module pulls in into every spec's graph before
+`vi.mock` can register — three unrelated specs broke when `world/boot`'s store moved
+into its screen. So `telemetry/store.tsx` sits beside `telemetry/vitals.ts`, the way
+`world/` has both `store.ts` and `perf.ts`. **A store module stays out of the
+component tree it drives.**
+
+## 2026-08-15 — `use-is-client.ts` is a root leaf; `world/random.ts` is not
+
+Both are tiny and both were in a category folder Phase 6 deleted, and the two-importer
+rule sent them to different places. `useIsClient` has consumers in `world/` (×3) and
+`site/` (×1) — two domains, so it is a root leaf, the same argument Phase 4 used for
+`store.ts`. `mulberry32` has four consumers and all of them are the world's, so it
+became `world/random.ts` — a domain file, not a shared one. It sits at the domain root
+rather than in `scene/` or `screens/` only because both subfolders read it.
+Neither appears in any target tree; §3 of `refactor.md` was corrected, not the code.
+
+## 2026-08-15 — `useDisposable` merged into `world/gpu.ts`
+
+`hooks/use-disposable.ts` released three.js resources; `world/gpu.ts` detected whether
+there was a real GPU to release them from. They read as unrelated until you notice both
+are the same boundary asked at the two ends of a session, and that all five importers
+of the hook are in `world/`. The alternative — a one-hook file at the domain root — is
+the fragmentation Phase 0 retired the rule for.
+
+## 2026-08-15 — "Inspector" is a brand; the directory is what was ambiguous
+
+`refactor.md` §3 said the name is "retired from the tree and kept only as the ⌘K
+agent's brand", and Phase 6 renamed `features/inspector/` to `telemetry/` on that
+basis. The identifiers did **not** follow: `InspectorOverlay`, `useInspectorOverlay`
+and `setInspectorOpen` name a user-facing surface labelled "Inspector · receipts",
+with an accessible name four E2E specs match on. The ambiguity `AGENTS.md` warned
+about was two _directories_ competing for one word, and only one directory remains.
+Renaming the copy is a product decision; Phase 8 owns it if anyone does.
+
+## 2026-08-15 — `ContentLink` became `BlockLink`, not `Link`
+
+The rename to `architecture.md` §3's names took `Destination → Page` and
+`ContentBlock → Block`, and symmetry wanted `Link`. Every file that renders one also
+imports `next/link`, and two `Link`s in one scope is exactly the collision class Phase 5
+spent a commit untangling — eleven of them in the hardware cluster alone. `BlockLink` is
+also the more accurate name: it is the link inside a `links` block, not a link in general.
+
+## 2026-08-15 — The world keeps calling a station a "destination"
+
+The content model is `Page` now, but `world/` still says destination in its copy —
+"all studio destinations", the map's count — and in locals iterating `stationIndex`.
+That is not drift. A page is what the record holds; a destination is what the room
+takes you to, and the room's word for it is product language with E2E specs asserting
+on it. `StationEntry`, `StationSector` and `STATION_ORDER` stay for the same reason:
+they are the room's index into the record, not the record.
+
 ## 2026-08-15 — Two brand hexes live in `ui/`, the rest of `brand.ts` is the world's
 
 `config/brand.ts` was the room's three.js material tokens under a name that said

@@ -5,8 +5,9 @@ The migration from the tree as it is to the architecture in
 Delete this file when the last phase lands.
 
 Status: **Phase 1 landed 2026-08-11. Revised 2026-08-13 after a full measurement pass — see
-§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3, 4 and 5 on 2026-08-15.** The measurement
-is in §2, the structural review in §4, the evidence in §5.
+§1. Phases 0 and 2a landed 2026-08-14, Phases 2b, 3, 4, 5 and 6 on 2026-08-15.** The
+measurement is in §2, the structural review in §4, the evidence in §5. **Phases 7 and 8 are
+all that remain**, and neither moves a file.
 
 ---
 
@@ -167,21 +168,24 @@ src/
     screens/   texture.ts  kit.ts  monitors.ts  wall.ts  tv.ts
 
   agent/                     SERVER-ONLY, every file
-    retrieval.ts  prompt.ts  stream.ts  response.ts  rate-limit.ts
+    corpus.ts  retrieval.ts  prompt.ts  stream.ts  response.ts  rate-limit.ts
     index.generated.json
 
   command-menu/              menu.tsx  navigate.tsx  ask.tsx  answer.tsx  store.tsx
-  telemetry/                 vitals.ts  overlay.tsx  panels.tsx
+  telemetry/                 vitals.ts  store.tsx  overlay.tsx  panels.tsx
   ui/                        button · badge · kbd · status-dot · segmented · brand-icons · cn
 
   env.ts                     the only process.env reader
   store.ts                   createStore<T>() — every client signal is built from it
   reduced-motion.tsx         provider + store, one concept
+  use-is-client.ts           hydration — world/ and site/ both read it
   chat-contract.ts           the /api/chat wire format — shared, owned by neither side
   globals.css
 ```
 
-**8 directories and 5 files at the root of `src/`. Maximum depth 3.**
+**8 directories and 6 files at the root of `src/`. Maximum depth 3.** _(Five files when this
+was written; `use-is-client.ts` earned the sixth in Phase 6 the same way `store.ts` earned the
+fourth in Phase 4 — a second domain imported it.)_
 
 | Metric                           |      Now |                           Target |
 | -------------------------------- | -------: | -------------------------------: |
@@ -232,37 +236,46 @@ adjacency list, which is what Phase 7 encodes.
 
 ### 4.1 Allowed imports, exactly
 
-| Module           | May import                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| `app/` (non-API) | `site/` · `world/` · `command-menu/` · `telemetry/` · `content/` · `ui/` · root leaves           |
-| `app/api/`       | `agent/` · `chat-contract` · `env`                                                               |
-| `site/`          | `content/` · `ui/` · `reduced-motion` · **store-only:** `command-menu/store`                     |
-| `world/`         | `content/` · `ui/` · `reduced-motion` · **store-only:** `command-menu/store`, `telemetry/vitals` |
-| `command-menu/`  | `content/` · `ui/` · `reduced-motion` · `chat-contract`                                          |
-| `telemetry/`     | `ui/` · `reduced-motion` · **store-only:** `world/perf`                                          |
-| `agent/`         | `content/` (including `content/prose/**`) · `env` · `chat-contract`                              |
-| `content/`       | **nothing**                                                                                      |
-| `ui/`            | **nothing** — no domain, no root leaf that carries product state                                 |
+| Module           | May import                                                                                      |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `app/` (non-API) | `site/` · `world/` · `command-menu/` · `telemetry/` · `content/` · `ui/` · root leaves          |
+| `app/api/`       | `agent/` · `chat-contract` · `env`                                                              |
+| `site/`          | `content/` · `ui/` · `reduced-motion` · **store-only:** `command-menu/store`                    |
+| `world/`         | `content/` · `ui/` · `reduced-motion` · **store-only:** `command-menu/store`, `telemetry/store` |
+| `command-menu/`  | `content/` · `ui/` · `reduced-motion` · `chat-contract`                                         |
+| `telemetry/`     | `ui/` · `reduced-motion` · **store-only:** `world/perf`                                         |
+| `agent/`         | `content/` (including `content/prose/**`) · `env` · `chat-contract`                             |
+| `content/`       | **nothing**                                                                                     |
+| `ui/`            | **nothing** — no domain, no root leaf that carries product state                                |
 
-Root leaves — `env.ts`, `store.ts`, `reduced-motion.tsx`, `chat-contract.ts` — may be imported
-by anyone permitted above and import nothing from `src/` themselves. (`store.ts` is the store
-factory, added in Phase 4: four domains build stores, so it belongs to none of them.)
+Root leaves — `env.ts`, `store.ts`, `reduced-motion.tsx`, `chat-contract.ts`,
+`use-is-client.ts` — may be imported by anyone permitted above and import nothing from `src/`
+themselves. (`store.ts` is the store factory, added in Phase 4: four domains build stores, so
+it belongs to none of them. `use-is-client.ts` arrived in Phase 6 by the same test: `world/`
+and `site/` both read it.)
 
 ### 4.2 The store exception, stated precisely
 
 A client domain's **store module is its public API; every other file in it is private.** A
 sibling may import the store and nothing else.
 
-| Domain          | Public store modules              | Everything else |
-| --------------- | --------------------------------- | --------------- |
-| `world/`        | `world/store.ts`, `world/perf.ts` | private         |
-| `command-menu/` | `command-menu/store.tsx`          | private         |
-| `telemetry/`    | `telemetry/vitals.ts`             | private         |
-| `site/`         | none — it exports no state        | fully private   |
+| Domain          | Public store modules                         | Everything else |
+| --------------- | -------------------------------------------- | --------------- |
+| `world/`        | `world/store.ts`, `world/perf.ts`            | private         |
+| `command-menu/` | `command-menu/store.tsx`                     | private         |
+| `telemetry/`    | `telemetry/store.tsx`, `telemetry/vitals.ts` | private         |
+| `site/`         | none — it exports no state                   | fully private   |
 
 This is not a new affordance; it is the shape the code already has. It covers the three edges
 `architecture.md` carried as hand-written exceptions (`inspector/ → world/perf` is simply an
 instance of the general rule) and the five that were undocumented.
+
+> **Corrected in Phase 6.** `telemetry/` has **two** public modules, not the one this table
+> first named. The overlay's open/close signal cannot live in the component tree it drives:
+> `tests/stores.ts` imports it, and that import drags whatever the module pulls in into every
+> spec's graph before `vi.mock` can register — the failure Phase 5 recorded when it tried the
+> same merge in `world/boot`. So `telemetry/store.tsx` is a public module beside
+> `telemetry/vitals.ts`, the way `world/` has both `store.ts` and `perf.ts`.
 
 ### 4.3 Denied, without exception
 
@@ -325,6 +338,15 @@ that already point at a store stay, and the ones that reach past it (`useCommand
 `world-canvas.tsx`, `useInspectorOverlay` from `boot-actions.tsx` and `hud/deck-controls.tsx`)
 are repointed at the store module. Three hand-written exceptions become zero, and the rule
 becomes a glob instead of a paragraph.
+
+> **Resolved in Phase 6, ahead of the phase that was to enforce it.** Deleting the three
+> `index.ts` barrels left every one of these imports with nowhere to point but a real path, and
+> each one turned out to be a store: `@/command-menu/store` from `world/canvas.tsx`,
+> `world/hud/deck.tsx` and `site/home-cta.tsx`, `@/telemetry/store` from `world/boot.tsx` and
+> `world/hud/deck.tsx`. All five are permitted by §4.1. **There was a ninth edge the count
+> missed**, and it was the only real violation: `world/hud/deck.dom.test.tsx` mounted the
+> `CommandMenu` component itself. It reads the store now. **Phase 7 inherits zero edges to
+> resolve and only the globs to write.**
 
 ---
 
@@ -694,7 +716,7 @@ optional final phase.
 > imports the day it landed. That is the mechanism by which a flattened domain grows a barrel
 > back, and it is checked now rather than described. Phase 7 still owns the rest of §4.4.
 
-### Phase 6 — the remaining domains
+### Phase 6 — the remaining domains ✅ landed 2026-08-15
 
 - **Objective.** Empty every technical-category folder. _(Counts below are estimates.)_
 - **Scope.** `ai/` → `agent/`, the eight `retrieve-*`/`embed-query` files → one
@@ -715,17 +737,65 @@ optional final phase.
 - **Verify.** `pnpm validate` · `pnpm e2e:ci` · expect new `knip` findings as barrels
   disappear, and treat them as findings rather than something to silence.
 
+> **Landed**, in six commits: `agent/`, `telemetry/`, `command-menu/`, `site/`, the root
+> leaves, and the rename. **Ten directories disappeared** — `ai/`, `features/`, `config/`,
+> `constants/`, `hooks/`, `providers/`, `schemas/`, `seo/`, `styles/`, `components/` — leaving
+> the eight in §3 with six files beside them. 76 test files, 841 tests, coverage
+> 98.97 / 93.94 / 98.79 / 99.72, 19/19 routes static, and `agent:index:check` reproduced all
+> 86 chunks unchanged after the rename. Seven things are worth knowing.
+>
+> **`agent/corpus.ts` is a sixth file the plan did not name, and a test seam is why.** The
+> scope said fold the index loader into `retrieval.ts`; `app/api/chat/route.test.ts` mocks the
+> loader to run the real scoring against a fake corpus, and one module for both would have
+> mocked the thing under test. The honest boundary is the lifecycle: `corpus.ts` reads and
+> validates a build artifact at module scope, and everything in `retrieval.ts` is a pure
+> function over the chunks it is handed.
+>
+> **`schemas/agent.ts` was split, not moved.** It held the `/api/chat` wire format _and_ the
+> index schema, which is why five client files under `features/command-menu` were importing a
+> server module for a type — §4.3 rule 4, broken in plain sight and by nothing lint could see.
+> The wire half is `chat-contract.ts`; the index half is `agent/corpus.ts`.
+>
+> **The eight edges of §4.5 resolved themselves**, and a ninth appeared. See the note there:
+> deleting the barrels left every cross-domain import pointing at a store, which §4.1 already
+> permits. The ninth was a spec mounting another domain's component — the only edge in the set
+> that was a real violation rather than an invisible one.
+>
+> **Two new leaves, both measured.** `use-is-client.ts` at the root (`world/` ×3, `site/` ×1)
+> and `world/random.ts` inside the domain (`scene/` ×3, `screens/` ×1, so it can live in
+> neither). Neither was in a target tree; both follow §8 rule 6 exactly, and §3 above is
+> corrected rather than the code bent to it.
+>
+> **The `Inspector` identifiers stayed while the folder went.** They name a user-facing
+> surface four E2E specs assert on — "Inspector · receipts", "Performance inspector overlay" —
+> and §3's change 3 retires the _directory_, which is what made the name ambiguous. Renaming
+> the copy is a product decision and belongs to Phase 8 if it belongs to anyone.
+>
+> **`eslint.config.ts` lost the `FEATURES` generator** and gained the same-domain rule for all
+> five domains rather than only `world/`. It found two edges the moment it landed. Phase 7
+> still owns §4.4 — the groups applied from _outside_ a domain, and `warn` → `error` — and
+> this phase deliberately did not do half of it.
+>
+> **Five spec files became three concepts.** `use-in-view` folded into the portrait,
+> `json-ld` into `structured-data`, `site-url` into `metadata`, `use-disposable` into
+> `gpu`, and `providers`' theme case into the one that already asserted it through the whole
+> tree. Two assertions were dropped as genuinely redundant and named in the commits; the rest
+> moved. 80 test files are 76.
+
 ### Phase 7 — enforce the boundaries
 
 - **Objective.** Make the architecture checked rather than described.
-- **Scope.** Rewrite the `FEATURES` generator in `eslint.config.ts` against domain paths;
-  implement §4.1–4.3 as the globs in §4.4, one group per domain with the store carved out —
-  **the glob is the whole point, because the current one cannot see a barrel import and all
-  eight violating edges are barrel imports**; promote `no-restricted-imports` from `warn` to
-  `error`; resolve the eight edges; correct `architecture.md` §4 and
-  `.claude/rules/project-structure.md`, which carry the same false claim.
-- **Verify.** `pnpm lint` — the budget is already `0` as of Phase 4, so this phase is measured
-  by the eight edges going red first and then green, not by the flag.
+- **Scope.** Implement §4.1–4.3 as the globs in §4.4: one group per domain applied to every
+  file **outside** it, with the store module carved out by minimatch negation. Promote
+  `no-restricted-imports` from `warn` to `error`. Correct the "not yet enforced" paragraphs in
+  `architecture.md` §4 and `.claude/rules/project-structure.md`, which are true today and stop
+  being so here.
+- **Verify.** `pnpm lint`. **Phase 6 changed what this phase has to do:** the `FEATURES`
+  generator is already gone, the same-domain half is already live, and there are no violating
+  edges left to resolve. So the measure is no longer "eight edges go red then green" — it is
+  that the new globs, applied to a tree that already obeys them, stay green while a
+  deliberately introduced cross-domain import goes red. **Prove the rule can fail before
+  trusting it**; a group whose negation is wrong permits everything and says nothing.
 
 > Without this phase the refactor is a one-time tidy that decays. With it, the tree is held in
 > place by a check rather than by a document nobody re-reads.
@@ -762,10 +832,13 @@ entry and the final tidy.
    raise the ratio; 2b adds new code and must bring its own tests. Never lower a threshold.
 6. **Path-coupled configuration.** `scripts/check-prerender.ts` imported
    `../src/constants/routes` — repointed at `content/pages` in 2a, along with the two
-   `scripts/agent-index/` importers; `vitest.config.ts:128-129` pins coverage to
-   `src/app/api/**` and `src/rate-limit.ts` (moves in Phase 6); `components.json:8` points at
-   `src/styles/globals.css` (moves in Phase 6). 2a added one more: `package.json`'s
-   `agent:index*` and `e2e*` scripts carry `--conditions=react-server` for `server-only`.
+   `scripts/agent-index/` importers. 2a added `package.json`'s `agent:index*` and `e2e*`
+   scripts carrying `--conditions=react-server` for `server-only`. **Phase 6 repointed the
+   rest and the list is now empty:** `vitest.config.ts`'s coverage pin (`src/rate-limit.ts` →
+   `src/agent/rate-limit.ts`), `components.json` (the CSS path and all four aliases),
+   `.prettierignore` and `scripts/agent-index/paths.ts` (the generated index),
+   `next.config.ts` (the env import), `eslint.config.ts` (the env override and the
+   `process.env` message), and `.claude/settings.json`'s write permission for the index.
 7. **`git blame` gets noisier.** One commit per phase, moves separated from edits, and a
    `.git-blame-ignore-revs` entry.
 8. **Bundle size shifts** when merging changes tree-shaking boundaries. Read `pnpm size` after
