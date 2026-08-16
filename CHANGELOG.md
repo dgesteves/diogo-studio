@@ -1,5 +1,60 @@
 # Changelog
 
+## [1.14.0](https://github.com/dgesteves/diogo-studio/compare/v1.13.0...v1.14.0) (2026-08-16)
+
+
+### Features
+
+* **content:** every block carries an id ([2bb5b23](https://github.com/dgesteves/diogo-studio/commit/2bb5b23c9a8e0d209d18c1a1fbc78c4790bdcdc4))
+
+
+### Bug Fixes
+
+* **agent:** per-block chunks with real anchors and correct permalinks ([52ff4d2](https://github.com/dgesteves/diogo-studio/commit/52ff4d2c87ecd14907561d52aa5d6d0742825f7e))
+* **e2e:** move the react-server guard out of config load ([e105d50](https://github.com/dgesteves/diogo-studio/commit/e105d50e114df6b85fa2ce77b39987263ede7832))
+* **world:** the boot notice reads as a sentence ([6fc4dcc](https://github.com/dgesteves/diogo-studio/commit/6fc4dccba2e3d4c93ba0503bcc41fdbdac51638e))
+* **world:** the boot overlay's aria-hidden mark lands on the shell, not the page ([3937f93](https://github.com/dgesteves/diogo-studio/commit/3937f9398487fbdaac7479efa744e0b5b02ede66))
+* **world:** the resume panel stops advertising a file that does not exist ([66059c0](https://github.com/dgesteves/diogo-studio/commit/66059c0b5ab5f30a79fc58a515439b625a80f524))
+
+
+### Code Refactoring
+
+* **content:** one career record ([e683e6a](https://github.com/dgesteves/diogo-studio/commit/e683e6a9a499b4a23554ad0922438289b1a9531b))
+* **lint:** the domain boundaries are a check ([c193d24](https://github.com/dgesteves/diogo-studio/commit/c193d242c140275cec399f0b09c520898e4fd550))
+* **state:** one store factory, and src/stores dissolved ([3b7938b](https://github.com/dgesteves/diogo-studio/commit/3b7938b1c7c8eca8cf820ae05eca4c47bd3d4aad))
+* **world:** one canvas-texture hook, and no warning budget ([0e09eab](https://github.com/dgesteves/diogo-studio/commit/0e09eab770ba816da71967448574ee82c8d45cee))
+* **world:** one CRT kit for every screen in the room ([df512a8](https://github.com/dgesteves/diogo-studio/commit/df512a827f2ad835f0e15a376d6b8a593cd2d678))
+* **world:** three's Clock deprecation warning is no longer filtered ([cf2bf9a](https://github.com/dgesteves/diogo-studio/commit/cf2bf9a743cee119819eb823ee66b369c9eebd4f))
+* **world:** wall screens take their data as a parameter ([ebe9be8](https://github.com/dgesteves/diogo-studio/commit/ebe9be8b70f69bd3d517a1b3ab981e7c9b981d3c))
+
+
+### Documentation
+
+* architecture.md describes a tree that exists ([cb01f30](https://github.com/dgesteves/diogo-studio/commit/cb01f30448403b483bc7652f97b4e10d6e77a373))
+* **content:** five pages describe what exists ([cc17a6a](https://github.com/dgesteves/diogo-studio/commit/cc17a6ac99fc860e7e92c1a9e4edc06ede32626d))
+* record Phase 3 ([f5a0e2e](https://github.com/dgesteves/diogo-studio/commit/f5a0e2ed913cb877420a4f701c8eb60534d31b4f))
+* record Phase 4 ([b2b89a4](https://github.com/dgesteves/diogo-studio/commit/b2b89a4de32e79d3bbaa0fd81b7ac1c6e71d2cf0))
+* record Phase 7 ([3616140](https://github.com/dgesteves/diogo-studio/commit/3616140d4e2b2c68b4502f59313de4239407f49e))
+* record Phase 8 and delete refactor.md ([a37fe81](https://github.com/dgesteves/diogo-studio/commit/a37fe81272fc988a9be8d0a4dc7335a5ab51199f))
+* repoint every live refactor.md cross-reference ([56258a0](https://github.com/dgesteves/diogo-studio/commit/56258a0d6f74e7e5b0fc9e9801cb80e16c5134df))
+* the ladder names where Next's own docs are, and the managed block stays ([e0f0fd9](https://github.com/dgesteves/diogo-studio/commit/e0f0fd9ad5dac26a5c1931ee1fe2c30ba0fc0543))
+
+
+### Build System
+
+* **deps:** the pnpm overrides go, and the typescript ignore mirrors a peer range ([882114b](https://github.com/dgesteves/diogo-studio/commit/882114b9f5604ab1b946220a8450e2ba1b18bfcc))
+* knip reports every unused export, with no carve-out ([b04135a](https://github.com/dgesteves/diogo-studio/commit/b04135aaa1ef8142b8ae2b0b4469ba037597ec46))
+* let knip report an export nothing else imports ([d68905a](https://github.com/dgesteves/diogo-studio/commit/d68905ac28d9049187d154016bbde119f07215f5))
+* prettier stops checking a file that is not in the repository ([9a28778](https://github.com/dgesteves/diogo-studio/commit/9a28778e957433f32e867b35d80f61f3f93dbbd3))
+
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump the development-minor-patch group with 3 updates ([#223](https://github.com/dgesteves/diogo-studio/issues/223)) ([57d825b](https://github.com/dgesteves/diogo-studio/commit/57d825bfac7c49cd21d54e475afbf1179f94d422))
+* **deps:** bump the next group with 2 updates ([#221](https://github.com/dgesteves/diogo-studio/issues/221)) ([b23af5e](https://github.com/dgesteves/diogo-studio/commit/b23af5e6f3a3ea826a1a0c657635fc0d46b68223))
+* **deps:** bump the production-minor-patch group with 2 updates ([#222](https://github.com/dgesteves/diogo-studio/issues/222)) ([407f500](https://github.com/dgesteves/diogo-studio/commit/407f500fc3e92eee2936c476af4d33a7a3ceb7a4))
+* **deps:** bump the re-build pnpm-lock.yaml ([010d1fd](https://github.com/dgesteves/diogo-studio/commit/010d1fd647e856a387e1b2581691d20d7ad96945))
+
 ## [1.13.0](https://github.com/dgesteves/diogo-studio/compare/v1.12.2...v1.13.0) (2026-08-14)
 
 
