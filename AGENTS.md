@@ -63,7 +63,8 @@ Version-bound to Next 16.3 / React 19.2 / Tailwind 4 — re-verify here on a maj
 
 1. Security, accessibility and web standards — OWASP, WCAG 2.2 AA, W3C/WHATWG/RFC/MDN.
 2. Official docs for the installed versions — Next 16.3, React 19.2, TS 6, Vitest 4,
-   Playwright 1.62.
+   Playwright 1.62. Next's ship on disk at `node_modules/next/dist/docs/`, matched to the
+   installed version, so read those instead of recalling an earlier major.
 3. The recorded design target — `docs/architecture.md`. May override (2), never (1).
 4. Automated enforcement — tsconfig, ESLint, Vitest/Playwright, CI. If it contradicts 1–3, the
    config may be the bug: investigate it.
@@ -148,3 +149,13 @@ file type).
 - **GitHub Free, private repo:** no branch protection and no required status checks, so nothing
   stops a red push but you. Upload CI artifacts only on failure, with `retention-days`. Full
   table in `docs/architecture.md`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
