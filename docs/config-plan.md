@@ -656,15 +656,22 @@ final env checker.
 None of this is code, and none of it has been performed. It requires dashboard access this
 repository does not have.
 
-| #   | Action                                        | Why                                                           | When                        | Depends on            | What can break                                                                       | Before PR 5? |
-| --- | --------------------------------------------- | ------------------------------------------------------------- | --------------------------- | --------------------- | ------------------------------------------------------------------------------------ | ------------ |
-| 1   | **OpenAI spend cap**                          | The only control that bounds worst case independently of code | **Immediately — do first**  | Nothing               | Nothing. The endpoint is already 503                                                 | **Yes**      |
-| 2   | **OpenAI key rotation**                       | The key was displayed in a chat session                       | Immediately                 | Nothing               | Nothing — the key is unused in production today                                      | Yes          |
-| 3   | **Sentry token rotation**                     | Same exposure                                                 | Immediately                 | Nothing               | Source-map upload, if Vercel and GitHub are updated at different times               | Yes          |
-| 4   | **Upstash database creation**                 | Production cannot use the in-memory limiter                   | Any time                    | Nothing               | Nothing                                                                              | **Yes**      |
-| 5   | **Vercel Production variables**               | `OPENAI_API_KEY` + both `UPSTASH_*`, marked Sensitive         | **After PR 4 merges**       | PR 4, items 1 and 4   | Adding the key before PR 4 creates a billable endpoint behind an ineffective limiter | **Yes**      |
-| 6   | **GitHub secret removal**                     | CI does not need Sentry credentials                           | After pipeline-plan Phase 1 | `pipeline-plan.md` §3 | CI build fails while `ci.yml:80-84` still references them                            | No           |
-| 7   | **Restore `.claude/settings.json` deny rule** | `Read(./.env.local)` was removed for a one-off need           | Any time                    | Nothing               | Nothing                                                                              | No           |
+| #   | Action                          | Why                                                           | When                        | Depends on            | What can break                                                                       | Before PR 5? |
+| --- | ------------------------------- | ------------------------------------------------------------- | --------------------------- | --------------------- | ------------------------------------------------------------------------------------ | ------------ |
+| 1   | **OpenAI spend cap**            | The only control that bounds worst case independently of code | **Immediately — do first**  | Nothing               | Nothing. The endpoint is already 503                                                 | **Yes**      |
+| 2   | **OpenAI key rotation**         | The key was displayed in a chat session                       | Immediately                 | Nothing               | Nothing — the key is unused in production today                                      | Yes          |
+| 3   | **Sentry token rotation**       | Same exposure                                                 | Immediately                 | Nothing               | Source-map upload, if Vercel and GitHub are updated at different times               | Yes          |
+| 4   | **Upstash database creation**   | Production cannot use the in-memory limiter                   | Any time                    | Nothing               | Nothing                                                                              | **Yes**      |
+| 5   | **Vercel Production variables** | `OPENAI_API_KEY` + both `UPSTASH_*`, marked Sensitive         | **After PR 4 merges**       | PR 4, items 1 and 4   | Adding the key before PR 4 creates a billable endpoint behind an ineffective limiter | **Yes**      |
+| 6   | **GitHub secret removal**       | CI does not need Sentry credentials                           | After pipeline-plan Phase 1 | `pipeline-plan.md` §3 | CI build fails while `ci.yml:80-84` still references them                            | No           |
+
+**Item 7 was withdrawn on 2026-08-17.** It read "restore the `.claude/settings.json` deny rule".
+The `Read(./.env)` and `Read(./.env.local)` entries were removed deliberately, not for a one-off
+need: agents are to read env files going forward. The consequence is that a real credential can
+reach a session transcript whenever one does, so **items 2 and 3 stop being one-time cleanup and
+become the standing practice** — rotate anything an agent has read. Nothing in this plan depends on
+the deny rule, and no other guardrail changed: `.env*` stays gitignored, `Edit()` denials on the
+lockfile, changelog and generated index are untouched, and every check in §12 is unaffected.
 
 **On item 5 and Preview.** The assertion in §7.1 deliberately excludes Preview, so preview
 deployments do not need these variables. Add them to Preview only if you want the agent working on

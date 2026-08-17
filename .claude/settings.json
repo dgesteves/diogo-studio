@@ -15,8 +15,6 @@
       "Bash(git show:*)"
     ],
     "deny": [
-      "Read(./.env)",
-      "Read(./.env.local)",
       "Edit(./CHANGELOG.md)",
       "Edit(./pnpm-lock.yaml)",
       "Edit(./src/agent/index.generated.json)"
