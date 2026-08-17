@@ -24,6 +24,42 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-17 — `config-plan.md` and `pipeline-plan.md` are deleted, unimplemented, on purpose
+
+Both plans were sound and neither was wrong. They were deleted because the product is not
+finished, and a bounded plan against a codebase that is still growing gets re-derived anyway —
+paying for the audit twice. The experience comes first: UI, copy, behavior, desktop and mobile,
+reduced motion, accessibility. The architectural pass happens once, against the finished thing.
+
+**Deferring is safe here for a specific reason, not a hopeful one.** Drift is held by machinery
+rather than by intent: `tests/boundaries.test.ts` and `eslint.config.ts` hold the six-domain
+architecture, `prerender:check` holds static rendering, the `vitest.config.ts` thresholds hold
+coverage. Keep those green while building and the eventual audit is about design, not debt.
+If they start getting waived, this decision has expired.
+
+Both implementation branches were dropped with the docs — `config-architecture` (three commits:
+the ESLint `process.env` ban widened to the node, `pnpm env:check`, and the `AGENTS.md`
+correction) and `ci/gated-pipeline` (`8150ed3`, six CI jobs to three). None of it is on `main`.
+The full plans are at `fee3f0c`; `git show` beats re-auditing.
+
+**What is deferred is repository work only. Four findings live outside it and are not deferred:**
+
+| Finding                                                                     | Where it lives   |
+| --------------------------------------------------------------------------- | ---------------- |
+| No OpenAI spend cap — the only bound on worst case independent of code      | OpenAI dashboard |
+| `OPENAI_API_KEY` and the Sentry token were displayed in a chat session      | rotate both      |
+| No Upstash database — the in-memory limiter is ineffective on serverless    | Upstash + Vercel |
+| `OPENAI_API_KEY` absent from Vercel Production — `/api/chat` is `503` there | Vercel           |
+
+The last two are ordered: adding the key before a real limiter exists creates a billable
+endpoint behind one that does not work.
+
+**And one fact worth not rediscovering: CI is an observer, not a gate.** Deployment triggers on
+`git push` and has no relationship to the checks — release `846c8f0` served production at
+`14:54:52Z` while its own CI finished at `15:16:33Z`, 21 minutes later. GitHub Free has no
+branch protection, so nothing stops a red push but you. Vercel Deployment Checks is the fix
+when it is worth doing; `git show fee3f0c:docs/pipeline-plan.md` has the worked design.
+
 ## 2026-08-15 — The five pnpm overrides are deleted; the Dependabot ignores stay
 
 Two cleanups that looked alike and were not. Both were checked the same way: remove the
