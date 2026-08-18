@@ -24,6 +24,60 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-18 — A mocked answer on a timer put a deadline on the click it existed to enable
+
+`ask-agent.spec.ts` "stopping a slow answer" failed on CI in `full-motion` only, three times
+for **4.5 minutes** of runner time: `locator.click` on Stop reported `element is not stable`,
+then `element was detached from the DOM`, then spent the whole 90s test budget on a control
+that was never coming back.
+
+The mock held `/api/chat` for 4s and then fulfilled it. The Stop control exists only while
+`status === "streaming"`, so that timer was a deadline on the click — and **the click is the
+slow half**. Measured at `Emulation.setCPUThrottlingRate: 8`, which is the nearest a host
+gets to 2 vCPU plus SwiftShader: the click needs **9.17s** of actionability polling against
+**210ms** once frames settle, because frames arrive at ~6.4 fps with the scene rendering
+(80 rAFs in 12.5s). Sampling the button's own rect across those 80 frames returns **one
+distinct box**, so `not stable` is the single settling frame after Stop replaces the `↵ Ask`
+hint, stretched across multi-hundred-millisecond frames. Nothing in the product moves it.
+
+The 4s never encoded a requirement — it only kept the streaming state observable, and `stop()`
+aborts the request, so the response was never needed. The route now holds open and is never
+fulfilled, which is also a more faithful "slow answer" than one that arrives on a schedule.
+
+**Rejected, and why the rejection is the point.** An `actionTimeout` bounds the 4.5 minutes,
+but a legitimate click measured 9.2s under throttling and the passing container retry took
+43.2s, so any bound tight enough to save real time is close enough to real timings to trade
+this flake for a new one. `force: true`, asserting `data-state`, and leaning on `retries` are
+the same softening the 2026-08-08 entry below already refused. A lint rule banning timers
+inside `page.route` mocks was considered and not written: there is one occurrence, and it
+would forbid a legitimately chunked stream. `tests/e2e` has no other timed mock — the only
+other `setTimeout` in the directory is a word in a comment.
+
+Verified at CI fidelity with `CI_CPUS=1 pnpm e2e:runner`, which reproduces the failure this
+host does not: before, attempt 1 timed out and retry #1 passed at 43.2s; after, it passes on
+the first attempt at 39.9s. Locally the whole file is 14/14 across both projects.
+
+### The scrim does not hide the world, so open item (1) below is wrong as written
+
+Chasing the frame budget led straight to the 2026-08-08 work item "skip `WorldPostprocessing`
+while a blocking overlay covers the scene — it is invisible behind a 70% scrim plus blur."
+**That claim does not hold.** The ⌘K overlay is `bg-background/70` with `backdrop-blur-sm`:
+30% of the scene comes through, and a 4px blur softens detail while doing nothing to a
+large-radius glow — which is exactly what bloom is. A screenshot with the menu open shows a
+backdrop that is dimmed, not hidden. Skipping postprocessing there is a **visible** change,
+most obviously in dark theme where the neon and the AI core are the glow. Do not pick that
+item up as written.
+
+Items (2) and (3) keep their reasoning but inherit the same question: pausing the loop freezes
+a world that stays on screen, on a site whose premise is that the world is live. The one
+candidate with a claim to imperceptibility is lowering DPR while a blocking overlay is up,
+since blur does hide resolution — untested, and it owes a side-by-side through the real scrim
+before it earns a line of code.
+
+None of it is owed to CI. A starved `full-motion` run is a cost this repo priced deliberately
+— one worker, a 15s expect budget, a 90s test timeout — and the defect here was a spec holding
+a stopwatch, not a scene that renders too much.
+
 ## 2026-08-18 — An opacity-animated rule states its own resting opacity
 
 Second cause behind the flashing boot screen, found by measuring frames out of a screen

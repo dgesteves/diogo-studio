@@ -132,10 +132,15 @@ test.describe("Ask the agent", () => {
   test("stopping a slow answer returns the visitor to the suggestions", async ({ page }) => {
     // Held open rather than sent, which is the only way to observe the streaming state:
     // `route.fulfill` delivers a body in one piece, so the wait has to be on the server
-    // side of the mock.
-    await page.route("**/api/chat", async (route) => {
-      await new Promise((resolve) => setTimeout(resolve, 4_000));
-      await route.fulfill({ status: 200, body: "too late" });
+    // side of the mock. It is never fulfilled, because `stop()` aborts the request — an
+    // answer that arrives on a timer only puts a deadline on the click, and the click is
+    // the slow half. Measured at `Emulation.setCPUThrottlingRate: 8`, Stop needs ~9s of
+    // actionability polling at ~6 fps while the software-rendered scene owns the main
+    // thread, against 210ms once frames settle; a 4s release unmounted the button
+    // mid-click and `locator.click` then spent the whole 90s budget waiting for a control
+    // that was never coming back.
+    await page.route("**/api/chat", async () => {
+      await new Promise(() => {});
     });
 
     const dialog = await openAsk(page);
