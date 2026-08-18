@@ -48,17 +48,17 @@ const COLD_BOOT_MS = 30_000;
 /**
  * Wait for the state the product *guarantees*, then interact with it normally.
  *
- * `BootActions` shows "Skip intro" while the scene compiles and swaps in "Enter the
- * studio" once `canEnter` flips — which `BootSequence` promises within `BOOT_MAX_MS`
- * (12s) on any machine, however slow, via its `forceReady` timer. So the ready CTA is
- * not a race: it is reached by the clock, not by the hardware. Waiting for it means the
- * panel has finished resizing around the swap, and no element can detach mid-click.
+ * `BootActions` mounts the CTA disabled and enables it once `canEnter` flips — which
+ * `BootSequence` promises within `BOOT_MAX_MS` (12s) on any machine, however slow, via
+ * its `forceReady` timer. So the live CTA is not a race: it is reached by the clock, not
+ * by the hardware, and Playwright's actionability wait for "enabled" is exactly that
+ * wait. The button never detaches, because it is the same element throughout.
  *
  * Two days of red CI came from doing the opposite — racing whichever control was up,
  * with `force: true` and a 1s cap, on a page whose main thread was blocked in 5s chunks.
  * The cap guaranteed the failure it was meant to prevent and the force hid that the page
- * was unusable; `WorldQualityGuard` fixes that cause. The pre-ready "Skip intro" path and
- * the boot timing itself are asserted in `boot.test.tsx` under fake timers, where they
+ * was unusable; `WorldQualityGuard` fixes that cause. The pre-ready Escape path and
+ * the boot timing itself are asserted in `boot.dom.test.tsx` under fake timers, where they
  * are deterministic. End to end, the question is only whether a first visit is gated and
  * whether dismissing it yields a usable page.
  */
@@ -119,10 +119,10 @@ test.describe("Boot sequence", { tag: "@full-motion" }, () => {
     const boot = page.getByRole("dialog", { name: /entering .*studio/i });
     await expect(boot).toBeVisible({ timeout: COLD_BOOT_MS });
 
-    // The preference controls only exist once `canEnter` flips — before that the panel
-    // offers "Skip intro" and nothing else — so waiting for the CTA is also waiting for them.
+    // The preference controls are mounted from the first frame; the CTA is what becomes
+    // live at `canEnter`, so waiting for it to be enabled is waiting for the gate to open.
     const enter = boot.getByRole("button", { name: /enter the studio/i });
-    await expect(enter).toBeVisible({ timeout: COLD_BOOT_MS });
+    await expect(enter).toBeEnabled({ timeout: COLD_BOOT_MS });
 
     await preference(boot, /theme preference/i, "Dark").click();
     await preference(boot, /sound preference/i, "Muted").click();
