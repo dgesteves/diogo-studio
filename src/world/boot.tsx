@@ -558,7 +558,25 @@ export function BootSequence(): ReactElement | null {
   const [finished, setFinished] = useState(false);
   const [minElapsed, setMinElapsed] = useState(false);
   const [forceReady, setForceReady] = useState(false);
-  const show = isClient && !reducedMotion && !finished && !hasBootedThisSession();
+  const [gated, setGated] = useState<boolean | null>(null);
+
+  /**
+   * Whether to gate this visit is decided once, on the first client render, and never
+   * revisited. It used to be read live, and `reducedMotion` is partly derived from
+   * `navigator.connection.effectiveType` — a rolling estimate Chrome recomputes *while*
+   * the page loads, which is precisely when this is on screen. A cold first visit pulling
+   * the whole world down would dip to `2g` and recover, and each dip unmounted the entire
+   * gate and rebuilt it: backdrop animations restarting (the sun visibly flashing), the
+   * progress bar snapping back to `faux`'s initial 8%, and the panel blinking out and in.
+   *
+   * A render-phase update rather than an effect, so the decision costs no extra paint and
+   * the splash hands over in the same commit.
+   */
+  if (isClient && gated === null) {
+    setGated(!reducedMotion && !hasBootedThisSession());
+  }
+
+  const show = isClient && gated === true && !finished;
 
   useEffect(() => {
     if (isClient) hideBootSplash();

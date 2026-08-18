@@ -24,6 +24,47 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-18 — The boot gate decides once; reading the motion preference live tore it down
+
+Reported from production: the sun on the boot screen "flashes a lot," the progress bar jumps,
+and the preferences and CTA disappear and come back — worst on a fresh browser profile with a
+cold cache.
+
+One cause for all of it. `BootSequence` computed `show` from `useReducedMotionPreference()` on
+every render, and `reducedMotion` is `override ?? (systemReducedMotion || lowPower)` where
+`lowPower` reads `navigator.connection.effectiveType`. That value is not a constant: Chrome
+derives it from a rolling RTT and throughput estimate and fires `change` as it moves — and a
+cold first visit downloading the entire 3D world is exactly the moment it dips to `2g` and
+recovers. Each dip made `show` false, so `BootSequence` returned `null` and the whole overlay
+unmounted; each recovery mounted a brand-new tree. That is the flashing sun (every backdrop
+animation restarts from 0% on fresh DOM), the jumping bar (`BootOverlay`'s `faux` is
+`useState(8)`), and the vanishing controls (the panel is simply gone for the duration of the
+dip). `saveData` cannot flap, but `effectiveType` does, which is why this looked random.
+
+**The fix is the latch, not the input.** `reducedMotion` is a live preference and should stay
+one; what was wrong is that a startup event read it as if it were stable. `BootSequence` now
+decides on the first client render — a render-phase `setGated`, so it costs no extra paint and
+the splash still hands over in the same commit — and never revisits it. That closes the whole
+class: the OS media query flipping mid-load, or an override written by other UI, would have
+done the same damage. It also takes the `hasBootedThisSession()` `sessionStorage` read out of
+every render.
+
+Deliberately **not** changed: `lowPower`'s contribution to `reducedMotion`. Treating a slow
+connection as a motion preference is arguably conflating bandwidth with vestibular safety, but
+that decision reaches the canvas, the HUD and every animation in `site/`, and it is not what
+this bug required.
+
+Reproduced before fixing, in `boot.dom.test.tsx`, with `stubNetworkConnection` and a real
+`ReducedMotionProvider`: reporting `2g` then `4g` mid-compile removed the dialog and the
+`.boot-sun` node outright. The test now asserts the opposite — same dialog, the _same_
+backdrop node (identity, so a restarted animation would fail it), and a progress bar that
+does not go backwards. Restoring the old `show` expression fails exactly that test.
+
+Still open, and much smaller: `BootSplash` and `BootOverlay` each render a `BootBackdrop`, and
+`hideBootSplash()` runs in a passive effect, so at least one frame paints with two suns
+stacked out of phase. That is a single pop at handoff rather than a repeating flash, and it is
+untouched here.
+
 ## 2026-08-18 — The boot gate has one control in both states; "Skip intro" is deleted
 
 `BootActions` used to render two unrelated things: a small ghost "Skip intro" button while
