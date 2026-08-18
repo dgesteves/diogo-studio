@@ -4,6 +4,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
+import { type ConnectionStub, restoreMediaStubs, stubNetworkConnection } from "@tests/media";
 import { useInspectorOverlay } from "@/telemetry/store";
 import { persistOverride, ReducedMotionProvider } from "@/reduced-motion";
 import {
@@ -116,6 +117,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  restoreMediaStubs();
   vi.useRealTimers();
   audio.enable.mockClear();
   theme.setTheme.mockClear();
@@ -249,6 +251,54 @@ describe("Boot gate", () => {
     );
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
+  });
+
+  it("is not torn down by a connection-speed flap mid-boot", () => {
+    const listeners = new Set<() => void>();
+    const conn: ConnectionStub = {
+      effectiveType: "4g",
+      saveData: false,
+      addEventListener: (_type, listener) => listeners.add(listener),
+      removeEventListener: (_type, listener) => listeners.delete(listener),
+    };
+    stubNetworkConnection(conn);
+
+    render(
+      <ReducedMotionProvider>
+        <BootSequence />
+      </ReducedMotionProvider>,
+    );
+
+    // Mid-compile, which is when a cold visit is downloading hardest.
+    advance(2000);
+
+    // Chrome derives `effectiveType` from a rolling RTT/throughput estimate and fires
+    // `change` as it moves — and a cold first visit pulling the whole world down is
+    // exactly when it dips and recovers.
+    function report(effectiveType: ConnectionStub["effectiveType"]): void {
+      act(() => {
+        conn.effectiveType = effectiveType;
+        for (const listener of listeners) listener();
+      });
+    }
+
+    const barWidth = (): string =>
+      document.querySelector<HTMLElement>(".boot-fill")?.style.width ?? "gone";
+    const before = Number.parseFloat(barWidth());
+    expect(before).toBeGreaterThan(20);
+
+    const sun = document.querySelector(".boot-sun");
+
+    report("2g");
+    report("4g");
+
+    // The gate is untouched: same dialog, and the *same* backdrop node, so no CSS
+    // animation on it restarts. Reading the preference live tore this tree down on the
+    // dip and rebuilt it on the recovery — the sun flashing once per flap.
+    expect(screen.getByRole("dialog", { name: STUDIO_DIALOG })).toBeInTheDocument();
+    expect(document.querySelector(".boot-sun")).toBe(sun);
+    // And the progress bar keeps its place instead of snapping back to `faux`'s initial 8%.
+    expect(Number.parseFloat(barWidth())).toBeGreaterThanOrEqual(before);
   });
 
   it("hides the server-rendered splash as soon as it takes over", () => {
