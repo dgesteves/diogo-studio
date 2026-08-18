@@ -17,7 +17,7 @@ vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
  */
 
 const DEPLOY_URL = "diogo-studio-git-main.vercel.app";
-const PRODUCTION_URL = "diogo.studio";
+const PRODUCTION_URL = "diogo-studio.com";
 
 afterEach(() => {
   setTestEnv();
@@ -101,12 +101,12 @@ describe("rootViewport", () => {
 describe("getSiteUrl() precedence", () => {
   it("prefers the explicit app url over anything Vercel injects", () => {
     setTestEnv({
-      NEXT_PUBLIC_APP_URL: "https://diogo.studio",
+      NEXT_PUBLIC_APP_URL: "https://diogo-studio.com",
       VERCEL_PROJECT_PRODUCTION_URL: PRODUCTION_URL,
       VERCEL_URL: DEPLOY_URL,
     });
 
-    expect(getSiteUrl()).toBe("https://diogo.studio");
+    expect(getSiteUrl()).toBe("https://diogo-studio.com");
   });
 
   it("prefers the production domain over the per-deployment url", () => {
@@ -142,13 +142,13 @@ describe("getSiteUrl() normalization", () => {
   });
 
   it("strips trailing slashes, so callers can concatenate a route safely", () => {
-    setTestEnv({ NEXT_PUBLIC_APP_URL: "https://diogo.studio///" });
+    setTestEnv({ NEXT_PUBLIC_APP_URL: "https://diogo-studio.com///" });
 
-    expect(getSiteUrl()).toBe("https://diogo.studio");
+    expect(getSiteUrl()).toBe("https://diogo-studio.com");
   });
 
   it("never ends in a slash, whatever it was given", () => {
-    for (const value of ["https://diogo.studio/", `${PRODUCTION_URL}/`, "https://a.b/c/"]) {
+    for (const value of ["https://diogo-studio.com/", `${PRODUCTION_URL}/`, "https://a.b/c/"]) {
       setTestEnv({ NEXT_PUBLIC_APP_URL: value });
       expect(getSiteUrl().endsWith("/")).toBe(false);
     }

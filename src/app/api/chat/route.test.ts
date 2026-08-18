@@ -72,7 +72,7 @@ let callerId = 0;
 // every case gets its own, and only the rate-limit case deliberately reuses one.
 function post(body: unknown, ip = `10.0.0.${(callerId += 1)}`): Promise<Response> {
   return POST(
-    new Request("https://diogo.studio/api/chat", {
+    new Request("https://diogo-studio.com/api/chat", {
       method: "POST",
       headers: { "content-type": "application/json", "x-forwarded-for": ip },
       body: typeof body === "string" ? body : JSON.stringify(body),

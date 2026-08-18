@@ -13,7 +13,7 @@ vi.mock("@/env", async () => ({ env: (await import("@tests/env")).testEnv }));
 // config"), so the profile is asserted through the mock rather than its effect.
 vi.mock("next/cache", () => ({ cacheLife }));
 
-const SITE_URL = "https://diogo.studio";
+const SITE_URL = "https://diogo-studio.com";
 
 beforeEach(() => {
   setTestEnv({ NEXT_PUBLIC_APP_URL: SITE_URL });

@@ -33,7 +33,7 @@ vi.mock("@upstash/redis", () => {
 });
 
 function request(headers: Record<string, string> = {}): Request {
-  return new Request("https://diogo.studio/api/chat", { method: "POST", headers });
+  return new Request("https://diogo-studio.com/api/chat", { method: "POST", headers });
 }
 
 const UPSTASH = {
