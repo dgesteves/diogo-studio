@@ -24,6 +24,23 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-18 — `world-poster.png` is a placeholder, and its weight is an OG constraint
+
+One file, two roles, opposite budgets. In `world/fallback.tsx` it goes through
+`next/image`, so it is resized and re-encoded per viewport and its 3.2 MB source never
+reaches a browser. In `site/metadata.ts` it is the `og:image` — a raw `/public` URL that
+no optimizer touches, so every social scraper fetches all 3.2 MB. X and Facebook accept
+that; several messaging clients cap preview fetches far lower and render no card at all
+rather than a slow one. Its 5116×2084 is also ≈2.45:1, wider than the 2:1 that
+`summary_large_image` crops to, so the card loses the top and bottom.
+
+The poster is placeholder art and will be replaced. When it is, give `og:image` its own
+small 2:1 asset and leave the large source to the fallback, rather than hunting for one
+file that satisfies both. A size assertion on the card asset is the right guard, but it
+would fail today, so it belongs with the replacement rather than here. Per
+[No roadmap document](#2026-08-07--no-roadmap-document) the intent to replace lives in an
+issue; this entry is only the constraint any replacement has to meet.
+
 ## 2026-08-17 — `config-plan.md` and `pipeline-plan.md` are deleted, unimplemented, on purpose
 
 Both plans were sound and neither was wrong. They were deleted because the product is not
