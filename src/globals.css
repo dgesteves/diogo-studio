@@ -215,6 +215,7 @@
   }
 }
 .world-hint-pulse {
+  opacity: 0.6;
   animation: world-hint-pulse 2.6s ease-in-out infinite;
 }
 
@@ -260,6 +261,7 @@
   }
 }
 .deck-radar-ping {
+  opacity: 0.75;
   animation: deck-radar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -327,6 +329,7 @@
 }
 
 .scene-aurora {
+  opacity: 0.4;
   background: radial-gradient(
     66% 58% at 50% 6%,
     color-mix(in srgb, var(--brand-cyan) 26%, transparent),
@@ -355,6 +358,7 @@
 }
 
 .scene-horizon {
+  opacity: 0.4;
   background: var(--brand-cyan);
   box-shadow:
     0 0 96px 20px color-mix(in srgb, var(--brand-cyan) 62%, transparent),
@@ -428,6 +432,11 @@
   }
 }
 .boot-sun {
+  /* Must match the `0%` keyframe below. Without it the resting opacity is 1, and a
+     frame painted before the animation applies — every fresh mount of the overlay —
+     flashes the sun at 1.6x its brightest animated value. Same reason on the three
+     layers below. */
+  opacity: 0.62;
   background:
     radial-gradient(
       circle at 50% 44%,
@@ -475,6 +484,7 @@
   }
 }
 .boot-scan-beam {
+  opacity: 0;
   background: linear-gradient(
     to bottom,
     transparent,
@@ -531,6 +541,7 @@
   }
 }
 .boot-crt {
+  opacity: 0.035;
   background-image: repeating-linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.05) 0,
@@ -554,10 +565,12 @@
   pointer-events: none;
 }
 .boot-glitch::before {
+  opacity: 0;
   color: var(--brand-magenta);
   animation: boot-glitch-a 3.4s steps(2, end) infinite;
 }
 .boot-glitch::after {
+  opacity: 0;
   color: var(--brand-cyan-bright);
   animation: boot-glitch-b 2.9s steps(2, end) infinite;
 }
@@ -625,6 +638,7 @@
   }
 }
 .boot-hud-sweep {
+  opacity: 0;
   background: linear-gradient(
     to bottom,
     transparent,
@@ -645,6 +659,7 @@
   }
 }
 .boot-caret {
+  opacity: 1;
   animation: boot-caret 1s steps(1, end) infinite;
 }
 
