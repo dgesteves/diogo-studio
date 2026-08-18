@@ -24,6 +24,36 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-18 — An opacity-animated rule states its own resting opacity
+
+Second cause behind the flashing boot screen, found by measuring frames out of a screen
+recording rather than by reading the CSS: the sun flashed to **1.6x** its brightest animated
+value for single frames, and 1 / 0.62 — the `0%` keyframe of `boot-sun-pulse` — is 1.61.
+
+A CSS animation that sets `opacity` in its keyframes says nothing about the element when the
+animation is not applying, and the initial value is `1`. Any frame painted before the
+animation takes effect shows the element at full opacity, and a fresh mount is exactly that
+frame. `.boot-sun` rested at 1 against a `0%` of 0.62; `.boot-crt` — a full-screen white grid
+at `mix-blend-mode: overlay` — rested at 1 against a `0%` of **0.035**, a 28x flash;
+`.boot-scan-beam` and `.boot-hud-sweep` rested fully opaque against a `0%` of 0. Sweeping the
+stylesheet for the same shape turned up five more: `scene-pulse`'s two users at 2.5x, the two
+`.boot-glitch` pseudo-elements fully opaque against a `0%` of 0, plus `.world-hint-pulse` and
+`.deck-radar-ping`.
+
+The static value also decides the **reduced-motion** resting state, since this stylesheet cuts
+every animation to 0.001ms and the element then reverts to it. `.boot-crt` was therefore
+pinned at opacity 1 under reduced motion, not only for a frame.
+
+Every fix states the `0%` value as the rule's own, so the steady state is unchanged and only
+the pre-animation frame moves. `src/globals.test.ts` now parses the stylesheet and fails any
+rule whose animation touches opacity without either declaring one or using a `both`/`backwards`
+fill mode, which applies the first keyframe up front and makes the static value unreachable —
+that is why `.world-intro-rise` and `.boot-neon-in` are correct as they are. Verified by
+mutation: deleting `.boot-sun`'s resting opacity fails the check by name.
+
+This is the flash that a fresh mount produced; what _caused_ the repeated fresh mounts is the
+entry below.
+
 ## 2026-08-18 — The boot gate decides once; reading the motion preference live tore it down
 
 Reported from production: the sun on the boot screen "flashes a lot," the progress bar jumps,
