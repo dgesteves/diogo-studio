@@ -24,6 +24,46 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-18 — The boot gate has one control in both states; "Skip intro" is deleted
+
+`BootActions` used to render two unrelated things: a small ghost "Skip intro" button while
+the scene compiled, then — at `canEnter` — a preferences row plus the bordered "Enter the
+studio" CTA. Reported as "an odd different button before the enter button appears," which is
+what it looked like: the pre-ready control shared no shape, weight or placement with the
+thing it turned into, and the swap grew the panel by the whole height of the preferences row.
+
+Now the preferences and the CTA mount on the first frame and `canEnter` only flips the CTA's
+`disabled`. The panel geometry is identical in both halves of the boot, so nothing resizes
+under the visitor and no element detaches mid-click. Two details are load-bearing rather than
+decorative: the `group` class is withheld until the CTA is live, so the animated frame and
+the corner brackets hold still under a pointer that cannot click yet; and the dimming is on
+the wrapper with `disabled:opacity-100` on the button, because the button's own
+`disabled:opacity-40` fades the button and leaves its decoration lit.
+
+Mounting the preferences early created one bug worth naming, because it is invisible until
+someone uses a keyboard: the effect that hands focus to the CTA at `canEnter` would now yank
+it off a toggle a visitor was part-way through choosing. So `onOpenAutoFocus` parks focus on
+the panel instead of Radix's default first focusable child, and the effect claims focus only
+when focus is still there (or on `document.body`). That makes "the visitor has not moved
+focus" a testable condition rather than an assumption, and it is asserted in both directions.
+
+**The accepted cost: before `canEnter` there is no visible way out** — only Escape, which
+`BootOverlay` already routes to the muted entry. `BOOT_MIN_MS` (1.1s) bounds the common case
+and `BOOT_MAX_MS` (12s) bounds the worst one, so no visitor is held indefinitely, but a
+pointer-only visitor on a slow device has 12 seconds with nothing to press. Weighed against a
+second control that read as a different product, this was chosen deliberately; a future
+change that wants a visible pre-ready exit should make it the _same_ control, not a new one.
+
+Test layering is unchanged from the 2026-08-08 entry and the coverage moved with the
+behavior. `boot.dom.test.tsx` asserts the CTA is disabled before ready, enabled after, and
+that Escape is the pre-ready exit and does not enable audio, plus both focus directions;
+verified by mutation — dropping `disabled` and stubbing `onOpenChange` fails exactly four
+tests, and dropping the focus guard fails exactly the mid-choice one. E2E gets simpler rather than
+looser: `dismissBoot` waits on the same element throughout, so Playwright's built-in "enabled"
+actionability wait _is_ the wait for the gate to open, and the detach-mid-click failure mode
+that the 2026-08-09 entry spent `force: true` on cannot occur — that `force: true` stays, as
+the animation reason for it is untouched.
+
 ## 2026-08-17 — `config-plan.md` and `pipeline-plan.md` are deleted, unimplemented, on purpose
 
 Both plans were sound and neither was wrong. They were deleted because the product is not

@@ -340,6 +340,16 @@ type BootActionsProps = {
   onEnterMuted: () => void;
 };
 
+/**
+ * One row of controls, identical in both halves of the boot. The preferences and the CTA
+ * mount on the first frame and the CTA is merely disabled until `canEnter`, so the panel
+ * never resizes under the visitor and nothing detaches mid-click.
+ *
+ * It replaced a pre-ready "Skip intro" button that swapped for this one: a control that
+ * looked unrelated to the thing it turned into, and a swap two days of CI were spent
+ * racing. The cost is deliberate — before `canEnter` the only way out is Escape, which
+ * `BootOverlay` routes to the muted entry, and `BOOT_MAX_MS` bounds that wait at 12s.
+ */
 function BootActions({
   canEnter,
   primaryRef,
@@ -356,20 +366,6 @@ function BootActions({
     else onEnterMuted();
   }
 
-  if (!canEnter) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => handleEnter(false)}
-        className="focus-visible:ring-offset-brand-ink font-mono text-[10px] tracking-widest text-white/45 uppercase hover:bg-white/5 hover:text-white/80"
-      >
-        Skip intro
-      </Button>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center gap-5">
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
@@ -379,7 +375,16 @@ function BootActions({
         <span aria-hidden="true" className="h-3 w-px bg-white/15" />
         <BootInspectorToggle inspectorOn={inspectorOn} onChange={setInspectorOn} />
       </div>
-      <div className="group relative inline-flex">
+      {/* `group` is withheld until the CTA is live, so the frame and the corner brackets
+          hold still under a pointer that cannot click yet. The dimming is on the wrapper
+          rather than the button because `disabled:opacity-40` would fade the button and
+          leave its decoration lit. */}
+      <div
+        className={cn(
+          "relative inline-flex transition-opacity duration-500",
+          canEnter ? "group" : "opacity-40",
+        )}
+      >
         <span
           aria-hidden="true"
           className="boot-cta-frame pointer-events-none absolute -inset-px"
@@ -387,8 +392,9 @@ function BootActions({
         <Button
           ref={primaryRef}
           type="button"
+          disabled={!canEnter}
           onClick={() => handleEnter(soundOn)}
-          className="boot-cta border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)] focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="boot-cta border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100"
         >
           <span
             aria-hidden="true"
@@ -436,6 +442,7 @@ function BootOverlay({
   onEnterMuted,
 }: BootOverlayProps): ReactElement {
   const primaryRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [faux, setFaux] = useState(8);
 
   useEffect(() => {
@@ -447,9 +454,17 @@ function BootOverlay({
   }, [canEnter]);
 
   useEffect(() => {
-    // Move focus for keyboard/screen-reader users without painting the focus
-    // ring over the CTA's animated border; Tab still reveals it.
-    if (canEnter) primaryRef.current?.focus({ focusVisible: false });
+    if (!canEnter) return;
+    // Claim focus only if the visitor has not spent the wait moving it themselves. The
+    // preferences are on screen throughout, so someone can be part-way through choosing
+    // a theme when the CTA goes live, and stealing focus mid-choice is worse than not
+    // announcing the CTA. `onOpenAutoFocus` parks focus on the panel so "untouched" is a
+    // thing this can test for.
+    const active = document.activeElement;
+    if (active !== panelRef.current && active !== document.body) return;
+    // Move focus without painting the focus ring over the CTA's animated
+    // border; Tab still reveals it.
+    primaryRef.current?.focus({ focusVisible: false });
   }, [canEnter]);
 
   const pct = canEnter ? 100 : Math.min(96, Math.max(progress, faux));
@@ -460,8 +475,16 @@ function BootOverlay({
     <Dialog.Root open onOpenChange={(open) => !open && onEnterMuted()}>
       <Dialog.Portal>
         <Dialog.Content
+          ref={panelRef}
           aria-describedby={undefined}
           onInteractOutside={(event) => event.preventDefault()}
+          onOpenAutoFocus={(event) => {
+            // Radix would focus the first preference toggle. Park focus on the panel
+            // instead: it keeps the dialog's focus trap intact, reads the title first,
+            // and leaves the CTA free to claim focus once it is live.
+            event.preventDefault();
+            panelRef.current?.focus({ preventScroll: true });
+          }}
           className={cn(
             "fixed inset-0 z-50 flex items-center justify-center overflow-hidden px-6 pb-[8vh] outline-none",
             "transition-opacity duration-700 ease-out",
@@ -535,7 +558,6 @@ export function BootSequence(): ReactElement | null {
   const [finished, setFinished] = useState(false);
   const [minElapsed, setMinElapsed] = useState(false);
   const [forceReady, setForceReady] = useState(false);
-
   const show = isClient && !reducedMotion && !finished && !hasBootedThisSession();
 
   useEffect(() => {

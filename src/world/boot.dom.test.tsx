@@ -92,6 +92,10 @@ function renderGate(): UserEvent {
   return user;
 }
 
+function enterCta(): HTMLElement {
+  return screen.getByRole("button", { name: /enter the studio/i });
+}
+
 function preference(group: RegExp, option: RegExp): HTMLElement {
   return within(screen.getByRole("group", { name: group })).getByRole("button", { name: option });
 }
@@ -119,13 +123,16 @@ afterEach(() => {
 });
 
 describe("Boot gate", () => {
-  it("gates a first visit, showing progress and an immediate way past it", () => {
+  it("gates a first visit, showing progress and a CTA that is not yet live", () => {
     render(<BootSequence />);
 
     expect(screen.getByRole("dialog", { name: STUDIO_DIALOG })).toBeInTheDocument();
     expect(screen.getByText(FIRST_STEP, VISIBLE_ONLY)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /skip intro/i })).toBeInTheDocument();
     expect(screen.getByRole("note")).toBeInTheDocument();
+    // The CTA and the preferences are mounted from the first frame, so the panel does
+    // not resize under the visitor when the world becomes ready.
+    expect(enterCta()).toBeDisabled();
+    expect(screen.getByRole("group", { name: /sound preference/i })).toBeInTheDocument();
   });
 
   it("holds the visitor for the minimum duration even once the world is ready", () => {
@@ -137,12 +144,11 @@ describe("Boot gate", () => {
 
     // Ready alone is not enough: canEnter is `(ready || forceReady) && minElapsed`, so the
     // splash cannot flash past faster than a person can read it.
-    expect(screen.getByRole("button", { name: /skip intro/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /enter the studio/i })).not.toBeInTheDocument();
+    expect(enterCta()).toBeDisabled();
 
     advance(BOOT_MIN_MS);
 
-    expect(screen.getByRole("button", { name: /enter the studio/i })).toBeInTheDocument();
+    expect(enterCta()).toBeEnabled();
   });
 
   it("reports the studio ready at full progress", () => {
@@ -160,7 +166,7 @@ describe("Boot gate", () => {
 
     // The forceReady escape hatch: a device that never finishes compiling must not be
     // trapped behind the splash.
-    expect(screen.getByRole("button", { name: /enter the studio/i })).toBeInTheDocument();
+    expect(enterCta()).toBeEnabled();
   });
 
   it("dismisses on entry and does not gate again in the same session", async () => {
@@ -180,17 +186,48 @@ describe("Boot gate", () => {
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
   });
 
-  it("lets the visitor out through the pre-ready skip control", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it("hands focus to the CTA when it goes live, if the visitor has not moved it", () => {
     render(<BootSequence />);
 
-    await click(user, /skip intro/i);
+    // `onOpenAutoFocus` parks focus on the panel rather than the first preference
+    // toggle, so the CTA has somewhere to take it from.
+    expect(document.activeElement).toBe(screen.getByRole("dialog", { name: STUDIO_DIALOG }));
+
+    reachReadyState();
+
+    expect(document.activeElement).toBe(enterCta());
+  });
+
+  it("does not steal focus from a visitor who is mid-choice when the CTA goes live", async () => {
+    const user = renderGate();
+
+    // The preferences are on screen for the whole wait now, so this is reachable in a way
+    // it never was when they only appeared with the CTA.
+    await choose(user, /theme preference/i, /dark/i);
+    const dark = preference(/theme preference/i, /dark/i);
+    expect(document.activeElement).toBe(dark);
+
+    reachReadyState();
+
+    expect(document.activeElement).toBe(dark);
+  });
+
+  it("leaves Escape as the way out while the CTA is still disabled", async () => {
+    const user = renderGate();
+
+    // With the pre-ready "Skip intro" button gone, this is the *only* way past the gate
+    // before `canEnter` — the sibling test below covers Escape on the ready screen,
+    // where it is a convenience rather than the sole exit.
+    expect(enterCta()).toBeDisabled();
+
+    await act(async () => {
+      await user.keyboard("{Escape}");
+    });
     advance(BOOT_EXIT_MS);
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
     expect(hasBootedThisSession()).toBe(true);
-    // Skipping is not consent to sound: the sound choice is only offered on the ready
-    // screen, which a skipping visitor never sees.
+    // Leaving early is not consent to sound, whatever the sound toggle says.
     expect(audio.enable).not.toHaveBeenCalled();
   });
 
