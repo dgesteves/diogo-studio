@@ -24,6 +24,65 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-19 — The boot screen animated four properties the compositor has to repaint for
+
+The flashing boot screen, found. The entry below this one fixed two real defects and closed
+neither symptom; it ends by saying the burst was never reproduced on the development host. It
+still has not been — but it no longer needs to be, because the cause is measurable without it.
+
+`Tracing.start` over the `disabled-by-default-devtools.timeline` category, on the settled gate,
+attributing every `Paint` record to its node. At 2048x1032 CSS on a DPR-2 display, over three
+seconds — about 180 frames:
+
+| node              | paint records | rect                      |
+| ----------------- | ------------- | ------------------------- |
+| `.scene-grid`     | **360**       | unbounded clip, 4096x2257 |
+| `#document`       | 180           | 4096x2257                 |
+| `.boot-motes`     | 180           | 4096x2064                 |
+| `.boot-fill`      | 180           | 892x13                    |
+| `.boot-cta-frame` | 180           | 490x93                    |
+
+Every one of them animated a property the compositor cannot own. `.scene-grid` and `.boot-motes`
+animated `background-position`; `.boot-fill` animated it too; `.boot-cta-frame` animated an
+`@property` angle feeding a `conic-gradient`, which is a paint animation whatever it feeds.
+`opacity` and `transform` are the only two properties that move a layer instead of redrawing it,
+and the boot screen was not using either for any of this.
+
+`.scene-grid` twice because it is mounted twice — the gate's backdrop and `WorldFallback` behind
+it — and it is `inset-x-[-50%] h-[260vh]`, so each copy is larger than the viewport. Around **35
+megapixels repainted per frame**, and it scales with viewport area: reconstructed at 3840x2160
+the same stylesheet asks for **4.0 Gpx/s**. That is the reporter's "it happens on wide screens,
+and not with DevTools open taking half of it" — DevTools is not a debugger effect, it is a
+smaller viewport.
+
+The mechanism from there is ordinary. A raster that misses its deadline does not stall the
+frame; the compositor draws the layers that are ready over the ones that are not. So the layers
+Chrome _had_ promoted — `.boot-sun`, `.scene-aurora`, `.scene-horizon`, `.boot-scan-beam`, all
+`opacity`/`transform` — presented on time and correct, while the ones still being painted
+presented stale or not at all. Which is exactly the pair of artifacts in the recordings: glows
+appearing at a point of their 5s pulse the animation never passes through (the compositor's copy
+against a stale raster underneath), the floor grid and the readability wash simply absent, and
+the preference row not drawn at all for a frame.
+
+All four are now `transform`, on their own element where one element could not hold two: two
+pseudo-elements for the motes' two drift speeds, one for the bar's stripes, one for the CTA's
+rotating conic gradient. Measured the same way afterwards, on a deleted `.next` and a fresh
+profile: **1118 paint records in three seconds became 12**, and none of them is per-frame.
+
+Two seams were fixed on the way, because the arithmetic only works if the travel is a whole
+number of tiles: the motes' near layer drifted 620px through a 150px tile and jumped 20px every
+18 seconds, and the progress bar's stripes moved 24px horizontally through a 12px period at
+-45deg — 1.41 periods — and twitched every 0.8s. Both were invisible against the flashing and
+neither is invisible without it.
+
+`globals.test.ts` now fails on a keyframe that animates anything outside
+`opacity`/`transform`/`translate`/`rotate`/`scale`, with one checked exception: a rule whose
+`animation` shorthand carries `steps()` changes its value a fixed number of times per cycle
+rather than once per frame, which is what lets `.boot-glitch` keep animating `clip-path`. The
+same pass gave `.boot-sheen` and `.deck-radar-ping` the resting `transform` their keyframes
+assume — the transform half of the 2026-08-18 resting-opacity entry, which only ever covered
+`opacity`.
+
 ## 2026-08-19 — The gate owns one backdrop, so no animation in it restarts at hydration
 
 Second pass at the flashing boot screen, and the first driven by measuring the reported recording
