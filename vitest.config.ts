@@ -78,6 +78,27 @@ export default defineConfig({
           // A spec's own afterEach must run before the global one, so anything it mounted
           // is unmounted before vitest.setup.ts resets the stores it subscribes to.
           sequence: { hooks: "stack" },
+          /**
+           * Three times vitest's default, and the node project deliberately keeps the default.
+           * The two projects do genuinely different work: a node spec calls pure functions, so
+           * one taking five seconds is a bug and should fail. A jsdom spec here mounts a
+           * three.js scene through RTTR — the whole room is 300-odd meshes — and that costs
+           * real time on a CI runner with no GPU and a share of a vCPU.
+           *
+           * Measured 2026-08-19, same specs on this machine vs. a GitHub runner: the runner
+           * ran 5.5x to 12.5x slower, and the spread is the problem rather than the factor —
+           * a local time predicts nothing. The most expensive spec left is
+           * `canvas.dom.test.tsx > mounts the whole world in one canvas` at ~316 ms here,
+           * which is irreducible because mounting everything is the assertion; at the worst
+           * observed ratio that is ~4 s, or 79% of the default deadline, with no margin for a
+           * worse day. That is what took main red.
+           *
+           * The cost this buys back is that a spec which hangs takes 15 s to say so. Accepted:
+           * a deadline that fires on correct tests is a worse alarm than a slow one. If a spec
+           * needs this much, look at what it mounts first — the fix is nearly always fewer
+           * mounts, not more seconds, and no spec in this suite is within 4x of the number.
+           */
+          testTimeout: 15_000,
           include: DOM_SPECS,
           exclude,
         },
