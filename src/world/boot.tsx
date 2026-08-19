@@ -74,10 +74,25 @@ export function markBootedThisSession(): void {
   }
 }
 
+function bootSplash(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  return document.getElementById(BOOT_SPLASH_ID);
+}
+
 export function hideBootSplash(): void {
-  if (typeof document === "undefined") return;
-  const el = document.getElementById(BOOT_SPLASH_ID);
+  const el = bootSplash();
   if (el) el.style.display = "none";
+}
+
+/**
+ * The splash is the gate's backdrop, not a stand-in for one, so it leaves with the gate
+ * rather than the moment the client takes over — and it fades on the same clock as the
+ * panel above it. Imperative because the node belongs to the `(world)` layout's server
+ * markup and this component is three trees away, in a portal.
+ */
+function fadeBootSplash(): void {
+  const el = bootSplash();
+  if (el) el.style.opacity = "0";
 }
 
 export const BOOT_MIN_MS = 1100;
@@ -340,6 +355,16 @@ type BootActionsProps = {
   onEnterMuted: () => void;
 };
 
+/**
+ * One row of controls, identical in both halves of the boot. The preferences and the CTA
+ * mount on the first frame and the CTA is merely disabled until `canEnter`, so the panel
+ * never resizes under the visitor and nothing detaches mid-click.
+ *
+ * It replaced a pre-ready "Skip intro" button that swapped for this one: a control that
+ * looked unrelated to the thing it turned into, and a swap two days of CI were spent
+ * racing. The cost is deliberate — before `canEnter` the only way out is Escape, which
+ * `BootOverlay` routes to the muted entry, and `BOOT_MAX_MS` bounds that wait at 12s.
+ */
 function BootActions({
   canEnter,
   primaryRef,
@@ -356,20 +381,6 @@ function BootActions({
     else onEnterMuted();
   }
 
-  if (!canEnter) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={() => handleEnter(false)}
-        className="focus-visible:ring-offset-brand-ink font-mono text-[10px] tracking-widest text-white/45 uppercase hover:bg-white/5 hover:text-white/80"
-      >
-        Skip intro
-      </Button>
-    );
-  }
-
   return (
     <div className="flex flex-col items-center gap-5">
       <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
@@ -379,7 +390,16 @@ function BootActions({
         <span aria-hidden="true" className="h-3 w-px bg-white/15" />
         <BootInspectorToggle inspectorOn={inspectorOn} onChange={setInspectorOn} />
       </div>
-      <div className="group relative inline-flex">
+      {/* `group` is withheld until the CTA is live, so the frame and the corner brackets
+          hold still under a pointer that cannot click yet. The dimming is on the wrapper
+          rather than the button because `disabled:opacity-40` would fade the button and
+          leave its decoration lit. */}
+      <div
+        className={cn(
+          "relative inline-flex transition-opacity duration-500",
+          canEnter ? "group" : "opacity-40",
+        )}
+      >
         <span
           aria-hidden="true"
           className="boot-cta-frame pointer-events-none absolute -inset-px"
@@ -387,8 +407,9 @@ function BootActions({
         <Button
           ref={primaryRef}
           type="button"
+          disabled={!canEnter}
           onClick={() => handleEnter(soundOn)}
-          className="boot-cta border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)] focus-visible:ring-0 focus-visible:ring-offset-0"
+          className="boot-cta border-brand-cyan/50 bg-brand-ink/70 text-brand-cyan-bright hover:border-brand-cyan hover:bg-brand-cyan/15 active:bg-brand-cyan/20 relative h-11 gap-2 overflow-hidden rounded-none border px-9 font-mono text-[11px] font-semibold tracking-[0.22em] uppercase shadow-[0_0_26px_color-mix(in_srgb,var(--brand-cyan)_22%,transparent),inset_0_0_18px_color-mix(in_srgb,var(--brand-cyan)_14%,transparent)] backdrop-blur-sm [text-shadow:0_0_12px_var(--brand-cyan)] focus-visible:ring-0 focus-visible:ring-offset-0 disabled:opacity-100"
         >
           <span
             aria-hidden="true"
@@ -436,6 +457,7 @@ function BootOverlay({
   onEnterMuted,
 }: BootOverlayProps): ReactElement {
   const primaryRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const [faux, setFaux] = useState(8);
 
   useEffect(() => {
@@ -447,9 +469,17 @@ function BootOverlay({
   }, [canEnter]);
 
   useEffect(() => {
-    // Move focus for keyboard/screen-reader users without painting the focus
-    // ring over the CTA's animated border; Tab still reveals it.
-    if (canEnter) primaryRef.current?.focus({ focusVisible: false });
+    if (!canEnter) return;
+    // Claim focus only if the visitor has not spent the wait moving it themselves. The
+    // preferences are on screen throughout, so someone can be part-way through choosing
+    // a theme when the CTA goes live, and stealing focus mid-choice is worse than not
+    // announcing the CTA. `onOpenAutoFocus` parks focus on the panel so "untouched" is a
+    // thing this can test for.
+    const active = document.activeElement;
+    if (active !== panelRef.current && active !== document.body) return;
+    // Move focus without painting the focus ring over the CTA's animated
+    // border; Tab still reveals it.
+    primaryRef.current?.focus({ focusVisible: false });
   }, [canEnter]);
 
   const pct = canEnter ? 100 : Math.min(96, Math.max(progress, faux));
@@ -460,15 +490,22 @@ function BootOverlay({
     <Dialog.Root open onOpenChange={(open) => !open && onEnterMuted()}>
       <Dialog.Portal>
         <Dialog.Content
+          ref={panelRef}
           aria-describedby={undefined}
           onInteractOutside={(event) => event.preventDefault()}
+          onOpenAutoFocus={(event) => {
+            // Radix would focus the first preference toggle. Park focus on the panel
+            // instead: it keeps the dialog's focus trap intact, reads the title first,
+            // and leaves the CTA free to claim focus once it is live.
+            event.preventDefault();
+            panelRef.current?.focus({ preventScroll: true });
+          }}
           className={cn(
             "fixed inset-0 z-50 flex items-center justify-center overflow-hidden px-6 pb-[8vh] outline-none",
             "transition-opacity duration-700 ease-out",
             exiting ? "opacity-0" : "opacity-100",
           )}
         >
-          <BootBackdrop />
           <BootHud />
 
           <div
@@ -504,12 +541,25 @@ function BootOverlay({
 
 const HIDE_IF_BOOTED = `try{if(sessionStorage.getItem('${BOOT_SESSION_KEY}')==='1'){var e=document.getElementById('${BOOT_SPLASH_ID}');if(e)e.style.display='none'}}catch(_){}`;
 
+/**
+ * The gate's backdrop — the whole of it, for the whole of the gate.
+ *
+ * It used to be a stand-in that `BootSequence` hid the instant it took over, with `BootOverlay`
+ * mounting a second, identical `BootBackdrop` above it. The two nodes are what made the handover
+ * visible: a CSS animation's clock starts when its element does, so every layer in the scene —
+ * the sun's pulse, the horizon rule's, the grid pan, the scan beam — jumped back to its `0%`
+ * keyframe in the frame the swap landed. Measured off a screen recording, the sun dropped 13% of
+ * its brightness in one frame at hydration and climbed again from the start of its 5s pulse.
+ *
+ * One node, mounted by the server, never replaced: there is no clock to restart. `BootOverlay`
+ * renders the HUD and the panel over it and nothing else, and this fades out with them.
+ */
 export function BootSplash(): ReactElement {
   return (
     <div
       id={BOOT_SPLASH_ID}
       aria-hidden="true"
-      className="fixed inset-0 z-45 overflow-hidden"
+      className="fixed inset-0 z-45 overflow-hidden transition-opacity duration-700 ease-out"
       suppressHydrationWarning
     >
       <BootBackdrop />
@@ -535,12 +585,32 @@ export function BootSequence(): ReactElement | null {
   const [finished, setFinished] = useState(false);
   const [minElapsed, setMinElapsed] = useState(false);
   const [forceReady, setForceReady] = useState(false);
+  const [gated, setGated] = useState<boolean | null>(null);
 
-  const show = isClient && !reducedMotion && !finished && !hasBootedThisSession();
+  /**
+   * Whether to gate this visit is decided once, on the first client render, and never
+   * revisited. It used to be read live, and `reducedMotion` is partly derived from
+   * `navigator.connection.effectiveType` — a rolling estimate Chrome recomputes *while*
+   * the page loads, which is precisely when this is on screen. A cold first visit pulling
+   * the whole world down would dip to `2g` and recover, and each dip unmounted the entire
+   * gate and rebuilt it: backdrop animations restarting (the sun visibly flashing), the
+   * progress bar snapping back to `faux`'s initial 8%, and the panel blinking out and in.
+   *
+   * A render-phase update rather than an effect, so the decision costs no extra paint and
+   * the splash hands over in the same commit.
+   */
+  if (isClient && gated === null) {
+    setGated(!reducedMotion && !hasBootedThisSession());
+  }
 
+  const show = isClient && gated === true && !finished;
+
+  // A visit that is not gated has no use for a backdrop, and the splash is the only thing
+  // still covering the world. A gated one keeps it: it *is* the gate's backdrop now, and it
+  // goes when the gate does.
   useEffect(() => {
-    if (isClient) hideBootSplash();
-  }, [isClient]);
+    if (gated === false) hideBootSplash();
+  }, [gated]);
 
   useEffect(() => {
     if (!show) return;
@@ -556,8 +626,10 @@ export function BootSequence(): ReactElement | null {
     if (exiting) return;
     if (withSound) void enable();
     setExiting(true);
+    fadeBootSplash();
     window.setTimeout(() => {
       markBootedThisSession();
+      hideBootSplash();
       setFinished(true);
     }, BOOT_EXIT_MS);
   }

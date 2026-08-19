@@ -24,6 +24,273 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-19 — The boot screen animated four properties the compositor has to repaint for
+
+The flashing boot screen, found. The entry below this one fixed two real defects and closed
+neither symptom; it ends by saying the burst was never reproduced on the development host. It
+still has not been — but it no longer needs to be, because the cause is measurable without it.
+
+`Tracing.start` over the `disabled-by-default-devtools.timeline` category, on the settled gate,
+attributing every `Paint` record to its node. At 2048x1032 CSS on a DPR-2 display, over three
+seconds — about 180 frames:
+
+| node              | paint records | rect                      |
+| ----------------- | ------------- | ------------------------- |
+| `.scene-grid`     | **360**       | unbounded clip, 4096x2257 |
+| `#document`       | 180           | 4096x2257                 |
+| `.boot-motes`     | 180           | 4096x2064                 |
+| `.boot-fill`      | 180           | 892x13                    |
+| `.boot-cta-frame` | 180           | 490x93                    |
+
+Every one of them animated a property the compositor cannot own. `.scene-grid` and `.boot-motes`
+animated `background-position`; `.boot-fill` animated it too; `.boot-cta-frame` animated an
+`@property` angle feeding a `conic-gradient`, which is a paint animation whatever it feeds.
+`opacity` and `transform` are the only two properties that move a layer instead of redrawing it,
+and the boot screen was not using either for any of this.
+
+`.scene-grid` twice because it is mounted twice — the gate's backdrop and `WorldFallback` behind
+it — and it is `inset-x-[-50%] h-[260vh]`, so each copy is larger than the viewport. Around **35
+megapixels repainted per frame**, and it scales with viewport area: reconstructed at 3840x2160
+the same stylesheet asks for **4.0 Gpx/s**. That is the reporter's "it happens on wide screens,
+and not with DevTools open taking half of it" — DevTools is not a debugger effect, it is a
+smaller viewport.
+
+The mechanism from there is ordinary. A raster that misses its deadline does not stall the
+frame; the compositor draws the layers that are ready over the ones that are not. So the layers
+Chrome _had_ promoted — `.boot-sun`, `.scene-aurora`, `.scene-horizon`, `.boot-scan-beam`, all
+`opacity`/`transform` — presented on time and correct, while the ones still being painted
+presented stale or not at all. Which is exactly the pair of artifacts in the recordings: glows
+appearing at a point of their 5s pulse the animation never passes through (the compositor's copy
+against a stale raster underneath), the floor grid and the readability wash simply absent, and
+the preference row not drawn at all for a frame.
+
+All four are now `transform`, on their own element where one element could not hold two: two
+pseudo-elements for the motes' two drift speeds, one for the bar's stripes, one for the CTA's
+rotating conic gradient. Measured the same way afterwards, on a deleted `.next` and a fresh
+profile: **1118 paint records in three seconds became 12**, and none of them is per-frame.
+
+Two seams were fixed on the way, because the arithmetic only works if the travel is a whole
+number of tiles: the motes' near layer drifted 620px through a 150px tile and jumped 20px every
+18 seconds, and the progress bar's stripes moved 24px horizontally through a 12px period at
+-45deg — 1.41 periods — and twitched every 0.8s. Both were invisible against the flashing and
+neither is invisible without it.
+
+`globals.test.ts` now fails on a keyframe that animates anything outside
+`opacity`/`transform`/`translate`/`rotate`/`scale`, with one checked exception: a rule whose
+`animation` shorthand carries `steps()` changes its value a fixed number of times per cycle
+rather than once per frame, which is what lets `.boot-glitch` keep animating `clip-path`. The
+same pass gave `.boot-sheen` and `.deck-radar-ping` the resting `transform` their keyframes
+assume — the transform half of the 2026-08-18 resting-opacity entry, which only ever covered
+`opacity`.
+
+## 2026-08-19 — The gate owns one backdrop, so no animation in it restarts at hydration
+
+Second pass at the flashing boot screen, and the first driven by measuring the reported recording
+rather than by reading the stylesheet. `Screen Recording 2026-08-19 at 03.45.54.mov` is 27.6s of a
+single, un-dismissed gate; sampling it at its own frame period and reducing each frame to
+per-region luminance separates two artifacts that look like one. The sun region sits at 36.3
+through its trough and jumps to 50–58 for one frame at a time — 1.4x, where `boot-sun-pulse` spans
+1.29x end to end, so no phase of the animation produces it — and the preference row vanishes
+entirely for a frame while the separator hairlines stay at the same x, so the layout is intact and
+nothing has re-rendered. **Neither is what this entry fixes.** Both are the compositor presenting
+the layers that were ready over the ones that were not; the cause and the fix are in the entry
+above.
+
+What this entry fixes is a third thing the same measurement turned up, on the way. `BootSplash`
+rendered a `BootBackdrop`, `BootOverlay` rendered a second identical one, and `BootSequence` hid
+the first the instant it took over. A CSS animation's clock starts with its element, so the swap
+restarted every layer in the scene at once — the sun's pulse, the horizon rule's, the grid pan,
+the scan beam. Reproduced under `Emulation.setCPUThrottlingRate: 8` and measured off a CDP
+screencast: at the handover frame the sun region fell from 37.15 to **32.43**, below anything in
+the run before it, then climbed again from the `0%` keyframe.
+
+The server-rendered splash is now the gate's backdrop for the gate's whole life. `BootOverlay`
+renders the HUD and the panel over it and nothing else, and the splash fades on the same 700ms
+clock and is hidden when the gate is gone. After the change the same handover frame reads
+36.73 → 44.86 and keeps rising — the panel arriving, no reset. `boot.dom.test.tsx` counts
+`.boot-scene` nodes, so a second backdrop is a failing test rather than a flash.
+
+**Two changes made alongside this one were removed before merge, and are recorded because the
+reasoning is worth not repeating.** Both were written while the cause was still unknown, and both
+survived into a state where they fixed nothing measurable:
+
+- `isolation: isolate` on `.boot-scene`, to scope `.boot-crt`'s `mix-blend-mode` group to the
+  scene rather than the gate's stacking root. It renders identically — every layer the grade
+  applies to was already inside `.boot-scene` — so it documented an intent the code already had.
+- A `gateCovered` signal in `world/store.ts` that put `<Canvas frameloop>` on `demand` while the
+  gate covered the scene. The premise is true and still is: the gate's backdrop is opaque, so
+  those frames are invisible. But once the paint animations were fixed, two attempts to measure a
+  benefit — main-thread totals over a 4s window, and time-to-CTA-enabled under CPU throttling —
+  produced nothing that separated it from the baseline. It cost a store, a subscription in
+  `WorldCanvas`, a lifecycle effect in `BootSequence` and a failure mode where a mistake freezes
+  the world. Unmeasured optimisation with a new failure mode is not a trade this repo takes; if
+  it is picked up again it needs a number first.
+
+## 2026-08-18 — A mocked answer on a timer put a deadline on the click it existed to enable
+
+`ask-agent.spec.ts` "stopping a slow answer" failed on CI in `full-motion` only, three times
+for **4.5 minutes** of runner time: `locator.click` on Stop reported `element is not stable`,
+then `element was detached from the DOM`, then spent the whole 90s test budget on a control
+that was never coming back.
+
+The mock held `/api/chat` for 4s and then fulfilled it. The Stop control exists only while
+`status === "streaming"`, so that timer was a deadline on the click — and **the click is the
+slow half**. Measured at `Emulation.setCPUThrottlingRate: 8`, which is the nearest a host
+gets to 2 vCPU plus SwiftShader: the click needs **9.17s** of actionability polling against
+**210ms** once frames settle, because frames arrive at ~6.4 fps with the scene rendering
+(80 rAFs in 12.5s). Sampling the button's own rect across those 80 frames returns **one
+distinct box**, so `not stable` is the single settling frame after Stop replaces the `↵ Ask`
+hint, stretched across multi-hundred-millisecond frames. Nothing in the product moves it.
+
+The 4s never encoded a requirement — it only kept the streaming state observable, and `stop()`
+aborts the request, so the response was never needed. The route now holds open and is never
+fulfilled, which is also a more faithful "slow answer" than one that arrives on a schedule.
+
+**Rejected, and why the rejection is the point.** An `actionTimeout` bounds the 4.5 minutes,
+but a legitimate click measured 9.2s under throttling and the passing container retry took
+43.2s, so any bound tight enough to save real time is close enough to real timings to trade
+this flake for a new one. `force: true`, asserting `data-state`, and leaning on `retries` are
+the same softening the 2026-08-08 entry below already refused. A lint rule banning timers
+inside `page.route` mocks was considered and not written: there is one occurrence, and it
+would forbid a legitimately chunked stream. `tests/e2e` has no other timed mock — the only
+other `setTimeout` in the directory is a word in a comment.
+
+Verified at CI fidelity with `CI_CPUS=1 pnpm e2e:runner`, which reproduces the failure this
+host does not: before, attempt 1 timed out and retry #1 passed at 43.2s; after, it passes on
+the first attempt at 39.9s. Locally the whole file is 14/14 across both projects.
+
+### The scrim does not hide the world, so open item (1) below is wrong as written
+
+Chasing the frame budget led straight to the 2026-08-08 work item "skip `WorldPostprocessing`
+while a blocking overlay covers the scene — it is invisible behind a 70% scrim plus blur."
+**That claim does not hold.** The ⌘K overlay is `bg-background/70` with `backdrop-blur-sm`:
+30% of the scene comes through, and a 4px blur softens detail while doing nothing to a
+large-radius glow — which is exactly what bloom is. A screenshot with the menu open shows a
+backdrop that is dimmed, not hidden. Skipping postprocessing there is a **visible** change,
+most obviously in dark theme where the neon and the AI core are the glow. Do not pick that
+item up as written.
+
+Items (2) and (3) keep their reasoning but inherit the same question: pausing the loop freezes
+a world that stays on screen, on a site whose premise is that the world is live. The one
+candidate with a claim to imperceptibility is lowering DPR while a blocking overlay is up,
+since blur does hide resolution — untested, and it owes a side-by-side through the real scrim
+before it earns a line of code.
+
+None of it is owed to CI. A starved `full-motion` run is a cost this repo priced deliberately
+— one worker, a 15s expect budget, a 90s test timeout — and the defect here was a spec holding
+a stopwatch, not a scene that renders too much.
+
+## 2026-08-18 — An opacity-animated rule states its own resting opacity
+
+Second cause behind the flashing boot screen, found by measuring frames out of a screen
+recording rather than by reading the CSS: the sun flashed to **1.6x** its brightest animated
+value for single frames, and 1 / 0.62 — the `0%` keyframe of `boot-sun-pulse` — is 1.61.
+
+A CSS animation that sets `opacity` in its keyframes says nothing about the element when the
+animation is not applying, and the initial value is `1`. Any frame painted before the
+animation takes effect shows the element at full opacity, and a fresh mount is exactly that
+frame. `.boot-sun` rested at 1 against a `0%` of 0.62; `.boot-crt` — a full-screen white grid
+at `mix-blend-mode: overlay` — rested at 1 against a `0%` of **0.035**, a 28x flash;
+`.boot-scan-beam` and `.boot-hud-sweep` rested fully opaque against a `0%` of 0. Sweeping the
+stylesheet for the same shape turned up five more: `scene-pulse`'s two users at 2.5x, the two
+`.boot-glitch` pseudo-elements fully opaque against a `0%` of 0, plus `.world-hint-pulse` and
+`.deck-radar-ping`.
+
+The static value also decides the **reduced-motion** resting state, since this stylesheet cuts
+every animation to 0.001ms and the element then reverts to it. `.boot-crt` was therefore
+pinned at opacity 1 under reduced motion, not only for a frame.
+
+Every fix states the `0%` value as the rule's own, so the steady state is unchanged and only
+the pre-animation frame moves. `src/globals.test.ts` now parses the stylesheet and fails any
+rule whose animation touches opacity without either declaring one or using a `both`/`backwards`
+fill mode, which applies the first keyframe up front and makes the static value unreachable —
+that is why `.world-intro-rise` and `.boot-neon-in` are correct as they are. Verified by
+mutation: deleting `.boot-sun`'s resting opacity fails the check by name.
+
+This is the flash that a fresh mount produced; what _caused_ the repeated fresh mounts is the
+entry below.
+
+## 2026-08-18 — The boot gate decides once; reading the motion preference live tore it down
+
+Reported from production: the sun on the boot screen "flashes a lot," the progress bar jumps,
+and the preferences and CTA disappear and come back — worst on a fresh browser profile with a
+cold cache.
+
+One cause for all of it. `BootSequence` computed `show` from `useReducedMotionPreference()` on
+every render, and `reducedMotion` is `override ?? (systemReducedMotion || lowPower)` where
+`lowPower` reads `navigator.connection.effectiveType`. That value is not a constant: Chrome
+derives it from a rolling RTT and throughput estimate and fires `change` as it moves — and a
+cold first visit downloading the entire 3D world is exactly the moment it dips to `2g` and
+recovers. Each dip made `show` false, so `BootSequence` returned `null` and the whole overlay
+unmounted; each recovery mounted a brand-new tree. That is the flashing sun (every backdrop
+animation restarts from 0% on fresh DOM), the jumping bar (`BootOverlay`'s `faux` is
+`useState(8)`), and the vanishing controls (the panel is simply gone for the duration of the
+dip). `saveData` cannot flap, but `effectiveType` does, which is why this looked random.
+
+**The fix is the latch, not the input.** `reducedMotion` is a live preference and should stay
+one; what was wrong is that a startup event read it as if it were stable. `BootSequence` now
+decides on the first client render — a render-phase `setGated`, so it costs no extra paint and
+the splash still hands over in the same commit — and never revisits it. That closes the whole
+class: the OS media query flipping mid-load, or an override written by other UI, would have
+done the same damage. It also takes the `hasBootedThisSession()` `sessionStorage` read out of
+every render.
+
+Deliberately **not** changed: `lowPower`'s contribution to `reducedMotion`. Treating a slow
+connection as a motion preference is arguably conflating bandwidth with vestibular safety, but
+that decision reaches the canvas, the HUD and every animation in `site/`, and it is not what
+this bug required.
+
+Reproduced before fixing, in `boot.dom.test.tsx`, with `stubNetworkConnection` and a real
+`ReducedMotionProvider`: reporting `2g` then `4g` mid-compile removed the dialog and the
+`.boot-sun` node outright. The test now asserts the opposite — same dialog, the _same_
+backdrop node (identity, so a restarted animation would fail it), and a progress bar that
+does not go backwards. Restoring the old `show` expression fails exactly that test.
+
+Still open, and much smaller: `BootSplash` and `BootOverlay` each render a `BootBackdrop`, and
+`hideBootSplash()` runs in a passive effect, so at least one frame paints with two suns
+stacked out of phase. That is a single pop at handoff rather than a repeating flash, and it is
+untouched here.
+
+## 2026-08-18 — The boot gate has one control in both states; "Skip intro" is deleted
+
+`BootActions` used to render two unrelated things: a small ghost "Skip intro" button while
+the scene compiled, then — at `canEnter` — a preferences row plus the bordered "Enter the
+studio" CTA. Reported as "an odd different button before the enter button appears," which is
+what it looked like: the pre-ready control shared no shape, weight or placement with the
+thing it turned into, and the swap grew the panel by the whole height of the preferences row.
+
+Now the preferences and the CTA mount on the first frame and `canEnter` only flips the CTA's
+`disabled`. The panel geometry is identical in both halves of the boot, so nothing resizes
+under the visitor and no element detaches mid-click. Two details are load-bearing rather than
+decorative: the `group` class is withheld until the CTA is live, so the animated frame and
+the corner brackets hold still under a pointer that cannot click yet; and the dimming is on
+the wrapper with `disabled:opacity-100` on the button, because the button's own
+`disabled:opacity-40` fades the button and leaves its decoration lit.
+
+Mounting the preferences early created one bug worth naming, because it is invisible until
+someone uses a keyboard: the effect that hands focus to the CTA at `canEnter` would now yank
+it off a toggle a visitor was part-way through choosing. So `onOpenAutoFocus` parks focus on
+the panel instead of Radix's default first focusable child, and the effect claims focus only
+when focus is still there (or on `document.body`). That makes "the visitor has not moved
+focus" a testable condition rather than an assumption, and it is asserted in both directions.
+
+**The accepted cost: before `canEnter` there is no visible way out** — only Escape, which
+`BootOverlay` already routes to the muted entry. `BOOT_MIN_MS` (1.1s) bounds the common case
+and `BOOT_MAX_MS` (12s) bounds the worst one, so no visitor is held indefinitely, but a
+pointer-only visitor on a slow device has 12 seconds with nothing to press. Weighed against a
+second control that read as a different product, this was chosen deliberately; a future
+change that wants a visible pre-ready exit should make it the _same_ control, not a new one.
+
+Test layering is unchanged from the 2026-08-08 entry and the coverage moved with the
+behavior. `boot.dom.test.tsx` asserts the CTA is disabled before ready, enabled after, and
+that Escape is the pre-ready exit and does not enable audio, plus both focus directions;
+verified by mutation — dropping `disabled` and stubbing `onOpenChange` fails exactly four
+tests, and dropping the focus guard fails exactly the mid-choice one. E2E gets simpler rather than
+looser: `dismissBoot` waits on the same element throughout, so Playwright's built-in "enabled"
+actionability wait _is_ the wait for the gate to open, and the detach-mid-click failure mode
+that the 2026-08-09 entry spent `force: true` on cannot occur — that `force: true` stays, as
+the animation reason for it is untouched.
+
 ## 2026-08-18 — `world-poster.png` is a placeholder, and its weight is an OG constraint
 
 One file, two roles, opposite budgets. In `world/fallback.tsx` it goes through

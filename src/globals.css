@@ -215,6 +215,7 @@
   }
 }
 .world-hint-pulse {
+  opacity: 0.6;
   animation: world-hint-pulse 2.6s ease-in-out infinite;
 }
 
@@ -260,6 +261,8 @@
   }
 }
 .deck-radar-ping {
+  opacity: 0.75;
+  transform: translate(-50%, -50%) scale(1);
   animation: deck-radar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -278,9 +281,17 @@
   pointer-events: none;
 }
 
+/* The pan is a transform and not `background-position`, which is the difference between
+   moving a layer and repainting one. This element is 200% of the viewport wide and 260vh
+   tall — 9.2 megapixels on a 2048px-wide DPR-2 display — and it is mounted twice, in the
+   gate's backdrop and in `WorldFallback` behind it. Painted per frame that was 18 of the
+   ~35 megapixels the boot screen was repainting every frame, and it invalidated with an
+   unbounded clip, so it took the whole layer with it. The translate lands after
+   `rotateX`, so it slides along the ground plane exactly as the offset did, and 80px is
+   one tile of the 80px grid, so the loop is still seamless. */
 @keyframes scene-grid-pan {
   to {
-    background-position: 0 80px;
+    transform: perspective(135vh) rotateX(60deg) translate3d(0, 80px, 0);
   }
 }
 
@@ -327,6 +338,7 @@
 }
 
 .scene-aurora {
+  opacity: 0.4;
   background: radial-gradient(
     66% 58% at 50% 6%,
     color-mix(in srgb, var(--brand-cyan) 26%, transparent),
@@ -355,6 +367,7 @@
 }
 
 .scene-horizon {
+  opacity: 0.4;
   background: var(--brand-cyan);
   box-shadow:
     0 0 96px 20px color-mix(in srgb, var(--brand-cyan) 62%, transparent),
@@ -388,6 +401,10 @@
 }
 
 .boot-sheen {
+  /* Must match the `0%` keyframe, for the reason `.boot-sun` states its resting opacity:
+     a frame painted before the animation applies uses the static value, and the static
+     value here is no transform at all — a white band straight across the bar. */
+  transform: translateX(-120%);
   background: linear-gradient(
     90deg,
     transparent,
@@ -428,6 +445,11 @@
   }
 }
 .boot-sun {
+  /* Must match the `0%` keyframe below. Without it the resting opacity is 1, and a
+     frame painted before the animation applies — every fresh mount of the overlay —
+     flashes the sun at 1.6x its brightest animated value. Same reason on the three
+     layers below. */
+  opacity: 0.62;
   background:
     radial-gradient(
       circle at 50% 44%,
@@ -475,6 +497,7 @@
   }
 }
 .boot-scan-beam {
+  opacity: 0;
   background: linear-gradient(
     to bottom,
     transparent,
@@ -487,32 +510,50 @@
   animation: boot-scan-beam 5.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
 
-@keyframes boot-motes-drift {
+/* Two drift speeds means two layers, because one element can only hold one transform —
+   and a transform is what this has to be. As one element it repainted a full viewport
+   (8.5 megapixels at 2048×1032 on DPR 2) on every frame of an 18s loop, to move dots
+   that are one pixel across.
+
+   Each distance is a whole number of its own tile — 600/150 and 480/96 — so both loop
+   without a seam. The near layer's was not: it travelled 620px through a 150px tile and
+   jumped 20px every 18 seconds. */
+@keyframes boot-motes-near {
   to {
-    background-position:
-      0 -620px,
-      60px -480px;
+    transform: translate3d(0, -600px, 0);
   }
 }
-.boot-motes {
-  background-image:
-    radial-gradient(
-      circle,
-      color-mix(in srgb, var(--brand-cyan-bright) 75%, transparent) 1px,
-      transparent 1.8px
-    ),
-    radial-gradient(
-      circle,
-      color-mix(in srgb, var(--brand-cyan) 60%, transparent) 1px,
-      transparent 1.6px
-    );
-  background-size:
-    150px 150px,
-    96px 96px;
-  background-position:
-    0 0,
-    60px 80px;
-  animation: boot-motes-drift 18s linear infinite;
+@keyframes boot-motes-far {
+  to {
+    transform: translate3d(0, -480px, 0);
+  }
+}
+.boot-motes::before,
+.boot-motes::after {
+  content: "";
+  position: absolute;
+  /* Slack above and below, so the drift never walks an edge into the viewport. */
+  inset: -640px 0;
+  pointer-events: none;
+}
+.boot-motes::before {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-cyan-bright) 75%, transparent) 1px,
+    transparent 1.8px
+  );
+  background-size: 150px 150px;
+  animation: boot-motes-near 18s linear infinite;
+}
+.boot-motes::after {
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--brand-cyan) 60%, transparent) 1px,
+    transparent 1.6px
+  );
+  background-size: 96px 96px;
+  background-position: 60px 80px;
+  animation: boot-motes-far 18s linear infinite;
 }
 
 @keyframes boot-crt-flicker {
@@ -531,6 +572,7 @@
   }
 }
 .boot-crt {
+  opacity: 0.035;
   background-image: repeating-linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.05) 0,
@@ -554,10 +596,12 @@
   pointer-events: none;
 }
 .boot-glitch::before {
+  opacity: 0;
   color: var(--brand-magenta);
   animation: boot-glitch-a 3.4s steps(2, end) infinite;
 }
 .boot-glitch::after {
+  opacity: 0;
   color: var(--brand-cyan-bright);
   animation: boot-glitch-b 2.9s steps(2, end) infinite;
 }
@@ -625,6 +669,7 @@
   }
 }
 .boot-hud-sweep {
+  opacity: 0;
   background: linear-gradient(
     to bottom,
     transparent,
@@ -645,6 +690,7 @@
   }
 }
 .boot-caret {
+  opacity: 1;
   animation: boot-caret 1s steps(1, end) infinite;
 }
 
@@ -657,41 +703,49 @@
     color-mix(in srgb, var(--brand-ink) 65%, transparent) 12px
   );
 }
+/* One stripe period, travelled sideways. The stripes run at -45deg with a 12px period, so
+   a horizontal step of `12 / cos(45deg)` lands the pattern back on itself — the 24px the
+   background offset used was 1.41 periods, and the bar twitched once every 0.8s because of
+   it. On its own pseudo-element this is a transform, so the bar stops asking for a repaint
+   of the panel on every frame; it and `.boot-cta-frame` were the last two things doing
+   that, and between them they were the whole 60/s full-page paint pass. */
 @keyframes boot-fill-stripes {
   to {
-    background-position:
-      24px 0,
-      0 0;
+    transform: translate3d(16.971px, 0, 0);
   }
 }
 .boot-fill {
-  background-image:
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, 0.28) 0,
-      rgba(255, 255, 255, 0.28) 6px,
-      transparent 6px,
-      transparent 12px
-    ),
-    linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--brand-cyan) 78%, transparent),
-      var(--brand-cyan-bright)
-    );
-  background-size:
-    auto,
-    100% 100%;
+  background-image: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--brand-cyan) 78%, transparent),
+    var(--brand-cyan-bright)
+  );
+}
+.boot-fill::before {
+  content: "";
+  position: absolute;
+  /* Slack on both sides, so a step never walks an edge into the bar. */
+  inset: 0 -24px;
+  background-image: repeating-linear-gradient(
+    -45deg,
+    rgba(255, 255, 255, 0.28) 0,
+    rgba(255, 255, 255, 0.28) 6px,
+    transparent 6px,
+    transparent 12px
+  );
   animation: boot-fill-stripes 0.8s linear infinite;
 }
 
-@property --boot-angle {
-  syntax: "<angle>";
-  initial-value: 0deg;
-  inherits: false;
-}
+/* Rotating the gradient rather than the angle it is drawn from. An animated `@property`
+   is a paint animation whatever it feeds, so the conic gradient was redrawn 60 times a
+   second — small in area, but it kept the panel's own layer dirty for the whole gate,
+   which is the layer the preference row is rastered into. */
 @keyframes boot-cta-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
   to {
-    --boot-angle: 360deg;
+    transform: translate(-50%, -50%) rotate(360deg);
   }
 }
 /* The default ring sits exactly on top of `.boot-cta-frame` and hides the
@@ -703,16 +757,8 @@
 }
 
 .boot-cta-frame {
-  background: conic-gradient(
-    from var(--boot-angle),
-    transparent 0deg,
-    var(--brand-cyan-bright) 50deg,
-    transparent 110deg,
-    transparent 230deg,
-    color-mix(in srgb, var(--brand-magenta) 80%, white) 290deg,
-    transparent 350deg
-  );
   padding: 1px;
+  overflow: hidden;
   -webkit-mask:
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
@@ -721,6 +767,27 @@
     linear-gradient(#000 0 0) content-box,
     linear-gradient(#000 0 0);
   mask-composite: exclude;
+}
+.boot-cta-frame::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* A square half again as wide as the frame, so no angle of it uncovers a corner. */
+  width: 150%;
+  aspect-ratio: 1;
+  /* Must match the `from` keyframe: a transform-animated rule states its own resting
+     transform for the same reason an opacity-animated one states its resting opacity. */
+  transform: translate(-50%, -50%);
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--brand-cyan-bright) 50deg,
+    transparent 110deg,
+    transparent 230deg,
+    color-mix(in srgb, var(--brand-magenta) 80%, white) 290deg,
+    transparent 350deg
+  );
   animation: boot-cta-spin 4s linear infinite;
 }
 

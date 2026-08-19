@@ -4,6 +4,7 @@ import { act, render, screen, within } from "@testing-library/react";
 import userEvent, { type UserEvent } from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { click } from "@tests/interactions";
+import { type ConnectionStub, restoreMediaStubs, stubNetworkConnection } from "@tests/media";
 import { useInspectorOverlay } from "@/telemetry/store";
 import { persistOverride, ReducedMotionProvider } from "@/reduced-motion";
 import {
@@ -92,6 +93,10 @@ function renderGate(): UserEvent {
   return user;
 }
 
+function enterCta(): HTMLElement {
+  return screen.getByRole("button", { name: /enter the studio/i });
+}
+
 function preference(group: RegExp, option: RegExp): HTMLElement {
   return within(screen.getByRole("group", { name: group })).getByRole("button", { name: option });
 }
@@ -112,6 +117,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  restoreMediaStubs();
   vi.useRealTimers();
   audio.enable.mockClear();
   theme.setTheme.mockClear();
@@ -119,13 +125,16 @@ afterEach(() => {
 });
 
 describe("Boot gate", () => {
-  it("gates a first visit, showing progress and an immediate way past it", () => {
+  it("gates a first visit, showing progress and a CTA that is not yet live", () => {
     render(<BootSequence />);
 
     expect(screen.getByRole("dialog", { name: STUDIO_DIALOG })).toBeInTheDocument();
     expect(screen.getByText(FIRST_STEP, VISIBLE_ONLY)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /skip intro/i })).toBeInTheDocument();
     expect(screen.getByRole("note")).toBeInTheDocument();
+    // The CTA and the preferences are mounted from the first frame, so the panel does
+    // not resize under the visitor when the world becomes ready.
+    expect(enterCta()).toBeDisabled();
+    expect(screen.getByRole("group", { name: /sound preference/i })).toBeInTheDocument();
   });
 
   it("holds the visitor for the minimum duration even once the world is ready", () => {
@@ -137,12 +146,11 @@ describe("Boot gate", () => {
 
     // Ready alone is not enough: canEnter is `(ready || forceReady) && minElapsed`, so the
     // splash cannot flash past faster than a person can read it.
-    expect(screen.getByRole("button", { name: /skip intro/i })).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /enter the studio/i })).not.toBeInTheDocument();
+    expect(enterCta()).toBeDisabled();
 
     advance(BOOT_MIN_MS);
 
-    expect(screen.getByRole("button", { name: /enter the studio/i })).toBeInTheDocument();
+    expect(enterCta()).toBeEnabled();
   });
 
   it("reports the studio ready at full progress", () => {
@@ -160,7 +168,7 @@ describe("Boot gate", () => {
 
     // The forceReady escape hatch: a device that never finishes compiling must not be
     // trapped behind the splash.
-    expect(screen.getByRole("button", { name: /enter the studio/i })).toBeInTheDocument();
+    expect(enterCta()).toBeEnabled();
   });
 
   it("dismisses on entry and does not gate again in the same session", async () => {
@@ -180,17 +188,48 @@ describe("Boot gate", () => {
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
   });
 
-  it("lets the visitor out through the pre-ready skip control", async () => {
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+  it("hands focus to the CTA when it goes live, if the visitor has not moved it", () => {
     render(<BootSequence />);
 
-    await click(user, /skip intro/i);
+    // `onOpenAutoFocus` parks focus on the panel rather than the first preference
+    // toggle, so the CTA has somewhere to take it from.
+    expect(document.activeElement).toBe(screen.getByRole("dialog", { name: STUDIO_DIALOG }));
+
+    reachReadyState();
+
+    expect(document.activeElement).toBe(enterCta());
+  });
+
+  it("does not steal focus from a visitor who is mid-choice when the CTA goes live", async () => {
+    const user = renderGate();
+
+    // The preferences are on screen for the whole wait now, so this is reachable in a way
+    // it never was when they only appeared with the CTA.
+    await choose(user, /theme preference/i, /dark/i);
+    const dark = preference(/theme preference/i, /dark/i);
+    expect(document.activeElement).toBe(dark);
+
+    reachReadyState();
+
+    expect(document.activeElement).toBe(dark);
+  });
+
+  it("leaves Escape as the way out while the CTA is still disabled", async () => {
+    const user = renderGate();
+
+    // With the pre-ready "Skip intro" button gone, this is the *only* way past the gate
+    // before `canEnter` — the sibling test below covers Escape on the ready screen,
+    // where it is a convenience rather than the sole exit.
+    expect(enterCta()).toBeDisabled();
+
+    await act(async () => {
+      await user.keyboard("{Escape}");
+    });
     advance(BOOT_EXIT_MS);
 
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
     expect(hasBootedThisSession()).toBe(true);
-    // Skipping is not consent to sound: the sound choice is only offered on the ready
-    // screen, which a skipping visitor never sees.
+    // Leaving early is not consent to sound, whatever the sound toggle says.
     expect(audio.enable).not.toHaveBeenCalled();
   });
 
@@ -214,9 +253,61 @@ describe("Boot gate", () => {
     expect(screen.queryByRole("dialog", { name: STUDIO_DIALOG })).not.toBeInTheDocument();
   });
 
-  it("hides the server-rendered splash as soon as it takes over", () => {
-    // Two overlays at once would double the backdrop; the splash exists only to cover the
-    // gap before hydration.
+  it("is not torn down by a connection-speed flap mid-boot", () => {
+    const listeners = new Set<() => void>();
+    const conn: ConnectionStub = {
+      effectiveType: "4g",
+      saveData: false,
+      addEventListener: (_type, listener) => listeners.add(listener),
+      removeEventListener: (_type, listener) => listeners.delete(listener),
+    };
+    stubNetworkConnection(conn);
+
+    render(
+      <ReducedMotionProvider>
+        <BootSplash />
+        <BootSequence />
+      </ReducedMotionProvider>,
+    );
+
+    // Mid-compile, which is when a cold visit is downloading hardest.
+    advance(2000);
+
+    // Chrome derives `effectiveType` from a rolling RTT/throughput estimate and fires
+    // `change` as it moves — and a cold first visit pulling the whole world down is
+    // exactly when it dips and recovers.
+    function report(effectiveType: ConnectionStub["effectiveType"]): void {
+      act(() => {
+        conn.effectiveType = effectiveType;
+        for (const listener of listeners) listener();
+      });
+    }
+
+    const barWidth = (): string =>
+      document.querySelector<HTMLElement>(".boot-fill")?.style.width ?? "gone";
+    const before = Number.parseFloat(barWidth());
+    expect(before).toBeGreaterThan(20);
+
+    const sun = document.querySelector(".boot-sun");
+    expect(sun).not.toBeNull();
+
+    report("2g");
+    report("4g");
+
+    // The gate is untouched: same dialog, and the *same* backdrop node, so no CSS
+    // animation on it restarts. Reading the preference live tore this tree down on the
+    // dip and rebuilt it on the recovery — the sun flashing once per flap.
+    expect(screen.getByRole("dialog", { name: STUDIO_DIALOG })).toBeInTheDocument();
+    expect(document.querySelector(".boot-sun")).toBe(sun);
+    // And the progress bar keeps its place instead of snapping back to `faux`'s initial 8%.
+    expect(Number.parseFloat(barWidth())).toBeGreaterThanOrEqual(before);
+  });
+
+  it("adopts the server-rendered backdrop instead of mounting a second one", () => {
+    // The handover used to swap one `BootBackdrop` for an identical one, which restarted
+    // every animation in the scene in a single frame — the sun, the horizon rule, the grid
+    // pan and the scan beam all snapping back to their `0%` keyframe at hydration. One node
+    // for the whole gate is what makes that unrepresentable, so count them.
     render(
       <>
         <BootSplash />
@@ -224,6 +315,47 @@ describe("Boot gate", () => {
       </>,
     );
 
+    const splash = document.getElementById(BOOT_SPLASH_ID);
+    expect(document.querySelectorAll(".boot-scene")).toHaveLength(1);
+    expect(splash?.querySelector(".boot-scene")).not.toBeNull();
+    // And it stays: it is the gate's backdrop, not a placeholder for one.
+    expect(splash?.style.display).toBe("");
+  });
+
+  it("takes the backdrop out with the gate, on the gate's own fade", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(
+      <>
+        <BootSplash />
+        <BootSequence />
+      </>,
+    );
+    reachReadyState();
+
+    await click(user, /enter the studio/i);
+    const splash = document.getElementById(BOOT_SPLASH_ID);
+
+    // Mid-fade the panel is still on screen, so the backdrop has to be fading with it
+    // rather than cut away underneath it.
+    expect(splash?.style.opacity).toBe("0");
+    expect(splash?.style.display).toBe("");
+
+    advance(BOOT_EXIT_MS);
+
+    expect(splash?.style.display).toBe("none");
+  });
+
+  it("clears the backdrop at once for a visit it does not gate", () => {
+    window.sessionStorage.setItem(BOOT_SESSION_KEY, "1");
+
+    render(
+      <>
+        <BootSplash />
+        <BootSequence />
+      </>,
+    );
+
+    // Nothing is going to fade it, so it cannot wait for a fade.
     expect(document.getElementById(BOOT_SPLASH_ID)?.style.display).toBe("none");
   });
 
