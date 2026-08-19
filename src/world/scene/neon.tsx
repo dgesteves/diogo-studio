@@ -3,16 +3,15 @@
 import { type ReactElement } from "react";
 import { Html } from "@react-three/drei";
 import { worldColors, useWorldPalette } from "../materials";
+import { BACK_WALL_Z, NEON_RULE_Y } from "../room";
 import { siteConfig } from "@/content/profile";
-
-const BACK = -2.27;
 
 export function WorldNeon(): ReactElement {
   const palette = useWorldPalette();
 
   return (
     <group>
-      <Html position={[0, 2.45, BACK]} center distanceFactor={8} zIndexRange={[0, 0]}>
+      <Html position={[0, 2.45, BACK_WALL_Z]} center distanceFactor={8} zIndexRange={[0, 0]}>
         <div
           aria-hidden="true"
           className="pointer-events-none text-center whitespace-nowrap select-none"
@@ -35,13 +34,13 @@ export function WorldNeon(): ReactElement {
         </div>
       </Html>
 
-      <mesh position={[0, 2.02, BACK]}>
+      <mesh position={[0, NEON_RULE_Y, BACK_WALL_Z]}>
         <boxGeometry args={[3.3, 0.012, 0.012]} />
         <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
 
       <pointLight
-        position={[0, 2.4, BACK + 0.6]}
+        position={[0, 2.4, BACK_WALL_Z + 0.6]}
         color={worldColors.accent}
         intensity={1.2 * palette.neonIntensity}
         distance={5}

@@ -1,6 +1,18 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { buildShelfBooks, SHELF_BOOKS, type ShelfBook } from "./shelving";
+import { DESK_TOP_Y, NEON_RULE_Y, ROOM } from "../room";
+import {
+  buildShelfBooks,
+  SHELF_BOOKS,
+  PRINT_ASPECT,
+  PRINT_TEXTURE,
+  shelfBookCeiling,
+  shelfTop,
+  WALL_SHELF_BOOKS,
+  WALL_SHELVES,
+  type ShelfBook,
+} from "./shelving";
 
 /**
  * The books on the shelf behind the desk. They are generated from a seed rather than
@@ -145,5 +157,129 @@ describe("SHELF_BOOKS", () => {
     );
 
     expect(new Set(rows).size).toBe(ROWS.length);
+  });
+});
+
+/**
+ * The floating shelves on the wall the desk faces. The band they hang in is bounded above by
+ * the neon rule and below by the monitors, and both bounds are invisible to every other check
+ * here: a taller row of books, or a shelf nudged up, runs spines straight through the tube on
+ * the wall behind them and nothing fails. These are those two bounds.
+ */
+describe("WALL_SHELVES", () => {
+  it("hangs both shelves in the band the sign leaves, inside the shell", () => {
+    expect(WALL_SHELVES).toHaveLength(2);
+
+    for (const shelf of WALL_SHELVES) {
+      expect.soft(shelf.y, `${shelf.key} hangs below the desk`).toBeGreaterThan(DESK_TOP_Y);
+      expect.soft(shelf.y, `${shelf.key} hangs above the rule`).toBeLessThan(NEON_RULE_Y);
+      // The back wall is 22 units of plane and the room is 7.7 of it: a shelf laid out from
+      // the wall rather than from the room runs straight out through the side of the shell.
+      expect.soft(shelf.centerX - shelf.width / 2).toBeGreaterThan(ROOM.minX);
+      expect.soft(shelf.centerX + shelf.width / 2).toBeLessThan(ROOM.maxX);
+    }
+  });
+
+  it("staggers the pair rather than stacking it, and never overlaps two planks", () => {
+    const [lower, upper] = WALL_SHELVES;
+
+    expect(lower!.y).not.toBeCloseTo(upper!.y);
+    const gap = Math.abs(upper!.centerX - lower!.centerX) - (upper!.width + lower!.width) / 2;
+    expect(gap).toBeGreaterThan(0);
+  });
+
+  it("keeps a row of spines on the plank it stands on", () => {
+    for (const shelf of WALL_SHELVES) {
+      const half = shelf.width / 2;
+      expect.soft(shelf.bookOffset).toBeGreaterThanOrEqual(0);
+      expect.soft(shelf.bookOffset + shelf.bookSpan).toBeLessThanOrEqual(shelf.width);
+
+      const row = buildShelfBooks(shelf.bookSeed, shelfBookCeiling(shelf), shelf.bookSpan);
+      const center = shelf.bookOffset + shelf.bookSpan / 2 - half;
+      expect(row.length).toBeGreaterThan(3);
+      for (const book of row) {
+        const x = center + book.z;
+        expect.soft(x - book.thickness / 2, `${shelf.key} spills left`).toBeGreaterThan(-half);
+        expect.soft(x + book.thickness / 2, `${shelf.key} spills right`).toBeLessThan(half);
+      }
+    }
+  });
+
+  /**
+   * The one thing the shelves' height is derived from rather than authored. Every spine's top
+   * has to land under the neon tube on the wall behind it — raising a shelf has to shorten its
+   * books, and a row given a free hand would reach 0.38.
+   */
+  it("stops every spine short of the neon rule", () => {
+    expect(WALL_SHELF_BOOKS.length).toBeGreaterThan(WALL_SHELVES.length * 3);
+
+    for (const book of WALL_SHELF_BOOKS) {
+      const top = book.position[1] + book.scale[1] / 2;
+      expect
+        .soft(top, `a spine at x=${book.position[0]} reaches the rule`)
+        .toBeLessThan(NEON_RULE_Y);
+    }
+  });
+
+  it("stands each spine on a shelf, turned a quarter turn from the bookshelf's", () => {
+    const tops = WALL_SHELVES.map(shelfTop);
+
+    for (const book of WALL_SHELF_BOOKS) {
+      // Thickness across x and depth into z: the row runs along the wall, not out of it.
+      expect.soft(book.scale[0]).toBeLessThan(book.scale[2]);
+      // A lean tilts the spine along the row; about x it would tip into the wall instead.
+      expect.soft(book.rotation[0]).toBe(0);
+      expect.soft(book.rotation[1]).toBe(0);
+      // Standing on a plank, not sunk half into one or hovering over it.
+      const bottom = book.position[1] - book.scale[1] / 2;
+      expect
+        .soft(
+          tops.some((top) => Math.abs(top - bottom) < 1e-9),
+          `a spine floats at y=${bottom}`,
+        )
+        .toBe(true);
+    }
+  });
+
+  it("gives every instance a key React can tell apart, across both shelves", () => {
+    expect(new Set(WALL_SHELF_BOOKS.map((book) => book.key)).size).toBe(WALL_SHELF_BOOKS.length);
+  });
+});
+
+/**
+ * The print's asset. `PRINT_ASPECT` is a number typed next to a filename, and the frame's
+ * geometry is built from it — swap the photograph for a landscape one and the face renders
+ * stretched with nothing failing. The file is also fetched into the scene at runtime rather
+ * than through `next/image`, so its weight is a payload the room pays on load: the original
+ * camera JPEG this was cut down from is 1.6 MB.
+ */
+describe("the print's asset", () => {
+  const file = new URL(`../../../public${PRINT_TEXTURE}`, import.meta.url);
+  const bytes = readFileSync(file);
+
+  /** JPEG dimensions live in the frame header, which is the first SOFn segment. */
+  function jpegSize(jpeg: Buffer): { width: number; height: number } {
+    let offset = 2;
+    while (offset + 9 < jpeg.length) {
+      if (jpeg[offset] !== 0xff) throw new Error(`not a segment at ${offset}`);
+      const marker = jpeg[offset + 1]!;
+      const isFrameHeader =
+        marker >= 0xc0 && marker <= 0xcf && ![0xc4, 0xc8, 0xcc].includes(marker);
+      if (isFrameHeader) {
+        return { height: jpeg.readUInt16BE(offset + 5), width: jpeg.readUInt16BE(offset + 7) };
+      }
+      offset += 2 + jpeg.readUInt16BE(offset + 2);
+    }
+    throw new Error("no frame header");
+  }
+
+  it("is shaped the way the frame is built for", () => {
+    const { width, height } = jpegSize(bytes);
+
+    expect(width / height).toBeCloseTo(PRINT_ASPECT, 2);
+  });
+
+  it("stays a decoration-sized download", () => {
+    expect(bytes.byteLength).toBeLessThan(150_000);
   });
 });

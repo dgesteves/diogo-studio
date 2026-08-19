@@ -17,13 +17,13 @@ import {
   drawTimeline,
 } from "../screens/wall";
 import { type Vec3 } from "../stations";
-import { Bookshelf } from "./shelving";
+import { Bookshelf, WallShelves } from "./shelving";
 
 /**
- * The set dressing that carries a station: the door to /contact and the five panels on the
- * right wall. Each panel is a canvas screen painted from the authored record — the data is
- * bound here and the drawing happens in `world/screens/wall.ts`, so no fact reaches a draw
- * routine except as an argument.
+ * The set dressing: the shelving, the door to /contact and the five panels on the right wall.
+ * Each panel is a canvas screen painted from the authored record — the data is bound here and
+ * the drawing happens in `world/screens/wall.ts`, so no fact reaches a draw routine except as
+ * an argument. The shelves carry no station; they are furniture.
  */
 
 const LEAF_W = 0.92;
@@ -160,6 +160,7 @@ export function WorldProps(): ReactElement {
   return (
     <group>
       <Bookshelf />
+      <WallShelves />
 
       <group position={[-1.8, 0, 1.4]}>
         <mesh position={[0, 0.18, 0]}>

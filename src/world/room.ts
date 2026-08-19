@@ -33,6 +33,15 @@ const WALL_INSET = 0.03;
 const CENTER_Z = 2.4;
 const SPACING_Z = 0.78;
 
+/** The plane a flat fixture on the back wall hangs on, clear of the shell so it never z-fights. */
+export const BACK_WALL_Z = ROOM.minZ + WALL_INSET;
+
+/**
+ * The neon rule under the sign. It is also the ceiling of the band the floating shelves hang
+ * in — the monitors take the wall below it — so both the sign and `scene/shelving` read it.
+ */
+export const NEON_RULE_Y = 2.02;
+
 /**
  * The screens hang on the right wall, so their panels face -x and the row runs
  * along z — starting just past the lounge sofa and reading left-to-right for
