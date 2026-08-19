@@ -7,14 +7,17 @@ import { anodizedMetalMaterial, frameMaterial, useWorldPalette, worldColors } fr
 import { Instance, Instances, RoundedBox, useTexture } from "@react-three/drei";
 import { ROOM, SHELF_BAND_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
+import { bookDesign, Books, type BookDesign, type BookPlacement } from "./books";
 import { Starship, SuperHeavy } from "./starship";
 import { Vader } from "./vader";
 
 /**
- * The shelving: the tall bookshelf beside the door, and the pair of floating shelves on the
- * wall the desk faces. Every book in both is one instanced mesh rather than a hundred
- * siblings — at this count the draw calls are the whole cost — and every row is laid out from
- * a seed, so the same shelf renders every time.
+ * The shelving: the tall bookshelf beside the door, and the three floating shelves on the
+ * wall the desk faces. Every book in both is one merged mesh rather than a hundred siblings —
+ * at this count the draw calls are the whole cost — and every row is laid out from a seed, so
+ * the same shelf renders every time.
+ *
+ * What a spine is *made of* is `books.tsx`; this file decides only how many stand where.
  */
 
 export type ShelfBook = {
@@ -22,24 +25,9 @@ export type ShelfBook = {
   height: number;
   thickness: number;
   depth: number;
-  color: string;
+  design: BookDesign;
   lean: number;
 };
-
-const SPINE_COLORS = [
-  "#243440",
-  "#2b3a46",
-  "#22323a",
-  "#31424c",
-  "#3a4b53",
-  "#26343f",
-  "#2e3d45",
-  "#3f505a",
-  "#465862",
-] as const;
-
-const ACCENT_COLORS = ["#1d6a7c", "#2c5a74", "#7c3554", "#8f652f"] as const;
-const ACCENT_CHANCE = 0.07;
 
 /** A row is laid out centered on zero along its own axis; `span` is how long that row is. */
 const SHELF_SPAN = 1;
@@ -58,7 +46,6 @@ const MAX_LEAN = 0.14;
 export function buildShelfBooks(seed: number, maxHeight: number, span = SHELF_SPAN): ShelfBook[] {
   const random = mulberry32(seed);
   const books: ShelfBook[] = [];
-  const fallback = SPINE_COLORS[0];
   const half = span / 2;
   const end = half - MARGIN;
   let z = -half + MARGIN;
@@ -72,24 +59,16 @@ export function buildShelfBooks(seed: number, maxHeight: number, span = SHELF_SP
     if (z + thickness > end) break;
     const height = Math.min(MIN_HEIGHT + random() * HEIGHT_RANGE, maxHeight);
     const depth = MIN_DEPTH + random() * DEPTH_RANGE;
-    const pool = random() < ACCENT_CHANCE ? ACCENT_COLORS : SPINE_COLORS;
-    const index = Math.floor(random() * pool.length);
-    const color = pool[index] ?? fallback;
     const lean = random() < LEAN_CHANCE ? (random() - 0.5) * MAX_LEAN : 0;
-    books.push({ z: z + thickness / 2, height, thickness, depth, color, lean });
+    // Stepped from the seed and the position in the row rather than drawn, so the binding
+    // and the title are the one thing a row is guaranteed not to repeat back to back.
+    const design = bookDesign(seed + books.length);
+    books.push({ z: z + thickness / 2, height, thickness, depth, design, lean });
     z += thickness + BOOK_SPACING;
   }
 
   return books;
 }
-
-type BookInstance = {
-  key: string;
-  position: [number, number, number];
-  scale: [number, number, number];
-  rotation: [number, number, number];
-  color: string;
-};
 
 const BOOK_FRONT_X = 0.085;
 
@@ -101,13 +80,17 @@ const ROWS = [
   { baseY: 1.84, maxHeight: 0.38, seed: 6217 },
 ] as const;
 
-export const SHELF_BOOKS: BookInstance[] = ROWS.flatMap((row) =>
-  buildShelfBooks(row.seed, row.maxHeight).map((book): BookInstance => ({
+/** Spines out along +x, so the row is read from the middle of the room. */
+const BOOKSHELF_POSE = { kind: "upright", spine: "px" } as const;
+
+export const SHELF_BOOKS: BookPlacement[] = ROWS.flatMap((row) =>
+  buildShelfBooks(row.seed, row.maxHeight).map((book): BookPlacement => ({
     key: `${row.seed}-${book.z.toFixed(3)}`,
     position: [BOOK_FRONT_X - book.depth / 2, row.baseY + book.height / 2, book.z],
-    scale: [book.depth, book.height, book.thickness],
+    size: [book.depth, book.height, book.thickness],
     rotation: [book.lean, 0, 0],
-    color: book.color,
+    pose: BOOKSHELF_POSE,
+    design: book.design,
   })),
 );
 
@@ -160,7 +143,6 @@ function ShelfLight(): ReactElement {
 
 const FRAME_COLOR = "#0c1116";
 const SHELF_SURFACE = { color: "#161d24", roughness: 0.6 } as const;
-const PAPER_ROUGHNESS = 0.92;
 const PRINT_ROUGHNESS = 0.7;
 const PLANK_THICKNESS = 0.025;
 const PLANK_YS = [0.5, 0.94, 1.38, 1.82];
@@ -189,19 +171,7 @@ export function Bookshelf(): ReactElement {
           <meshStandardMaterial {...SHELF_SURFACE} />
         </mesh>
       ))}
-      <Instances limit={SHELF_BOOKS.length} range={SHELF_BOOKS.length} frustumCulled={false}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial roughness={PAPER_ROUGHNESS} metalness={0} />
-        {SHELF_BOOKS.map((book) => (
-          <Instance
-            key={book.key}
-            position={book.position}
-            scale={book.scale}
-            rotation={book.rotation}
-            color={book.color}
-          />
-        ))}
-      </Instances>
+      <Books books={SHELF_BOOKS} />
     </group>
   );
 }
@@ -317,21 +287,27 @@ function onShelf(shelf: WallShelfLayout, offsetX: number): Vec3 {
   return [shelf.centerX + offsetX, shelfTop(shelf), WALL_SHELF_Z];
 }
 
-export const WALL_SHELF_BOOKS: BookInstance[] = WALL_SHELVES.flatMap((shelf) => {
+/** Spines out along +z, the quarter turn from the bookshelf's that the row itself is. */
+const WALL_SHELF_POSE = { kind: "upright", spine: "pz" } as const;
+
+export const WALL_SHELF_BOOKS: BookPlacement[] = WALL_SHELVES.flatMap((shelf) => {
   const row = shelf.books;
   const rowCenter = row.offset + row.span / 2 - shelf.width / 2;
 
-  return buildShelfBooks(row.seed, shelfBookCeiling(shelf), row.span).map((book): BookInstance => ({
-    key: `${shelf.key}-${book.z.toFixed(3)}`,
-    position: [
-      shelf.centerX + rowCenter + book.z,
-      shelfTop(shelf) + book.height / 2,
-      WALL_SHELF_BOOK_Z + book.depth / 2,
-    ],
-    scale: [book.thickness, book.height, book.depth],
-    rotation: [0, 0, book.lean],
-    color: book.color,
-  }));
+  return buildShelfBooks(row.seed, shelfBookCeiling(shelf), row.span).map(
+    (book): BookPlacement => ({
+      key: `${shelf.key}-${book.z.toFixed(3)}`,
+      position: [
+        shelf.centerX + rowCenter + book.z,
+        shelfTop(shelf) + book.height / 2,
+        WALL_SHELF_BOOK_Z + book.depth / 2,
+      ],
+      size: [book.thickness, book.height, book.depth],
+      rotation: [0, 0, book.lean],
+      pose: WALL_SHELF_POSE,
+      design: book.design,
+    }),
+  );
 });
 
 /**
@@ -651,23 +627,7 @@ export function WallShelves(): ReactElement {
       <Starship position={onShelf(BOTTOM_SHELF, SHIP_OFFSET_X)} />
       <PuzzleCube shelf={BOTTOM_SHELF} offsetX={0.76} />
 
-      <Instances
-        limit={WALL_SHELF_BOOKS.length}
-        range={WALL_SHELF_BOOKS.length}
-        frustumCulled={false}
-      >
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial roughness={PAPER_ROUGHNESS} metalness={0} />
-        {WALL_SHELF_BOOKS.map((book) => (
-          <Instance
-            key={book.key}
-            position={book.position}
-            scale={book.scale}
-            rotation={book.rotation}
-            color={book.color}
-          />
-        ))}
-      </Instances>
+      <Books books={WALL_SHELF_BOOKS} />
     </group>
   );
 }

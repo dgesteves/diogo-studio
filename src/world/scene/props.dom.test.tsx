@@ -13,6 +13,9 @@ import { WorldProps } from "./props";
  * and that the books cost one draw call per shelving unit rather than one per spine.
  */
 
+/** `props.tsx` paints each wall panel at this width; the book atlases are other sizes. */
+const WALL_SCREEN_TEXTURE_WIDTH = 600;
+
 let stub: { contexts: readonly RecordingContext[]; restore: () => void } | undefined;
 
 afterEach(async () => {
@@ -54,7 +57,10 @@ describe("WorldProps", () => {
     stub = stubCanvasContexts();
     await renderScene(<WorldProps />);
 
-    const transcripts = stub.contexts.map((context) => context.transcript.join("\n"));
+    // The shelving paints its book atlases onto canvases too; a panel is 600 wide.
+    const transcripts = stub.contexts
+      .filter((context) => context.ctx.canvas.width === WALL_SCREEN_TEXTURE_WIDTH)
+      .map((context) => context.transcript.join("\n"));
 
     expect(transcripts).toHaveLength(Object.keys(WALL_SCREEN_Z).length);
     expect(new Set(transcripts).size).toBe(transcripts.length);
@@ -99,26 +105,67 @@ describe("WorldProps", () => {
     for (const dispose of disposals) expect(dispose).toHaveBeenCalledOnce();
   });
 
-  it("draws every book and sticker instanced rather than one mesh each", async () => {
+  /**
+   * A hundred and twenty-one spines and fifty-four stickers, at four draw calls between them.
+   * The books cannot be instanced — every spine reads its own cell of an atlas, and instances
+   * share one geometry — so they are merged instead, one mesh per shelving unit.
+   */
+  it("draws every book merged and every sticker instanced, not one mesh each", async () => {
     const scene = await renderScene(<WorldProps />);
     // drei fills the instance buffer on the first frame, not at mount.
     await scene.advance(1);
+    const refreshed = scene.refresh();
 
-    const instanced = scene
-      .refresh()
-      .objects.filter(
-        (object): object is InstancedMesh => (object as InstancedMesh).isInstancedMesh === true,
-      );
+    const instanced = refreshed.objects.filter(
+      (object): object is InstancedMesh => (object as InstancedMesh).isInstancedMesh === true,
+    );
+    // Only the puzzle cube's stickers, which are 54 copies of one tile.
+    expect(instanced).toHaveLength(1);
+    expect(instanced[0]!.count).toBeGreaterThanOrEqual(PUZZLE_STICKERS.length);
+    // Culled on its base tile's bounds rather than its instances', so a camera angle that
+    // leaves that one tile off-screen would otherwise blank all 54.
+    expect(instanced[0]!.frustumCulled).toBe(false);
 
-    // The bookshelf, the floating shelves, and the puzzle cube's stickers.
-    expect(instanced).toHaveLength(3);
     const spines = SHELF_BOOKS.length + WALL_SHELF_BOOKS.length;
-    const tiles = spines + PUZZLE_STICKERS.length;
-    expect(instanced.reduce((total, mesh) => total + mesh.count, 0)).toBeGreaterThanOrEqual(tiles);
-    expect(scene.meshesWith("BoxGeometry").length).toBeLessThan(tiles);
-    // Every one of them is culled on its base geometry's bounds rather than its instances',
-    // so a camera angle that leaves that one tile off-screen blanks the whole mesh.
-    for (const mesh of instanced) expect.soft(mesh.frustumCulled).toBe(false);
+    const merged = refreshed.meshes.filter(
+      (mesh) =>
+        (mesh.geometry.getAttribute("position")?.count ?? 0) % 24 === 0 &&
+        mesh.geometry.getIndex() !== null,
+    );
+    const shelved = merged.filter((mesh) =>
+      [SHELF_BOOKS.length, WALL_SHELF_BOOKS.length].includes(
+        mesh.geometry.getAttribute("position")!.count / 24,
+      ),
+    );
+    expect(shelved).toHaveLength(2);
+    // A box per spine, and nowhere near a mesh per spine.
+    expect(refreshed.meshes.length).toBeLessThan(spines);
+  });
+
+  /**
+   * Neither the atlas nor the merged geometry is reconciled by R3F — both are built by hand
+   * and handed in as props, so nothing else will ever free them. The canvas really does
+   * unmount, every time a visitor turns motion off mid-session.
+   */
+  it("releases each shelving unit's atlas and geometry when the world unmounts", async () => {
+    stub = stubCanvasContexts();
+    const scene = await renderScene(<WorldProps />);
+
+    const shelved = scene.meshes.filter((mesh) =>
+      [SHELF_BOOKS.length, WALL_SHELF_BOOKS.length].includes(
+        (mesh.geometry.getAttribute("position")?.count ?? 0) / 24,
+      ),
+    );
+    expect(shelved).toHaveLength(2);
+    const disposals = shelved.flatMap((mesh) => [
+      vi.spyOn(materialOf<MeshStandardMaterial>(mesh).map!, "dispose"),
+      vi.spyOn(mesh.geometry, "dispose"),
+    ]);
+
+    await scene.unmount();
+
+    expect(disposals).toHaveLength(4);
+    for (const dispose of disposals) expect(dispose).toHaveBeenCalledOnce();
   });
 
   it("aims the shelf light at a target that is actually in the scene", async () => {

@@ -5,6 +5,7 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
+import { bookDesign, Books, type BookPlacement } from "./books";
 
 /**
  * The corner the room is not working in: rug, sofa, lamp, coffee table and the TV above the
@@ -183,11 +184,30 @@ function LoungeLamp(): ReactElement {
 const LAPTOP_BODY = { color: "#0e1419", roughness: 0.45, metalness: 0.5 } as const;
 const REMOTE_BODY = { color: "#0b1014", roughness: 0.6, metalness: 0.25 } as const;
 
-const BOOK_STACK = [
-  { size: [0.24, 0.028, 0.32], yOffset: 0.014, rotationY: 0.08, color: "#2b3a46" },
-  { size: [0.22, 0.024, 0.3], yOffset: 0.04, rotationY: -0.14, color: "#8f652f" },
-  { size: [0.2, 0.022, 0.28], yOffset: 0.063, rotationY: 0.24, color: "#31424c" },
-] as const;
+/**
+ * The three books on the coffee table. They are bound in `books.tsx` like every other book
+ * in the room, rather than being three more colored boxes: lying face up, what a visitor
+ * standing in the room sees of them is the spines and the page edges, so those are the two
+ * things the pose has to get right. The room is toward -x from here.
+ */
+const TABLE_BOOK_POSE = { kind: "flat", spine: "nx" } as const;
+
+type StackedBook = { key: string; size: Vec3; y: number; turn: number; order: number };
+
+const BOOK_STACK: readonly StackedBook[] = [
+  { key: "lower", size: [0.24, 0.028, 0.32], y: 0.014, turn: 0.08, order: 3 },
+  { key: "middle", size: [0.22, 0.024, 0.3], y: 0.04, turn: -0.14, order: 17 },
+  { key: "upper", size: [0.2, 0.022, 0.28], y: 0.063, turn: 0.24, order: 28 },
+];
+
+const TABLE_BOOKS: readonly BookPlacement[] = BOOK_STACK.map((book): BookPlacement => ({
+  key: book.key,
+  position: [0, book.y, 0],
+  size: book.size,
+  rotation: [0, book.turn, 0],
+  pose: TABLE_BOOK_POSE,
+  design: bookDesign(book.order),
+}));
 
 type LoungeTableItemsProps = {
   topY: number;
@@ -220,12 +240,7 @@ function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
       </group>
 
       <group position={[-0.36, topY, 0.04]}>
-        {BOOK_STACK.map((book) => (
-          <mesh key={book.color} position={[0, book.yOffset, 0]} rotation={[0, book.rotationY, 0]}>
-            <boxGeometry args={[...book.size]} />
-            <meshStandardMaterial color={book.color} roughness={0.9} metalness={0} />
-          </mesh>
-        ))}
+        <Books books={TABLE_BOOKS} />
       </group>
 
       <group position={[0, topY + 0.008, 0.2]} rotation={[0, 0.5, 0]}>

@@ -24,6 +24,46 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-19 — Books are merged, not instanced, and carry a texture atlas
+
+Every book in the room was an untextured box tinted per instance, which reads as a
+color block however many stand side by side — and the bookshelf is the _subject_ of
+the writing station, not background. Each spine now gets its own cell of a canvas
+atlas: cloth, a title, a publisher's band at the head, a mark at the foot, and a page
+block over the top.
+
+**The bindings are modern, and that was a correction.** The first pass bound them as
+antiquarian library books — gold foil, paired rules at head and foot, an engraved
+device at the tail, and a third of the palette in walnut, tan and ochre. Every one of
+those is a period detail, and this room has no warm surface in it and no light but
+cyan, so 121 gold-blocked spines read as somebody else's furniture moved in. Cool
+cloth, near-white ink and a flat publisher's band read as what the titles on them
+actually are, which is a working engineer's shelf; two spines carry the room's own
+cyan and pink so the shelf belongs to it. The lesson generalizes past books: a prop
+copied faithfully from a reference photograph can be well made and still be furniture
+from another building.
+
+Per-cell art means per-book UVs, and an `InstancedMesh` cannot carry those — every
+instance shares one geometry. So the boxes are merged into one geometry per shelving
+unit with the placement baked in. That is a draw call per unit rather than per book,
+one fewer than instancing cost, and the mesh's bounds are the books' own so it culls
+normally instead of needing `frustumCulled={false}`. Nothing about a book animates, so
+nothing is given up for it.
+
+**The cost is texture memory, and it is deliberate.** 48×256 px per spine at 512 px/m
+is ~4.7 MB for the bookshelf and ~2.4 MB for the floating shelves. The resolution is
+set by the writing station, where the camera sits ~1.6 m off the shelf and a spine
+covers more screen than a smaller cell would have pixels for. Lower it and the
+lettering goes to mush at the one station that looks straight at it; a shared atlas
+across both units would save nothing, because the size is driven by 121 unique spines
+rather than by the grid.
+
+Two smaller calls inside it. Titles are **stepped** through the catalogs by a stride
+coprime with each one's length rather than drawn from the PRNG, because the tell of a
+generated shelf is two neighbors bound and titled alike, and no range assertion catches
+it. And a spine wide enough to read across is lettered across even though turning it
+would always fit more type — a shelf lettered all one way is the other tell.
+
 ## 2026-08-19 — Scene specs walk state on a live world; the jsdom deadline is set, not inherited
 
 `canvas.dom.test.tsx > keeps the render loop running until the device has proven
