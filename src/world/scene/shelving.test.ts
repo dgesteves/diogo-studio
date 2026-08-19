@@ -1,13 +1,16 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-import { DESK_TOP_Y, NEON_RULE_Y, ROOM } from "../room";
+import { DESK_TOP_Y, ROOM, SHELF_BAND_TOP_Y } from "../room";
 import {
   buildShelfBooks,
   SHELF_BOOKS,
   PRINT_ASPECT,
   PRINT_TEXTURE,
+  PUZZLE_SIZE,
+  PUZZLE_STICKERS,
   shelfBookCeiling,
+  shelfCeilingY,
   shelfTop,
   WALL_SHELF_BOOKS,
   WALL_SHELVES,
@@ -162,17 +165,24 @@ describe("SHELF_BOOKS", () => {
 
 /**
  * The floating shelves on the wall the desk faces. The band they hang in is bounded above by
- * the neon rule and below by the monitors, and both bounds are invisible to every other check
- * here: a taller row of books, or a shelf nudged up, runs spines straight through the tube on
- * the wall behind them and nothing fails. These are those two bounds.
+ * the sign and below by the monitors, and both bounds are invisible to every other check
+ * here: a taller row of books, a shelf nudged up, or a new plank hung over an old one runs
+ * spines straight through something and nothing fails. These are those bounds.
  */
 describe("WALL_SHELVES", () => {
-  it("hangs both shelves in the band the sign leaves, inside the shell", () => {
-    expect(WALL_SHELVES).toHaveLength(2);
+  const overlapInX = (a: (typeof WALL_SHELVES)[number], b: typeof a): boolean =>
+    Math.abs(a.centerX - b.centerX) < (a.width + b.width) / 2;
+
+  const pairs = WALL_SHELVES.flatMap((shelf, index) =>
+    WALL_SHELVES.slice(index + 1).map((other) => [shelf, other] as const),
+  );
+
+  it("hangs every shelf in the band the sign leaves, inside the shell", () => {
+    expect(WALL_SHELVES).toHaveLength(3);
 
     for (const shelf of WALL_SHELVES) {
       expect.soft(shelf.y, `${shelf.key} hangs below the desk`).toBeGreaterThan(DESK_TOP_Y);
-      expect.soft(shelf.y, `${shelf.key} hangs above the rule`).toBeLessThan(NEON_RULE_Y);
+      expect.soft(shelf.y, `${shelf.key} hangs into the sign`).toBeLessThan(SHELF_BAND_TOP_Y);
       // The back wall is 22 units of plane and the room is 7.7 of it: a shelf laid out from
       // the wall rather than from the room runs straight out through the side of the shell.
       expect.soft(shelf.centerX - shelf.width / 2).toBeGreaterThan(ROOM.minX);
@@ -180,22 +190,41 @@ describe("WALL_SHELVES", () => {
     }
   });
 
-  it("staggers the pair rather than stacking it, and never overlaps two planks", () => {
-    const [lower, upper] = WALL_SHELVES;
+  /**
+   * Stacking is allowed — the lanes overlap, so a plank does hang over another — but two of
+   * them sharing a stretch of wall have to be far enough apart in y to be two shelves with a
+   * row of books between them rather than one thick one.
+   */
+  it("never runs two planks into each other", () => {
+    for (const [a, b] of pairs) {
+      if (!overlapInX(a, b)) continue;
+      expect
+        .soft(Math.abs(a.y - b.y), `${a.key} and ${b.key} sit on top of each other`)
+        .toBeGreaterThan(0.3);
+    }
+  });
 
-    expect(lower!.y).not.toBeCloseTo(upper!.y);
-    const gap = Math.abs(upper!.centerX - lower!.centerX) - (upper!.width + lower!.width) / 2;
-    expect(gap).toBeGreaterThan(0);
+  /** Three shelves hung at the same x would read as a rack rather than as three shelves. */
+  it("puts each shelf in its own lane", () => {
+    const centers = WALL_SHELVES.map((shelf) => shelf.centerX);
+
+    expect(new Set(centers).size).toBe(WALL_SHELVES.length);
+    for (const [a, b] of pairs) {
+      expect
+        .soft(Math.abs(a.centerX - b.centerX), `${a.key} and ${b.key} share a lane`)
+        .toBeGreaterThan(0.5);
+    }
   });
 
   it("keeps a row of spines on the plank it stands on", () => {
     for (const shelf of WALL_SHELVES) {
+      const books = shelf.books;
       const half = shelf.width / 2;
-      expect.soft(shelf.bookOffset).toBeGreaterThanOrEqual(0);
-      expect.soft(shelf.bookOffset + shelf.bookSpan).toBeLessThanOrEqual(shelf.width);
+      expect.soft(books.offset).toBeGreaterThanOrEqual(0);
+      expect.soft(books.offset + books.span).toBeLessThanOrEqual(shelf.width);
 
-      const row = buildShelfBooks(shelf.bookSeed, shelfBookCeiling(shelf), shelf.bookSpan);
-      const center = shelf.bookOffset + shelf.bookSpan / 2 - half;
+      const row = buildShelfBooks(books.seed, shelfBookCeiling(shelf), books.span);
+      const center = books.offset + books.span / 2 - half;
       expect(row.length).toBeGreaterThan(3);
       for (const book of row) {
         const x = center + book.z;
@@ -207,17 +236,34 @@ describe("WALL_SHELVES", () => {
 
   /**
    * The one thing the shelves' height is derived from rather than authored. Every spine's top
-   * has to land under the neon tube on the wall behind it — raising a shelf has to shorten its
-   * books, and a row given a free hand would reach 0.38.
+   * has to land under whatever hangs over it — the sign's band, or the plank above — so
+   * raising a shelf or hanging a new one over it has to shorten the row, and a row given a
+   * free hand would reach 0.38.
    */
-  it("stops every spine short of the neon rule", () => {
+  it("stops every spine short of what hangs over its shelf", () => {
     expect(WALL_SHELF_BOOKS.length).toBeGreaterThan(WALL_SHELVES.length * 3);
 
     for (const book of WALL_SHELF_BOOKS) {
       const top = book.position[1] + book.scale[1] / 2;
+      const shelf = WALL_SHELVES.find(
+        (candidate) =>
+          Math.abs(shelfTop(candidate) - (book.position[1] - book.scale[1] / 2)) < 1e-9,
+      );
       expect
-        .soft(top, `a spine at x=${book.position[0]} reaches the rule`)
-        .toBeLessThan(NEON_RULE_Y);
+        .soft(top, `a spine at x=${book.position[0]} reaches what is above it`)
+        .toBeLessThan(shelfCeilingY(shelf!));
+    }
+  });
+
+  /**
+   * A shelf may declare a row it has no height for: the generator clamps every spine to the
+   * ceiling it is given, so a squashed row renders as a line of slivers rather than failing.
+   */
+  it("leaves every shelf the height for the row it declares", () => {
+    for (const shelf of WALL_SHELVES) {
+      expect
+        .soft(shelfBookCeiling(shelf), `${shelf.key} has no room for its books`)
+        .toBeGreaterThanOrEqual(0.2);
     }
   });
 
@@ -281,5 +327,54 @@ describe("the print's asset", () => {
 
   it("stays a decoration-sized download", () => {
     expect(bytes.byteLength).toBeLessThan(150_000);
+  });
+});
+
+/**
+ * The puzzle cube on the bottom shelf. Its stickers are placed from each face's basis rather
+ * than typed out, so one wrong axis buries nine of them inside the body — which renders as a
+ * cube with a blank side and fails nothing.
+ */
+describe("PUZZLE_STICKERS", () => {
+  const HALF = PUZZLE_SIZE / 2;
+
+  it("covers all six faces, nine tiles each", () => {
+    expect(PUZZLE_STICKERS).toHaveLength(54);
+    expect(new Set(PUZZLE_STICKERS.map((sticker) => sticker.key)).size).toBe(54);
+
+    const perColor = new Map<string, number>();
+    for (const sticker of PUZZLE_STICKERS) {
+      perColor.set(sticker.color, (perColor.get(sticker.color) ?? 0) + 1);
+    }
+    expect(perColor.size).toBe(6);
+    for (const count of perColor.values()) expect(count).toBe(9);
+  });
+
+  it("lays every sticker on the surface of the cube, not inside it", () => {
+    for (const sticker of PUZZLE_STICKERS) {
+      const distances = sticker.position.map(Math.abs);
+      // Exactly one axis is the face's own, standing just proud of it; the other two are the
+      // grid, which stays inside the cube's footprint.
+      expect
+        .soft(
+          distances.filter((d) => d > HALF),
+          `${sticker.key} is not on one face`,
+        )
+        .toHaveLength(1);
+      for (const distance of distances) expect.soft(distance).toBeLessThan(HALF + 0.01);
+    }
+  });
+
+  it("gives each face its own outward color", () => {
+    const byNormal = new Map<string, Set<string>>();
+
+    for (const sticker of PUZZLE_STICKERS) {
+      const axis = sticker.position.findIndex((value) => Math.abs(value) > HALF);
+      const face = `${axis}:${Math.sign(sticker.position[axis]!)}`;
+      byNormal.set(face, (byNormal.get(face) ?? new Set()).add(sticker.color));
+    }
+
+    expect(byNormal.size).toBe(6);
+    for (const colors of byNormal.values()) expect(colors.size).toBe(1);
   });
 });
