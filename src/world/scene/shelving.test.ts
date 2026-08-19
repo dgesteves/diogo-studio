@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { DESK_TOP_Y, ROOM, SHELF_BAND_TOP_Y } from "../room";
+import { BOOK_CLOTHS } from "./books";
 import {
   buildShelfBooks,
   SHELF_BOOKS,
@@ -21,28 +22,15 @@ import {
  * The books on the shelf behind the desk. They are generated from a seed rather than
  * authored, so no type checks any of what a visitor actually sees: a bad draw can hang a
  * book off the end of the shelf, overlap it with its neighbor, or run it through the plank
- * above. `bookshelf-instances.ts` freezes one draw at module load and renders it instanced,
- * so these invariants are what make that draw shippable — and the seeded PRNG is what makes
- * them assertable at all.
+ * above. `SHELF_BOOKS` freezes one draw at module load and `books.tsx` merges it into a single
+ * mesh, so these invariants are what make that draw shippable — and the seeded PRNG is what
+ * makes them assertable at all.
  */
 
 // The shelf `buildShelfBooks` fills is one unit wide with a 0.02 margin at each end.
 const LEFT = -0.48;
 const RIGHT = 0.48;
 const SPACING = 0.003;
-
-const SPINE_COLORS = [
-  "#243440",
-  "#2b3a46",
-  "#22323a",
-  "#31424c",
-  "#3a4b53",
-  "#26343f",
-  "#2e3d45",
-  "#3f505a",
-  "#465862",
-];
-const ACCENT_COLORS = ["#1d6a7c", "#2c5a74", "#7c3554", "#8f652f"];
 
 const start = (book: ShelfBook): number => book.z - book.thickness / 2;
 const end = (book: ShelfBook): number => book.z + book.thickness / 2;
@@ -75,14 +63,25 @@ describe("buildShelfBooks", () => {
       expect.soft(book.thickness).toBeLessThanOrEqual(0.076);
       expect.soft(book.depth).toBeGreaterThanOrEqual(0.11);
       expect.soft(book.depth).toBeLessThanOrEqual(0.155);
-      expect.soft([...SPINE_COLORS, ...ACCENT_COLORS]).toContain(book.color);
+      expect.soft(BOOK_CLOTHS).toContain(book.design.cloth);
     }
-    // Accents are the 7% case. A pool picked the wrong way round would still pass every
-    // assertion above.
-    expect(books.filter((book) => ACCENT_COLORS.includes(book.color)).length).toBeLessThan(
-      books.length / 2,
-    );
-    expect(books.filter((book) => SPINE_COLORS.includes(book.color)).length).toBeGreaterThan(0);
+  });
+
+  /**
+   * The one thing a shelf of generated books gives itself away with, and the reason the
+   * design is stepped rather than drawn: two neighbors in the same cloth under the same
+   * title read as one book rendered twice, and every range assertion above still passes.
+   */
+  it("never binds or titles two neighbors alike", () => {
+    for (const [index, book] of books.slice(1).entries()) {
+      const before = books[index]!;
+      expect
+        .soft(book.design.cloth.key, `two ${book.design.cloth.key} spines meet`)
+        .not.toBe(before.design.cloth.key);
+      expect.soft(book.design.title.join(" ")).not.toBe(before.design.title.join(" "));
+    }
+    // And the row spends the palette rather than leaving it to the law of averages.
+    expect(new Set(books.map((book) => book.design.cloth.key)).size).toBeGreaterThan(5);
   });
 
   it("leans a few books and stands the rest upright", () => {
@@ -131,12 +130,14 @@ describe("SHELF_BOOKS", () => {
 
       for (const [index, book] of books.entries()) {
         const instance = instances[index]!;
-        // A cube scaled to the spine, sitting on the plank rather than half inside it.
-        expect.soft(instance.scale).toEqual([book.depth, book.height, book.thickness]);
+        // A box the size of the spine, sitting on the plank rather than half inside it.
+        expect.soft(instance.size).toEqual([book.depth, book.height, book.thickness]);
         expect.soft(instance.position[1]).toBeCloseTo(row.baseY + book.height / 2, 10);
         expect.soft(instance.position[2]).toBe(book.z);
         expect.soft(instance.rotation).toEqual([book.lean, 0, 0]);
-        expect.soft(instance.color).toBe(book.color);
+        expect.soft(instance.design).toEqual(book.design);
+        // Spine out into the room, so the row is read rather than seen edge on.
+        expect.soft(instance.pose).toEqual({ kind: "upright", spine: "px" });
       }
     }
 
@@ -244,10 +245,9 @@ describe("WALL_SHELVES", () => {
     expect(WALL_SHELF_BOOKS.length).toBeGreaterThan(WALL_SHELVES.length * 3);
 
     for (const book of WALL_SHELF_BOOKS) {
-      const top = book.position[1] + book.scale[1] / 2;
+      const top = book.position[1] + book.size[1] / 2;
       const shelf = WALL_SHELVES.find(
-        (candidate) =>
-          Math.abs(shelfTop(candidate) - (book.position[1] - book.scale[1] / 2)) < 1e-9,
+        (candidate) => Math.abs(shelfTop(candidate) - (book.position[1] - book.size[1] / 2)) < 1e-9,
       );
       expect
         .soft(top, `a spine at x=${book.position[0]} reaches what is above it`)
@@ -272,12 +272,14 @@ describe("WALL_SHELVES", () => {
 
     for (const book of WALL_SHELF_BOOKS) {
       // Thickness across x and depth into z: the row runs along the wall, not out of it.
-      expect.soft(book.scale[0]).toBeLessThan(book.scale[2]);
+      expect.soft(book.size[0]).toBeLessThan(book.size[2]);
       // A lean tilts the spine along the row; about x it would tip into the wall instead.
       expect.soft(book.rotation[0]).toBe(0);
       expect.soft(book.rotation[1]).toBe(0);
+      // The spine faces the room across the desk, a quarter turn from the bookshelf's.
+      expect.soft(book.pose).toEqual({ kind: "upright", spine: "pz" });
       // Standing on a plank, not sunk half into one or hovering over it.
-      const bottom = book.position[1] - book.scale[1] / 2;
+      const bottom = book.position[1] - book.size[1] / 2;
       expect
         .soft(
           tops.some((top) => Math.abs(top - bottom) < 1e-9),

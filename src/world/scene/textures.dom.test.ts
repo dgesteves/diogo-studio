@@ -1,11 +1,25 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 
-import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
+import {
+  createRecordingContext,
+  stubCanvasContexts,
+  type RecordingContext,
+} from "@tests/recording-ctx";
 
+import {
+  bookAtlasLayout,
+  BOOK_CELL,
+  bookCellRects,
+  bookDesign,
+  createBookAtlasTexture,
+  paintBookAtlas,
+  type BookPlacement,
+} from "./books";
 import { createCityFacadeTexture, createSkyTexture } from "./city";
 import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH, useKeyboardLegendTexture } from "./keyboard";
 import { createGlowTexture, createMoonTexture } from "./moon";
+import { SHELF_BOOKS } from "./shelving";
 
 /**
  * The canvas textures the scene paints for itself: the lit windows on the city towers, the
@@ -247,5 +261,131 @@ describe("keyboard legend texture", () => {
     unmount();
 
     expect(dispose).toHaveBeenCalledOnce();
+  });
+});
+
+/**
+ * The bookshelf's atlas. A shelf is one mesh reading one texture, so every spine's art has to
+ * stay inside its own cell — art that spills prints a neighbor's ink on the sides of the
+ * book beside it, and the shelf renders perfectly either way. The transcript is the only
+ * place that is visible, because jsdom has no pixels.
+ */
+describe("book atlas texture", () => {
+  const books = SHELF_BOOKS.slice(0, 12);
+  const layout = bookAtlasLayout(books.length);
+
+  function paint(row: readonly BookPlacement[] = books): RecordingContext {
+    const recording = createRecordingContext({ width: layout.width, height: layout.height });
+    paintBookAtlas(recording.ctx, row);
+    return recording;
+  }
+
+  it("returns a texture rather than throwing when the browser refuses a context", () => {
+    expect(() => createBookAtlasTexture(books)).not.toThrow();
+    expect(createBookAtlasTexture(books).image).toBeInstanceOf(HTMLCanvasElement);
+  });
+
+  /**
+   * Mipmaps are the one thing this texture needs that `createCanvasTexture` does not give
+   * it: a shelf is painted once and then read minified and at a glancing angle, where an
+   * unfiltered band edge crawls on every camera move.
+   */
+  it("mipmaps and filters the atlas, unlike the screens it shares a factory with", () => {
+    const texture = createBookAtlasTexture(books);
+
+    expect(texture.generateMipmaps).toBe(true);
+    expect(texture.anisotropy).toBeGreaterThan(1);
+  });
+
+  it("floods each cell with its own cloth before anything is printed on it", () => {
+    const atlas = paint();
+    const floods = atlas
+      .callsTo("fillRect")
+      .filter(([, , width, height]) => width === BOOK_CELL.width && height === BOOK_CELL.height);
+
+    expect(floods).toHaveLength(books.length);
+    expect(floods.map(([x, y]) => [Number(x), Number(y)])).toEqual(
+      books.map((_, index) => [
+        (index % layout.columns) * BOOK_CELL.width,
+        Math.floor(index / layout.columns) * BOOK_CELL.height,
+      ]),
+    );
+    expect(new Set(books.map((book) => book.design.cloth.cloth)).size).toBeGreaterThan(1);
+  });
+
+  /**
+   * Every spine, including the thin ones — a narrow book is set as one line up its length
+   * rather than left blank, which is what the two-line layout gives on a 15-pixel spine.
+   */
+  it("letters every spine with its own title", () => {
+    const atlas = paint();
+
+    expect(atlas.text.join(" ")).toBe(books.map((book) => book.design.title.join(" ")).join(" "));
+    // Every one of them printed in that book's ink, which is what a title is set in.
+    const inks = new Set(books.map((book) => book.design.cloth.ink));
+    for (const run of atlas.runs) expect.soft(inks).toContain(run.style);
+  });
+
+  /**
+   * A shelf lettered all one way reads as generated. Turning every title would always fit
+   * more — a spine is the long direction — so a spine wide enough to read across is set that
+   * way instead. The two books differ only in thickness, which is the whole of the rule.
+   */
+  it("letters a wide spine across it and a narrow one up it", () => {
+    const wide = { ...books[0]!, size: [0.14, 0.38, 0.076] as const, design: bookDesign(0) };
+    const narrow = { ...wide, size: [0.14, 0.38, 0.026] as const };
+
+    const recording = createRecordingContext({ width: 200, height: 600 });
+    paintBookAtlas(recording.ctx, [wide, narrow]);
+
+    // A turned title is painted inside a rotated frame, so it is drawn at that frame's origin.
+    const [acrossRun, upRun] = [recording.runs[0]!, recording.runs.at(-1)!];
+    expect(acrossRun.x).not.toBe(0);
+    expect(upRun.x).toBe(0);
+    expect(recording.callsTo("rotate")).toEqual([[-Math.PI / 2]]);
+    expect(recording.callsTo("translate")).toHaveLength(1);
+  });
+
+  /**
+   * The defect that is invisible in a screenshot and wrong on every shelf: one book's rules,
+   * page block or emblem painted over the cell the book beside it reads from.
+   */
+  it("keeps every mark inside the cell of the book it belongs to", () => {
+    const atlas = paint();
+    const bounds = books.map((book, index) => {
+      const rects = bookCellRects(index, layout, book);
+      return { rects, index };
+    });
+
+    let cursor = -1;
+    for (const call of atlas.callsTo("fillRect")) {
+      const [x, y, width, height] = call.map(Number);
+      if (width === BOOK_CELL.width && height === BOOK_CELL.height) {
+        cursor += 1;
+        continue;
+      }
+      const cell = bounds[cursor]!;
+      const left = (cell.index % layout.columns) * BOOK_CELL.width;
+      const top = Math.floor(cell.index / layout.columns) * BOOK_CELL.height;
+
+      expect.soft(x!, `book ${cell.index} paints left of its cell`).toBeGreaterThanOrEqual(left);
+      expect.soft(y!).toBeGreaterThanOrEqual(top);
+      expect.soft(x! + width!).toBeLessThanOrEqual(left + BOOK_CELL.width);
+      expect.soft(y! + height!).toBeLessThanOrEqual(top + BOOK_CELL.height);
+    }
+    expect(cursor).toBe(books.length - 1);
+
+    // The publisher's marks are paths rather than rects, and land inside the atlas too.
+    for (const point of atlas.paths.flatMap((path) => path.points)) {
+      expect.soft(point[0]).toBeGreaterThanOrEqual(0);
+      expect.soft(point[0]).toBeLessThanOrEqual(layout.width);
+      expect.soft(point[1]).toBeGreaterThanOrEqual(0);
+      expect.soft(point[1]).toBeLessThanOrEqual(layout.height);
+    }
+  });
+
+  it("paints the same shelf every time", () => {
+    // Two contexts rather than two passes: the stub numbers its gradient handles globally.
+    expect(paint().transcript).toEqual(paint().transcript);
   });
 });

@@ -28,9 +28,14 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
 
 ## Materials, geometry and theme
 
-- **Never inline a hex, roughness or metalness value.** Use the shared tokens in
+- **Never inline a hex, roughness or metalness value on a material.** Use the shared tokens in
   `world/materials.ts` — `worldColors` plus the four material presets, ~40 importers. Add a
-  token rather than a literal. The two hexes in `ui/brand.ts` are the exception and
+  token rather than a literal, or a named preset beside the mesh where the finish is that
+  object's alone (`SHELF_SURFACE`, `PUZZLE_BODY`). **Pigments a canvas routine paints with are
+  not material tokens** and belong with the routine, named as a palette — `LIT_WINDOW_COLORS`
+  in `scene/city.tsx`, `BOOK_CLOTHS` in `scene/books.tsx`, `INK` in `screens/kit.ts`. They
+  never reach a material, and putting them in `materials.ts` would make it the room's paint
+  box rather than its surface list. The two hexes in `ui/brand.ts` are the exception and
   are not the world's: they exist for the `ImageResponse` icons and the portrait tint, which
   render pixels no stylesheet reaches.
 - Read theme colors through `useWorldPalette()`, never by branching on the store inline;
@@ -51,8 +56,12 @@ This rule is the source of truth for them and the axe/E2E specs enforce them:
   `useScreenTexture(width, height)` in `world/screens/texture.ts` owns the disposal, and its
   `paint(draw)` is the only place `needsUpdate` is set — the one `react-hooks/immutability`
   exemption in `src/` lives there, so never copy the banner to a new file.
-- Prefer instancing for repeated geometry over N sibling meshes. Resolve device pixel ratio via
-  `dprForFactor()` — never hardcode it, and never raise it to fix a visual bug.
+- Prefer instancing for repeated geometry over N sibling meshes — unless the copies need
+  **per-copy UVs**, which instancing cannot express because every instance shares one geometry.
+  Then merge them into a single geometry with the placement baked in, as `scene/books.tsx`
+  does: one draw call, correct bounds, and nothing given up as long as nothing animates.
+  Resolve device pixel ratio via `dprForFactor()` — never hardcode it, and never raise it to
+  fix a visual bug.
 - Publish scene stats to `world/perf` (world writes, inspector reads); don't add a second
   telemetry path.
 

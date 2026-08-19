@@ -349,6 +349,7 @@ src/
     boot.tsx  store.ts  perf.ts  audio.tsx
     hud/                      deck · radar · map · explore
     scene/                    room · desk · workstation · lounge · shelving
+                              books.tsx (one binding, shelved and stacked)
                               lighting · city  + geometry modules
     screens/                  texture.ts (one texture hook) · kit.ts (one CRT kit)
                               wall · monitors · tv — DRAW FROM content

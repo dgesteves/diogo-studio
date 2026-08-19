@@ -180,19 +180,44 @@ describe("Lounge", () => {
     expect(worldBox(soundbar).min.y).toBeGreaterThanOrEqual(worldBox(cabinet!).max.y - EPSILON);
   });
 
-  /** Three identical books read as one block; the offsets are what make it a stack. */
+  /**
+   * Three identical books read as one block; the offsets are what make it a stack. They are
+   * bound in `books.tsx` like the shelves', which merges all three into one geometry — so the
+   * claim is read back out of the vertices, 24 to a book, rather than off three meshes.
+   */
   it("stacks the table's books at rising heights, each set down differently", async () => {
     const scene = await lounge();
+    const CORNERS_PER_BOOK = 24;
 
-    const books = scene.meshes
-      .filter((mesh) => mesh.geometry.type === "BoxGeometry" && mesh.rotation.y !== 0)
-      .sort((a, b) => a.position.y - b.position.y);
-
-    expect(books).toHaveLength(3);
-    expect(books.map((book) => book.position.y)).toEqual(
-      [...books.map((book) => book.position.y)].sort((a, b) => a - b),
+    const stack = scene.meshes.find(
+      (mesh) => (mesh.geometry.getAttribute("position")?.count ?? 0) === CORNERS_PER_BOOK * 3,
     );
-    expect(new Set(books.map((book) => book.rotation.y)).size).toBe(3);
-    expect(new Set(books.map((book) => geometryParams(book).width)).size).toBe(3);
+    const corners = stack?.geometry.getAttribute("position");
+    if (!corners) throw new Error("The coffee table carries no books");
+
+    const books = Array.from({ length: 3 }, (_, index) => {
+      const xs: number[] = [];
+      const ys: number[] = [];
+      const zs: number[] = [];
+      for (let corner = 0; corner < CORNERS_PER_BOOK; corner += 1) {
+        const vertex = index * CORNERS_PER_BOOK + corner;
+        xs.push(Number(corners.getX(vertex).toFixed(6)));
+        ys.push(corners.getY(vertex));
+        zs.push(corners.getZ(vertex));
+      }
+      return {
+        bottom: Math.min(...ys),
+        width: Math.max(...xs) - Math.min(...xs),
+        depth: Math.max(...zs) - Math.min(...zs),
+        // A box square to the table has two x values; one set down turned has four.
+        turned: new Set(xs).size,
+      };
+    });
+
+    expect(books.map((book) => book.bottom)).toEqual(
+      [...books.map((book) => book.bottom)].sort((a, b) => a - b),
+    );
+    for (const book of books) expect.soft(book.turned).toBe(4);
+    expect(new Set(books.map((book) => `${book.width}x${book.depth}`)).size).toBe(3);
   });
 });
