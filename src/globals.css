@@ -262,6 +262,7 @@
 }
 .deck-radar-ping {
   opacity: 0.75;
+  transform: translate(-50%, -50%) scale(1);
   animation: deck-radar-ping 2.4s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
 
@@ -392,6 +393,10 @@
 }
 
 .boot-sheen {
+  /* Must match the `0%` keyframe, for the reason `.boot-sun` states its resting opacity:
+     a frame painted before the animation applies uses the static value, and the static
+     value here is no transform at all — a white band straight across the bar. */
+  transform: translateX(-120%);
   background: linear-gradient(
     90deg,
     transparent,
