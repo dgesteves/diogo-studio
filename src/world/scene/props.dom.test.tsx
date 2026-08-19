@@ -3,14 +3,14 @@ import type { InstancedMesh, MeshStandardMaterial } from "three";
 import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 import { WALL_SCREEN, WALL_SCREEN_Z } from "../room";
-import { SHELF_BOOKS } from "./shelving";
+import { SHELF_BOOKS, WALL_SHELF_BOOKS } from "./shelving";
 import { WorldProps } from "./props";
 
 /**
  * The furniture that carries five of the seventeen stations. `screen-draw.test.ts` already
  * asserts what each routine paints; what is left to this file is the wiring around them —
  * that the panels hang where the layout says, that each one is given its *own* routine,
- * and that 40 books cost one draw call rather than 40.
+ * and that the books cost one draw call per shelving unit rather than one per spine.
  */
 
 let stub: { contexts: readonly RecordingContext[]; restore: () => void } | undefined;
@@ -99,20 +99,22 @@ describe("WorldProps", () => {
     for (const dispose of disposals) expect(dispose).toHaveBeenCalledOnce();
   });
 
-  it("draws the whole bookshelf in one instanced call rather than one mesh per book", async () => {
+  it("draws every book instanced rather than one mesh per spine", async () => {
     const scene = await renderScene(<WorldProps />);
     // drei fills the instance buffer on the first frame, not at mount.
     await scene.advance(1);
 
     const instanced = scene
       .refresh()
-      .objects.find(
+      .objects.filter(
         (object): object is InstancedMesh => (object as InstancedMesh).isInstancedMesh === true,
       );
 
-    expect(instanced).toBeDefined();
-    expect(instanced!.count).toBeGreaterThanOrEqual(SHELF_BOOKS.length);
-    expect(scene.meshesWith("BoxGeometry").length).toBeLessThan(SHELF_BOOKS.length);
+    // One per shelving unit: the bookshelf and the pair of floating shelves.
+    expect(instanced).toHaveLength(2);
+    const spines = SHELF_BOOKS.length + WALL_SHELF_BOOKS.length;
+    expect(instanced.reduce((total, mesh) => total + mesh.count, 0)).toBeGreaterThanOrEqual(spines);
+    expect(scene.meshesWith("BoxGeometry").length).toBeLessThan(spines);
   });
 
   it("aims the shelf light at a target that is actually in the scene", async () => {

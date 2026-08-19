@@ -28,6 +28,7 @@ export const worldColors = {
   coolLight: "#bfe9f5",
   coolLightCore: "#f2fbff",
   statusOk: "#34d399",
+  foliage: "#266a44",
 } as const;
 
 export const frameMaterial = { color: "#0b1016", roughness: 0.5, metalness: 0.6 } as const;
@@ -60,6 +61,8 @@ export type WorldPalette = {
   keyLightIntensity: number;
   ceilingLightIntensity: number;
   neonIntensity: number;
+  /** Multiplied into the framed photograph, which is lit daylight in an unlit room. */
+  printTint: string;
 };
 
 export const worldPalettes: Record<WorldMode, WorldPalette> = {
@@ -81,6 +84,7 @@ export const worldPalettes: Record<WorldMode, WorldPalette> = {
     keyLightIntensity: 1.15,
     ceilingLightIntensity: 1,
     neonIntensity: 1,
+    printTint: "#6d7a83",
   },
   day: {
     background: "#b4cde0",
@@ -100,6 +104,7 @@ export const worldPalettes: Record<WorldMode, WorldPalette> = {
     keyLightIntensity: 1.9,
     ceilingLightIntensity: 0.5,
     neonIntensity: 0.45,
+    printTint: "#e8eef2",
   },
 };
 
