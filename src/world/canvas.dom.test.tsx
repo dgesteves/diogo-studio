@@ -1,6 +1,6 @@
 import { act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { type ReactNode } from "react";
+import { type ReactElement, type ReactNode } from "react";
 import { Color, type Fog, type PerspectiveCamera } from "three";
 import type * as Fiber from "@react-three/fiber";
 import type * as Drei from "@react-three/drei";
@@ -108,6 +108,14 @@ afterEach(unmountScenes);
 
 type Options = { quality?: WorldQuality; mode?: WorldMode; explore?: boolean };
 
+function worldTree(quality: WorldQuality): ReactElement {
+  return (
+    <CommandMenuProvider>
+      <WorldCanvas active="home" quality={quality} onQuality={vi.fn()} />
+    </CommandMenuProvider>
+  );
+}
+
 async function world({
   quality = "full",
   mode = "night",
@@ -118,22 +126,27 @@ async function world({
     setExplore(explore);
   });
 
-  return renderScene(
-    <CommandMenuProvider>
-      <WorldCanvas active="home" quality={quality} onQuality={vi.fn()} />
-    </CommandMenuProvider>,
-    {
-      prepare: (state) => {
-        // The scene precompiles on mount, and three's real `compileAsync` polls a driver that
-        // does not exist here — it leaves a timer running past the end of the test.
-        vi.spyOn(state.gl, "compileAsync").mockImplementation(async (target) => target);
-        // The room's three `<ContactShadows>` render to an offscreen target on every frame,
-        // and a mock context has no framebuffer to bind. This is the one piece of the scene
-        // that genuinely needs a GPU; everything around it runs.
-        vi.spyOn(state.gl, "setRenderTarget").mockImplementation(() => {});
-      },
+  return renderScene(worldTree(quality), {
+    prepare: (state) => {
+      // The scene precompiles on mount, and three's real `compileAsync` polls a driver that
+      // does not exist here — it leaves a timer running past the end of the test.
+      vi.spyOn(state.gl, "compileAsync").mockImplementation(async (target) => target);
+      // The room's three `<ContactShadows>` render to an offscreen target on every frame,
+      // and a mock context has no framebuffer to bind. This is the one piece of the scene
+      // that genuinely needs a GPU; everything around it runs.
+      vi.spyOn(state.gl, "setRenderTarget").mockImplementation(() => {});
     },
-  );
+  });
+}
+
+/**
+ * Walks the world to another tier the way the product does — `WorldQualityGuard` reports a
+ * degrade and the root re-renders the *same* canvas with a lower `quality`, so the room is
+ * never rebuilt around it. Rebuilding it per tier was both less faithful and slow enough that
+ * a three-tier spec timed out on CI: this room is 300-odd meshes and each mount costs seconds.
+ */
+async function requality(scene: SceneQuery, quality: WorldQuality): Promise<void> {
+  await scene.update(worldTree(quality));
 }
 
 function canvasProps(): CanvasProps {
@@ -160,19 +173,20 @@ describe("WorldCanvas", () => {
   });
 
   it("paints the room's own sky and fog, and swaps them with the palette", async () => {
-    const night = await world({ mode: "night" });
-    const nightFog = night.state.scene.fog as Fog;
+    const scene = await world({ mode: "night" });
+    const nightFog = scene.state.scene.fog as Fog;
 
-    expect((night.state.scene.background as Color).getHexString()).toBe(
+    expect((scene.state.scene.background as Color).getHexString()).toBe(
       new Color(worldPalettes.night.background).getHexString(),
     );
     expect(nightFog.near).toBe(worldPalettes.night.fogNear);
     expect(nightFog.far).toBe(worldPalettes.night.fogFar);
 
-    await unmountScenes();
-    const day = await world({ mode: "day" });
+    // The theme bridge only writes the mode to the store, so the running world has to repaint
+    // itself — switching theme mid-visit must not tear the room down and build it again.
+    await act(async () => setWorldMode("day"));
 
-    expect((day.state.scene.background as Color).getHexString()).toBe(
+    expect((scene.state.scene.background as Color).getHexString()).toBe(
       new Color(worldPalettes.day.background).getHexString(),
     );
   });
@@ -183,26 +197,24 @@ describe("WorldCanvas", () => {
    * reduced-motion fallback already shows — rather than a page that drops clicks.
    */
   it("keeps the render loop running until the device has proven it cannot", async () => {
-    for (const quality of ["full", "reduced"] as const) {
-      await unmountScenes();
-      await world({ quality });
-      expect(canvasProps().frameloop).toBe("always");
-    }
+    const scene = await world({ quality: "full" });
+    expect(canvasProps().frameloop).toBe("always");
 
-    await unmountScenes();
-    await world({ quality: "frozen" });
+    await requality(scene, "reduced");
+    expect(canvasProps().frameloop).toBe("always");
+
+    await requality(scene, "frozen");
 
     expect(canvasProps().frameloop).toBe("demand");
   });
 
   it("spends pixels and antialiasing only at full quality", async () => {
-    await world({ quality: "full" });
+    const scene = await world({ quality: "full" });
     expect(canvasProps().dpr).toBe(DPR_MIN);
     expect(canvasProps().gl?.antialias).toBe(true);
 
     for (const quality of ["reduced", "frozen"] as const) {
-      await unmountScenes();
-      await world({ quality });
+      await requality(scene, quality);
 
       expect(canvasProps().dpr).toBe(DPR_DEGRADED);
       expect(canvasProps().gl?.antialias).toBe(false);
@@ -218,12 +230,11 @@ describe("WorldCanvas", () => {
   });
 
   it("drops the effect chain below full quality", async () => {
-    await world({ quality: "full" });
+    const scene = await world({ quality: "full" });
     expect(effects.rendered.map((effect) => effect.effect)).toEqual(["bloom", "vignette"]);
 
-    await unmountScenes();
     effects.rendered.length = 0;
-    await world({ quality: "reduced" });
+    await requality(scene, "reduced");
 
     expect(effects.rendered).toHaveLength(0);
   });
@@ -268,12 +279,11 @@ describe("WorldCanvas", () => {
   });
 
   it("watches the frame rate only where there is quality left to give up", async () => {
-    await world({ quality: "full" });
+    const scene = await world({ quality: "full" });
     expect(monitor.props).toBeDefined();
 
-    await unmountScenes();
     monitor.props = undefined;
-    await world({ quality: "frozen" });
+    await requality(scene, "frozen");
 
     expect(monitor.props).toBeUndefined();
   });
@@ -283,20 +293,24 @@ describe("WorldCanvas", () => {
    * the store says so and `ExploreController` takes over, standing the visitor up at eye height
    * and switching to yaw-then-pitch rotation. Rendering both controllers, or neither, is the
    * failure this catches — and it is the whole of explore mode.
+   *
+   * Asserted as a handoff on one running world, because that is the only way in: nobody loads
+   * the page already exploring. Mounting a second world with the flag pre-set skipped the
+   * transition entirely, so `ExploreController` was never asked to take a camera it had not
+   * placed itself — which is the frame that has to stand the visitor up.
    */
   it("stands the visitor up in explore mode and orbits otherwise", async () => {
-    const orbiting = await world({ explore: false });
-    await orbiting.advance(60, 1 / 60);
-    expect(orbiting.state.camera.rotation.order).toBe("XYZ");
+    const scene = await world({ explore: false });
+    await scene.advance(60, 1 / 60);
+    expect(scene.state.camera.rotation.order).toBe("XYZ");
     // Orbiting looks down at the room from well above standing height.
-    expect(orbiting.state.camera.position.y).toBeGreaterThan(EXPLORE.eyeHeight * 2);
+    expect(scene.state.camera.position.y).toBeGreaterThan(EXPLORE.eyeHeight * 2);
 
-    await unmountScenes();
-    const exploring = await world({ explore: true });
-    await exploring.advance(60, 1 / 60);
+    await act(async () => setExplore(true));
+    await scene.advance(60, 1 / 60);
 
-    expect(exploring.state.camera.rotation.order).toBe("YXZ");
-    expect(exploring.state.camera.position.y).toBeCloseTo(EXPLORE.eyeHeight, 1);
+    expect(scene.state.camera.rotation.order).toBe("YXZ");
+    expect(scene.state.camera.position.y).toBeCloseTo(EXPLORE.eyeHeight, 1);
   });
 
   /** The boot screen is waiting on this: the shaders are warm, so the world can be shown. */

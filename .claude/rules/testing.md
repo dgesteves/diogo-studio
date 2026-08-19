@@ -84,6 +84,13 @@ with no setup.
   store, because R3F replaces the state object on every `set()` — a captured `RootState` keeps
   the renderer's default 75° camera while `makeDefault` drives another one. Full reasoning in
   [`docs/decisions.md`](../../docs/decisions.md).
+- **Change state on the world you already mounted; never mount a second one to change it.**
+  Quality is a prop on a live `<WorldCanvas>`, the palette and explore mode are store reads,
+  and none of them can be reached by loading the page already in that state — so a spec that
+  remounts per tier asserts a path the product does not have _and_ passes against a component
+  that reads its props once. Update the scene (`SceneQuery.update`) or write the store inside
+  `act()`. It is also the difference between a 300-mesh mount and a re-render: three of them
+  is what took a spec past the deadline on CI. See `docs/decisions.md`.
 - **RTTR's renderer is a real `WebGLRenderer` over a mock context, so it answers most things
   and a few not at all.** `gl.info`, `compileAsync` and a real `<canvas>` are all there;
   `setRenderTarget` (drei's `ContactShadows`) and postprocessing's `getContextAttributes()`

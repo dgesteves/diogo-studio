@@ -24,6 +24,40 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-19 — Scene specs walk state on a live world; the jsdom deadline is set, not inherited
+
+`canvas.dom.test.tsx > keeps the render loop running until the device has proven
+it cannot` timed out on CI and took main red. It mounted the whole 300-mesh room
+three times, once per quality tier, unmounting between each. Four sibling specs
+did the same for their own axis, and one of them was 63 ms from failing on the
+same run.
+
+Both halves of that were wrong, and only fixing both is a fix.
+
+**The remounts were also the weaker test.** A tier change is a prop on a live
+canvas — `WorldQualityGuard` reports a degrade and `world.tsx` re-renders the same
+`<WorldCanvas>` with a lower `quality`. The room is never rebuilt around it. Same
+for the palette, which `useWorldPalette` reads from the store, and for explore
+mode, which nobody can load the page already in. So each of those specs asserted a
+mount path the product does not have, and would have passed against a
+`WorldCanvas` that read its props once and ignored every later change. They now
+update or re-store a mounted world, which is both what happens at runtime and
+about a third of the cost.
+
+**The deadline was never chosen.** 5 s is vitest's default, sized for tests that
+mount a `<div>`. Measured the same day, the same specs ran 5.5x to 12.5x slower on
+a GitHub runner than on the dev machine, and the spread matters more than the
+factor — a local time predicts nothing. With every avoidable mount removed, the
+most expensive spec left is an irreducible one (mounting everything _is_ its
+assertion) that projects to ~4 s at the worst observed ratio: 79% of budget. The
+jsdom project now sets `testTimeout` explicitly and the node project keeps the
+default, because a node spec calls pure functions and one taking five seconds is a
+bug that should fail. Reasoning is in `vitest.config.ts`, which is what enforces it.
+
+Not done: making an RTTR world mount cheaper. It is the real cost and it is
+untouched — worth revisiting only with a measurement, not a guess about which
+layer is slow.
+
 ## 2026-08-19 — The boot screen animated four properties the compositor has to repaint for
 
 The flashing boot screen, found. The entry below this one fixed two real defects and closed
