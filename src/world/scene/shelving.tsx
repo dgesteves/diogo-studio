@@ -5,8 +5,10 @@ import { Suspense, useState, type ReactElement } from "react";
 import { Object3D, SRGBColorSpace } from "three";
 import { anodizedMetalMaterial, frameMaterial, useWorldPalette, worldColors } from "../materials";
 import { Instance, Instances, RoundedBox, useTexture } from "@react-three/drei";
-import { NEON_RULE_Y, ROOM } from "../room";
+import { ROOM, SHELF_BAND_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
+import { Starship, SuperHeavy } from "./starship";
+import { Vader } from "./vader";
 
 /**
  * The shelving: the tall bookshelf beside the door, and the pair of floating shelves on the
@@ -205,16 +207,23 @@ export function Bookshelf(): ReactElement {
 }
 
 /**
- * The two floating shelves on the wall the desk faces. They are staggered rather than stacked:
- * the only clear wall there is the band between the monitors' top edge and the neon rule, and
- * that band is not two rows of books deep.
+ * The three floating shelves on the wall the desk faces. They climb the band between the desk
+ * and the sign in three lanes — middle, left, right — so no two sit over the same stretch of
+ * wall at the same height and the wall reads as a wall rather than as a rack.
  *
  * Each row of spines is `buildShelfBooks` turned a quarter turn — the generator lays a row out
  * along one axis, which is z for the bookshelf and x here, so a spine's thickness scales x and
- * its lean rotates about z. How tall a row may grow is not authored: it is whatever the shelf's
- * height leaves under the neon rule, so raising a shelf shortens its books instead of running
- * them through the tube.
+ * its lean rotates about z. How tall a row may grow is not authored: it is whatever the shelf
+ * has clear above it, so raising a shelf, or hanging one over it, shortens its books instead
+ * of running them through what is there.
  */
+
+type WallShelfBooks = {
+  /** Where the row starts, measured from the shelf's left end, and how long it runs. */
+  offset: number;
+  span: number;
+  seed: number;
+};
 
 type WallShelfLayout = {
   key: string;
@@ -222,10 +231,7 @@ type WallShelfLayout = {
   /** The plank's mid-height. */
   y: number;
   width: number;
-  /** The row of spines: where it starts, measured from the shelf's left end, and how long. */
-  bookOffset: number;
-  bookSpan: number;
-  bookSeed: number;
+  books: WallShelfBooks;
 };
 
 const WALL_SHELF_THICKNESS = 0.045;
@@ -234,38 +240,76 @@ const WALL_SHELF_DEPTH = 0.24;
 const WALL_SHELF_Z = ROOM.minZ + WALL_SHELF_DEPTH / 2;
 /** Spines stand in front of the neon tube's own standoff, so no book can ever cross it in z. */
 const WALL_SHELF_BOOK_Z = ROOM.minZ + 0.045;
-const NEON_RULE_CLEARANCE = 0.07;
+/** Air left over a row of spines, so a book never quite touches what hangs above it. */
+const SHELF_CLEARANCE = 0.07;
 
-const LOWER_SHELF: WallShelfLayout = {
-  key: "lower",
-  centerX: -0.82,
-  y: 1.32,
-  width: 1.62,
-  bookOffset: 0.06,
-  bookSpan: 0.86,
-  bookSeed: 4211,
+const BOTTOM_SHELF: WallShelfLayout = {
+  key: "bottom",
+  centerX: 0.1,
+  y: 1.18,
+  width: 1.8,
+  books: { offset: 0.15, span: 0.8, seed: 6473 },
 };
 
-const UPPER_SHELF: WallShelfLayout = {
-  key: "upper",
-  centerX: 0.78,
-  y: 1.5,
-  width: 1.26,
-  bookOffset: 0.5,
-  bookSpan: 0.7,
-  bookSeed: 8317,
+const MIDDLE_SHELF: WallShelfLayout = {
+  key: "middle",
+  centerX: -0.85,
+  y: 1.52,
+  width: 1.7,
+  books: { offset: 0.06, span: 0.86, seed: 4211 },
 };
 
-export const WALL_SHELVES: readonly WallShelfLayout[] = [LOWER_SHELF, UPPER_SHELF];
+const TOP_SHELF: WallShelfLayout = {
+  key: "top",
+  centerX: 1,
+  y: 1.78,
+  width: 1.6,
+  // `offset` is measured from the left end, so widening a shelf rightward leaves its row of
+  // spines where it already was.
+  books: { offset: 0.55, span: 0.7, seed: 8317 },
+};
+
+export const WALL_SHELVES: readonly WallShelfLayout[] = [BOTTOM_SHELF, MIDDLE_SHELF, TOP_SHELF];
 
 /** The plank's top surface, where everything standing on the shelf sits. */
 export function shelfTop(shelf: WallShelfLayout): number {
   return shelf.y + WALL_SHELF_THICKNESS / 2;
 }
 
-/** How tall a book on this shelf may be before it reaches the rule under the sign. */
+function overlapsInX(a: WallShelfLayout, b: WallShelfLayout): boolean {
+  return Math.abs(a.centerX - b.centerX) < (a.width + b.width) / 2;
+}
+
+/**
+ * What hangs over this shelf: the sign's band, or the underside of a plank above it that its
+ * books would otherwise grow through. Derived rather than authored, so hanging a new shelf
+ * over an old one shortens the old one's row instead of needing it re-tuned by hand.
+ */
+export function shelfCeilingY(shelf: WallShelfLayout): number {
+  const overhead = WALL_SHELVES.filter(
+    (other) => other.y > shelf.y && overlapsInX(other, shelf),
+  ).map((other) => other.y - WALL_SHELF_THICKNESS / 2);
+
+  return Math.min(SHELF_BAND_TOP_Y, ...overhead);
+}
+
+/**
+ * How much clear height one spot on a shelf has. `shelfCeilingY` is the whole plank's worst
+ * case, which is what a row of books spanning it has to respect; a single ornament stands at
+ * one x and is only bounded by what actually hangs over that x.
+ */
+export function clearanceAbove(shelf: WallShelfLayout, offsetX: number): number {
+  const x = shelf.centerX + offsetX;
+  const overhead = WALL_SHELVES.filter(
+    (other) => other.y > shelf.y && Math.abs(other.centerX - x) < other.width / 2,
+  ).map((other) => other.y - WALL_SHELF_THICKNESS / 2);
+
+  return Math.min(SHELF_BAND_TOP_Y, ...overhead) - shelfTop(shelf) - SHELF_CLEARANCE;
+}
+
+/** How tall a book on this shelf may be before it reaches whatever is above it. */
 export function shelfBookCeiling(shelf: WallShelfLayout): number {
-  return NEON_RULE_Y - NEON_RULE_CLEARANCE - shelfTop(shelf);
+  return shelfCeilingY(shelf) - SHELF_CLEARANCE - shelfTop(shelf);
 }
 
 /** A position on top of the plank, `offsetX` from the shelf's center. */
@@ -274,39 +318,158 @@ function onShelf(shelf: WallShelfLayout, offsetX: number): Vec3 {
 }
 
 export const WALL_SHELF_BOOKS: BookInstance[] = WALL_SHELVES.flatMap((shelf) => {
-  const rowCenter = shelf.bookOffset + shelf.bookSpan / 2 - shelf.width / 2;
+  const row = shelf.books;
+  const rowCenter = row.offset + row.span / 2 - shelf.width / 2;
 
-  return buildShelfBooks(shelf.bookSeed, shelfBookCeiling(shelf), shelf.bookSpan).map(
-    (book): BookInstance => ({
-      key: `${shelf.key}-${book.z.toFixed(3)}`,
-      position: [
-        shelf.centerX + rowCenter + book.z,
-        shelfTop(shelf) + book.height / 2,
-        WALL_SHELF_BOOK_Z + book.depth / 2,
-      ],
-      scale: [book.thickness, book.height, book.depth],
-      rotation: [0, 0, book.lean],
-      color: book.color,
-    }),
-  );
+  return buildShelfBooks(row.seed, shelfBookCeiling(shelf), row.span).map((book): BookInstance => ({
+    key: `${shelf.key}-${book.z.toFixed(3)}`,
+    position: [
+      shelf.centerX + rowCenter + book.z,
+      shelfTop(shelf) + book.height / 2,
+      WALL_SHELF_BOOK_Z + book.depth / 2,
+    ],
+    scale: [book.thickness, book.height, book.depth],
+    rotation: [0, 0, book.lean],
+    color: book.color,
+  }));
 });
 
-/** Books left lying flat, which is what keeps a shelf from reading as a wall of spines. */
-const STACK_SLABS: readonly { color: string; args: Vec3; y: number; rotationY: number }[] = [
-  { color: SPINE_COLORS[1], args: [0.19, 0.032, 0.145], y: 0.016, rotationY: 0.07 },
-  { color: ACCENT_COLORS[0], args: [0.175, 0.026, 0.135], y: 0.045, rotationY: -0.11 },
-  { color: SPINE_COLORS[5], args: [0.165, 0.028, 0.128], y: 0.072, rotationY: 0.03 },
+/**
+ * The puzzle cube on the bottom shelf, solved and turned off-axis so three faces catch the
+ * light. Its 54 stickers are one instanced mesh: at this size they are nine tiles a face, and
+ * as sibling meshes they would cost more draw calls than the rest of the shelving put together.
+ */
+export const PUZZLE_SIZE = 0.11;
+const PUZZLE_STEP = PUZZLE_SIZE / 3;
+const PUZZLE_TILE = PUZZLE_STEP - 0.005;
+const PUZZLE_STICKER_DEPTH = 0.003;
+/** How far a sticker's own slab stands proud of the body it is stuck to. */
+const PUZZLE_STICKER_LIFT = 0.0012;
+const PUZZLE_YAW = 0.7;
+const PUZZLE_BODY = { color: "#080b0e", roughness: 0.42, metalness: 0.05 } as const;
+const PUZZLE_STICKER_ROUGHNESS = 0.3;
+
+/**
+ * A face is a color plus the frame it is laid out in: the axis it faces along, and the two
+ * axes its 3×3 grid runs across. Deriving the grid from that basis is what keeps a sticker
+ * on the surface of the cube rather than inside it.
+ */
+type PuzzleFace = {
+  key: string;
+  color: string;
+  normal: Vec3;
+  across: Vec3;
+  down: Vec3;
+  rotation: Vec3;
+};
+
+const PUZZLE_FACES: readonly PuzzleFace[] = [
+  {
+    key: "up",
+    color: "#d5dbe0",
+    normal: [0, 1, 0],
+    across: [1, 0, 0],
+    down: [0, 0, 1],
+    rotation: [-Math.PI / 2, 0, 0],
+  },
+  {
+    key: "down",
+    color: "#dcb23f",
+    normal: [0, -1, 0],
+    across: [1, 0, 0],
+    down: [0, 0, 1],
+    rotation: [Math.PI / 2, 0, 0],
+  },
+  {
+    key: "front",
+    color: "#b23a3d",
+    normal: [0, 0, 1],
+    across: [1, 0, 0],
+    down: [0, 1, 0],
+    rotation: [0, 0, 0],
+  },
+  {
+    key: "back",
+    color: "#c4672b",
+    normal: [0, 0, -1],
+    across: [1, 0, 0],
+    down: [0, 1, 0],
+    rotation: [0, Math.PI, 0],
+  },
+  {
+    key: "right",
+    color: "#2f6cae",
+    normal: [1, 0, 0],
+    across: [0, 0, 1],
+    down: [0, 1, 0],
+    rotation: [0, Math.PI / 2, 0],
+  },
+  {
+    key: "left",
+    color: "#3c8f56",
+    normal: [-1, 0, 0],
+    across: [0, 0, 1],
+    down: [0, 1, 0],
+    rotation: [0, -Math.PI / 2, 0],
+  },
 ];
 
-function BookStack({ shelf, offsetX }: { shelf: WallShelfLayout; offsetX: number }): ReactElement {
+const PUZZLE_CELLS: readonly (readonly [number, number])[] = [-1, 0, 1].flatMap((across) =>
+  [-1, 0, 1].map((down) => [across, down] as const),
+);
+
+export type PuzzleSticker = {
+  key: string;
+  position: Vec3;
+  rotation: Vec3;
+  color: string;
+};
+
+function stickerPosition(face: PuzzleFace, across: number, down: number): Vec3 {
+  const lift = PUZZLE_SIZE / 2 + PUZZLE_STICKER_LIFT;
+  const along = (axis: 0 | 1 | 2): number =>
+    face.normal[axis] * lift +
+    face.across[axis] * across * PUZZLE_STEP +
+    face.down[axis] * down * PUZZLE_STEP;
+
+  return [along(0), along(1), along(2)];
+}
+
+export const PUZZLE_STICKERS: readonly PuzzleSticker[] = PUZZLE_FACES.flatMap((face) =>
+  PUZZLE_CELLS.map(([across, down]): PuzzleSticker => ({
+    key: `${face.key}-${across}-${down}`,
+    position: stickerPosition(face, across, down),
+    rotation: face.rotation,
+    color: face.color,
+  })),
+);
+
+function PuzzleCube({ shelf, offsetX }: { shelf: WallShelfLayout; offsetX: number }): ReactElement {
+  const [x, y, z] = onShelf(shelf, offsetX);
+
   return (
-    <group position={onShelf(shelf, offsetX)}>
-      {STACK_SLABS.map((slab) => (
-        <mesh key={slab.color} position={[0, slab.y, 0]} rotation={[0, slab.rotationY, 0]}>
-          <boxGeometry args={slab.args} />
-          <meshStandardMaterial color={slab.color} roughness={PAPER_ROUGHNESS} metalness={0} />
-        </mesh>
-      ))}
+    <group position={[x, y + PUZZLE_SIZE / 2, z]} rotation={[0, PUZZLE_YAW, 0]}>
+      <RoundedBox args={[PUZZLE_SIZE, PUZZLE_SIZE, PUZZLE_SIZE]} radius={0.006} smoothness={2}>
+        <meshStandardMaterial {...PUZZLE_BODY} />
+      </RoundedBox>
+      {/* Culled on the base tile's bounds, not the instances', so a camera tilt drops all 54
+          stickers at once and leaves the bare body. */}
+      <Instances
+        limit={PUZZLE_STICKERS.length}
+        range={PUZZLE_STICKERS.length}
+        frustumCulled={false}
+      >
+        <boxGeometry args={[PUZZLE_TILE, PUZZLE_TILE, PUZZLE_STICKER_DEPTH]} />
+        <meshStandardMaterial roughness={PUZZLE_STICKER_ROUGHNESS} metalness={0} />
+        {PUZZLE_STICKERS.map((sticker) => (
+          <Instance
+            key={sticker.key}
+            position={sticker.position}
+            rotation={sticker.rotation}
+            color={sticker.color}
+          />
+        ))}
+      </Instances>
     </group>
   );
 }
@@ -437,8 +600,19 @@ function ShelfPlant({ shelf, offsetX }: { shelf: WallShelfLayout; offsetX: numbe
   );
 }
 
-/** A hairline under the front lip: the shelves have to read as objects in an unlit corner. */
+/**
+ * Where the two rocket models stand: the one stretch of this shelf with nothing overhead but
+ * the top plank, which is what lets them be twice the height of the books beside them.
+ */
+export const BOOSTER_OFFSET_X = 0.33;
+export const SHIP_OFFSET_X = 0.52;
+
+/** Where the figure stands on the top shelf. */
+export const VADER_OFFSET_X = -0.5;
+
+/** A tube under the front lip: the shelves have to read as objects in an unlit corner. */
 const LIP_INSET = 0.012;
+const LIP_STRIP = 0.01;
 
 function WallShelfPlank({ shelf }: { shelf: WallShelfLayout }): ReactElement {
   return (
@@ -451,8 +625,10 @@ function WallShelfPlank({ shelf }: { shelf: WallShelfLayout }): ReactElement {
         <boxGeometry args={[shelf.width - 0.16, 0.02, WALL_SHELF_DEPTH - 0.09]} />
         <meshStandardMaterial {...HOUSING} />
       </mesh>
-      <mesh position={[0, -WALL_SHELF_THICKNESS / 2 - 0.003, WALL_SHELF_DEPTH / 2 - LIP_INSET]}>
-        <boxGeometry args={[shelf.width - 0.06, 0.006, 0.006]} />
+      <mesh
+        position={[0, -WALL_SHELF_THICKNESS / 2 - LIP_STRIP / 2, WALL_SHELF_DEPTH / 2 - LIP_INSET]}
+      >
+        <boxGeometry args={[shelf.width - 0.06, LIP_STRIP, LIP_STRIP]} />
         <meshBasicMaterial color={worldColors.accentSoft} toneMapped={false} />
       </mesh>
     </group>
@@ -467,10 +643,13 @@ export function WallShelves(): ReactElement {
       ))}
 
       <Suspense fallback={null}>
-        <LeaningPrint shelf={LOWER_SHELF} offsetX={0.42} />
+        <LeaningPrint shelf={MIDDLE_SHELF} offsetX={0.46} />
       </Suspense>
-      <ShelfPlant shelf={LOWER_SHELF} offsetX={0.68} />
-      <BookStack shelf={UPPER_SHELF} offsetX={-0.42} />
+      <ShelfPlant shelf={MIDDLE_SHELF} offsetX={0.72} />
+      <Vader position={onShelf(TOP_SHELF, VADER_OFFSET_X)} />
+      <SuperHeavy position={onShelf(BOTTOM_SHELF, BOOSTER_OFFSET_X)} />
+      <Starship position={onShelf(BOTTOM_SHELF, SHIP_OFFSET_X)} />
+      <PuzzleCube shelf={BOTTOM_SHELF} offsetX={0.76} />
 
       <Instances
         limit={WALL_SHELF_BOOKS.length}

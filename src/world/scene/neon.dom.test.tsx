@@ -8,7 +8,7 @@ import { setWorldMode, type WorldMode } from "../store";
 import { WorldNeon } from "./neon";
 
 /**
- * The sign on the back wall: a name in neon, two tubes and the light they throw. It is the
+ * The sign on the back wall: a name in neon, a side tube and the light they throw. It is the
  * one place in the scene that paints text as DOM rather than into a canvas texture, through
  * drei's `<Html>`, so it is also the one place where a decorative label could reach a screen
  * reader as a second copy of the site's name.
@@ -66,15 +66,15 @@ describe("WorldNeon", () => {
     expect(day.lightsOfType("PointLight")[0]!.intensity).toBeLessThan(nightIntensity);
   });
 
-  it("builds both tubes from the shared accent tokens", async () => {
+  it("builds the tube from the shared accent tokens", async () => {
     const scene = await neon();
 
-    // Two different tokens: the back tube and the side tube are not the same neon.
-    expect(tubeColors(scene)).toEqual([worldColors.accent, worldColors.accentSoft]);
+    // The side tube is the only one left: the back wall's rule under the sign is gone.
+    expect(tubeColors(scene)).toEqual([worldColors.accentSoft]);
   });
 
   /** Tone mapping would fold a light source back into the room's exposure and it would read as paint. */
-  it("keeps the tubes out of the room's tone mapping", async () => {
+  it("keeps the tube out of the room's tone mapping", async () => {
     const scene = await neon();
 
     for (const mesh of scene.meshesWith("BoxGeometry")) {

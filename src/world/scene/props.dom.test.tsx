@@ -3,7 +3,7 @@ import type { InstancedMesh, MeshStandardMaterial } from "three";
 import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 import { WALL_SCREEN, WALL_SCREEN_Z } from "../room";
-import { SHELF_BOOKS, WALL_SHELF_BOOKS } from "./shelving";
+import { PUZZLE_STICKERS, SHELF_BOOKS, WALL_SHELF_BOOKS } from "./shelving";
 import { WorldProps } from "./props";
 
 /**
@@ -99,7 +99,7 @@ describe("WorldProps", () => {
     for (const dispose of disposals) expect(dispose).toHaveBeenCalledOnce();
   });
 
-  it("draws every book instanced rather than one mesh per spine", async () => {
+  it("draws every book and sticker instanced rather than one mesh each", async () => {
     const scene = await renderScene(<WorldProps />);
     // drei fills the instance buffer on the first frame, not at mount.
     await scene.advance(1);
@@ -110,11 +110,15 @@ describe("WorldProps", () => {
         (object): object is InstancedMesh => (object as InstancedMesh).isInstancedMesh === true,
       );
 
-    // One per shelving unit: the bookshelf and the pair of floating shelves.
-    expect(instanced).toHaveLength(2);
+    // The bookshelf, the floating shelves, and the puzzle cube's stickers.
+    expect(instanced).toHaveLength(3);
     const spines = SHELF_BOOKS.length + WALL_SHELF_BOOKS.length;
-    expect(instanced.reduce((total, mesh) => total + mesh.count, 0)).toBeGreaterThanOrEqual(spines);
-    expect(scene.meshesWith("BoxGeometry").length).toBeLessThan(spines);
+    const tiles = spines + PUZZLE_STICKERS.length;
+    expect(instanced.reduce((total, mesh) => total + mesh.count, 0)).toBeGreaterThanOrEqual(tiles);
+    expect(scene.meshesWith("BoxGeometry").length).toBeLessThan(tiles);
+    // Every one of them is culled on its base geometry's bounds rather than its instances',
+    // so a camera angle that leaves that one tile off-screen blanks the whole mesh.
+    for (const mesh of instanced) expect.soft(mesh.frustumCulled).toBe(false);
   });
 
   it("aims the shelf light at a target that is actually in the scene", async () => {

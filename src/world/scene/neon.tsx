@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { Html } from "@react-three/drei";
 import { worldColors, useWorldPalette } from "../materials";
-import { BACK_WALL_Z, NEON_RULE_Y } from "../room";
+import { BACK_WALL_Z } from "../room";
 import { siteConfig } from "@/content/profile";
 
 export function WorldNeon(): ReactElement {
@@ -33,11 +33,6 @@ export function WorldNeon(): ReactElement {
           </p>
         </div>
       </Html>
-
-      <mesh position={[0, NEON_RULE_Y, BACK_WALL_Z]}>
-        <boxGeometry args={[3.3, 0.012, 0.012]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
 
       <pointLight
         position={[0, 2.4, BACK_WALL_Z + 0.6]}

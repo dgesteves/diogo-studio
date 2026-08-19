@@ -37,10 +37,11 @@ const SPACING_Z = 0.78;
 export const BACK_WALL_Z = ROOM.minZ + WALL_INSET;
 
 /**
- * The neon rule under the sign. It is also the ceiling of the band the floating shelves hang
- * in — the monitors take the wall below it — so both the sign and `scene/shelving` read it.
+ * The ceiling of the band the floating shelves hang in: the monitors take the wall below it
+ * and the sign's subtitle sits just above. It was the y of a neon rule under the sign until
+ * that rule was removed, which is why `scene/shelving` is now its only reader.
  */
-export const NEON_RULE_Y = 2.02;
+export const SHELF_BAND_TOP_Y = 2.1;
 
 /**
  * The screens hang on the right wall, so their panels face -x and the row runs
