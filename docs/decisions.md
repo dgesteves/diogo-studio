@@ -24,6 +24,49 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-19 — The gate owns one backdrop, so no animation in it restarts at hydration
+
+Second pass at the flashing boot screen, and the first driven by measuring the reported recording
+rather than by reading the stylesheet. `Screen Recording 2026-08-19 at 03.45.54.mov` is 27.6s of a
+single, un-dismissed gate; sampling it at its own frame period and reducing each frame to
+per-region luminance separates two artifacts that look like one. The sun region sits at 36.3
+through its trough and jumps to 50–58 for one frame at a time — 1.4x, where `boot-sun-pulse` spans
+1.29x end to end, so no phase of the animation produces it — and the preference row vanishes
+entirely for a frame while the separator hairlines stay at the same x, so the layout is intact and
+nothing has re-rendered. **Neither is what this entry fixes.** Both are the compositor presenting
+the layers that were ready over the ones that were not; the cause and the fix are in the entry
+above.
+
+What this entry fixes is a third thing the same measurement turned up, on the way. `BootSplash`
+rendered a `BootBackdrop`, `BootOverlay` rendered a second identical one, and `BootSequence` hid
+the first the instant it took over. A CSS animation's clock starts with its element, so the swap
+restarted every layer in the scene at once — the sun's pulse, the horizon rule's, the grid pan,
+the scan beam. Reproduced under `Emulation.setCPUThrottlingRate: 8` and measured off a CDP
+screencast: at the handover frame the sun region fell from 37.15 to **32.43**, below anything in
+the run before it, then climbed again from the `0%` keyframe.
+
+The server-rendered splash is now the gate's backdrop for the gate's whole life. `BootOverlay`
+renders the HUD and the panel over it and nothing else, and the splash fades on the same 700ms
+clock and is hidden when the gate is gone. After the change the same handover frame reads
+36.73 → 44.86 and keeps rising — the panel arriving, no reset. `boot.dom.test.tsx` counts
+`.boot-scene` nodes, so a second backdrop is a failing test rather than a flash.
+
+**Two changes made alongside this one were removed before merge, and are recorded because the
+reasoning is worth not repeating.** Both were written while the cause was still unknown, and both
+survived into a state where they fixed nothing measurable:
+
+- `isolation: isolate` on `.boot-scene`, to scope `.boot-crt`'s `mix-blend-mode` group to the
+  scene rather than the gate's stacking root. It renders identically — every layer the grade
+  applies to was already inside `.boot-scene` — so it documented an intent the code already had.
+- A `gateCovered` signal in `world/store.ts` that put `<Canvas frameloop>` on `demand` while the
+  gate covered the scene. The premise is true and still is: the gate's backdrop is opaque, so
+  those frames are invisible. But once the paint animations were fixed, two attempts to measure a
+  benefit — main-thread totals over a 4s window, and time-to-CTA-enabled under CPU throttling —
+  produced nothing that separated it from the baseline. It cost a store, a subscription in
+  `WorldCanvas`, a lifecycle effect in `BootSequence` and a failure mode where a mistake freezes
+  the world. Unmeasured optimisation with a new failure mode is not a trade this repo takes; if
+  it is picked up again it needs a number first.
+
 ## 2026-08-18 — A mocked answer on a timer put a deadline on the click it existed to enable
 
 `ask-agent.spec.ts` "stopping a slow answer" failed on CI in `full-motion` only, three times

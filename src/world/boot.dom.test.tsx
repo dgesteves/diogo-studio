@@ -265,6 +265,7 @@ describe("Boot gate", () => {
 
     render(
       <ReducedMotionProvider>
+        <BootSplash />
         <BootSequence />
       </ReducedMotionProvider>,
     );
@@ -288,6 +289,7 @@ describe("Boot gate", () => {
     expect(before).toBeGreaterThan(20);
 
     const sun = document.querySelector(".boot-sun");
+    expect(sun).not.toBeNull();
 
     report("2g");
     report("4g");
@@ -301,9 +303,11 @@ describe("Boot gate", () => {
     expect(Number.parseFloat(barWidth())).toBeGreaterThanOrEqual(before);
   });
 
-  it("hides the server-rendered splash as soon as it takes over", () => {
-    // Two overlays at once would double the backdrop; the splash exists only to cover the
-    // gap before hydration.
+  it("adopts the server-rendered backdrop instead of mounting a second one", () => {
+    // The handover used to swap one `BootBackdrop` for an identical one, which restarted
+    // every animation in the scene in a single frame — the sun, the horizon rule, the grid
+    // pan and the scan beam all snapping back to their `0%` keyframe at hydration. One node
+    // for the whole gate is what makes that unrepresentable, so count them.
     render(
       <>
         <BootSplash />
@@ -311,6 +315,47 @@ describe("Boot gate", () => {
       </>,
     );
 
+    const splash = document.getElementById(BOOT_SPLASH_ID);
+    expect(document.querySelectorAll(".boot-scene")).toHaveLength(1);
+    expect(splash?.querySelector(".boot-scene")).not.toBeNull();
+    // And it stays: it is the gate's backdrop, not a placeholder for one.
+    expect(splash?.style.display).toBe("");
+  });
+
+  it("takes the backdrop out with the gate, on the gate's own fade", async () => {
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(
+      <>
+        <BootSplash />
+        <BootSequence />
+      </>,
+    );
+    reachReadyState();
+
+    await click(user, /enter the studio/i);
+    const splash = document.getElementById(BOOT_SPLASH_ID);
+
+    // Mid-fade the panel is still on screen, so the backdrop has to be fading with it
+    // rather than cut away underneath it.
+    expect(splash?.style.opacity).toBe("0");
+    expect(splash?.style.display).toBe("");
+
+    advance(BOOT_EXIT_MS);
+
+    expect(splash?.style.display).toBe("none");
+  });
+
+  it("clears the backdrop at once for a visit it does not gate", () => {
+    window.sessionStorage.setItem(BOOT_SESSION_KEY, "1");
+
+    render(
+      <>
+        <BootSplash />
+        <BootSequence />
+      </>,
+    );
+
+    // Nothing is going to fade it, so it cannot wait for a fade.
     expect(document.getElementById(BOOT_SPLASH_ID)?.style.display).toBe("none");
   });
 

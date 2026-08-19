@@ -74,10 +74,25 @@ export function markBootedThisSession(): void {
   }
 }
 
+function bootSplash(): HTMLElement | null {
+  if (typeof document === "undefined") return null;
+  return document.getElementById(BOOT_SPLASH_ID);
+}
+
 export function hideBootSplash(): void {
-  if (typeof document === "undefined") return;
-  const el = document.getElementById(BOOT_SPLASH_ID);
+  const el = bootSplash();
   if (el) el.style.display = "none";
+}
+
+/**
+ * The splash is the gate's backdrop, not a stand-in for one, so it leaves with the gate
+ * rather than the moment the client takes over — and it fades on the same clock as the
+ * panel above it. Imperative because the node belongs to the `(world)` layout's server
+ * markup and this component is three trees away, in a portal.
+ */
+function fadeBootSplash(): void {
+  const el = bootSplash();
+  if (el) el.style.opacity = "0";
 }
 
 export const BOOT_MIN_MS = 1100;
@@ -491,7 +506,6 @@ function BootOverlay({
             exiting ? "opacity-0" : "opacity-100",
           )}
         >
-          <BootBackdrop />
           <BootHud />
 
           <div
@@ -527,12 +541,25 @@ function BootOverlay({
 
 const HIDE_IF_BOOTED = `try{if(sessionStorage.getItem('${BOOT_SESSION_KEY}')==='1'){var e=document.getElementById('${BOOT_SPLASH_ID}');if(e)e.style.display='none'}}catch(_){}`;
 
+/**
+ * The gate's backdrop — the whole of it, for the whole of the gate.
+ *
+ * It used to be a stand-in that `BootSequence` hid the instant it took over, with `BootOverlay`
+ * mounting a second, identical `BootBackdrop` above it. The two nodes are what made the handover
+ * visible: a CSS animation's clock starts when its element does, so every layer in the scene —
+ * the sun's pulse, the horizon rule's, the grid pan, the scan beam — jumped back to its `0%`
+ * keyframe in the frame the swap landed. Measured off a screen recording, the sun dropped 13% of
+ * its brightness in one frame at hydration and climbed again from the start of its 5s pulse.
+ *
+ * One node, mounted by the server, never replaced: there is no clock to restart. `BootOverlay`
+ * renders the HUD and the panel over it and nothing else, and this fades out with them.
+ */
 export function BootSplash(): ReactElement {
   return (
     <div
       id={BOOT_SPLASH_ID}
       aria-hidden="true"
-      className="fixed inset-0 z-45 overflow-hidden"
+      className="fixed inset-0 z-45 overflow-hidden transition-opacity duration-700 ease-out"
       suppressHydrationWarning
     >
       <BootBackdrop />
@@ -578,9 +605,12 @@ export function BootSequence(): ReactElement | null {
 
   const show = isClient && gated === true && !finished;
 
+  // A visit that is not gated has no use for a backdrop, and the splash is the only thing
+  // still covering the world. A gated one keeps it: it *is* the gate's backdrop now, and it
+  // goes when the gate does.
   useEffect(() => {
-    if (isClient) hideBootSplash();
-  }, [isClient]);
+    if (gated === false) hideBootSplash();
+  }, [gated]);
 
   useEffect(() => {
     if (!show) return;
@@ -596,8 +626,10 @@ export function BootSequence(): ReactElement | null {
     if (exiting) return;
     if (withSound) void enable();
     setExiting(true);
+    fadeBootSplash();
     window.setTimeout(() => {
       markBootedThisSession();
+      hideBootSplash();
       setFinished(true);
     }, BOOT_EXIT_MS);
   }
