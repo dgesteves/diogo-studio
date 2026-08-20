@@ -33,7 +33,8 @@ import { createCanvasTexture } from "../screens/texture";
 const BODY = {
   topRadius: 0.05,
   bottomRadius: 0.044,
-  height: 0.12,
+  /** A shade under the width: taller than that and the blank wall above the print reads as a beaker. */
+  height: 0.096,
   /** 24 was enough for an untextured cylinder; a printed one kinks its type on the facets. */
   segments: 48,
 } as const;
@@ -70,7 +71,35 @@ const RIM = {
   tube: WALL / 2 + 0.0008,
   y: BODY.height,
 } as const;
-const HANDLE = { radius: 0.028, tube: 0.0075, x: 0.045, y: BODY.height / 2 } as const;
+/**
+ * The handle. It sweeps well past a half turn so both ends curve back *into* the tapered wall
+ * instead of stopping flat against it, and it is spun by half that extra sweep, which is what
+ * keeps the two ends level with each other.
+ *
+ * Those two are why `x` and `y` are held in meters rather than derived: what they have to
+ * satisfy is that both ends land inside a wall whose radius changes with height, so they are
+ * read off the geometry rather than computed from it. Pushing the ring further out opens the
+ * hole but lifts the ends clear of the wall, and more sweep is what buys them back — the two
+ * numbers move together.
+ *
+ * The ring itself stays essentially round, and that is a decision rather than an omission. The
+ * mug is about ninety pixels tall on screen and the canvas renders at half DPR, so what
+ * survives is the silhouette and the hole; an ellipse flattened toward the body reads there as
+ * a slot, not as a handle. `HANDLE_SCALE` therefore does almost nothing across, a little in
+ * height, and its real work front to back, where thinning the strap costs the hole nothing.
+ */
+const HANDLE_SWEEP = 0.93;
+const HANDLE = {
+  radius: 0.024,
+  tube: 0.005,
+  x: 0.054,
+  y: BODY.height * 0.528,
+  arc: Math.PI + HANDLE_SWEEP,
+  segments: [12, 32],
+} as const;
+/** Rolls the extra sweep evenly onto both ends, so the handle stays level about its waist. */
+const HANDLE_SPIN = -HANDLE.arc / 2;
+const HANDLE_SCALE: [number, number, number] = [1, 1.08, 0.75];
 
 /**
  * The print, unrolled. Width is the resolution decision — 512 px around a 31 cm circumference
@@ -271,10 +300,14 @@ export function CoffeeMug(): ReactElement {
           <torusGeometry args={[RIM.radius, RIM.tube, 10, BODY.segments]} />
           <meshStandardMaterial color={GLAZE} {...CERAMIC} />
         </mesh>
-        <mesh position={[HANDLE.x, HANDLE.y, 0]} rotation={[0, 0, -Math.PI / 2]}>
-          <torusGeometry args={[HANDLE.radius, HANDLE.tube, 10, 20, Math.PI]} />
-          <meshStandardMaterial color={GLAZE} {...CERAMIC} />
-        </mesh>
+        {/* Scale on the group and rotation on the mesh, in that order: a scale applied under
+            the rotation would stretch the ring along the arc instead of standing it up. */}
+        <group position={[HANDLE.x, HANDLE.y, 0]} scale={HANDLE_SCALE}>
+          <mesh rotation={[0, 0, HANDLE_SPIN]}>
+            <torusGeometry args={[HANDLE.radius, HANDLE.tube, ...HANDLE.segments, HANDLE.arc]} />
+            <meshStandardMaterial color={GLAZE} {...CERAMIC} />
+          </mesh>
+        </group>
       </group>
     </group>
   );
