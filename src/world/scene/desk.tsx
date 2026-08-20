@@ -6,13 +6,14 @@ import { DoubleSide } from "three";
 import { worldColors, darkMetalMaterial } from "../materials";
 import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
 import { Keyboard } from "./keyboard";
+import { CoffeeMug } from "./mug";
 import { Mouse } from "./mouse";
 import { GraphicsTablet } from "./tablet";
 
 /**
- * The desk and everything resting on it that is not hardware — mug, plant, lamp, headphones —
- * plus the composition that places the input devices from their own files. The desk surface
- * height lives in `world/room.ts`, because the camera framing derives from it too.
+ * The desk and everything resting on it that is not hardware — plant, lamp, headphones — plus the
+ * composition that places the input devices and the printed mug from their own files. The desk
+ * surface height lives in `world/room.ts`, because the camera framing derives from it too.
  */
 
 const LEG_POSITIONS = [
@@ -38,29 +39,6 @@ export function Desk(): ReactElement {
           <meshStandardMaterial color="#13181d" roughness={0.65} metalness={0.45} />
         </mesh>
       ))}
-    </group>
-  );
-}
-
-function CoffeeMug(): ReactElement {
-  return (
-    <group position={[0.78, DESK_TOP_Y, 0.06]}>
-      <mesh position={[0, 0.06, 0]}>
-        <cylinderGeometry args={[0.05, 0.044, 0.12, 24]} />
-        <meshStandardMaterial color="#1a2a36" roughness={0.4} metalness={0.45} />
-      </mesh>
-      <mesh position={[0, 0.119, 0]}>
-        <cylinderGeometry args={[0.043, 0.043, 0.004, 24]} />
-        <meshStandardMaterial color="#1a0c04" roughness={0.6} metalness={0.05} />
-      </mesh>
-      <mesh position={[0, 0.121, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.044, 0.005, 8, 24]} />
-        <meshStandardMaterial color="#0a0608" roughness={0.7} metalness={0} />
-      </mesh>
-      <mesh position={[0.045, 0.06, 0]} rotation={[0, 0, -Math.PI / 2]}>
-        <torusGeometry args={[0.028, 0.0075, 8, 18, Math.PI]} />
-        <meshStandardMaterial color="#1a2a36" roughness={0.4} metalness={0.45} />
-      </mesh>
     </group>
   );
 }

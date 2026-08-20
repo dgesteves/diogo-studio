@@ -1,18 +1,24 @@
 "use client";
 
-import { useRef, type ReactElement } from "react";
+import { type ReactElement } from "react";
 import { RoundedBox, ContactShadows } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
-import { AdditiveBlending, type MeshBasicMaterial } from "three";
 import { anodizedMetalMaterial, worldColors, portMaterial } from "../materials";
 import { DESK_TOP_Y } from "../room";
+import { MAC_STUDIO, MacStudio } from "./mac-studio";
+import { StatusLed } from "./status-led";
 
 /**
- * The three boxes behind the monitors — server node, Mac Studio, hub — and the blinking LED
- * they share. One file because they share one layout: the cluster is laid out as a row, so
- * moving any of them means recomputing all three, and `StatusLed` is used by all three fronts.
+ * The three boxes behind the monitors — server node, Mac Studio, hub — the row they stand in,
+ * and the blinking LED they share. The layout is the reason this is one file: the cluster is
+ * a row, so moving any of them means recomputing all three, and `StatusLed` is on all three
+ * fronts.
  *
- * Each box namespaces its own dimensions (`HUB_`, `MAC_`, `SERVER_`). They described the same
+ * The server node and the hub are also *built* here, because they are this studio's own
+ * hardware and nothing outside decides what they look like. The Mac Studio is not: it is a
+ * real machine, its shape is the thing being reproduced, and it owns `scene/mac-studio.tsx`
+ * along with the dimensions this row lays out from.
+ *
+ * Each box namespaces its own dimensions (`HUB_`, `SERVER_`). They described the same
  * measurements under the same names in three files before this merge, which is exactly the
  * kind of collision that made them look separable when they never were.
  */
@@ -27,70 +33,16 @@ const SERVER_HEIGHT = 0.16;
 const SERVER_FOOT_HEIGHT = 0.006;
 const SERVER_BODY_HEIGHT = SERVER_HEIGHT - SERVER_FOOT_HEIGHT;
 const SERVER_BODY_CENTER_Y = SERVER_FOOT_HEIGHT + SERVER_BODY_HEIGHT / 2;
-const MAC_STUDIO_WIDTH = 0.27;
-const MAC_STUDIO_HEIGHT = 0.13;
 const HUB_WIDTH = 0.13;
 const HUB_HEIGHT = 0.034;
 const HUB_DEPTH = 0.23;
 
-const CLUSTER_WIDTH = SERVER_WIDTH + MAC_STUDIO_WIDTH + HUB_WIDTH + HARDWARE_GAP * 2;
+const CLUSTER_WIDTH = SERVER_WIDTH + MAC_STUDIO.width + HUB_WIDTH + HARDWARE_GAP * 2;
 const CLUSTER_LEFT = -CLUSTER_WIDTH / 2;
 
 const SERVER_X = CLUSTER_LEFT + SERVER_WIDTH / 2;
-const MAC_STUDIO_X = CLUSTER_LEFT + SERVER_WIDTH + HARDWARE_GAP + MAC_STUDIO_WIDTH / 2;
+const MAC_STUDIO_X = CLUSTER_LEFT + SERVER_WIDTH + HARDWARE_GAP + MAC_STUDIO.width / 2;
 const HUB_X = CLUSTER_LEFT + CLUSTER_WIDTH - HUB_WIDTH / 2;
-
-const HALO_SCALE = 3.4;
-const HALO_OPACITY = 0.26;
-const IDLE_LEVEL = 0.22;
-
-type StatusLedProps = {
-  position: [number, number, number];
-  color: string;
-  radius: number;
-  blinkSpeed?: number;
-  phase?: number;
-};
-
-export function StatusLed({
-  position,
-  color,
-  radius,
-  blinkSpeed = 0,
-  phase = 0,
-}: StatusLedProps): ReactElement {
-  const core = useRef<MeshBasicMaterial>(null);
-  const halo = useRef<MeshBasicMaterial>(null);
-
-  useFrame(({ clock }) => {
-    if (!blinkSpeed || !core.current || !halo.current) return;
-    const wave = 0.5 + 0.5 * Math.sin(clock.elapsedTime * blinkSpeed + phase);
-    const level = IDLE_LEVEL + (1 - IDLE_LEVEL) * wave * wave;
-    core.current.opacity = level;
-    halo.current.opacity = HALO_OPACITY * level;
-  });
-
-  return (
-    <group position={position}>
-      <mesh>
-        <sphereGeometry args={[radius, 12, 10]} />
-        <meshBasicMaterial ref={core} color={color} transparent toneMapped={false} />
-      </mesh>
-      <mesh position={[0, 0, radius * 0.2]}>
-        <circleGeometry args={[radius * HALO_SCALE, 20]} />
-        <meshBasicMaterial
-          ref={halo}
-          color={color}
-          transparent
-          opacity={HALO_OPACITY}
-          blending={AdditiveBlending}
-          depthWrite={false}
-          toneMapped={false}
-        />
-      </mesh>
-    </group>
-  );
-}
 
 const HUB_FOOT_HEIGHT = 0.005;
 const HUB_BODY_HEIGHT = HUB_HEIGHT - HUB_FOOT_HEIGHT;
@@ -159,78 +111,6 @@ function HubFrontPanel(): ReactElement {
         color={worldColors.accentBright}
         radius={0.0024}
         blinkSpeed={1.6}
-      />
-    </group>
-  );
-}
-
-const MAC_PEDESTAL_HEIGHT = 0.019;
-const MAC_PEDESTAL_RADIUS = MAC_STUDIO_WIDTH * 0.42;
-const MAC_BODY_HEIGHT = MAC_STUDIO_HEIGHT - MAC_PEDESTAL_HEIGHT;
-const MAC_BODY_CENTER_Y = MAC_PEDESTAL_HEIGHT + MAC_BODY_HEIGHT / 2;
-const MAC_FRONT_Z = HARDWARE_DEPTH / 2;
-const MAC_PORT_Y = MAC_PEDESTAL_HEIGHT + MAC_BODY_HEIGHT * 0.34;
-const MAC_PORT_HEIGHT = 0.0036;
-const MAC_SD_SLOT_WIDTH = 0.032;
-const MAC_USB_C_WIDTH = 0.0114;
-
-const MAC_FRONT_PORTS = [
-  { x: -0.05, width: MAC_SD_SLOT_WIDTH },
-  { x: 0.026, width: MAC_USB_C_WIDTH },
-  { x: 0.05, width: MAC_USB_C_WIDTH },
-] as const;
-
-function MacStudio(): ReactElement {
-  return (
-    <group position={[MAC_STUDIO_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
-      <mesh position={[0, MAC_PEDESTAL_HEIGHT / 2, 0]}>
-        <cylinderGeometry
-          args={[MAC_PEDESTAL_RADIUS, MAC_PEDESTAL_RADIUS, MAC_PEDESTAL_HEIGHT, 32]}
-        />
-        <meshStandardMaterial color="#0a0e12" roughness={0.75} metalness={0.3} />
-      </mesh>
-      <mesh position={[0, MAC_PEDESTAL_HEIGHT * 0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[MAC_PEDESTAL_RADIUS - 0.006, 0.0022, 8, 40]} />
-        <meshStandardMaterial color="#161c22" roughness={0.6} metalness={0.5} />
-      </mesh>
-      <RoundedBox
-        args={[MAC_STUDIO_WIDTH, MAC_BODY_HEIGHT, HARDWARE_DEPTH]}
-        radius={0.017}
-        smoothness={4}
-        position={[0, MAC_BODY_CENTER_Y, 0]}
-      >
-        <meshStandardMaterial {...anodizedMetalMaterial} />
-      </RoundedBox>
-      <mesh position={[0, MAC_PEDESTAL_HEIGHT + 0.0015, 0]}>
-        <boxGeometry args={[MAC_STUDIO_WIDTH - 0.014, 0.003, HARDWARE_DEPTH - 0.014]} />
-        <meshStandardMaterial color="#0a0f14" roughness={0.5} metalness={0.55} />
-      </mesh>
-      <MacFrontPanel />
-      <mesh position={[0, MAC_BODY_CENTER_Y, -MAC_FRONT_Z - 0.0005]} rotation={[0, Math.PI, 0]}>
-        <planeGeometry args={[MAC_STUDIO_WIDTH - 0.03, MAC_BODY_HEIGHT - 0.026]} />
-        <meshStandardMaterial color="#0b1015" roughness={0.85} metalness={0.35} />
-      </mesh>
-    </group>
-  );
-}
-
-function MacFrontPanel(): ReactElement {
-  return (
-    <group position={[0, 0, MAC_FRONT_Z]}>
-      {MAC_FRONT_PORTS.map((port) => (
-        <mesh key={port.x} position={[port.x, MAC_PORT_Y, -0.0015]}>
-          <boxGeometry args={[port.width, MAC_PORT_HEIGHT, 0.004]} />
-          <meshStandardMaterial {...portMaterial} />
-        </mesh>
-      ))}
-      <mesh position={[0, MAC_PEDESTAL_HEIGHT + 0.0022, -0.001]}>
-        <boxGeometry args={[MAC_STUDIO_WIDTH * 0.34, 0.0009, 0.002]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
-      <StatusLed
-        position={[-0.104, MAC_PORT_Y, 0.0012]}
-        color={worldColors.coolLightCore}
-        radius={0.0022}
       />
     </group>
   );
@@ -378,7 +258,9 @@ export function DeskHardware(): ReactElement {
   return (
     <group>
       <ServerNode />
-      <MacStudio />
+      <group position={[MAC_STUDIO_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
+        <MacStudio />
+      </group>
       <DeskHub />
       <ContactShadows
         position={[0, DESK_TOP_Y + 0.0009, HARDWARE_CENTER_Z]}

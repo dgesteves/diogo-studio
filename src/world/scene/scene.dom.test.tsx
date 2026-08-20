@@ -12,14 +12,14 @@ import { setWorldMode, type WorldMode } from "../store";
 import { worldColors, worldPalettes } from "../materials";
 import { ROOM } from "../room";
 import { StudioScene } from "./studio";
-import { StatusLed } from "./workstation";
+import { StatusLed } from "./status-led";
 
 /**
  * An exact count, deliberately. Restructure phases 3-4 move 40 scene files and merge
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
  */
-const SCENE_MESH_COUNT = 228;
+const SCENE_MESH_COUNT = 227;
 
 afterEach(unmountScenes);
 
