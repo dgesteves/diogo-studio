@@ -25,6 +25,12 @@ export const worldColors = {
   accent: brand.accent,
   accentBright: "#67e8f9",
   accentSoft: "#7dd3fc",
+  /**
+   * The room's second neon, and the only one that is not on the cyan axis. Everything lit in
+   * here is the accent or a shade of it, which is the house style right up until one object
+   * has to be told apart from the rest of the desk rather than blend into it.
+   */
+  hotNeon: brand.magenta,
   coolLight: "#bfe9f5",
   coolLightCore: "#f2fbff",
   statusOk: "#34d399",

@@ -80,7 +80,7 @@ function disposablesIn(value: unknown): readonly Disposable[] {
  * and passed in as a prop was never reconciled, so nothing else ever frees it. That matters
  * because the canvas really does unmount: `world-stage.tsx` drops the whole scene when a
  * visitor turns motion off mid-session, and without this every such toggle strands another
- * copy of the city, the moon, the mouse and the television on the GPU.
+ * copy of the city, the moon and the television on the GPU.
  *
  * The factory replaces the `useMemo` it would otherwise be wrapped in, so a call site
  * cannot memoize the resource and forget the cleanup — or write the cleanup against an

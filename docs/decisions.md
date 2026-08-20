@@ -24,6 +24,49 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-20 — The coaster's face is unlit, off-palette, and sized by the camera
+
+The mug now stands on a coaster with an etched face — rings, a tick dial, a segmented gauge
+and one label — painted as a canvas texture the way the mug's own print is.
+
+Three things about it will look wrong to a reader and are deliberate.
+
+**The face is a `meshBasicMaterial` with `toneMapped={false}`.** Under the room's night rig —
+one dim key light and a lot of fog — a `meshStandardMaterial` swallowed the etching exactly
+the way that rig swallowed the mug before the glaze was lightened. Unlit, the neon on the
+print is the value it was painted at and the bloom pass treats it as the emitter it is meant
+to be. The slab under it is still a standard material, because it is resin and not a light.
+
+**Nothing on it is cyan.** The room is lit on the accent and shades of it, so a coaster in
+that palette was one more cyan ring on a desk that already has several — the mug read as
+another lit edge rather than as a cup standing on something. The face is magenta for the
+rings, violet for the dial, and the amber `/now` is accented with for the gauge and the type.
+The magenta is `worldColors.hotNeon`, which is `--brand-magenta` arriving in the room through
+`ui/brand.ts` — the site's second brand color, not a fourth literal invented here, and a
+token because the slab's rim is that same color as a material and the two must not drift.
+
+**It is 13.6 cm across, which is a large coaster.** The `/now` camera looks along the desk at
+about 17°, so the face is seen at under a third of its height. At the radius that merely fits
+the mug, the visible ring was 1.8 cm and rendered as a hairline. The rule this leaves behind
+is the one in the file: everything etched inside 0.65 of the radius is etched under the cup,
+so the design lives outside it and the middle stays plain.
+
+## 2026-08-20 — The server node is gone; the desk row is two boxes
+
+The chassis behind the monitors was invented furniture: a plain box with drive trays and
+blinking LEDs, standing in for hardware nobody has. Next to a Mac Studio modeled from the
+real machine and a control deck with a working screen, it read as filler, and it carried
+about forty meshes for it.
+
+`workstation.tsx` stays, and stays a layout file — the two remaining boxes are still a row
+whose positions are computed together. The unused `"server-rack"` kind went from
+`worldObjectKinds` in the same change: no station ever pointed at it, so it was a name for
+an object the room did not have.
+
+This overtakes **2026-08-15 — There is no `world/scene/server-rack.tsx`**. That entry's
+conclusion holds for a different reason now: not "the three boxes share a layout and an
+LED" but "there are two boxes, and neither is built here."
+
 ## 2026-08-19 — Books are merged, not instanced, and carry a texture atlas
 
 Every book in the room was an untextured box tinted per instance, which reads as a
