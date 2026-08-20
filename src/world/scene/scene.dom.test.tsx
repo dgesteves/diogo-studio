@@ -19,7 +19,7 @@ import { StatusLed } from "./status-led";
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
  */
-const SCENE_MESH_COUNT = 199;
+const SCENE_MESH_COUNT = 202;
 
 afterEach(unmountScenes);
 

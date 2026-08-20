@@ -83,8 +83,8 @@ const DISPLAY_LENGTH = TABLET.length - DISPLAY_INSET * 2;
  * surface big enough for a 25 cm object. Turned slightly, the way something put down beside
  * the thing you are actually using is.
  */
-const TABLET_POSITION = [-0.62, DESK_TOP_Y, -0.04] as const;
-const TABLET_TURN = 0.12;
+export const TABLET_POSITION = [-0.62, DESK_TOP_Y, -0.04] as const;
+export const TABLET_TURN = 0.12;
 
 export function Tablet(): ReactElement {
   const screen = useTabletScreenTexture(APPS);
