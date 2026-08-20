@@ -5,7 +5,6 @@ import {
   BufferGeometry,
   Euler,
   Float32BufferAttribute,
-  LinearMipmapLinearFilter,
   Matrix4,
   Vector3,
   type CanvasTexture,
@@ -598,14 +597,11 @@ export function paintBookAtlas(
 
 export function createBookAtlasTexture(books: readonly BookPlacement[]): CanvasTexture {
   const layout = bookAtlasLayout(books.length);
-  const { canvas, texture } = createCanvasTexture(layout.width, layout.height);
-
-  // `createCanvasTexture` leaves mipmaps off for the screens, which repaint every frame and
-  // are never seen minified. A shelf is the opposite: painted once, then read at a glancing
-  // angle from across the room, where an unmipmapped band edge crawls on every camera move.
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.anisotropy = 4;
+  const { canvas, texture } = createCanvasTexture(layout.width, layout.height, {
+    // A shelf is the opposite of a screen: painted once, then read at a glancing angle from
+    // across the room, where an unmipmapped band edge crawls on every camera move.
+    mipmapped: true,
+  });
 
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
