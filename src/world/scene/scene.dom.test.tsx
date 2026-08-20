@@ -19,7 +19,7 @@ import { StatusLed } from "./status-led";
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
  */
-const SCENE_MESH_COUNT = 239;
+const SCENE_MESH_COUNT = 197;
 
 afterEach(unmountScenes);
 
@@ -79,7 +79,7 @@ describe("StudioScene", () => {
 });
 
 /**
- * The blinking lights on the server rack and the desk hardware — the only thing in the room
+ * The blinking lights on the desk hardware — the only thing in the room
  * that moves on its own when nobody is interacting with it. Each is a core sphere and an
  * additive halo, and the halo has to follow the core: a pulse where only the sphere changes
  * reads as a flicker rather than a light.
@@ -130,7 +130,7 @@ describe("StatusLed", () => {
     expect(opacities()).toEqual(resting);
   });
 
-  /** Without the phase offset every LED in the rack blinks in unison, which reads as one lamp. */
+  /** Without the phase offset every LED on a box blinks in unison, which reads as one lamp. */
   it("offsets the blink by its phase", async () => {
     const { scene, opacities } = await led({ blinkSpeed: SPEED });
     await scene.advance(1, PEAK);

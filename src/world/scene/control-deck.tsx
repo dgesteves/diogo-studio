@@ -134,7 +134,7 @@ const BEZEL_PAD = 0.0045;
 const BEZEL_THICKNESS = 0.004;
 export const SCREEN_S = FACE_MARGIN + KEY_SIZE + KEY_TO_PANEL + BEZEL_PAD + SCREEN_HEIGHT / 2;
 
-/** The pads the console stands on: the same rubber the server node is footed with. */
+/** The pads the console stands on. */
 const PAD = { color: "#05080b", roughness: 0.95, metalness: 0.05 } as const;
 const BEZEL = { color: "#080d12", roughness: 0.45, metalness: 0.5 } as const;
 const KEY_CAP = { color: "#0e141a", roughness: 0.7, metalness: 0.25 } as const;

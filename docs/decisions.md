@@ -24,6 +24,22 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-20 — The server node is gone; the desk row is two boxes
+
+The chassis behind the monitors was invented furniture: a plain box with drive trays and
+blinking LEDs, standing in for hardware nobody has. Next to a Mac Studio modeled from the
+real machine and a control deck with a working screen, it read as filler, and it carried
+about forty meshes for it.
+
+`workstation.tsx` stays, and stays a layout file — the two remaining boxes are still a row
+whose positions are computed together. The unused `"server-rack"` kind went from
+`worldObjectKinds` in the same change: no station ever pointed at it, so it was a name for
+an object the room did not have.
+
+This overtakes **2026-08-15 — There is no `world/scene/server-rack.tsx`**. That entry's
+conclusion holds for a different reason now: not "the three boxes share a layout and an
+LED" but "there are two boxes, and neither is built here."
+
 ## 2026-08-19 — Books are merged, not instanced, and carry a texture atlas
 
 Every book in the room was an untextured box tinted per instance, which reads as a

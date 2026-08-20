@@ -18,7 +18,6 @@ export const worldObjectKinds = [
   "monitor-right",
   "neon-sign",
   "bookshelf",
-  "server-rack",
   "tv",
   "speaker-stack",
   "plant",
