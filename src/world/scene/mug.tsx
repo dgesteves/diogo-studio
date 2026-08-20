@@ -4,6 +4,7 @@ import { type ReactElement } from "react";
 import { BackSide, LinearMipmapLinearFilter, type CanvasTexture } from "three";
 import { useDisposable } from "../gpu";
 import { DESK_TOP_Y } from "../room";
+import { COASTER, Coaster } from "./coaster";
 import { MONO } from "../screens/kit";
 import { createCanvasTexture } from "../screens/texture";
 
@@ -22,6 +23,10 @@ import { createCanvasTexture } from "../screens/texture";
  *
  * The pigments here are a canvas routine's paint box rather than the room's surface list,
  * which is why they live with the routine that mixes them, as `books.tsx` and `city.tsx` do.
+ *
+ * The mug does not stand on the desk. It stands on the coaster in `scene/coaster.tsx`, which
+ * owns its own face and knows nothing about what is set on it, so the only thing this file
+ * takes from there is the height the cup has to clear.
  */
 
 /** In meters. The taper and the handle are the mug's, the y offsets stack from the desk. */
@@ -240,32 +245,37 @@ export function CoffeeMug(): ReactElement {
 
   return (
     <group position={MUG_POSITION}>
-      {/* Half a turn: a cylinder's texture seam starts at +z, which is exactly the side the
-          `/now` camera looks at, so the quote would be split down the middle without it. */}
-      <mesh position={[0, BODY.height / 2, 0]} rotation={[0, Math.PI, 0]}>
-        <cylinderGeometry
-          args={[BODY.topRadius, BODY.bottomRadius, BODY.height, BODY.segments, 1, true]}
-        />
-        <meshStandardMaterial map={print} {...CERAMIC} />
-      </mesh>
-      <mesh position={[0, BODY.height / 2, 0]}>
-        <cylinderGeometry
-          args={[INTERIOR.topRadius, INTERIOR.bottomRadius, BODY.height, BODY.segments, 1, true]}
-        />
-        <meshStandardMaterial {...INTERIOR_GLAZE} side={BackSide} />
-      </mesh>
-      <mesh position={[0, COFFEE.y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[COFFEE.radius, BODY.segments]} />
-        <meshStandardMaterial {...BREW} />
-      </mesh>
-      <mesh position={[0, RIM.y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[RIM.radius, RIM.tube, 10, BODY.segments]} />
-        <meshStandardMaterial color={GLAZE} {...CERAMIC} />
-      </mesh>
-      <mesh position={[HANDLE.x, HANDLE.y, 0]} rotation={[0, 0, -Math.PI / 2]}>
-        <torusGeometry args={[HANDLE.radius, HANDLE.tube, 10, 20, Math.PI]} />
-        <meshStandardMaterial color={GLAZE} {...CERAMIC} />
-      </mesh>
+      <Coaster />
+      {/* Every offset in the cup is measured from its own base, so the coaster lifts the
+          whole of it rather than being added to each one. */}
+      <group position={[0, COASTER.height, 0]}>
+        {/* Half a turn: a cylinder's texture seam starts at +z, which is exactly the side the
+            `/now` camera looks at, so the quote would be split down the middle without it. */}
+        <mesh position={[0, BODY.height / 2, 0]} rotation={[0, Math.PI, 0]}>
+          <cylinderGeometry
+            args={[BODY.topRadius, BODY.bottomRadius, BODY.height, BODY.segments, 1, true]}
+          />
+          <meshStandardMaterial map={print} {...CERAMIC} />
+        </mesh>
+        <mesh position={[0, BODY.height / 2, 0]}>
+          <cylinderGeometry
+            args={[INTERIOR.topRadius, INTERIOR.bottomRadius, BODY.height, BODY.segments, 1, true]}
+          />
+          <meshStandardMaterial {...INTERIOR_GLAZE} side={BackSide} />
+        </mesh>
+        <mesh position={[0, COFFEE.y, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <circleGeometry args={[COFFEE.radius, BODY.segments]} />
+          <meshStandardMaterial {...BREW} />
+        </mesh>
+        <mesh position={[0, RIM.y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[RIM.radius, RIM.tube, 10, BODY.segments]} />
+          <meshStandardMaterial color={GLAZE} {...CERAMIC} />
+        </mesh>
+        <mesh position={[HANDLE.x, HANDLE.y, 0]} rotation={[0, 0, -Math.PI / 2]}>
+          <torusGeometry args={[HANDLE.radius, HANDLE.tube, 10, 20, Math.PI]} />
+          <meshStandardMaterial color={GLAZE} {...CERAMIC} />
+        </mesh>
+      </group>
     </group>
   );
 }
