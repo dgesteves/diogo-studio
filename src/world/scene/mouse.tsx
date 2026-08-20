@@ -480,7 +480,8 @@ export function wingSheets(side: number): readonly Sheet[] {
 }
 
 /**
- * The strip is the room's one accent, the same cyan the keyboard and the tablet are lit with —
+ * The strip is the room's one accent, the same cyan the keyboard and the headphones are lit
+ * with —
  * this is a desk of matching parts, not the object that gets a palette of its own.
  *
  * The color is painted onto the vertices anyway rather than set on the material, because what

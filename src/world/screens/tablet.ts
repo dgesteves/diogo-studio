@@ -1,149 +1,202 @@
 "use client";
 
-import { useRef } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useEffect } from "react";
 import { type CanvasTexture } from "three";
-import { worldColors } from "../materials";
-import { MONO } from "./kit";
+import { siteConfig } from "@/content/profile";
+import {
+  LABEL_INK,
+  paintHomeBar,
+  paintIcon,
+  paintIndicators,
+  paintLabel,
+  paintTray,
+  paintWallpaper,
+  type HomeApp,
+} from "./home";
+import { INK, MONO } from "./kit";
+import { useStudioMinute } from "./studio-time";
 import { useScreenTexture } from "./texture";
 
 /**
- * The drawing tablet's screen — chrome, the pressure-varying stroke, and the frame loop that
- * advances it. Separate from `monitors.ts` because it has a different consumer
- * (`scene/tablet.tsx`), a different aspect ratio and chrome nothing else draws.
+ * The tablet's home screen: a status bar, one wide clock card, three rows of app icons and a
+ * dock — the same room the phone shows, laid out for a panel two and a half times the width.
+ *
+ * It is a *different* layout rather than the phone's scaled up, which is the whole reason the
+ * two files exist beside `home.ts`. Five columns instead of four, a card that runs the width
+ * of the screen instead of standing in the first two rows, and a dock set in from both edges
+ * rather than filling them — put a phone's grid on this shape and it reads as a phone
+ * screenshot blown up, which is exactly what a tablet does not look like.
+ *
+ * Nothing here is a fact. The apps arrive as label and accent, the clock, the date and the
+ * city arrive formatted, and this routine decides the grid, the truncation and the paint.
  */
 
-const GRID_STEP = 42;
-const TOOL_COUNT = 5;
-const ACTIVE_TOOL = 1;
-
-function drawGrid(ctx: CanvasRenderingContext2D): void {
-  const { width: W, height: H } = ctx.canvas;
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.06)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let x = GRID_STEP; x < W; x += GRID_STEP) {
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, H);
-  }
-  for (let y = GRID_STEP; y < H; y += GRID_STEP) {
-    ctx.moveTo(0, y);
-    ctx.lineTo(W, y);
-  }
-  ctx.stroke();
-}
-
-function drawHeader(ctx: CanvasRenderingContext2D): void {
-  const { width: W } = ctx.canvas;
-  ctx.textBaseline = "top";
-  ctx.fillStyle = worldColors.accent;
-  ctx.font = `bold 20px ${MONO}`;
-  ctx.fillText("SKETCH", 22, 20);
-  ctx.fillStyle = "rgba(232, 246, 252, 0.4)";
-  ctx.font = `15px ${MONO}`;
-  ctx.fillText("layer 02", W - 116, 23);
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.16)";
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(22, 52);
-  ctx.lineTo(W - 22, 52);
-  ctx.stroke();
-}
-
-function drawTools(ctx: CanvasRenderingContext2D): void {
-  const { width: W, height: H } = ctx.canvas;
-  const radius = 13;
-  const gap = 16;
-  const span = TOOL_COUNT * radius * 2 + (TOOL_COUNT - 1) * gap;
-  const centerY = H - 44;
-
-  for (let i = 0; i < TOOL_COUNT; i += 1) {
-    const centerX = (W - span) / 2 + radius + i * (radius * 2 + gap);
-    ctx.fillStyle = i === ACTIVE_TOOL ? worldColors.accent : "rgba(232, 246, 252, 0.14)";
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-export type TabletView = {
-  progress: number;
-  pressure: number;
+export type TabletHomeView = {
+  /** In reading order. The first five are docked, the rest fill the grid, and any that fit
+   * neither are dropped — a home screen shows what a home screen holds. */
+  readonly apps: readonly HomeApp[];
+  /** Formatted already: the zone the studio keeps is a fact, and this is a draw. */
+  readonly clock: string;
+  readonly date: string;
+  /** The city that clock is set to, which is what makes the card a world clock. */
+  readonly city: string;
 };
 
-const STROKE_SAMPLES = 180;
+/**
+ * 540 px across the 16.06 cm of active display is ~3400 px/m — two thirds of the phone's
+ * density beside it, and the right call for a screen that is twice the size on the desk and
+ * therefore twice the pixels for the same picture. The height is the modeled display's own
+ * ratio, so nothing is painted stretched; `scene/slab.test.ts` holds the two together.
+ */
+export const TABLET_SCREEN = { width: 540, height: 783 } as const;
 
-function strokeAt(t: number, W: number, H: number): readonly [number, number] {
-  const x = W * (0.16 + 0.68 * t);
-  const y = H * (0.66 - 0.32 * t + 0.14 * Math.sin(t * Math.PI * 2.4));
-  return [x, y];
+/**
+ * The layout, in fractions of the screen's **width** — including the vertical ones, so the
+ * design is one set of proportions rather than two that drift when the canvas is resized.
+ */
+const MARGIN = 0.06;
+const ICON = 0.14;
+const COLUMNS = 5;
+const ROWS = 3;
+const COLUMN_PITCH = (1 - MARGIN * 2 - ICON) / (COLUMNS - 1);
+const ROW_PITCH = 0.235;
+const GRID_TOP = 0.45;
+const LABEL_SIZE = 0.026;
+const LABEL_GAP = 0.028;
+/** Wider than a tile and narrower than the pitch: a label may overhang, never collide. */
+const LABEL_WIDTH = 0.175;
+
+/**
+ * The card, and why it is a world clock rather than the phone's. Both devices are lit by the
+ * same minute — two clocks in one room disagreeing is a defect — so the tablet earns nothing
+ * by repeating the phone's card at a larger size. Naming the city the time belongs to is what
+ * the extra width is actually good for, and it is the one thing a screen in this room can say
+ * about where it is standing.
+ */
+const CARD = { top: 0.1, height: 0.27, radius: 0.05, pad: 0.045 } as const;
+const CARD_CLOCK_SIZE = 0.125;
+const CARD_DATE_SIZE = 0.028;
+/** The date sits under the time rather than in the far corner: one block, read in one go. */
+const CARD_DATE_DROP = 0.05;
+const CARD_CITY_SIZE = 0.032;
+
+/**
+ * The dock: a pill, inset from both edges and standing clear of the bottom. A tablet's dock
+ * does not reach the sides of the display the way a phone's does, and that gap is most of
+ * what tells the two devices apart in one glance.
+ */
+const DOCK = {
+  count: 5,
+  /** All but a hair of the grid's tile: a docked app is the same app, at the same size. */
+  icon: 0.13,
+  gap: 0.045,
+  inset: 0.03,
+  height: 0.19,
+  bottom: 0.055,
+} as const;
+const DOCK_RADIUS = 0.06;
+
+const STATUS = { clockSize: 0.032, y: 0.05, unit: 0.0075 } as const;
+const HOME_BAR = { width: 0.24, height: 0.009, bottom: 0.02 } as const;
+
+function paintStatusBar(ctx: CanvasRenderingContext2D, clock: string): void {
+  const W = ctx.canvas.width;
+
+  ctx.fillStyle = INK;
+  ctx.font = `600 ${(W * STATUS.clockSize).toFixed(2)}px ${MONO}`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillText(clock, W * MARGIN, W * STATUS.y);
+
+  paintIndicators(ctx, W * (1 - MARGIN), W * STATUS.y, W * STATUS.unit);
 }
 
-function traceStroke(ctx: CanvasRenderingContext2D, count: number): void {
-  const { width: W, height: H } = ctx.canvas;
-  ctx.beginPath();
-  for (let i = 0; i < count; i += 1) {
-    const [x, y] = strokeAt(i / (STROKE_SAMPLES - 1), W, H);
-    if (i === 0) ctx.moveTo(x, y);
-    else ctx.lineTo(x, y);
-  }
+function paintCard(ctx: CanvasRenderingContext2D, view: TabletHomeView): void {
+  const W = ctx.canvas.width;
+  const top = W * CARD.top;
+  const left = W * MARGIN;
+  const right = W * (1 - MARGIN);
+
+  paintTray(ctx, left, top, right - left, W * CARD.height, W * CARD.radius);
+
+  ctx.textAlign = "left";
+  ctx.textBaseline = "alphabetic";
+  ctx.fillStyle = INK;
+  ctx.font = `700 ${(W * CARD_CLOCK_SIZE).toFixed(2)}px ${MONO}`;
+  ctx.fillText(view.clock, left + W * CARD.pad, top + W * (CARD.pad + CARD_CLOCK_SIZE));
+
+  ctx.fillStyle = LABEL_INK;
+  ctx.font = `${(W * CARD_DATE_SIZE).toFixed(2)}px ${MONO}`;
+  ctx.fillText(
+    view.date,
+    left + W * CARD.pad,
+    top + W * (CARD.pad + CARD_CLOCK_SIZE + CARD_DATE_DROP),
+  );
+
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.font = `${(W * CARD_CITY_SIZE).toFixed(2)}px ${MONO}`;
+  ctx.fillText(view.city, right - W * CARD.pad, top + W * CARD.pad);
 }
 
-function drawStroke(ctx: CanvasRenderingContext2D, view: TabletView): void {
-  const { width: W, height: H } = ctx.canvas;
-  const count = Math.max(2, Math.round(STROKE_SAMPLES * view.progress));
+function paintGrid(ctx: CanvasRenderingContext2D, apps: readonly HomeApp[]): void {
+  const W = ctx.canvas.width;
+  const size = W * ICON;
 
-  ctx.lineCap = "round";
-  ctx.lineJoin = "round";
-  traceStroke(ctx, count);
-  ctx.strokeStyle = "rgba(34, 211, 238, 0.18)";
-  ctx.lineWidth = 15;
-  ctx.stroke();
-  ctx.strokeStyle = "rgba(236, 250, 255, 0.92)";
-  ctx.lineWidth = 4 + view.pressure * 2.5;
-  ctx.stroke();
+  apps.forEach((app, index) => {
+    const x = W * (MARGIN + (index % COLUMNS) * COLUMN_PITCH);
+    const y = W * (GRID_TOP + Math.floor(index / COLUMNS) * ROW_PITCH);
 
-  const [headX, headY] = strokeAt((count - 1) / (STROKE_SAMPLES - 1), W, H);
-  ctx.fillStyle = worldColors.accentBright;
-  ctx.beginPath();
-  ctx.arc(headX, headY, 5.5, 0, Math.PI * 2);
-  ctx.fill();
-}
-
-export function drawTablet(ctx: CanvasRenderingContext2D, view: TabletView): void {
-  const { width: W, height: H } = ctx.canvas;
-  ctx.fillStyle = "#04080b";
-  ctx.fillRect(0, 0, W, H);
-  drawGrid(ctx);
-  drawHeader(ctx);
-  drawStroke(ctx, view);
-  drawTools(ctx);
-}
-
-const TEXTURE_WIDTH = 358;
-const TEXTURE_HEIGHT = 512;
-const REDRAW_INTERVAL = 1 / 15;
-const STROKE_SECONDS = 5;
-const HOLD_SECONDS = 1.8;
-
-export function useTabletScreenTexture(): CanvasTexture {
-  const { texture, paint } = useScreenTexture(TEXTURE_WIDTH, TEXTURE_HEIGHT);
-  const elapsed = useRef(0);
-  const sinceRedraw = useRef(REDRAW_INTERVAL);
-
-  useFrame((_, delta) => {
-    elapsed.current = (elapsed.current + delta) % (STROKE_SECONDS + HOLD_SECONDS);
-    sinceRedraw.current += delta;
-    if (sinceRedraw.current < REDRAW_INTERVAL) return;
-    sinceRedraw.current = 0;
-
-    paint((ctx) =>
-      drawTablet(ctx, {
-        progress: Math.min(1, elapsed.current / STROKE_SECONDS),
-        pressure: 0.5 + 0.5 * Math.sin(elapsed.current * 2.4),
-      }),
+    paintIcon(ctx, app, x, y, size);
+    paintLabel(
+      ctx,
+      app.label,
+      x + size / 2,
+      y + size + W * LABEL_GAP,
+      W * LABEL_SIZE,
+      W * LABEL_WIDTH,
     );
   });
+}
+
+/** The docked apps are wordless — a docked app is known by its tile, on both devices. */
+function paintDock(ctx: CanvasRenderingContext2D, apps: readonly HomeApp[]): void {
+  const { width: W, height: H } = ctx.canvas;
+  const height = W * DOCK.height;
+  const top = H - W * DOCK.bottom - height;
+  const size = W * DOCK.icon;
+  const span = apps.length * size + (apps.length - 1) * W * DOCK.gap;
+
+  paintTray(ctx, W * DOCK.inset, top, W * (1 - DOCK.inset * 2), height, W * DOCK_RADIUS);
+
+  apps.forEach((app, index) => {
+    const x = (W - span) / 2 + index * (size + W * DOCK.gap);
+    paintIcon(ctx, app, x, top + (height - size) / 2, size);
+  });
+}
+
+export function drawTabletHome(ctx: CanvasRenderingContext2D, view: TabletHomeView): void {
+  const W = ctx.canvas.width;
+
+  paintWallpaper(ctx);
+  paintStatusBar(ctx, view.clock);
+  paintCard(ctx, view);
+  paintDock(ctx, view.apps.slice(0, DOCK.count));
+  paintGrid(ctx, view.apps.slice(DOCK.count, DOCK.count + COLUMNS * ROWS));
+  paintHomeBar(ctx, W * HOME_BAR.width, W * HOME_BAR.height, W * HOME_BAR.bottom);
+}
+
+export function useTabletScreenTexture(apps: readonly HomeApp[]): CanvasTexture {
+  const { texture, paint } = useScreenTexture(TABLET_SCREEN.width, TABLET_SCREEN.height, {
+    // Mipmapped for the same reason the phone's is: a home screen is a field of hard edges,
+    // and sampled from the top level alone the grid of icons sparkles on every camera move.
+    mipmapped: true,
+  });
+  const { clock, date } = useStudioMinute();
+
+  useEffect(() => {
+    paint((ctx) => drawTabletHome(ctx, { apps, clock, date, city: siteConfig.address.locality }));
+  }, [paint, apps, clock, date]);
 
   return texture;
 }

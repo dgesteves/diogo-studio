@@ -1,21 +1,22 @@
 import { describe, expect, it } from "vitest";
 import { Box3, Vector3 } from "three";
 
-import { DISPLAY, PHONE } from "./phone";
+import { DISPLAY as PHONE_DISPLAY, PHONE } from "./phone";
 import { createSlabBody, createSlabFace, slabOutline, type SlabSpec } from "./slab";
+import { DISPLAY as TABLET_DISPLAY, TABLET } from "./tablet";
 
 /**
- * The measurements that make a rectangle read as the device it is meant to be, none of which
+ * The measurements that make a rectangle read as one of these two devices, none of which
  * fails loudly. `ExtrudeGeometry` grows its section outward by the bevel and starts below
  * zero, so a body fed the finished outline comes out oversized and sunk into the desk — and
  * renders as a plausible slab either way. The corner is the other one: a circular arc of the
- * right radius still throws no error, it just stops being an iPhone.
- *
- * Written over the spec rather than over the phone, because the shape is `slab.ts`'s and the
- * phone is the one thing built from it so far.
+ * right radius still throws no error, it just stops being an iPhone or an iPad.
  */
 
-const DEVICES: readonly (readonly [string, SlabSpec])[] = [["the phone", PHONE]];
+const DEVICES: readonly (readonly [string, SlabSpec])[] = [
+  ["the phone", PHONE],
+  ["the tablet", TABLET],
+];
 
 function boundsOf(geometry: { computeBoundingBox: () => void; boundingBox: Box3 | null }): Box3 {
   geometry.computeBoundingBox();
@@ -115,6 +116,23 @@ describe.each(DEVICES)("%s's shell", (_name, spec) => {
 });
 
 /** A canvas of a different ratio than the panel paints the whole home screen stretched. */
-it("paints the phone's home screen on a canvas of the panel's own shape", () => {
-  expect(DISPLAY.canvasAspect / DISPLAY.aspect).toBeCloseTo(1, 2);
+describe.each([
+  ["the phone", PHONE_DISPLAY],
+  ["the tablet", TABLET_DISPLAY],
+])("%s's display", (_name, display) => {
+  it("is painted on a canvas of its own shape", () => {
+    expect(display.canvasAspect / display.aspect).toBeCloseTo(1, 2);
+  });
+});
+
+/**
+ * The two devices are the same object at two sizes, and the size is what tells them apart on
+ * the desk: a tablet whose bezel had been copied from the phone would read as a phone that
+ * had been scaled up, which is the failure this whole pair of files exists to avoid.
+ */
+it("gives the tablet the wider border of the two", () => {
+  const phoneBorder = (PHONE.width - PHONE_DISPLAY.width) / 2;
+  const tabletBorder = (TABLET.width - TABLET_DISPLAY.width) / 2;
+
+  expect(tabletBorder).toBeGreaterThan(phoneBorder * 3);
 });

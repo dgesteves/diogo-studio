@@ -9,7 +9,7 @@ import { Keyboard } from "./keyboard";
 import { CoffeeMug } from "./mug";
 import { Mouse } from "./mouse";
 import { Phone } from "./phone";
-import { GraphicsTablet } from "./tablet";
+import { Tablet } from "./tablet";
 
 /**
  * The desk and everything resting on it that is not hardware — plant, lamp, headphones — plus the
@@ -235,7 +235,7 @@ export function DeskProps(): ReactElement {
       <Phone />
       <CoffeeMug />
       <PlantPot />
-      <GraphicsTablet />
+      <Tablet />
     </group>
   );
 }

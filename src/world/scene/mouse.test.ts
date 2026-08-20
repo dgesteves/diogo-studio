@@ -171,7 +171,7 @@ describe("the lit seam", () => {
   );
 
   it("burns the room's accent, not a palette of its own", () => {
-    // The keyboard and the tablet are lit with this exact color; the mouse is a desk of
+    // The keyboard and the headphones are lit with this exact color; the mouse is a desk of
     // matching parts, so the strip is not the place to introduce a second neon.
     const peak = brightness.indexOf(Math.max(...brightness));
     const accent = new Color(worldColors.accent);

@@ -24,8 +24,8 @@ export type CanvasTextureOptions = {
    *
    * On for the other kind of canvas in this room: a surface painted once and then read
    * minified, at a glancing angle, from across the room. A mug's print, a coaster's face, a
-   * shelf of book spines, the phone's display — sampled from the top level alone, the band
-   * edges and the type on those crawl on every camera move.
+   * shelf of book spines, the two home screens on the desk — sampled from the top level
+   * alone, the band edges and the type on those crawl on every camera move.
    */
   mipmapped?: boolean;
 };
@@ -52,8 +52,9 @@ export function createCanvasTexture(
 
 /**
  * One canvas-backed texture, built once and released with the component, plus the `paint`
- * that pushes new pixels to the GPU. Every screen in the room — monitors, tablet, wall
- * panels, the lounge television — differs only in what it draws and what makes it redraw:
+ * that pushes new pixels to the GPU. Every screen in the room — monitors, wall panels, the
+ * lounge television, the phone and the tablet — differs only in what it draws and what makes
+ * it redraw:
  * an interval, a state change, or a frame callback. That difference stays at the call site;
  * everything above it is here.
  *
