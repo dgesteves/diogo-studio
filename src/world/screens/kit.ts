@@ -83,3 +83,16 @@ export function section(
   ctx.font = `bold 18px ${MONO}`;
   ctx.fillText(label, 36, y);
 }
+
+/**
+ * The longest prefix of `text` that fits `maxWidth`, elided. Truncation is the draw's call
+ * rather than the record's — the page carries the whole of a string and a screen shows what
+ * it has room for — so every routine that sets text into a fixed box needs this one.
+ */
+export function fit(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
+  let value = text;
+  while (value.length > 1 && ctx.measureText(value).width > maxWidth) {
+    value = `${value.slice(0, -2)}…`;
+  }
+  return value;
+}
