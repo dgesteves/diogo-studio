@@ -14,7 +14,8 @@ import {
 } from "./monitors";
 import { drawTablet } from "./tablet";
 import { CHANNELS, CONTROL_SCREEN, controlDeckView, drawControlDeck, KEYS } from "./control-deck";
-import { drawPhoneHome, monogram, PHONE_SCREEN, type PhoneApp } from "./phone";
+import { drawPhoneHome, PHONE_SCREEN } from "./phone";
+import { monogram, type HomeApp } from "./home";
 
 /**
  * The three screens on the studio desk, the tablet beside them, the control deck's panel and
@@ -341,12 +342,12 @@ describe("phone home screen", () => {
   const DATE = "Thursday, August 20";
 
   /** Enough to overflow the screen, so what it drops is a decision rather than an accident. */
-  const APPS: readonly PhoneApp[] = Array.from({ length: 24 }, (_, index) => ({
+  const APPS: readonly HomeApp[] = Array.from({ length: 24 }, (_, index) => ({
     label: `Station ${index}`,
     accent: `#${(index + 16).toString(16).padStart(2, "0")}d3ee`,
   }));
 
-  const home = (apps: readonly PhoneApp[] = APPS): RecordingContext =>
+  const home = (apps: readonly HomeApp[] = APPS): RecordingContext =>
     paint((ctx) => drawPhoneHome(ctx, { apps, clock: CLOCK, date: DATE }), PHONE_SCREEN);
 
   it("docks four apps and fills the grid with the rest, in reading order", () => {
