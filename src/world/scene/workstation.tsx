@@ -2,25 +2,23 @@
 
 import { type ReactElement } from "react";
 import { RoundedBox, ContactShadows } from "@react-three/drei";
-import { anodizedMetalMaterial, worldColors, portMaterial } from "../materials";
+import { worldColors } from "../materials";
 import { DESK_TOP_Y } from "../room";
+import { CONTROL_DECK, ControlDeck } from "./control-deck";
 import { MAC_STUDIO, MacStudio } from "./mac-studio";
 import { StatusLed } from "./status-led";
 
 /**
- * The three boxes behind the monitors — server node, Mac Studio, hub — the row they stand in,
- * and the blinking LED they share. The layout is the reason this is one file: the cluster is
- * a row, so moving any of them means recomputing all three, and `StatusLed` is on all three
- * fronts.
+ * The three boxes behind the monitors — server node, Mac Studio, control deck — the row they
+ * stand in, and the blinking LED they share. The layout is the reason this is one file: the
+ * cluster is a row, so moving any of them means recomputing all three, and `StatusLed` is on
+ * all three fronts.
  *
- * The server node and the hub are also *built* here, because they are this studio's own
- * hardware and nothing outside decides what they look like. The Mac Studio is not: it is a
- * real machine, its shape is the thing being reproduced, and it owns `scene/mac-studio.tsx`
- * along with the dimensions this row lays out from.
- *
- * Each box namespaces its own dimensions (`HUB_`, `SERVER_`). They described the same
- * measurements under the same names in three files before this merge, which is exactly the
- * kind of collision that made them look separable when they never were.
+ * Only the server node is *built* here, because it is a plain chassis this studio invented and
+ * nothing outside decides what it looks like. The other two are not. The Mac Studio is a real
+ * machine whose shape is the thing being reproduced; the control deck is a console with a face
+ * layout and a screen of its own. Each owns its file — `scene/mac-studio.tsx` and
+ * `scene/control-deck.tsx` — and this row lays out from the one width it takes from each.
  */
 
 const HARDWARE_DEPTH = 0.27;
@@ -33,88 +31,12 @@ const SERVER_HEIGHT = 0.16;
 const SERVER_FOOT_HEIGHT = 0.006;
 const SERVER_BODY_HEIGHT = SERVER_HEIGHT - SERVER_FOOT_HEIGHT;
 const SERVER_BODY_CENTER_Y = SERVER_FOOT_HEIGHT + SERVER_BODY_HEIGHT / 2;
-const HUB_WIDTH = 0.13;
-const HUB_HEIGHT = 0.034;
-const HUB_DEPTH = 0.23;
-
-const CLUSTER_WIDTH = SERVER_WIDTH + MAC_STUDIO.width + HUB_WIDTH + HARDWARE_GAP * 2;
+const CLUSTER_WIDTH = SERVER_WIDTH + MAC_STUDIO.width + CONTROL_DECK.width + HARDWARE_GAP * 2;
 const CLUSTER_LEFT = -CLUSTER_WIDTH / 2;
 
 const SERVER_X = CLUSTER_LEFT + SERVER_WIDTH / 2;
 const MAC_STUDIO_X = CLUSTER_LEFT + SERVER_WIDTH + HARDWARE_GAP + MAC_STUDIO.width / 2;
-const HUB_X = CLUSTER_LEFT + CLUSTER_WIDTH - HUB_WIDTH / 2;
-
-const HUB_FOOT_HEIGHT = 0.005;
-const HUB_BODY_HEIGHT = HUB_HEIGHT - HUB_FOOT_HEIGHT;
-const HUB_BODY_CENTER_Y = HUB_FOOT_HEIGHT + HUB_BODY_HEIGHT / 2;
-const HUB_FRONT_Z = HUB_DEPTH / 2;
-const HUB_PORT_Y = HUB_FOOT_HEIGHT + HUB_BODY_HEIGHT * 0.48;
-const HUB_PORT_HEIGHT = 0.0036;
-const HUB_FOOT_X = HUB_WIDTH / 2 - 0.016;
-const HUB_FOOT_Z = HUB_DEPTH / 2 - 0.022;
-
-const HUB_FRONT_PORTS = [
-  { x: -0.03, width: 0.028, height: HUB_PORT_HEIGHT },
-  { x: 0.002, width: 0.0165, height: 0.0072 },
-  { x: 0.024, width: 0.0114, height: HUB_PORT_HEIGHT },
-  { x: 0.043, width: 0.0114, height: HUB_PORT_HEIGHT },
-] as const;
-
-const HUB_FEET = [
-  [-HUB_FOOT_X, -HUB_FOOT_Z],
-  [HUB_FOOT_X, -HUB_FOOT_Z],
-  [-HUB_FOOT_X, HUB_FOOT_Z],
-  [HUB_FOOT_X, HUB_FOOT_Z],
-] as const;
-
-function DeskHub(): ReactElement {
-  return (
-    <group position={[HUB_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
-      {HUB_FEET.map(([x, z]) => (
-        <mesh key={`${x},${z}`} position={[x, HUB_FOOT_HEIGHT / 2, z]}>
-          <cylinderGeometry args={[0.006, 0.0065, HUB_FOOT_HEIGHT, 12]} />
-          <meshStandardMaterial color="#05080b" roughness={0.95} metalness={0.05} />
-        </mesh>
-      ))}
-      <RoundedBox
-        args={[HUB_WIDTH, HUB_BODY_HEIGHT, HUB_DEPTH]}
-        radius={0.005}
-        smoothness={3}
-        position={[0, HUB_BODY_CENTER_Y, 0]}
-      >
-        <meshStandardMaterial {...anodizedMetalMaterial} />
-      </RoundedBox>
-      <mesh position={[0, HUB_HEIGHT - 0.0008, 0]}>
-        <boxGeometry args={[HUB_WIDTH - 0.018, 0.0018, HUB_DEPTH - 0.03]} />
-        <meshStandardMaterial color="#0d1318" roughness={0.72} metalness={0.35} />
-      </mesh>
-      <mesh position={[0, HUB_HEIGHT + 0.0004, HUB_FRONT_Z - 0.034]}>
-        <boxGeometry args={[HUB_WIDTH * 0.42, 0.0008, 0.0022]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
-      <HubFrontPanel />
-    </group>
-  );
-}
-
-function HubFrontPanel(): ReactElement {
-  return (
-    <group position={[0, 0, HUB_FRONT_Z]}>
-      {HUB_FRONT_PORTS.map((port) => (
-        <mesh key={port.x} position={[port.x, HUB_PORT_Y, -0.0015]}>
-          <boxGeometry args={[port.width, port.height, 0.004]} />
-          <meshStandardMaterial {...portMaterial} />
-        </mesh>
-      ))}
-      <StatusLed
-        position={[-0.054, HUB_PORT_Y, 0.0012]}
-        color={worldColors.accentBright}
-        radius={0.0024}
-        blinkSpeed={1.6}
-      />
-    </group>
-  );
-}
+const DECK_X = CLUSTER_LEFT + CLUSTER_WIDTH - CONTROL_DECK.width / 2;
 
 const SERVER_FRONT_Z = HARDWARE_DEPTH / 2;
 const SERVER_BEZEL_Z = SERVER_FRONT_Z - 0.0025;
@@ -261,7 +183,9 @@ export function DeskHardware(): ReactElement {
       <group position={[MAC_STUDIO_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
         <MacStudio />
       </group>
-      <DeskHub />
+      <group position={[DECK_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
+        <ControlDeck />
+      </group>
       <ContactShadows
         position={[0, DESK_TOP_Y + 0.0009, HARDWARE_CENTER_Z]}
         scale={0.95}

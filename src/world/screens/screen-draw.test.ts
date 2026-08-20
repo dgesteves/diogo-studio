@@ -13,11 +13,13 @@ import {
   STATUS_ROWS,
 } from "./monitors";
 import { drawTablet } from "./tablet";
+import { CHANNELS, CONTROL_SCREEN, controlDeckView, drawControlDeck, KEYS } from "./control-deck";
 
 /**
- * The three screens on the studio desk and the tablet beside them. They redraw on a frame
- * or a timer, so what matters is that a given input paints one exact thing — and that the
- * inputs that move (a caret, a frame rate, a clock, a stroke) each change the picture.
+ * The three screens on the studio desk, the tablet beside them and the control deck's panel.
+ * They redraw on a frame or a timer, so what matters is that a given input paints one exact
+ * thing — and that the inputs that move (a caret, a frame rate, a clock, a stroke, a level)
+ * each change the picture.
  */
 
 const DESK = { width: 640, height: 400 };
@@ -249,5 +251,80 @@ describe("tablet screen", () => {
         .filter((path) => path.points.length === 1 && path.paints[0]?.kind === "fill")
         .filter((path) => path.paints[0]?.style === worldColors.accent),
     ).toHaveLength(1);
+  });
+});
+
+/**
+ * The console panel. Its two failures both still look like a working screen: a meter painted
+ * past the end of its track, and a key row where every chip is lit or none is.
+ */
+describe("control deck panel", () => {
+  const KEY_ROW_Y = 264;
+  const level = 0.42;
+  const deck = (levels: readonly number[], active = 0): RecordingContext =>
+    paint((ctx) => drawControlDeck(ctx, { levels, active }), CONTROL_SCREEN);
+
+  const chips = ({ paths }: RecordingContext) =>
+    paths.filter((path) => path.points.some(([, y]) => y === KEY_ROW_Y));
+
+  it("names every channel and every key, and reads each level as a percentage", () => {
+    const { text } = deck(CHANNELS.map(() => level));
+
+    expect(text).toEqual([
+      "● CONTROL",
+      "hub · linked",
+      ...CHANNELS.flatMap((channel) => [channel, "42%"]),
+      ...KEYS,
+    ]);
+  });
+
+  it("keeps a meter inside its track whatever level it is handed", () => {
+    const { callsTo, text } = deck([1.6, -0.4, 0.5, 0]);
+    const bars = callsTo("roundRect").filter(([, y]) => y !== KEY_ROW_Y);
+    // Track and fill for each of the four channels, in pairs.
+    const track = Number(bars[0]?.[2]);
+
+    expect(bars).toHaveLength(CHANNELS.length * 2);
+    for (const [, , width] of bars) {
+      expect.soft(Number(width)).toBeGreaterThan(0);
+      expect.soft(Number(width)).toBeLessThanOrEqual(track);
+    }
+    expect(text).toContain("100%");
+    expect(text).toContain("0%");
+  });
+
+  it("runs a channel over its ceiling in the hotter accent", () => {
+    const calm = deck([0.5, 0.5, 0.5, 0.5]);
+    const hot = deck([0.95, 0.5, 0.5, 0.5]);
+
+    expect(calm.valuesOf("fillStyle")).not.toContain(worldColors.accentBright);
+    expect(hot.valuesOf("fillStyle")).toContain(worldColors.accentBright);
+  });
+
+  it("lights exactly one key, the one the view names", () => {
+    const lit = chips(
+      deck(
+        CHANNELS.map(() => level),
+        2,
+      ),
+    ).map((chip) => chip.paints[0]?.style === worldColors.accent);
+
+    expect(lit).toEqual([false, false, true, false]);
+  });
+
+  it("drifts every channel inside its meter and steps the lit key along the row", () => {
+    const seen = new Set<number>();
+
+    for (let t = 0; t < 24; t += 0.25) {
+      const view = controlDeckView(t);
+      seen.add(view.active);
+      for (const value of view.levels) {
+        expect.soft(value).toBeGreaterThan(0);
+        expect.soft(value).toBeLessThan(1);
+      }
+    }
+
+    expect([...seen].sort()).toEqual(KEYS.map((_, index) => index));
+    expect(controlDeckView(1).levels).not.toEqual(controlDeckView(2).levels);
   });
 });
