@@ -7,6 +7,7 @@ import { worldColors, darkMetalMaterial } from "../materials";
 import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
 import { Keyboard } from "./keyboard";
 import { CoffeeMug } from "./mug";
+import { Mouse } from "./mouse";
 import { GraphicsTablet } from "./tablet";
 
 /**
@@ -229,6 +230,7 @@ export function DeskProps(): ReactElement {
   return (
     <group>
       <Keyboard />
+      <Mouse />
       <CoffeeMug />
       <PlantPot />
       <GraphicsTablet />
