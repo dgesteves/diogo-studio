@@ -8,6 +8,7 @@ import { DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
 import { Keyboard } from "./keyboard";
 import { CoffeeMug } from "./mug";
 import { Mouse } from "./mouse";
+import { Phone } from "./phone";
 import { GraphicsTablet } from "./tablet";
 
 /**
@@ -231,6 +232,7 @@ export function DeskProps(): ReactElement {
     <group>
       <Keyboard />
       <Mouse />
+      <Phone />
       <CoffeeMug />
       <PlantPot />
       <GraphicsTablet />

@@ -14,9 +14,11 @@ import {
 } from "./monitors";
 import { drawTablet } from "./tablet";
 import { CHANNELS, CONTROL_SCREEN, controlDeckView, drawControlDeck, KEYS } from "./control-deck";
+import { drawPhoneHome, monogram, PHONE_SCREEN, type PhoneApp } from "./phone";
 
 /**
- * The three screens on the studio desk, the tablet beside them and the control deck's panel.
+ * The three screens on the studio desk, the tablet beside them, the control deck's panel and
+ * the phone lying by the mouse.
  * They redraw on a frame or a timer, so what matters is that a given input paints one exact
  * thing — and that the inputs that move (a caret, a frame rate, a clock, a stroke, a level)
  * each change the picture.
@@ -326,5 +328,84 @@ describe("control deck panel", () => {
 
     expect([...seen].sort()).toEqual(KEYS.map((_, index) => index));
     expect(controlDeckView(1).levels).not.toEqual(controlDeckView(2).levels);
+  });
+});
+
+/**
+ * The phone's home screen. Its failures are all quiet ones: a station dropped off the end of
+ * the grid, a label run into its neighbor, a dock that takes five. The screen is 7 cm of desk
+ * seen from across the room, so none of them shows up anywhere but in the transcript.
+ */
+describe("phone home screen", () => {
+  const CLOCK = "16:20";
+  const DATE = "Thursday, August 20";
+
+  /** Enough to overflow the screen, so what it drops is a decision rather than an accident. */
+  const APPS: readonly PhoneApp[] = Array.from({ length: 24 }, (_, index) => ({
+    label: `Station ${index}`,
+    accent: `#${(index + 16).toString(16).padStart(2, "0")}d3ee`,
+  }));
+
+  const home = (apps: readonly PhoneApp[] = APPS): RecordingContext =>
+    paint((ctx) => drawPhoneHome(ctx, { apps, clock: CLOCK, date: DATE }), PHONE_SCREEN);
+
+  it("docks four apps and fills the grid with the rest, in reading order", () => {
+    const labels = home().runs.map((run) => run.text);
+    const docked = APPS.slice(0, 4).map((app) => app.label);
+    const gridded = APPS.slice(4, 20).map((app) => app.label);
+
+    // The dock is wordless — a docked app is known by its tile — so no label of one is set.
+    for (const label of docked) expect.soft(labels).not.toContain(label);
+    expect(labels.filter((text) => text.startsWith("Station "))).toEqual(gridded);
+  });
+
+  it("drops what the screen has no room for rather than painting off the edge", () => {
+    const { runs } = home();
+    const dropped = APPS.slice(20).map((app) => app.label);
+
+    expect(dropped).not.toEqual([]);
+    for (const label of dropped) expect.soft(runs.map((run) => run.text)).not.toContain(label);
+    for (const run of runs) {
+      expect.soft(run.y).toBeLessThan(PHONE_SCREEN.height);
+      expect.soft(run.x).toBeGreaterThan(0);
+    }
+  });
+
+  it("elides a label too long for its column instead of running it into the next", () => {
+    const long = [...APPS.slice(0, 4), { label: "A station named at length", accent: "#22d3ee" }];
+    const label = home(long).runs.find((run) => run.text.startsWith("A station"));
+
+    expect(label?.text).toMatch(/…$/);
+    expect(label!.width).toBeLessThan(PHONE_SCREEN.width * 0.25);
+  });
+
+  it("shows the same minute in the status bar and on the card", () => {
+    const { runs } = home();
+
+    expect(runs.filter((run) => run.text === CLOCK)).toHaveLength(2);
+    expect(runs.filter((run) => run.text === DATE)).toHaveLength(1);
+  });
+
+  it("floods one tile per app with that app's own station color", () => {
+    const { callsTo, valuesOf } = home();
+    const shown = APPS.slice(0, 20);
+    // A tile is the only square this screen fills — every other fill is a rounded path — and
+    // it is filled twice, once with the color and once with the gloss laid over it.
+    const squares = new Set(
+      callsTo("fillRect")
+        .filter(([, , width, height]) => width === height)
+        .map(([x, y]) => `${x},${y}`),
+    );
+
+    expect(squares.size).toBe(shown.length);
+    for (const app of shown) expect.soft(valuesOf("fillStyle")).toContain(app.accent);
+  });
+
+  it("takes the initials of a label, and never more than two", () => {
+    expect(monogram("Case studies")).toBe("CS");
+    expect(monogram("Open source")).toBe("OS");
+    expect(monogram("Now")).toBe("N");
+    expect(monogram("Résumé")).toBe("R");
+    expect(monogram("one two three four")).toBe("OT");
   });
 });
