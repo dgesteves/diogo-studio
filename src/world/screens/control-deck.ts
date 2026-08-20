@@ -28,12 +28,54 @@ export const CONTROL_SCREEN = { width: 512, height: 336 } as const;
 export const CHANNELS = ["power", "uplink", "thermal", "signal"] as const;
 export const KEYS = ["lights", "audio", "render", "scene"] as const;
 
+type Channel = (typeof CHANNELS)[number];
+type Key = (typeof KEYS)[number];
+
 /** The routine's pigments, which are paint rather than surfaces and so live with it. */
-const LABEL = "rgba(125, 232, 200, 0.85)";
 const TRACK = "rgba(232, 246, 252, 0.09)";
 const CHIP = "rgba(232, 246, 252, 0.07)";
 /** The lit chip is a lamp with a legend on it: its label has to go dark to stay readable. */
 const CHIP_INK = "#03080c";
+/** A channel's name is let down from its own hue, so the bar leads the row and the name follows. */
+const LABEL_ALPHA = 0.8;
+
+/**
+ * The two pigments with no token behind them. Thermal is the one reading a visitor expects to
+ * come back warm, and signal has to clear the cyan it sits under — `accentSoft` is a shade of
+ * the accent, and a lit panel washes that difference out entirely, so the two blue channels
+ * arrived as one instrument read twice.
+ */
+const EMBER = "#f0a63c";
+const VIOLET = "#a78bfa";
+
+/**
+ * A hue per channel, keyed rather than indexed so every channel has one. Four meters in one
+ * accent are the same instrument drawn four times — the block reads as a texture, and the eye
+ * finds no row in it — so each channel is told apart by color before it is read. The four are
+ * spread around the wheel rather than shaded off the accent, because emission plus bloom
+ * pulls everything bright in here back toward white.
+ */
+export const CHANNEL_PIGMENTS: Record<Channel, string> = {
+  power: worldColors.statusOk,
+  uplink: worldColors.accent,
+  thermal: EMBER,
+  signal: VIOLET,
+};
+
+/**
+ * The four lamps, in `KEYS` order. Tokens rather than pigments, because the chip on the
+ * screen and the LED under the physical key are one lamp seen twice — `scene/control-deck.tsx`
+ * lights the key row from this same map, so a key cannot disagree with its own chip.
+ */
+export const KEY_LAMPS: Record<Key, string> = {
+  lights: worldColors.accentSoft,
+  audio: worldColors.statusOk,
+  render: worldColors.hotNeon,
+  scene: worldColors.accent,
+};
+
+/** Over its ceiling a channel leaves its own hue for the room's alarm, whichever hue it was. */
+export const ALARM = worldColors.hotNeon;
 
 const MARGIN = 24;
 const HEADER_Y = 22;
@@ -59,25 +101,34 @@ export type ControlDeckView = {
 };
 
 /**
- * One channel: name, bar, number. The bar is clamped rather than trusted — a meter painted
- * past its track is the one failure here that still looks like a working screen — and it
- * keeps a stub of fill at zero so a dead channel reads as off rather than as missing.
+ * One channel: name, bar, number, all three in the channel's own hue. The bar is clamped
+ * rather than trusted — a meter painted past its track is the one failure here that still
+ * looks like a working screen — and it keeps a stub of fill at zero so a dead channel reads
+ * as off rather than as missing.
+ *
+ * A channel over its ceiling drops its hue in both the bar and the number: the state belongs
+ * where the reading is, and a bar the eye has already learned the color of is not where a
+ * visitor looks to find out that something is wrong.
  */
-function drawMeter(ctx: CanvasRenderingContext2D, label: string, level: number, y: number): void {
+function drawMeter(ctx: CanvasRenderingContext2D, label: Channel, level: number, y: number): void {
   const W = ctx.canvas.width;
   const trackWidth = W - MARGIN - VALUE_WIDTH - TRACK_X;
   const value = Math.max(0, Math.min(1, level));
+  const pigment = CHANNEL_PIGMENTS[label];
+  const hot = value > HOT;
 
   ctx.font = `16px ${MONO}`;
-  ctx.fillStyle = LABEL;
+  ctx.globalAlpha = LABEL_ALPHA;
+  ctx.fillStyle = pigment;
   ctx.fillText(label, METER_LABEL_X, y);
+  ctx.globalAlpha = 1;
 
   ctx.fillStyle = TRACK;
   ctx.beginPath();
   ctx.roundRect(TRACK_X, y + 2, trackWidth, TRACK_HEIGHT, TRACK_HEIGHT / 2);
   ctx.fill();
 
-  ctx.fillStyle = value > HOT ? worldColors.accentBright : worldColors.accent;
+  ctx.fillStyle = hot ? ALARM : pigment;
   ctx.beginPath();
   ctx.roundRect(
     TRACK_X,
@@ -88,7 +139,7 @@ function drawMeter(ctx: CanvasRenderingContext2D, label: string, level: number, 
   );
   ctx.fill();
 
-  ctx.fillStyle = INK;
+  ctx.fillStyle = hot ? ALARM : INK;
   ctx.textAlign = "right";
   ctx.fillText(`${Math.round(value * 100)}%`, W - MARGIN, y);
   ctx.textAlign = "left";
@@ -104,7 +155,7 @@ function drawKeys(ctx: CanvasRenderingContext2D, active: number): void {
     const x = MARGIN + index * (width + KEY_GAP);
     const lit = index === active;
 
-    ctx.fillStyle = lit ? worldColors.accent : CHIP;
+    ctx.fillStyle = lit ? KEY_LAMPS[label] : CHIP;
     ctx.beginPath();
     ctx.roundRect(x, KEY_ROW_Y, width, KEY_HEIGHT, KEY_RADIUS);
     ctx.fill();
@@ -124,9 +175,13 @@ export function drawControlDeck(ctx: CanvasRenderingContext2D, view: ControlDeck
 
   ctx.textBaseline = "top";
   ctx.textAlign = "left";
-  ctx.fillStyle = worldColors.accent;
   ctx.font = `bold 26px ${MONO}`;
-  ctx.fillText("● CONTROL", MARGIN, HEADER_Y);
+  // The dot is the link lamp rather than punctuation, so it is green for the same reason the
+  // legend at the other end of the row says linked.
+  ctx.fillStyle = worldColors.statusOk;
+  ctx.fillText("●", MARGIN, HEADER_Y);
+  ctx.fillStyle = worldColors.accent;
+  ctx.fillText("CONTROL", MARGIN + ctx.measureText("● ").width, HEADER_Y);
 
   ctx.font = `16px ${MONO}`;
   ctx.fillStyle = SOFT;

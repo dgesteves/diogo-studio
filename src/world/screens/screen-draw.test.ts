@@ -12,7 +12,16 @@ import {
   type StatusView,
   STATUS_ROWS,
 } from "./monitors";
-import { CHANNELS, CONTROL_SCREEN, controlDeckView, drawControlDeck, KEYS } from "./control-deck";
+import {
+  ALARM,
+  CHANNEL_PIGMENTS,
+  CHANNELS,
+  CONTROL_SCREEN,
+  controlDeckView,
+  drawControlDeck,
+  KEY_LAMPS,
+  KEYS,
+} from "./control-deck";
 import { drawPhoneHome, PHONE_SCREEN } from "./phone";
 import { drawTabletHome, TABLET_SCREEN } from "./tablet";
 import { monogram, type HomeApp } from "./home";
@@ -212,7 +221,8 @@ describe("control deck panel", () => {
     const { text } = deck(CHANNELS.map(() => level));
 
     expect(text).toEqual([
-      "● CONTROL",
+      "●",
+      "CONTROL",
       "hub · linked",
       ...CHANNELS.flatMap((channel) => [channel, "42%"]),
       ...KEYS,
@@ -234,21 +244,30 @@ describe("control deck panel", () => {
     expect(text).toContain("0%");
   });
 
-  it("runs a channel over its ceiling in the hotter accent", () => {
+  it("paints every channel in its own hue, so no two meters read as one instrument", () => {
+    const painted = deck(CHANNELS.map(() => level)).valuesOf("fillStyle");
+    const hues = CHANNELS.map((channel) => CHANNEL_PIGMENTS[channel]);
+
+    expect(new Set(hues).size).toBe(CHANNELS.length);
+    for (const hue of hues) expect.soft(painted).toContain(hue);
+  });
+
+  it("hands a channel over its ceiling to the alarm, whichever hue it was", () => {
     const calm = deck([0.5, 0.5, 0.5, 0.5]);
     const hot = deck([0.95, 0.5, 0.5, 0.5]);
 
-    expect(calm.valuesOf("fillStyle")).not.toContain(worldColors.accentBright);
-    expect(hot.valuesOf("fillStyle")).toContain(worldColors.accentBright);
+    expect(calm.valuesOf("fillStyle")).not.toContain(ALARM);
+    expect(hot.valuesOf("fillStyle")).toContain(ALARM);
   });
 
-  it("lights exactly one key, the one the view names", () => {
-    const lit = chips(
+  it("lights exactly one key, the one the view names, in that key's own lamp", () => {
+    const painted = chips(
       deck(
         CHANNELS.map(() => level),
         2,
       ),
-    ).map((chip) => chip.paints[0]?.style === worldColors.accent);
+    );
+    const lit = KEYS.map((key, index) => painted[index]?.paints[0]?.style === KEY_LAMPS[key]);
 
     expect(lit).toEqual([false, false, true, false]);
   });
