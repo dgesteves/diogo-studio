@@ -172,8 +172,8 @@ describe("useDisposable", () => {
 
   it("leaves values that are not resources alone", () => {
     const texture = makeResource();
-    // The shape `createCanvasTexture` returns, and the mouse's Vector3 beside its geometry:
-    // a disposable next to something that has no `dispose` and must not be reached for.
+    // The shape `createCanvasTexture` returns: a disposable next to something that has no
+    // `dispose` and must not be reached for.
     // `dispose: 3` is the case that makes the walk check the type rather than the key.
     const mixed = {
       canvas: { width: 8 },
