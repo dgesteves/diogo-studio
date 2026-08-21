@@ -8,6 +8,7 @@ import { Instance, Instances, RoundedBox, useTexture } from "@react-three/drei";
 import { ROOM, SHELF_BAND_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
 import { bookDesign, Books, type BookDesign, type BookPlacement } from "./books";
+import { Pothos } from "./plant";
 import { Starship, SuperHeavy } from "./starship";
 import { Vader } from "./vader";
 
@@ -205,7 +206,7 @@ type WallShelfLayout = {
 };
 
 const WALL_SHELF_THICKNESS = 0.045;
-const WALL_SHELF_DEPTH = 0.24;
+export const WALL_SHELF_DEPTH = 0.24;
 /** Back edge flush with the shell, so the plank reads as fixed to it. */
 const WALL_SHELF_Z = ROOM.minZ + WALL_SHELF_DEPTH / 2;
 /** Spines stand in front of the neon tube's own standoff, so no book can ever cross it in z. */
@@ -552,39 +553,22 @@ function LeaningPrint({
   );
 }
 
-const POT_HEIGHT = 0.07;
-const FOLIAGE: readonly { position: Vec3; radius: number }[] = [
-  { position: [0, POT_HEIGHT + 0.045, 0], radius: 0.052 },
-  { position: [-0.038, POT_HEIGHT + 0.024, 0.016], radius: 0.038 },
-  { position: [0.036, POT_HEIGHT + 0.03, -0.014], radius: 0.034 },
-];
-
-function ShelfPlant({ shelf, offsetX }: { shelf: WallShelfLayout; offsetX: number }): ReactElement {
-  return (
-    <group position={onShelf(shelf, offsetX)}>
-      <mesh position={[0, POT_HEIGHT / 2, 0]}>
-        <cylinderGeometry args={[0.046, 0.034, POT_HEIGHT, 18]} />
-        <meshStandardMaterial {...SHELF_SURFACE} />
-      </mesh>
-      {FOLIAGE.map((clump) => (
-        <mesh key={clump.radius} position={clump.position}>
-          <icosahedronGeometry args={[clump.radius, 0]} />
-          <meshStandardMaterial color={worldColors.foliage} roughness={0.6} flatShading />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
 /**
  * Where the two rocket models stand: the one stretch of this shelf with nothing overhead but
  * the top plank, which is what lets them be twice the height of the books beside them.
  */
-export const BOOSTER_OFFSET_X = 0.33;
-export const SHIP_OFFSET_X = 0.52;
+export const BOOSTER_OFFSET_X = 0.16;
+export const SHIP_OFFSET_X = 0.34;
 
 /** Where the figure stands on the top shelf. */
 export const VADER_OFFSET_X = -0.5;
+
+/**
+ * The pothos hangs off the near end of the middle shelf. What bounds it is the bottom plank,
+ * which passes under this spot: the vines have to stop short of that height, and
+ * `plant.test.ts` is what holds them to it.
+ */
+export const POTHOS_ANCHOR: Vec3 = onShelf(MIDDLE_SHELF, 0.72);
 
 /** A tube under the front lip: the shelves have to read as objects in an unlit corner. */
 const LIP_INSET = 0.012;
@@ -619,13 +603,13 @@ export function WallShelves(): ReactElement {
       ))}
 
       <Suspense fallback={null}>
-        <LeaningPrint shelf={MIDDLE_SHELF} offsetX={0.46} />
+        <LeaningPrint shelf={MIDDLE_SHELF} offsetX={0.34} />
       </Suspense>
-      <ShelfPlant shelf={MIDDLE_SHELF} offsetX={0.72} />
+      <Pothos position={POTHOS_ANCHOR} />
       <Vader position={onShelf(TOP_SHELF, VADER_OFFSET_X)} />
       <SuperHeavy position={onShelf(BOTTOM_SHELF, BOOSTER_OFFSET_X)} />
       <Starship position={onShelf(BOTTOM_SHELF, SHIP_OFFSET_X)} />
-      <PuzzleCube shelf={BOTTOM_SHELF} offsetX={0.76} />
+      <PuzzleCube shelf={BOTTOM_SHELF} offsetX={0.7} />
 
       <Books books={WALL_SHELF_BOOKS} />
     </group>

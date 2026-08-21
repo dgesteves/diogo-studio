@@ -18,8 +18,11 @@ import { StatusLed } from "./status-led";
  * An exact count, deliberately. Restructure phases 3-4 move 40 scene files and merge
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
+ *
+ * It last moved from 203 when the room's four plants were rebuilt: the clumped icosahedra came
+ * out and the sheet-built pots and foliage went in.
  */
-const SCENE_MESH_COUNT = 203;
+const SCENE_MESH_COUNT = 198;
 
 afterEach(unmountScenes);
 

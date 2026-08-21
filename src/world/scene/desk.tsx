@@ -5,15 +5,17 @@ import { RoundedBox } from "@react-three/drei";
 import { DoubleSide } from "three";
 import { worldColors, darkMetalMaterial } from "../materials";
 import { DESK_DEPTH, DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
+import { type Vec3 } from "../stations";
 import { Keyboard } from "./keyboard";
 import { CoffeeMug } from "./mug";
 import { Mouse } from "./mouse";
 import { Pencil } from "./pencil";
+import { Aloe } from "./plant";
 import { Phone } from "./phone";
 import { Tablet } from "./tablet";
 
 /**
- * The desk and everything resting on it that is not hardware — plant, lamp, headphones — plus the
+ * The desk and everything resting on it that is not hardware — the aloe, lamp, headphones — plus the
  * composition that places the input devices and the printed mug from their own files. The desk
  * surface height lives in `world/room.ts`, because the camera framing derives from it too.
  */
@@ -45,45 +47,8 @@ export function Desk(): ReactElement {
   );
 }
 
-function PlantPot(): ReactElement {
-  return (
-    <group position={[-0.95, DESK_TOP_Y, 0.3]}>
-      <mesh position={[0, 0.05, 0]}>
-        <cylinderGeometry args={[0.055, 0.045, 0.1, 20]} />
-        <meshStandardMaterial color="#2a1c11" roughness={0.85} metalness={0.05} />
-      </mesh>
-      <mesh position={[0, 0.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.055, 0.005, 8, 20]} />
-        <meshStandardMaterial color="#3a261a" roughness={0.85} metalness={0.05} />
-      </mesh>
-      <mesh position={[0, 0.097, 0]}>
-        <cylinderGeometry args={[0.05, 0.05, 0.005, 20]} />
-        <meshStandardMaterial color="#0c0805" roughness={1} metalness={0} />
-      </mesh>
-      {FOLIAGE_CLUMPS.map((clump) => (
-        <mesh key={clump.position.join(",")} position={clump.position}>
-          <icosahedronGeometry args={[clump.radius, 0]} />
-          <meshStandardMaterial color={clump.color} roughness={0.6} flatShading />
-        </mesh>
-      ))}
-    </group>
-  );
-}
-
-type FoliageClump = {
-  position: [number, number, number];
-  radius: number;
-  color: string;
-};
-
-const FOLIAGE_CLUMPS: FoliageClump[] = [
-  { position: [0, 0.155, 0], radius: 0.058, color: "#1f4a32" },
-  { position: [-0.045, 0.168, 0.014], radius: 0.05, color: "#266a44" },
-  { position: [0.046, 0.16, -0.014], radius: 0.048, color: "#1a4028" },
-  { position: [0.006, 0.166, 0.046], radius: 0.044, color: "#2b6e48" },
-  { position: [-0.008, 0.178, -0.044], radius: 0.044, color: "#22573a" },
-  { position: [0, 0.198, 0.004], radius: 0.04, color: "#266a44" },
-];
+/** Far enough left to be behind the keyboard's shoulder rather than in front of a monitor. */
+const DESK_PLANT: Vec3 = [-0.95, DESK_TOP_Y, 0.3];
 
 const EARCUP_SIDES = [-1, 1] as const;
 const EARCUP_X = 0.108;
@@ -235,7 +200,7 @@ export function DeskProps(): ReactElement {
       <Mouse />
       <Phone />
       <CoffeeMug />
-      <PlantPot />
+      <Aloe position={DESK_PLANT} />
       <Tablet />
       <Pencil />
     </group>

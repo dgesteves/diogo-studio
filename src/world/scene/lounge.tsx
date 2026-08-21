@@ -21,7 +21,11 @@ const LOUNGE_ROTATION_Y = 0;
 
 export const SOFA_Z = 1.05;
 export const TABLE_Z = -0.2;
-const CONSOLE_Z = -1.2;
+/**
+ * The unit under the television. Exported as a footprint because it is one end of the only
+ * clear stretch of the back wall, and `scene/plant.tsx` stands in what is left of it.
+ */
+export const TV_CONSOLE = { width: 1.9, height: 0.4, depth: 0.4, centerZ: -1.2 } as const;
 export const TV_WALL_Z = -1.35;
 export const TV_CENTER_Y = 1.5;
 
@@ -328,9 +332,7 @@ function LoungeSoundbar({ topY }: LoungeSoundbarProps): ReactElement {
   );
 }
 
-const CONSOLE_W = 1.9;
-const CONSOLE_H = 0.4;
-const CONSOLE_D = 0.4;
+const { width: CONSOLE_W, height: CONSOLE_H, depth: CONSOLE_D, centerZ: CONSOLE_Z } = TV_CONSOLE;
 const TV_W = 1.7;
 const TV_H = 0.98;
 const TV_Z = TV_WALL_Z;
