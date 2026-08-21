@@ -277,11 +277,6 @@ function LoungeCoffeeTable(): ReactElement {
         <meshStandardMaterial {...SURFACE} />
       </RoundedBox>
 
-      <mesh position={[0, TOP_Y + 0.032, 0]}>
-        <boxGeometry args={[1.0, 0.004, 0.5]} />
-        <meshStandardMaterial color="#0a1218" roughness={0.15} metalness={0.6} />
-      </mesh>
-
       <mesh position={[0, TOP_Y + 0.026, 0.352]}>
         <boxGeometry args={[1.2, 0.005, 0.005]} />
         <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
@@ -296,7 +291,7 @@ function LoungeCoffeeTable(): ReactElement {
         )),
       )}
 
-      <LoungeTableItems topY={TOP_Y + 0.034} />
+      <LoungeTableItems topY={TOP_Y + 0.031} />
     </group>
   );
 }
