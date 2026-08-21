@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
+import { ROOM } from "../room";
 
 /**
  * What the room stands on: the floor plane with its two grids, and the rug that sits on top
@@ -28,8 +29,13 @@ export function GridFloor(): ReactElement {
 }
 
 const WIDTH = 3.5;
-const DEPTH = 2.3;
-const CENTER_Z = 0.4;
+/** Where it stops on the chair's side, clear of the lounge and of the floor lamp's base. */
+const NEAR_EDGE_Z = 1.55;
+/** Floor left showing at the foot of the shelf wall, so the rug reads as laid, not fitted. */
+const WALL_GAP = 0.35;
+const FAR_EDGE_Z = ROOM.minZ + WALL_GAP;
+const DEPTH = NEAR_EDGE_Z - FAR_EDGE_Z;
+const CENTER_Z = (NEAR_EDGE_Z + FAR_EDGE_Z) / 2;
 const BAND = 0.08;
 const INSET = 0.14;
 const BASE_Y = 0.012;
