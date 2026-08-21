@@ -4,11 +4,22 @@ import { ROOM } from "../room";
 import { type Vec3 } from "../stations";
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { worldColors } from "../materials";
+import { ExtrudeGeometry, Path, Shape, type BufferGeometry } from "three";
+import { useDisposable } from "../gpu";
+import { anodizedMetalMaterial, worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
 import { Macbook } from "./macbook";
 import { Remote } from "./remote";
+import {
+  createSlabBody,
+  createSlabFace,
+  FACE_UP,
+  slabOutline,
+  SLAB_GLASS,
+  type SlabSpec,
+} from "./slab";
+import { createSledLoop, type SledSpec } from "./sled";
 import { Sofa, SOFA } from "./sofa";
 import { Soundbar, SOUNDBAR } from "./soundbar";
 
@@ -195,39 +206,143 @@ function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
   );
 }
 
-const TOP_Y = 0.34;
-const TOP_THICKNESS = 0.06;
+/**
+ * The top is a glass slab, so its shape comes from `slab.ts` — the same primitive as the phone
+ * and the tablet, at a hundred times the area.
+ *
+ * A `RoundedBox` is what it was, and a `RoundedBox` is a bar of soap: one radius rounds all
+ * twelve edges alike, so the thing has no edge at all and reads as a slab of the same dark
+ * plastic as everything else in the corner. What a high-end table has instead is a **flat side
+ * with the edge broken** — a chamfer top and bottom, a couple of millimeters each — because
+ * that chamfer is a line the light runs along, and it is the only reason a 5 cm top reads as a
+ * 5 cm top rather than as a thickness. The corner is a squircle for the same reason it is on
+ * the devices: the curvature carries into the straight edge instead of meeting it at a step.
+ */
+const TOP: SlabSpec = {
+  width: 1.3,
+  length: 0.7,
+  thickness: 0.05,
+  cornerRadius: 0.07,
+  fillet: 0.01,
+};
+
+/** The underside, which is what the base has to reach and what the room measures against. */
+const TOP_BOTTOM_Y = 0.32;
+/**
+ * The glass field and the light are on opposite faces of the slab, and that is the whole
+ * design. Above: a border of graphite, then smoked glass, and nothing lit at all — a lit line
+ * on a table top is a strip somebody stuck on, and it competes with the two screens the table
+ * carries. Below: a channel of accent recessed under the overhang, which puts the light on the
+ * rug instead of in the eye. The top then reads as floating on its own glow, which is the
+ * effect a lounge table like this is bought for.
+ *
+ * The step between the frame and the glass is tenths of a millimeter, and deliberately not a
+ * hairline — `scene/phone.tsx` documents what this room's shallow depth buffer does to two
+ * panels any closer than that.
+ */
+const GLASS_INSET = 0.021;
+const GLASS_Y = TOP_BOTTOM_Y + TOP.thickness + 0.002;
+
 /** The face everything on the table stands on, exported because two specs read it back. */
-export const TABLE_TOP_Y = TOP_Y + TOP_THICKNESS / 2;
-const LEG_X = 0.5;
-const LEG_Z = 0.28;
+export const TABLE_TOP_Y = GLASS_Y;
+
+/**
+ * The channel: set back under the edge so the slab's own overhang hides the emitter, and
+ * standing proud of the underside so the light has a wall to come off rather than a face
+ * pointing at the floor. What a visitor sees from anywhere in the room is a line of accent
+ * following the outline and the wash it throws down onto the rug — never the strip itself.
+ *
+ * It is thin on purpose. The room's bloom pass reads **area**, so a wide band of accent at
+ * this size stops being a line and becomes a lamp — see the soundbar's grille, which lost its
+ * perforations to exactly that.
+ */
+const CHANNEL_INSET = 0.014;
+const CHANNEL_WIDTH = 0.006;
+const CHANNEL_HEIGHT = 0.005;
+const CHANNEL_Y = TOP_BOTTOM_Y - CHANNEL_HEIGHT;
+
+function createChannel(): BufferGeometry {
+  const band = new Shape().setFromPoints(slabOutline(TOP, CHANNEL_INSET));
+  band.holes.push(new Path().setFromPoints(slabOutline(TOP, CHANNEL_INSET + CHANNEL_WIDTH)));
+  return new ExtrudeGeometry(band, { depth: CHANNEL_HEIGHT, bevelEnabled: false });
+}
+
+/**
+ * And the light it actually casts. Emissive geometry lights nothing in three.js — without
+ * this the channel is a bright line on a table standing in its own shadow, which is a decal.
+ * One point light, under the top and short of the floor, is the pool on the rug that makes
+ * the glow read as a source. Kept dim and short-range: the lounge is lit by the television
+ * and the lamp, and this is a table, not a third fixture.
+ */
+const UNDERGLOW = { y: TOP_BOTTOM_Y - 0.08, intensity: 0.55, distance: 1.5 } as const;
+
+/**
+ * The base is the same bent bar as the desk's, crossed instead of parallel — an X in plan,
+ * two runners meeting under the middle of the table and rising to the underside near its four
+ * corners.
+ *
+ * It is crossed so the two pieces are not the same piece of furniture at two sizes. A pair of
+ * parallel loops is the desk's silhouette, and the desk is three meters of it across the same
+ * room; repeated under a coffee table a quarter its length, the corner reads as a set. The X
+ * says the same vocabulary — one section, one bend, one finish — in a different sentence, and
+ * it is the shape that suits a top a visitor walks around rather than sits at.
+ *
+ * The feet are given as the corner one bar reaches, because that is what the shape actually
+ * is; the bar's own length and the turn that lays it there both fall out of that corner.
+ */
+const FOOT = { x: 0.44, z: 0.26 } as const;
+const SLED_TURN = Math.atan2(FOOT.z, FOOT.x);
+
+const SLED: SledSpec = {
+  width: 0.055,
+  thickness: 0.014,
+  halfRun: Math.hypot(FOOT.x, FOOT.z),
+  bend: 0.07,
+  rise: TOP_BOTTOM_Y,
+};
+
+/** The two turns are mirrored, which is what makes one bar into a crossing pair. */
+const SLED_TURNS = [SLED_TURN, -SLED_TURN] as const;
 
 function LoungeCoffeeTable(): ReactElement {
+  const parts = useDisposable(() => ({
+    top: createSlabBody(TOP),
+    channel: createChannel(),
+    glass: createSlabFace(TOP, GLASS_INSET),
+    loop: createSledLoop(SLED),
+  }));
+
   return (
-    <group position={[0, 0, TABLE_Z]}>
-      <RoundedBox
-        args={[1.3, TOP_THICKNESS, 0.7]}
-        radius={0.02}
-        smoothness={3}
-        position={[0, TOP_Y, 0]}
+    <group position={[TABLE_X, 0, TABLE_Z]}>
+      <mesh
+        geometry={parts.top}
+        position={[0, TOP_BOTTOM_Y + TOP.fillet, 0]}
+        rotation={FACE_UP}
         castShadow
       >
         <meshStandardMaterial {...SURFACE} />
-      </RoundedBox>
-
-      <mesh position={[0, TOP_Y + 0.026, 0.352]}>
-        <boxGeometry args={[1.2, 0.005, 0.005]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
 
-      {[-LEG_X, LEG_X].map((x) =>
-        [-LEG_Z, LEG_Z].map((z) => (
-          <mesh key={`${x},${z}`} position={[x, TOP_Y / 2 - 0.02, z]}>
-            <cylinderGeometry args={[0.022, 0.022, TOP_Y - 0.06, 10]} />
-            <meshStandardMaterial {...FRAME} />
-          </mesh>
-        )),
-      )}
+      <mesh geometry={parts.channel} position={[0, CHANNEL_Y, 0]} rotation={FACE_UP}>
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
+      </mesh>
+      <pointLight
+        position={[0, UNDERGLOW.y, 0]}
+        intensity={UNDERGLOW.intensity}
+        distance={UNDERGLOW.distance}
+        decay={2}
+        color={worldColors.accent}
+      />
+
+      <mesh geometry={parts.glass} position={[0, GLASS_Y, 0]} rotation={FACE_UP}>
+        <meshStandardMaterial {...SLAB_GLASS} />
+      </mesh>
+
+      {SLED_TURNS.map((turn) => (
+        <mesh key={turn} geometry={parts.loop} rotation={[0, turn, 0]} castShadow>
+          <meshStandardMaterial {...anodizedMetalMaterial} />
+        </mesh>
+      ))}
 
       <LoungeTableItems topY={TABLE_TOP_Y + 0.001} />
     </group>

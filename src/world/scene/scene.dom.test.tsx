@@ -19,10 +19,10 @@ import { StatusLed } from "./status-led";
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
  *
- * It last moved from 198 when the desk hardware's contact shadow came out: its plane read as a
- * black mat the Mac Studio was standing on rather than as shade under it.
+ * It last moved from 197 when the desk's four posts became the two sled loops the lounge table
+ * stands on — one bent bar per end, so two meshes carry what four used to.
  */
-const SCENE_MESH_COUNT = 197;
+const SCENE_MESH_COUNT = 195;
 
 afterEach(unmountScenes);
 
