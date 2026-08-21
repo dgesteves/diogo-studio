@@ -167,9 +167,13 @@ describe("Lounge", () => {
   it("rides the soundbar on top of the console instead of inside it", async () => {
     const scene = await lounge();
 
-    const grille = scene
-      .meshesWith("PlaneGeometry")
-      .find((mesh) => (geometryParams(mesh).height ?? 1) < 0.1);
+    // Wide and shallow, which is the soundbar's grille and nothing else on this side of the
+    // room: the mark on the laptop's lid is the other small plane down here, and picking on
+    // height alone found that instead the day the laptop was built.
+    const grille = scene.meshesWith("PlaneGeometry").find((mesh) => {
+      const { width = 0, height = 1 } = geometryParams(mesh);
+      return height < 0.1 && width > 0.5;
+    });
     // The soundbar is handed a `topY` and places itself; the console it belongs to is the
     // sibling of its own group, which is what makes this a claim about that number.
     const soundbar = grille!.parent!;

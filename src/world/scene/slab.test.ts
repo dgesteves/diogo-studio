@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { Box3, Vector3 } from "three";
 
+import { MACBOOK_BASE, MACBOOK_LID } from "./macbook";
 import { DISPLAY as PHONE_DISPLAY, PHONE } from "./phone";
 import { createSlabBody, createSlabFace, slabOutline, type SlabSpec } from "./slab";
 import { DISPLAY as TABLET_DISPLAY, TABLET } from "./tablet";
 
 /**
- * The measurements that make a rectangle read as one of these two devices, none of which
+ * The measurements that make a rectangle read as one of these devices, none of which
  * fails loudly. `ExtrudeGeometry` grows its section outward by the bevel and starts below
  * zero, so a body fed the finished outline comes out oversized and sunk into the desk — and
  * renders as a plausible slab either way. The corner is the other one: a circular arc of the
@@ -16,6 +17,8 @@ import { DISPLAY as TABLET_DISPLAY, TABLET } from "./tablet";
 const DEVICES: readonly (readonly [string, SlabSpec])[] = [
   ["the phone", PHONE],
   ["the tablet", TABLET],
+  ["the laptop's deck", MACBOOK_BASE],
+  ["the laptop's lid", MACBOOK_LID],
 ];
 
 function boundsOf(geometry: { computeBoundingBox: () => void; boundingBox: Box3 | null }): Box3 {
