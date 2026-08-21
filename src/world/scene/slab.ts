@@ -117,9 +117,12 @@ export const FACE_UP = [-Math.PI / 2, 0, 0] as const;
  * and a `meshStandardMaterial` at high metalness has only reflections to be lit by — turned
  * up to what a polished frame "should" be, these devices rendered charcoal under bright
  * light, which is a black phone and a black iPad. So the albedo carries the silver and the
- * metalness is kept low enough that the direct lights still reach it. `scene/mac-studio.tsx`
- * lands on the same split from the other side: it is the largest flat face on the desk and
- * had to be darkened to stop it blooming, where these are thin walls seen almost edge-on.
+ * metalness is kept low enough that the direct lights still reach it.
+ *
+ * `scene/macbook.tsx` wears this too, and it is a 35 × 25 cm plate rather than a thin wall —
+ * so the size of the face is not what bounds this. `scene/mac-studio.tsx` is the one machine
+ * that had to be darkened, and what darkened it was standing 0.4 m from the monitor rig's
+ * cyan point light. Judge a new device by the light falling on it, not by how big it is.
  */
 export const SLAB_FRAME = { color: "#c2c8ce", roughness: 0.42, metalness: 0.38 } as const;
 

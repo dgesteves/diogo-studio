@@ -5,6 +5,7 @@ import { ExtrudeGeometry, Shape, ShapeGeometry, type BufferGeometry } from "thre
 import { useDisposable } from "../gpu";
 import { portMaterial, worldColors } from "../materials";
 import { createMarkTexture } from "./mark";
+import { SLAB_FRAME } from "./slab";
 import { StatusLed } from "./status-led";
 
 /**
@@ -52,8 +53,17 @@ const LID_SEAM = 0.0015;
  * albedo is therefore a dark gray and the metal is carried by the specular term — which is
  * also what a silver machine standing in a cyan-lit room would actually look like, rather
  * than what it looks like in a daylit photograph of one.
+ *
+ * This is the exception, not the house rule: the phone, the iPad and the MacBook all wear
+ * `slab.ts`'s brighter `SLAB_FRAME`, and the MacBook's deck is a larger flat face than this
+ * lid. What sets this one apart is the point light 0.4 m away, so do not "fix" it to match.
+ *
+ * Which is why only the albedo is overridden. The finish — roughness and metalness — is the
+ * family's, because this is the same metal as the other three; the one number that differs is
+ * exposure compensation for the lamp it stands next to, and writing it this way keeps that
+ * readable as one deliberate exception rather than as a second silver.
  */
-const ALUMINUM = { color: "#666d74", roughness: 0.5, metalness: 0.45 } as const;
+const ALUMINUM = { ...SLAB_FRAME, color: "#666d74" } as const;
 /** The lid is a smoother plate than the extrusion, and the only part that reads near-white. */
 const LID = { color: "#737a81", roughness: 0.4, metalness: 0.42 } as const;
 const BASE = { color: "#171c21", roughness: 0.9, metalness: 0.15 } as const;

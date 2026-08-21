@@ -12,7 +12,7 @@ import { MACBOOK_SCREEN, useMacbookScreenTexture } from "../screens/macbook";
 import { createCanvasTexture } from "../screens/texture";
 import { getStation } from "../stations";
 import { createMarkTexture } from "./mark";
-import { createSlabBody, createSlabFace, SLAB_GLASS, type SlabSpec } from "./slab";
+import { createSlabBody, createSlabFace, SLAB_FRAME, SLAB_GLASS, type SlabSpec } from "./slab";
 
 /**
  * The MacBook Pro 16 standing open on the lounge table, in silver.
@@ -418,16 +418,18 @@ export const PORT_Y = FOOT_HEIGHT + MACBOOK_BASE.thickness / 2;
 /**
  * The finishes.
  *
- * The aluminum is **not** `slab.ts`'s silver, which is the one thing this object cannot share
- * with the phone and the iPad. Those are two thin walls seen almost edge-on; this is a 35 × 25
- * cm plate lying face up under the lounge's ceiling panel, and at their albedo it rendered as
- * a white slab — over the bloom threshold across its whole surface, with the keys, the
- * trackpad and its own edges washed out of it. `scene/mac-studio.tsx` reaches the same place
- * from the other side and for the same reason. So the albedo is stepped down between the two
- * and the metal carries the silver, which is also what an aluminum machine in a dim room
- * actually looks like rather than what it looks like in a daylit photograph of one.
+ * The aluminum is `slab.ts`'s silver, the same one the phone and the iPad wear. This machine is
+ * a slab-family device down to its profile and its cover glass; the frame was the one part it
+ * opted out of, on a blowout that does not happen. A 35 × 25 cm plate at that albedo was
+ * expected to clip white across its whole face and take the keys and the trackpad with it.
+ * Rendered in place it does not, in either palette: the lounge is lit by a ceiling panel two
+ * meters up and a blade lamp across the room, and none of it comes near the bloom threshold.
+ *
+ * `scene/mac-studio.tsx` keeps a darker albedo and that one is real — it stands 0.4 m from the
+ * monitor rig's cyan point light, which at this silver clips it to a white box with no edges
+ * left. What decides it is the light falling on the object, not the size of the face.
  */
-const ALUMINUM = { color: "#6b7178", roughness: 0.45, metalness: 0.44 } as const;
+const ALUMINUM = SLAB_FRAME;
 /**
  * The well is the only part of the backlight a visitor can actually see: the caps cover all of
  * it but the gaps, so a faint emissive here *is* light leaking around each key. Kept low —
@@ -462,14 +464,15 @@ const KEYCAP = {
   specularIntensity: 0.25,
 } as const;
 /** Perforated, so it reads a shade under the deck it is cut into rather than beside it. */
-const GRILLE_FACE = { color: "#585e65", roughness: 0.66, metalness: 0.3 } as const;
+const GRILLE_FACE = { color: "#9fa4a9", roughness: 0.66, metalness: 0.3 } as const;
 /** Glass, so it is the deck's own tone taken smoother rather than a lighter panel laid on
- *  it: on the machine the trackpad is the same aluminum seen through 0.6 mm of glass. */
-const TRACKPAD_GLASS = { color: "#70767d", roughness: 0.24, metalness: 0.4 } as const;
-const SEAM = { color: "#3a4046", roughness: 0.8, metalness: 0.2 } as const;
+ *  it: on the machine the trackpad is the same aluminum seen through 0.6 mm of glass. Taking
+ *  the deck's own token says that, where two hexes only ever agree until one of them moves. */
+const TRACKPAD_GLASS = { ...ALUMINUM, roughness: 0.24, metalness: 0.4 } as const;
+const SEAM = { color: "#6a6e71", roughness: 0.8, metalness: 0.2 } as const;
 const FOOT = { color: "#0e1216", roughness: 0.92, metalness: 0.05 } as const;
-/** The mark is a polished inlay in the lid, never lighter than it and only glossier. */
-const MARK = { color: "#6e767d", roughness: 0.16, metalness: 0.72 } as const;
+/** The mark is a polished inlay in the lid: the lid's own tone, and only glossier. */
+const MARK = { ...ALUMINUM, roughness: 0.16, metalness: 0.72 } as const;
 const MARK_SIZE = MACBOOK_LID.width * 0.115;
 
 /**
