@@ -7,6 +7,8 @@ import { worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
 import { Macbook } from "./macbook";
+import { Remote } from "./remote";
+import { Soundbar, SOUNDBAR } from "./soundbar";
 
 /**
  * The corner the room is not working in: rug, sofa, lamp, coffee table and the TV above the
@@ -186,8 +188,6 @@ function LoungeLamp(): ReactElement {
   );
 }
 
-const REMOTE_BODY = { color: "#0b1014", roughness: 0.6, metalness: 0.25 } as const;
-
 /**
  * The three books on the coffee table. They are bound in `books.tsx` like every other book
  * in the room, rather than being three more colored boxes: lying face up, what a visitor
@@ -237,20 +237,17 @@ function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
         <Books books={TABLE_BOOKS} />
       </group>
 
-      <group position={[0, topY + 0.008, 0.2]} rotation={[0, 0.5, 0]}>
-        <RoundedBox args={[0.05, 0.016, 0.16]} radius={0.006} smoothness={2}>
-          <meshStandardMaterial {...REMOTE_BODY} />
-        </RoundedBox>
-        <mesh position={[0, 0.009, -0.05]} rotation={[-Math.PI / 2, 0, 0]}>
-          <circleGeometry args={[0.005, 10]} />
-          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-        </mesh>
+      <group position={[0, topY, 0.2]} rotation={[0, 0.5, 0]}>
+        <Remote />
       </group>
     </group>
   );
 }
 
 const TOP_Y = 0.34;
+const TOP_THICKNESS = 0.06;
+/** The face everything on the table stands on, exported because two specs read it back. */
+export const TABLE_TOP_Y = TOP_Y + TOP_THICKNESS / 2;
 const LEG_X = 0.5;
 const LEG_Z = 0.28;
 
@@ -258,7 +255,7 @@ function LoungeCoffeeTable(): ReactElement {
   return (
     <group position={[0, 0, TABLE_Z]}>
       <RoundedBox
-        args={[1.3, 0.06, 0.7]}
+        args={[1.3, TOP_THICKNESS, 0.7]}
         radius={0.02}
         smoothness={3}
         position={[0, TOP_Y, 0]}
@@ -281,43 +278,14 @@ function LoungeCoffeeTable(): ReactElement {
         )),
       )}
 
-      <LoungeTableItems topY={TOP_Y + 0.031} />
-    </group>
-  );
-}
-
-const BAR_W = 1.2;
-const BAR_H = 0.08;
-const BAR_D = 0.1;
-const BAR_Z = 0.06;
-const BODY = { color: "#0e1419", roughness: 0.5, metalness: 0.4 } as const;
-const GRILLE = { color: "#080c10", roughness: 0.85, metalness: 0.1 } as const;
-
-type LoungeSoundbarProps = {
-  topY: number;
-};
-
-function LoungeSoundbar({ topY }: LoungeSoundbarProps): ReactElement {
-  const centerY = topY + BAR_H / 2;
-
-  return (
-    <group position={[0, centerY, BAR_Z]}>
-      <RoundedBox args={[BAR_W, BAR_H, BAR_D]} radius={0.03} smoothness={3} castShadow>
-        <meshStandardMaterial {...BODY} />
-      </RoundedBox>
-      <mesh position={[0, 0, BAR_D / 2 + 0.001]}>
-        <planeGeometry args={[BAR_W - 0.14, BAR_H - 0.036]} />
-        <meshStandardMaterial {...GRILLE} />
-      </mesh>
-      <mesh position={[BAR_W / 2 - 0.06, 0, BAR_D / 2 + 0.002]}>
-        <circleGeometry args={[0.006, 12]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
+      <LoungeTableItems topY={TABLE_TOP_Y + 0.001} />
     </group>
   );
 }
 
 const { width: CONSOLE_W, height: CONSOLE_H, depth: CONSOLE_D, centerZ: CONSOLE_Z } = TV_CONSOLE;
+/** Set forward on the cabinet, clear of its front edge by a finger — where a bar is stood. */
+const BAR_Z = CONSOLE_D / 2 - 0.03 - SOUNDBAR.depth / 2;
 const TV_W = 1.7;
 const TV_H = 0.98;
 const TV_Z = TV_WALL_Z;
@@ -341,7 +309,7 @@ function LoungeTv(): ReactElement {
           <boxGeometry args={[CONSOLE_W - 0.1, 0.01, 0.004]} />
           <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
         </mesh>
-        <LoungeSoundbar topY={CONSOLE_H + 0.02} />
+        <Soundbar topY={CONSOLE_H + 0.02} centerZ={BAR_Z} />
       </group>
 
       <group position={[0, TV_CENTER_Y, TV_Z]}>
