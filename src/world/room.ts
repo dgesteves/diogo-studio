@@ -19,6 +19,8 @@ export const ROOM = {
 
 export const DESK_TOP_THICKNESS = 0.06;
 export const DESK_LEG_HEIGHT = 0.7;
+/** Front to back. The chair is parked clear of the near edge, so it reads here too. */
+export const DESK_DEPTH = 1.1;
 /** The working surface: everything that sits on the desk stacks up from here. */
 export const DESK_TOP_Y = DESK_LEG_HEIGHT + DESK_TOP_THICKNESS / 2;
 
