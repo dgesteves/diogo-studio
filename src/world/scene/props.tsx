@@ -7,7 +7,7 @@ import { experiments } from "@/content/playground";
 import { practices } from "@/content/principles";
 import { stackGroups } from "@/content/stack";
 import { darkMetalMaterial, frameMaterial } from "../materials";
-import { ROOM, WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "../room";
+import { CONTACT_DOOR_Z, ROOM, WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "../room";
 import { useScreenTexture, type ScreenDraw } from "../screens/texture";
 import {
   drawPlayground,
@@ -84,7 +84,7 @@ const STANDOFF_YS = [PULL_Y - 0.32, PULL_Y + 0.32] as const;
 
 function ContactDoor(): ReactElement {
   return (
-    <group position={[-2.27, 0, 2.28]} rotation={[0, Math.PI / 2, 0]}>
+    <group position={[-2.27, 0, CONTACT_DOOR_Z]} rotation={[0, Math.PI / 2, 0]}>
       {JAMBS.map((jamb) => (
         <mesh key={jamb.position.join(",")} position={jamb.position}>
           <boxGeometry args={jamb.args} />

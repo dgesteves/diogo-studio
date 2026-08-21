@@ -3,7 +3,14 @@
 import { useSyncExternalStore } from "react";
 import { usePathname } from "next/navigation";
 import { type PageSlug, resolveStation } from "@/content/pages";
-import { WALL_SCREEN, WALL_SCREEN_Z, type WallScreenSlug } from "./room";
+import {
+  BOOKCASE_Z,
+  CONTACT_DOOR_Z,
+  LEFT_WALL_PLANT_Z,
+  WALL_SCREEN,
+  WALL_SCREEN_Z,
+  type WallScreenSlug,
+} from "./room";
 import { getWorldServerSnapshot, getWorldSnapshot, subscribeWorld } from "./store";
 
 /**
@@ -72,18 +79,38 @@ const RAW: Record<PageSlug, RawStation> = {
   work: ["monitor-left", "WORK", "#38bdf8", [-1.1, 1.7, 2.7], [-1.04, 1.2, -0.26]],
   projects: ["monitor-right", "PROJECTS", "#818cf8", [1.1, 1.7, 2.7], [1.04, 1.2, -0.26]],
   caseStudies: ["monitor-center", "CASE STUDIES", "#a78bfa", [0, 1.65, 2.4], [-0.6, 0.92, 0.34]],
-  writing: ["bookshelf", "WRITING", "#f472b6", [-0.7, 1.7, 4.6], [-2.0, 1.4, 3.7]],
+  writing: [
+    "bookshelf",
+    "WRITING",
+    "#f472b6",
+    // Framed from the room side of the case rather than the far side: it stands in the
+    // front-wall corner now, and the camera the mirror of this one would be inside the shell.
+    [-0.7, 1.7, BOOKCASE_Z - 0.9],
+    [-2.0, 1.4, BOOKCASE_Z],
+  ],
   speaking: ["speaker-stack", "SPEAKING", "#fb7185", [1.7, 1.4, 2.1], [1.38, 1.12, -0.1]],
   openSource: ["tv", "OPEN SOURCE", "#34d399", [1.8, 1.85, 2.0], [3.6, 1.05, -1.5]],
   playground: ["arcade", "PLAYGROUND", "#facc15", ...wallFraming("playground")],
   resume: ["frame", "RESUME", "#22d3ee", ...wallFraming("resume")],
   now: ["coffee", "NOW", "#fbbf24", [0.8, 1.35, 1.8], [0.95, 0.96, 0.3]],
-  contact: ["door", "CONTACT", "#5eead4", [-1.2, 1.6, 3.38], [-2.1, 1.2, 2.28]],
+  contact: [
+    "door",
+    "CONTACT",
+    "#5eead4",
+    [-1.2, 1.6, CONTACT_DOOR_Z + 1.1],
+    [-2.1, 1.2, CONTACT_DOOR_Z],
+  ],
   principles: ["poster", "PRINCIPLES", "#c084fc", ...wallFraming("principles")],
   stack: ["whiteboard", "STACK", "#7dd3fc", ...wallFraming("stack")],
   uses: ["monitor-center", "USES", "#67e8f9", [0, 1.85, 3.2], [-0.05, 0.95, 0.32]],
   timeline: ["timeline-strip", "TIMELINE", "#a78bfa", ...wallFraming("timeline")],
-  lab: ["plant", "LAB", "#4ade80", [-0.7, 1.35, 2.5], [-1.8, 0.95, 1.4]],
+  lab: [
+    "plant",
+    "LAB",
+    "#4ade80",
+    [-0.7, 1.35, LEFT_WALL_PLANT_Z + 1.1],
+    [-1.8, 0.95, LEFT_WALL_PLANT_Z],
+  ],
 };
 
 function toStation(slug: PageSlug, raw: RawStation): WorldStation {

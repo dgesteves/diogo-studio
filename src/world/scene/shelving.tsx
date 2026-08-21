@@ -5,7 +5,7 @@ import { Suspense, useState, type ReactElement } from "react";
 import { Object3D, SRGBColorSpace } from "three";
 import { anodizedMetalMaterial, frameMaterial, useWorldPalette, worldColors } from "../materials";
 import { Instance, Instances, RoundedBox, useTexture } from "@react-three/drei";
-import { ROOM, SHELF_BAND_TOP_Y } from "../room";
+import { BOOKCASE_SPAN, BOOKCASE_Z, ROOM, SHELF_BAND_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
 import { bookDesign, Books, type BookDesign, type BookPlacement } from "./books";
 import { Pothos } from "./plant";
@@ -148,17 +148,23 @@ const PRINT_ROUGHNESS = 0.7;
 const PLANK_THICKNESS = 0.025;
 const PLANK_YS = [0.5, 0.94, 1.38, 1.82];
 
+const SIDE_THICKNESS = 0.04;
+/** Each side panel is centered half a thickness inside its end, so the case measures
+ *  `BOOKCASE_SPAN` outer face to outer face and the back, top and bottom span the bay. */
+const BAY_SPAN = BOOKCASE_SPAN - SIDE_THICKNESS;
+const PLANK_SPAN = BAY_SPAN - 0.06;
+
 const FRAME_PANELS: readonly { position: Vec3; args: Vec3 }[] = [
-  { position: [-0.075, 1.15, 0], args: [0.03, 2.3, 1.1] },
-  { position: [0.005, 1.15, -0.55], args: [0.2, 2.3, 0.04] },
-  { position: [0.005, 1.15, 0.55], args: [0.2, 2.3, 0.04] },
-  { position: [0.005, 2.28, 0], args: [0.2, 0.04, 1.1] },
-  { position: [0.005, 0.04, 0], args: [0.2, 0.04, 1.1] },
+  { position: [-0.075, 1.15, 0], args: [0.03, 2.3, BAY_SPAN] },
+  { position: [0.005, 1.15, -BAY_SPAN / 2], args: [0.2, 2.3, SIDE_THICKNESS] },
+  { position: [0.005, 1.15, BAY_SPAN / 2], args: [0.2, 2.3, SIDE_THICKNESS] },
+  { position: [0.005, 2.28, 0], args: [0.2, SIDE_THICKNESS, BAY_SPAN] },
+  { position: [0.005, 0.04, 0], args: [0.2, SIDE_THICKNESS, BAY_SPAN] },
 ];
 
 export function Bookshelf(): ReactElement {
   return (
-    <group position={[-2.18, 0, 3.7]}>
+    <group position={[-2.18, 0, BOOKCASE_Z]}>
       <ShelfLight />
       {FRAME_PANELS.map((panel) => (
         <mesh key={panel.position.join(",")} position={panel.position}>
@@ -168,7 +174,7 @@ export function Bookshelf(): ReactElement {
       ))}
       {PLANK_YS.map((y) => (
         <mesh key={y} position={[0.01, y, 0]}>
-          <boxGeometry args={[0.16, PLANK_THICKNESS, 1.04]} />
+          <boxGeometry args={[0.16, PLANK_THICKNESS, PLANK_SPAN]} />
           <meshStandardMaterial {...SHELF_SURFACE} />
         </mesh>
       ))}
