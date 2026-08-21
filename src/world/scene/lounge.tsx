@@ -1,13 +1,26 @@
 "use client";
 
+import { ROOM } from "../room";
 import { type Vec3 } from "../stations";
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
-import { worldColors } from "../materials";
+import { ExtrudeGeometry, Path, Shape, type BufferGeometry } from "three";
+import { useDisposable } from "../gpu";
+import { anodizedMetalMaterial, worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
 import { Macbook } from "./macbook";
 import { Remote } from "./remote";
+import {
+  createSlabBody,
+  createSlabFace,
+  FACE_UP,
+  slabOutline,
+  SLAB_GLASS,
+  type SlabSpec,
+} from "./slab";
+import { createSledLoop, type SledSpec } from "./sled";
+import { Sofa, SOFA } from "./sofa";
 import { Soundbar, SOUNDBAR } from "./soundbar";
 
 /**
@@ -22,8 +35,31 @@ import { Soundbar, SOUNDBAR } from "./soundbar";
 export const LOUNGE_ORIGIN = [3.6, 0, -0.9] as const satisfies Vec3;
 const LOUNGE_ROTATION_Y = 0;
 
-export const SOFA_Z = 1.05;
-export const TABLE_Z = -0.2;
+/** The reveal between the sectional's outer arm and the wall it is pushed against. */
+const SOFA_WALL_GAP = 0.02;
+/**
+ * Hard against the right wall rather than centered on the television, which is what leaves the
+ * lounge an open floor instead of a corridor down either side of the sofa. Derived from the
+ * room rather than typed, so a wider sectional stays against the wall instead of through it.
+ */
+const SOFA_X = ROOM.maxX - LOUNGE_ORIGIN[0] - SOFA_WALL_GAP - SOFA.width / 2;
+/**
+ * The sectional's back face, not its center: it is an L, so a center is a number no part of
+ * it stands on. `scene/sofa.tsx` builds forward from here, toward the television at `-z`.
+ *
+ * Set away from the television rather than toward it. The lounge is a corner a visitor stands
+ * in, not a row of seats packed against a screen, and pulling the sofa to the back of the rug
+ * is what leaves the coffee table a walkway on both sides rather than a shin's width on one.
+ * The rug behind it is the bound: the whole piece has to stay on it.
+ */
+export const SOFA_Z = 2.25;
+/**
+ * Set between the television it faces and the middle of the run of seats it serves, which are
+ * not the same `x` now that the sofa stands against the wall. Its clearance from the chaise is
+ * not this number's doing — see `lounge.dom.test.tsx`.
+ */
+const TABLE_X = -0.15;
+export const TABLE_Z = 0.25;
 /**
  * The unit under the television. Exported as a footprint because it is one end of the only
  * clear stretch of the back wall, and `scene/plant.tsx` stands in what is left of it.
@@ -32,104 +68,30 @@ export const TV_CONSOLE = { width: 1.9, height: 0.4, depth: 0.4, centerZ: -1.2 }
 export const TV_WALL_Z = -1.35;
 export const TV_CENTER_Y = 1.5;
 
-const UPHOLSTERY = { color: "#16202a", roughness: 0.85, metalness: 0.05 } as const;
 const FRAME = { color: "#0c1116", roughness: 0.6, metalness: 0.35 } as const;
 const SURFACE = { color: "#12181f", roughness: 0.55, metalness: 0.3 } as const;
 
-const RUG_CENTER_Z = 0.2;
+/**
+ * The rug is what the lounge *is* — the corner is otherwise the same floor as the desk's — so
+ * it is given by its two edges rather than by a center. The far one stops short of the
+ * television's cabinet; the near one is set by the sofa, which has to stand entirely on it and
+ * is pulled well back from the screen so the coffee table has floor on both sides.
+ */
+const RUG = { width: 3.6, farZ: -1.3, nearZ: 2.55 } as const;
+const RUG_DEPTH = RUG.nearZ - RUG.farZ;
+const RUG_CENTER_Z = (RUG.nearZ + RUG.farZ) / 2;
 
 function LoungeRug(): ReactElement {
   return (
     <group position={[0, 0, RUG_CENTER_Z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} receiveShadow>
-        <planeGeometry args={[3.6, 3.0]} />
+        <planeGeometry args={[RUG.width, RUG_DEPTH]} />
         <meshStandardMaterial color="#0c141b" roughness={0.95} metalness={0} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.014, 0]}>
         <ringGeometry args={[1.28, 1.4, 48]} />
         <meshStandardMaterial color="#1d4a56" roughness={0.9} metalness={0} />
       </mesh>
-    </group>
-  );
-}
-
-const WIDTH = 2.2;
-const DEPTH = 0.95;
-const SEAT_TOP = 0.42;
-const SEAT_X = [-0.7, 0, 0.7] as const;
-const FOOT_X = [-0.95, 0.95] as const;
-const FOOT_Z = [-0.36, 0.36] as const;
-
-function LoungeSofa(): ReactElement {
-  return (
-    <group position={[0, 0, SOFA_Z]}>
-      <RoundedBox
-        args={[WIDTH, 0.34, DEPTH]}
-        radius={0.05}
-        smoothness={3}
-        position={[0, 0.27, 0]}
-        castShadow
-      >
-        <meshStandardMaterial {...UPHOLSTERY} />
-      </RoundedBox>
-
-      {SEAT_X.map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.66, 0.16, 0.78]}
-          radius={0.06}
-          smoothness={3}
-          position={[x, SEAT_TOP, 0]}
-          castShadow
-        >
-          <meshStandardMaterial {...UPHOLSTERY} />
-        </RoundedBox>
-      ))}
-
-      <RoundedBox
-        args={[WIDTH, 0.6, 0.2]}
-        radius={0.06}
-        smoothness={3}
-        position={[0, 0.62, 0.4]}
-        castShadow
-      >
-        <meshStandardMaterial {...UPHOLSTERY} />
-      </RoundedBox>
-
-      {SEAT_X.map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.62, 0.42, 0.14]}
-          radius={0.07}
-          smoothness={3}
-          position={[x, 0.62, 0.28]}
-          rotation={[0.12, 0, 0]}
-        >
-          <meshStandardMaterial color="#1c2a36" roughness={0.85} metalness={0.05} />
-        </RoundedBox>
-      ))}
-
-      {[-WIDTH / 2 + 0.12, WIDTH / 2 - 0.12].map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.22, 0.5, DEPTH]}
-          radius={0.07}
-          smoothness={3}
-          position={[x, 0.46, 0]}
-          castShadow
-        >
-          <meshStandardMaterial {...UPHOLSTERY} />
-        </RoundedBox>
-      ))}
-
-      {FOOT_X.map((x) =>
-        FOOT_Z.map((z) => (
-          <mesh key={`${x},${z}`} position={[x, 0.05, z]}>
-            <cylinderGeometry args={[0.03, 0.025, 0.1, 10]} />
-            <meshStandardMaterial {...FRAME} />
-          </mesh>
-        )),
-      )}
     </group>
   );
 }
@@ -244,39 +206,143 @@ function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
   );
 }
 
-const TOP_Y = 0.34;
-const TOP_THICKNESS = 0.06;
+/**
+ * The top is a glass slab, so its shape comes from `slab.ts` — the same primitive as the phone
+ * and the tablet, at a hundred times the area.
+ *
+ * A `RoundedBox` is what it was, and a `RoundedBox` is a bar of soap: one radius rounds all
+ * twelve edges alike, so the thing has no edge at all and reads as a slab of the same dark
+ * plastic as everything else in the corner. What a high-end table has instead is a **flat side
+ * with the edge broken** — a chamfer top and bottom, a couple of millimeters each — because
+ * that chamfer is a line the light runs along, and it is the only reason a 5 cm top reads as a
+ * 5 cm top rather than as a thickness. The corner is a squircle for the same reason it is on
+ * the devices: the curvature carries into the straight edge instead of meeting it at a step.
+ */
+const TOP: SlabSpec = {
+  width: 1.3,
+  length: 0.7,
+  thickness: 0.05,
+  cornerRadius: 0.07,
+  fillet: 0.01,
+};
+
+/** The underside, which is what the base has to reach and what the room measures against. */
+const TOP_BOTTOM_Y = 0.32;
+/**
+ * The glass field and the light are on opposite faces of the slab, and that is the whole
+ * design. Above: a border of graphite, then smoked glass, and nothing lit at all — a lit line
+ * on a table top is a strip somebody stuck on, and it competes with the two screens the table
+ * carries. Below: a channel of accent recessed under the overhang, which puts the light on the
+ * rug instead of in the eye. The top then reads as floating on its own glow, which is the
+ * effect a lounge table like this is bought for.
+ *
+ * The step between the frame and the glass is tenths of a millimeter, and deliberately not a
+ * hairline — `scene/phone.tsx` documents what this room's shallow depth buffer does to two
+ * panels any closer than that.
+ */
+const GLASS_INSET = 0.021;
+const GLASS_Y = TOP_BOTTOM_Y + TOP.thickness + 0.002;
+
 /** The face everything on the table stands on, exported because two specs read it back. */
-export const TABLE_TOP_Y = TOP_Y + TOP_THICKNESS / 2;
-const LEG_X = 0.5;
-const LEG_Z = 0.28;
+export const TABLE_TOP_Y = GLASS_Y;
+
+/**
+ * The channel: set back under the edge so the slab's own overhang hides the emitter, and
+ * standing proud of the underside so the light has a wall to come off rather than a face
+ * pointing at the floor. What a visitor sees from anywhere in the room is a line of accent
+ * following the outline and the wash it throws down onto the rug — never the strip itself.
+ *
+ * It is thin on purpose. The room's bloom pass reads **area**, so a wide band of accent at
+ * this size stops being a line and becomes a lamp — see the soundbar's grille, which lost its
+ * perforations to exactly that.
+ */
+const CHANNEL_INSET = 0.014;
+const CHANNEL_WIDTH = 0.006;
+const CHANNEL_HEIGHT = 0.005;
+const CHANNEL_Y = TOP_BOTTOM_Y - CHANNEL_HEIGHT;
+
+function createChannel(): BufferGeometry {
+  const band = new Shape().setFromPoints(slabOutline(TOP, CHANNEL_INSET));
+  band.holes.push(new Path().setFromPoints(slabOutline(TOP, CHANNEL_INSET + CHANNEL_WIDTH)));
+  return new ExtrudeGeometry(band, { depth: CHANNEL_HEIGHT, bevelEnabled: false });
+}
+
+/**
+ * And the light it actually casts. Emissive geometry lights nothing in three.js — without
+ * this the channel is a bright line on a table standing in its own shadow, which is a decal.
+ * One point light, under the top and short of the floor, is the pool on the rug that makes
+ * the glow read as a source. Kept dim and short-range: the lounge is lit by the television
+ * and the lamp, and this is a table, not a third fixture.
+ */
+const UNDERGLOW = { y: TOP_BOTTOM_Y - 0.08, intensity: 0.55, distance: 1.5 } as const;
+
+/**
+ * The base is the same bent bar as the desk's, crossed instead of parallel — an X in plan,
+ * two runners meeting under the middle of the table and rising to the underside near its four
+ * corners.
+ *
+ * It is crossed so the two pieces are not the same piece of furniture at two sizes. A pair of
+ * parallel loops is the desk's silhouette, and the desk is three meters of it across the same
+ * room; repeated under a coffee table a quarter its length, the corner reads as a set. The X
+ * says the same vocabulary — one section, one bend, one finish — in a different sentence, and
+ * it is the shape that suits a top a visitor walks around rather than sits at.
+ *
+ * The feet are given as the corner one bar reaches, because that is what the shape actually
+ * is; the bar's own length and the turn that lays it there both fall out of that corner.
+ */
+const FOOT = { x: 0.44, z: 0.26 } as const;
+const SLED_TURN = Math.atan2(FOOT.z, FOOT.x);
+
+const SLED: SledSpec = {
+  width: 0.055,
+  thickness: 0.014,
+  halfRun: Math.hypot(FOOT.x, FOOT.z),
+  bend: 0.07,
+  rise: TOP_BOTTOM_Y,
+};
+
+/** The two turns are mirrored, which is what makes one bar into a crossing pair. */
+const SLED_TURNS = [SLED_TURN, -SLED_TURN] as const;
 
 function LoungeCoffeeTable(): ReactElement {
+  const parts = useDisposable(() => ({
+    top: createSlabBody(TOP),
+    channel: createChannel(),
+    glass: createSlabFace(TOP, GLASS_INSET),
+    loop: createSledLoop(SLED),
+  }));
+
   return (
-    <group position={[0, 0, TABLE_Z]}>
-      <RoundedBox
-        args={[1.3, TOP_THICKNESS, 0.7]}
-        radius={0.02}
-        smoothness={3}
-        position={[0, TOP_Y, 0]}
+    <group position={[TABLE_X, 0, TABLE_Z]}>
+      <mesh
+        geometry={parts.top}
+        position={[0, TOP_BOTTOM_Y + TOP.fillet, 0]}
+        rotation={FACE_UP}
         castShadow
       >
         <meshStandardMaterial {...SURFACE} />
-      </RoundedBox>
-
-      <mesh position={[0, TOP_Y + 0.026, 0.352]}>
-        <boxGeometry args={[1.2, 0.005, 0.005]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
 
-      {[-LEG_X, LEG_X].map((x) =>
-        [-LEG_Z, LEG_Z].map((z) => (
-          <mesh key={`${x},${z}`} position={[x, TOP_Y / 2 - 0.02, z]}>
-            <cylinderGeometry args={[0.022, 0.022, TOP_Y - 0.06, 10]} />
-            <meshStandardMaterial {...FRAME} />
-          </mesh>
-        )),
-      )}
+      <mesh geometry={parts.channel} position={[0, CHANNEL_Y, 0]} rotation={FACE_UP}>
+        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
+      </mesh>
+      <pointLight
+        position={[0, UNDERGLOW.y, 0]}
+        intensity={UNDERGLOW.intensity}
+        distance={UNDERGLOW.distance}
+        decay={2}
+        color={worldColors.accent}
+      />
+
+      <mesh geometry={parts.glass} position={[0, GLASS_Y, 0]} rotation={FACE_UP}>
+        <meshStandardMaterial {...SLAB_GLASS} />
+      </mesh>
+
+      {SLED_TURNS.map((turn) => (
+        <mesh key={turn} geometry={parts.loop} rotation={[0, turn, 0]} castShadow>
+          <meshStandardMaterial {...anodizedMetalMaterial} />
+        </mesh>
+      ))}
 
       <LoungeTableItems topY={TABLE_TOP_Y + 0.001} />
     </group>
@@ -343,7 +409,9 @@ export function Lounge(): ReactElement {
   return (
     <group position={LOUNGE_ORIGIN} rotation={[0, LOUNGE_ROTATION_Y, 0]}>
       <LoungeRug />
-      <LoungeSofa />
+      <group position={[SOFA_X, 0, SOFA_Z]}>
+        <Sofa />
+      </group>
       <LoungeCoffeeTable />
       <LoungeTv />
       <LoungeLamp />

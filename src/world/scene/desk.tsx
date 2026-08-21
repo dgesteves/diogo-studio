@@ -3,9 +3,11 @@
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { DoubleSide } from "three";
-import { worldColors, darkMetalMaterial } from "../materials";
+import { anodizedMetalMaterial, worldColors, darkMetalMaterial } from "../materials";
 import { DESK_DEPTH, DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
+import { useDisposable } from "../gpu";
+import { createSledLoop, type SledSpec } from "./sled";
 import { Keyboard } from "./keyboard";
 import { CoffeeMug } from "./mug";
 import { Mouse } from "./mouse";
@@ -20,27 +22,54 @@ import { Tablet } from "./tablet";
  * surface height lives in `world/room.ts`, because the camera framing derives from it too.
  */
 
-const LEG_POSITIONS = [
-  [-1.35, -0.45],
-  [1.35, -0.45],
-  [-1.35, 0.45],
-  [1.35, 0.45],
-] as const;
+const DESK_WIDTH = 3;
+
+/**
+ * The desk stands on the same bent bar as the lounge table — `sled.ts` carries why, and the
+ * four posts this replaced are the reason. At three meters it is the widest thing in the room
+ * and the one a visitor sits at, so what is under it is a floor a chair rolls across rather
+ * than a row of shins: two loops, and nothing between them.
+ *
+ * Scaled from the table's rather than copied: a 2 cm section on a 92 cm runner, standing 35 cm
+ * in from each end. The cantilever is proportionally shorter than the table's because the span
+ * between the loops is twice as long, and a 3 m top hung off its middle reads as a plank.
+ */
+const SLED: SledSpec = {
+  width: 0.08,
+  thickness: 0.02,
+  halfRun: 0.46,
+  bend: 0.1,
+  rise: DESK_LEG_HEIGHT - DESK_TOP_THICKNESS / 2,
+};
+
+const SLED_INSET = 0.35;
+/** A quarter turn, which lays each bar's run across the desk's depth. The pair stays parallel:
+ *  the lounge table crosses its two into an X, and the desk is the piece that does not. */
+const SLED_TURN = Math.PI / 2;
+const LOOP_XS = [-1, 1].map((side) => side * (DESK_WIDTH / 2 - SLED_INSET));
 
 export function Desk(): ReactElement {
+  const loop = useDisposable(() => createSledLoop(SLED));
+
   return (
     <group position={[0, DESK_LEG_HEIGHT, 0]}>
-      <RoundedBox args={[3.0, DESK_TOP_THICKNESS, DESK_DEPTH]} radius={0.02} smoothness={2}>
+      <RoundedBox args={[DESK_WIDTH, DESK_TOP_THICKNESS, DESK_DEPTH]} radius={0.02} smoothness={2}>
         <meshStandardMaterial color="#0d1216" roughness={0.55} metalness={0.25} />
       </RoundedBox>
       <mesh position={[0, 0.005, DESK_DEPTH / 2 + 0.005]}>
         <boxGeometry args={[2.8, 0.006, 0.006]} />
         <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
-      {LEG_POSITIONS.map(([x, z]) => (
-        <mesh key={`${x},${z}`} position={[x, -DESK_LEG_HEIGHT / 2, z]}>
-          <cylinderGeometry args={[0.028, 0.028, DESK_LEG_HEIGHT, 10]} />
-          <meshStandardMaterial color="#13181d" roughness={0.65} metalness={0.45} />
+      {/* The loops are drawn from the floor up, so they hang below the group the top sets. */}
+      {LOOP_XS.map((x) => (
+        <mesh
+          key={x}
+          geometry={loop}
+          position={[x, -DESK_LEG_HEIGHT, 0]}
+          rotation={[0, SLED_TURN, 0]}
+          castShadow
+        >
+          <meshStandardMaterial {...anodizedMetalMaterial} />
         </mesh>
       ))}
     </group>
