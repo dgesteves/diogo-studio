@@ -12,18 +12,29 @@ import {
   type StatusView,
   STATUS_ROWS,
 } from "./monitors";
-import { drawTablet } from "./tablet";
-import { CHANNELS, CONTROL_SCREEN, controlDeckView, drawControlDeck, KEYS } from "./control-deck";
+import {
+  ALARM,
+  CHANNEL_PIGMENTS,
+  CHANNELS,
+  CONTROL_SCREEN,
+  controlDeckView,
+  drawControlDeck,
+  KEY_LAMPS,
+  KEYS,
+} from "./control-deck";
+import { drawPhoneHome, PHONE_SCREEN } from "./phone";
+import { drawTabletHome, TABLET_SCREEN } from "./tablet";
+import { monogram, type HomeApp } from "./home";
 
 /**
- * The three screens on the studio desk, the tablet beside them and the control deck's panel.
+ * The three screens on the studio desk, the control deck's panel, and the two devices lying
+ * on it — the phone by the mouse and the tablet beside the keyboard.
  * They redraw on a frame or a timer, so what matters is that a given input paints one exact
- * thing — and that the inputs that move (a caret, a frame rate, a clock, a stroke, a level)
- * each change the picture.
+ * thing — and that the inputs that move (a caret, a frame rate, a clock, a level) each change
+ * the picture.
  */
 
 const DESK = { width: 640, height: 400 };
-const TABLET = { width: 358, height: 512 };
 
 function paint(draw: (ctx: CanvasRenderingContext2D) => void, size = DESK): RecordingContext {
   const recording = createRecordingContext(size);
@@ -31,21 +42,11 @@ function paint(draw: (ctx: CanvasRenderingContext2D) => void, size = DESK): Reco
   return recording;
 }
 
-// The sparkline is the one path drawn in the plot area, and the tablet's ink is the one
-// stroked twice — grouping by `beginPath` is what tells them apart from the grid and rules
-// drawn around them, without a spec guessing at coordinates.
+// The sparkline is the one path drawn in the plot area — grouping by `beginPath` is what
+// tells it apart from the grid and the rules drawn around it, without a spec guessing at
+// coordinates.
 function sparkline({ paths }: RecordingContext): Path {
   return paths.find((path) => path.points.every(([x]) => x >= 250)) ?? { points: [], paints: [] };
-}
-
-function trace({ paths }: RecordingContext): Path {
-  return paths.find((path) => path.paints.length === 2) ?? { points: [], paints: [] };
-}
-
-// The nib is the dot filled straight after the ink; the tool dots come later.
-function head({ paths }: RecordingContext): Path | undefined {
-  const ink = paths.findIndex((path) => path.paints.length === 2);
-  return paths.slice(ink + 1).find((path) => path.points.length === 1);
 }
 
 describe("code screen", () => {
@@ -203,57 +204,6 @@ describe("terminal screen", () => {
   });
 });
 
-describe("tablet screen", () => {
-  it("draws the stroke up to the progress it is given", () => {
-    const quarter = trace(paint((ctx) => drawTablet(ctx, { progress: 0.25, pressure: 0 }), TABLET));
-    const whole = trace(paint((ctx) => drawTablet(ctx, { progress: 1, pressure: 0 }), TABLET));
-
-    expect(quarter.points.length).toBeLessThan(whole.points.length);
-    // Both traces start at the same place, so the drawing looks continuous as it grows.
-    expect(quarter.points[0]).toEqual(whole.points[0]);
-    // Painted twice on one path: a wide halo under a thin line.
-    expect(whole.paints.map((paint) => paint.kind)).toEqual(["stroke", "stroke"]);
-  });
-
-  it("never traces fewer than two points, so an unstarted stroke is still a line", () => {
-    const recording = paint((ctx) => drawTablet(ctx, { progress: 0, pressure: 0 }), TABLET);
-    const { points } = trace(recording);
-
-    expect(points).toHaveLength(2);
-    // The nib sits on the end of the ink, whatever the progress.
-    expect(head(recording)?.points[0]).toEqual(points.at(-1));
-  });
-
-  it("thickens the ink with pressure", () => {
-    const light = paint((ctx) => drawTablet(ctx, { progress: 1, pressure: 0 }), TABLET);
-    const heavy = paint((ctx) => drawTablet(ctx, { progress: 1, pressure: 1 }), TABLET);
-
-    expect(light.valuesOf("lineWidth")).toContain(4);
-    expect(heavy.valuesOf("lineWidth")).toContain(6.5);
-  });
-
-  it("frames the sketch with a grid, a header and five tools", () => {
-    const recording = paint((ctx) => drawTablet(ctx, { progress: 1, pressure: 0.5 }), TABLET);
-    const { callsTo, paths, text } = recording;
-
-    expect(text).toEqual(["SKETCH", "layer 02"]);
-    // The grid is one path of 42px verticals and horizontals, stroked once.
-    const grid = paths[0];
-    expect(grid?.points.filter(([, y]) => y === 0).map(([x]) => x)).toEqual([
-      42, 84, 126, 168, 210, 252, 294, 336,
-    ]);
-    expect(grid?.paints).toHaveLength(1);
-    // Five tool dots, of which exactly one carries the active accent.
-    const tools = callsTo("arc").filter(([, , radius]) => radius === 13);
-    expect(tools).toHaveLength(5);
-    expect(
-      paths
-        .filter((path) => path.points.length === 1 && path.paints[0]?.kind === "fill")
-        .filter((path) => path.paints[0]?.style === worldColors.accent),
-    ).toHaveLength(1);
-  });
-});
-
 /**
  * The console panel. Its two failures both still look like a working screen: a meter painted
  * past the end of its track, and a key row where every chip is lit or none is.
@@ -271,7 +221,8 @@ describe("control deck panel", () => {
     const { text } = deck(CHANNELS.map(() => level));
 
     expect(text).toEqual([
-      "● CONTROL",
+      "●",
+      "CONTROL",
       "hub · linked",
       ...CHANNELS.flatMap((channel) => [channel, "42%"]),
       ...KEYS,
@@ -293,21 +244,30 @@ describe("control deck panel", () => {
     expect(text).toContain("0%");
   });
 
-  it("runs a channel over its ceiling in the hotter accent", () => {
+  it("paints every channel in its own hue, so no two meters read as one instrument", () => {
+    const painted = deck(CHANNELS.map(() => level)).valuesOf("fillStyle");
+    const hues = CHANNELS.map((channel) => CHANNEL_PIGMENTS[channel]);
+
+    expect(new Set(hues).size).toBe(CHANNELS.length);
+    for (const hue of hues) expect.soft(painted).toContain(hue);
+  });
+
+  it("hands a channel over its ceiling to the alarm, whichever hue it was", () => {
     const calm = deck([0.5, 0.5, 0.5, 0.5]);
     const hot = deck([0.95, 0.5, 0.5, 0.5]);
 
-    expect(calm.valuesOf("fillStyle")).not.toContain(worldColors.accentBright);
-    expect(hot.valuesOf("fillStyle")).toContain(worldColors.accentBright);
+    expect(calm.valuesOf("fillStyle")).not.toContain(ALARM);
+    expect(hot.valuesOf("fillStyle")).toContain(ALARM);
   });
 
-  it("lights exactly one key, the one the view names", () => {
-    const lit = chips(
+  it("lights exactly one key, the one the view names, in that key's own lamp", () => {
+    const painted = chips(
       deck(
         CHANNELS.map(() => level),
         2,
       ),
-    ).map((chip) => chip.paints[0]?.style === worldColors.accent);
+    );
+    const lit = KEYS.map((key, index) => painted[index]?.paints[0]?.style === KEY_LAMPS[key]);
 
     expect(lit).toEqual([false, false, true, false]);
   });
@@ -326,5 +286,179 @@ describe("control deck panel", () => {
 
     expect([...seen].sort()).toEqual(KEYS.map((_, index) => index));
     expect(controlDeckView(1).levels).not.toEqual(controlDeckView(2).levels);
+  });
+});
+
+/**
+ * The phone's home screen. Its failures are all quiet ones: a station dropped off the end of
+ * the grid, a label run into its neighbor, a dock that takes five. The screen is 7 cm of desk
+ * seen from across the room, so none of them shows up anywhere but in the transcript.
+ */
+describe("phone home screen", () => {
+  const CLOCK = "16:20";
+  const DATE = "Thursday, August 20";
+
+  /** Enough to overflow the screen, so what it drops is a decision rather than an accident. */
+  const APPS: readonly HomeApp[] = Array.from({ length: 24 }, (_, index) => ({
+    label: `Station ${index}`,
+    accent: `#${(index + 16).toString(16).padStart(2, "0")}d3ee`,
+  }));
+
+  const home = (apps: readonly HomeApp[] = APPS): RecordingContext =>
+    paint((ctx) => drawPhoneHome(ctx, { apps, clock: CLOCK, date: DATE }), PHONE_SCREEN);
+
+  it("docks four apps and fills the grid with the rest, in reading order", () => {
+    const labels = home().runs.map((run) => run.text);
+    const docked = APPS.slice(0, 4).map((app) => app.label);
+    const gridded = APPS.slice(4, 20).map((app) => app.label);
+
+    // The dock is wordless — a docked app is known by its tile — so no label of one is set.
+    for (const label of docked) expect.soft(labels).not.toContain(label);
+    expect(labels.filter((text) => text.startsWith("Station "))).toEqual(gridded);
+  });
+
+  it("drops what the screen has no room for rather than painting off the edge", () => {
+    const { runs } = home();
+    const dropped = APPS.slice(20).map((app) => app.label);
+
+    expect(dropped).not.toEqual([]);
+    for (const label of dropped) expect.soft(runs.map((run) => run.text)).not.toContain(label);
+    for (const run of runs) {
+      expect.soft(run.y).toBeLessThan(PHONE_SCREEN.height);
+      expect.soft(run.x).toBeGreaterThan(0);
+    }
+  });
+
+  it("elides a label too long for its column instead of running it into the next", () => {
+    const long = [...APPS.slice(0, 4), { label: "A station named at length", accent: "#22d3ee" }];
+    const label = home(long).runs.find((run) => run.text.startsWith("A station"));
+
+    expect(label?.text).toMatch(/…$/);
+    expect(label!.width).toBeLessThan(PHONE_SCREEN.width * 0.25);
+  });
+
+  it("shows the same minute in the status bar and on the card", () => {
+    const { runs } = home();
+
+    expect(runs.filter((run) => run.text === CLOCK)).toHaveLength(2);
+    expect(runs.filter((run) => run.text === DATE)).toHaveLength(1);
+  });
+
+  it("floods one tile per app with that app's own station color", () => {
+    const { callsTo, valuesOf } = home();
+    const shown = APPS.slice(0, 20);
+    // A tile is the only square this screen fills — every other fill is a rounded path — and
+    // it is filled twice, once with the color and once with the gloss laid over it.
+    const squares = new Set(
+      callsTo("fillRect")
+        .filter(([, , width, height]) => width === height)
+        .map(([x, y]) => `${x},${y}`),
+    );
+
+    expect(squares.size).toBe(shown.length);
+    for (const app of shown) expect.soft(valuesOf("fillStyle")).toContain(app.accent);
+  });
+
+  it("takes the initials of a label, and never more than two", () => {
+    expect(monogram("Case studies")).toBe("CS");
+    expect(monogram("Open source")).toBe("OS");
+    expect(monogram("Now")).toBe("N");
+    expect(monogram("Résumé")).toBe("R");
+    expect(monogram("one two three four")).toBe("OT");
+  });
+});
+
+/**
+ * The tablet's home screen. It shows the same room as the phone's from the same kit, so what
+ * is worth asserting is what makes it a *tablet*: five to a row rather than four, a dock that
+ * is five wide, and a card that names the city the studio's clock is set to.
+ */
+describe("tablet home screen", () => {
+  const CLOCK = "16:20";
+  const DATE = "Thursday, August 20";
+  const CITY = "Lisbon";
+  const DOCKED = 5;
+  const COLUMNS = 5;
+  const GRIDDED = COLUMNS * 3;
+
+  /** Enough to overflow the screen, so what it drops is a decision rather than an accident. */
+  const APPS: readonly HomeApp[] = Array.from({ length: 24 }, (_, index) => ({
+    label: `Station ${index}`,
+    accent: `#${(index + 16).toString(16).padStart(2, "0")}d3ee`,
+  }));
+
+  const home = (apps: readonly HomeApp[] = APPS): RecordingContext =>
+    paint(
+      (ctx) => drawTabletHome(ctx, { apps, clock: CLOCK, date: DATE, city: CITY }),
+      TABLET_SCREEN,
+    );
+
+  it("docks five apps and fills the grid with the rest, in reading order", () => {
+    const labels = home().runs.map((run) => run.text);
+
+    // The dock is wordless — a docked app is known by its tile — so no label of one is set.
+    for (const app of APPS.slice(0, DOCKED)) expect.soft(labels).not.toContain(app.label);
+    expect(labels.filter((text) => text.startsWith("Station "))).toEqual(
+      APPS.slice(DOCKED, DOCKED + GRIDDED).map((app) => app.label),
+    );
+  });
+
+  it("lays the grid out five to a row, on one pitch", () => {
+    const centers = home()
+      .runs.filter((run) => run.text.startsWith("Station "))
+      .map((run) => run.x);
+    const row = centers.slice(0, COLUMNS);
+
+    // Every row starts over at the same five columns, which is what makes it a grid.
+    expect(centers.slice(COLUMNS, COLUMNS * 2)).toEqual(row);
+    expect(centers.slice(COLUMNS * 2)).toEqual(row);
+    const pitches = row.slice(1).map((x, index) => x - row[index]!);
+    for (const pitch of pitches) expect.soft(pitch).toBeCloseTo(pitches[0]!, 6);
+  });
+
+  it("drops what the screen has no room for rather than painting off the edge", () => {
+    const { runs } = home();
+    const dropped = APPS.slice(DOCKED + GRIDDED).map((app) => app.label);
+
+    expect(dropped).not.toEqual([]);
+    for (const label of dropped) expect.soft(runs.map((run) => run.text)).not.toContain(label);
+    for (const run of runs) {
+      expect.soft(run.y).toBeLessThan(TABLET_SCREEN.height);
+      expect.soft(run.x).toBeGreaterThan(0);
+    }
+  });
+
+  it("elides a label too long for its column instead of running it into the next", () => {
+    const long = [
+      ...APPS.slice(0, DOCKED),
+      { label: "A station named at length", accent: "#22d3ee" },
+    ];
+    const label = home(long).runs.find((run) => run.text.startsWith("A station"));
+
+    expect(label?.text).toMatch(/…$/);
+    expect(label!.width).toBeLessThan(TABLET_SCREEN.width * 0.2);
+  });
+
+  it("shows the studio's minute twice and names the city it is kept in", () => {
+    const { runs } = home();
+
+    expect(runs.filter((run) => run.text === CLOCK)).toHaveLength(2);
+    expect(runs.filter((run) => run.text === DATE)).toHaveLength(1);
+    expect(runs.filter((run) => run.text === CITY)).toHaveLength(1);
+  });
+
+  it("floods one tile per app with that app's own station color", () => {
+    const { callsTo, valuesOf } = home();
+    const shown = APPS.slice(0, DOCKED + GRIDDED);
+    // A tile is the only square this screen fills — every other fill is a rounded path — and
+    // it is filled twice, once with the color and once with the gloss laid over it.
+    const squares = new Set(
+      callsTo("fillRect")
+        .filter(([, , width, height]) => width === height)
+        .map(([x, y]) => `${x},${y}`),
+    );
+
+    expect(squares.size).toBe(shown.length);
+    for (const app of shown) expect.soft(valuesOf("fillStyle")).toContain(app.accent);
   });
 });

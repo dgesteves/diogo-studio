@@ -7,17 +7,16 @@ import {
   WHEEL,
   WING,
   bodyTopAt,
-  createShell,
   gripSheets,
   halfWidthAt,
   paintSeam,
-  sampleCurve,
   seamSheets,
   shellSheets,
   shellTopAt,
   shoulderAt,
   wingSheets,
 } from "./mouse";
+import { createShell } from "./shell";
 
 /**
  * The mouse is molded rather than lofted: separate shells that meet at real gaps. Nothing
@@ -38,34 +37,6 @@ function along(): readonly number[] {
 function positionsOf(geometry: ReturnType<typeof createShell>): readonly number[] {
   return Array.from(geometry.getAttribute("position").array);
 }
-
-describe("the measured curves the shell is read off", () => {
-  const knots = [
-    [0, 0.2],
-    [0.4, 0.9],
-    [0.7, 0.9],
-    [1, 0.1],
-  ] as const;
-
-  it("passes through every measurement it was given", () => {
-    for (const [at, value] of knots) expect(sampleCurve(knots, at)).toBeCloseTo(value, 10);
-  });
-
-  it("holds the ends flat instead of extrapolating past them", () => {
-    expect(sampleCurve(knots, -1)).toBe(0.2);
-    expect(sampleCurve(knots, 2)).toBe(0.1);
-  });
-
-  // Several tables hold a deliberate step, and an interpolant that overshoots one puts a
-  // bulge on either side of it — a lip around the wheel slot, a waist at the nose.
-  it("never overshoots a segment, so a step stays a step", () => {
-    for (let step = 0; step <= 200; step += 1) {
-      const at = step / 200;
-      expect.soft(sampleCurve(knots, at)).toBeLessThanOrEqual(0.9 + 1e-12);
-      expect.soft(sampleCurve(knots, at)).toBeGreaterThanOrEqual(0.1 - 1e-12);
-    }
-  });
-});
 
 describe("the mouse's proportions", () => {
   it("is widest under the heel of the hand, not at its middle", () => {
@@ -171,7 +142,7 @@ describe("the lit seam", () => {
   );
 
   it("burns the room's accent, not a palette of its own", () => {
-    // The keyboard and the tablet are lit with this exact color; the mouse is a desk of
+    // The keyboard and the headphones are lit with this exact color; the mouse is a desk of
     // matching parts, so the strip is not the place to introduce a second neon.
     const peak = brightness.indexOf(Math.max(...brightness));
     const accent = new Color(worldColors.accent);

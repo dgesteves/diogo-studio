@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { LinearMipmapLinearFilter, type CanvasTexture } from "three";
+import { type CanvasTexture } from "three";
 import { useDisposable } from "../gpu";
 import { worldColors } from "../materials";
 import { MONO } from "../screens/kit";
@@ -197,14 +197,11 @@ export function paintCoasterPrint(ctx: CanvasRenderingContext2D): void {
 }
 
 function createCoasterPrintTexture(): CanvasTexture {
-  const { canvas, texture } = createCanvasTexture(COASTER_PRINT.width, COASTER_PRINT.height);
-
-  // Painted once and then read at a glancing angle from across the room, like the mug's
-  // print and unlike a screen — so it takes the mipmap chain `createCanvasTexture` leaves off.
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.anisotropy = 4;
-
+  const { canvas, texture } = createCanvasTexture(COASTER_PRINT.width, COASTER_PRINT.height, {
+    // Painted once and then read at a glancing angle from across the room, like the mug's
+    // print and unlike a screen.
+    mipmapped: true,
+  });
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
 

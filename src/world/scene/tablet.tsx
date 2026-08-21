@@ -1,116 +1,131 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { RoundedBox } from "@react-three/drei";
-import { worldColors } from "../materials";
+import { ContactShadows } from "@react-three/drei";
+import { stationIndex } from "@/content/pages";
+import { useDisposable } from "../gpu";
 import { DESK_TOP_Y } from "../room";
-import { useTabletScreenTexture } from "../screens/tablet";
+import { type HomeApp } from "../screens/home";
+import { TABLET_SCREEN, useTabletScreenTexture } from "../screens/tablet";
+import { getStation } from "../stations";
+import {
+  createSlabBody,
+  createSlabFace,
+  FACE_UP,
+  SLAB_FRAME,
+  SLAB_GLASS,
+  type SlabSpec,
+} from "./slab";
 
 /**
- * The drawing tablet and the stylus lying on it. One file because the stylus has no meaning
- * anywhere else in the room and is positioned against the tablet's own surface.
+ * The tablet lying face-up to the left of the keyboard, screen on. It is the phone's larger
+ * relation and is built the same way — the squircle profile, the body extruded from it, and
+ * the glass and the display as two concentric copies of the one outline — so the shape lives
+ * in `slab.ts` and this file is the measurements, the place on the desk and what it shows.
+ *
+ * Silver, which on this object is the whole point and the thing that took tuning: a tablet is
+ * mostly frame seen from above, so where the phone can be read by its screen alone this one
+ * is read by the band of aluminum around it. See `SLAB_FRAME` for why that band is not a
+ * polished metal.
+ *
+ * Nothing is modeled on the back — the camera bar, the connector, the etching are all against
+ * the desk — and nothing on the walls: they are 5.3 mm tall, seen from meters away, and a
+ * button on them would be a tenth of a pixel.
  */
 
-const BARREL_LENGTH = 0.126;
-const BARREL_HALF = BARREL_LENGTH / 2;
-const BARREL_TAIL_RADIUS = 0.0055;
-const BARREL_TIP_RADIUS = 0.0042;
-const GRIP_LENGTH = 0.036;
-const TIP_LENGTH = 0.02;
-
-const STYLUS_RADIUS = 0.0062;
-
-type StylusProps = {
-  position: [number, number, number];
-  rotation: [number, number, number];
+/** In meters, off the real device — an 11-inch iPad Pro: 249.7 × 177.5 × 5.3 mm, with an
+ *  18 mm corner. */
+export const TABLET: SlabSpec = {
+  width: 0.1775,
+  length: 0.2497,
+  thickness: 0.0053,
+  cornerRadius: 0.018,
+  fillet: 0.0005,
 };
 
-function Stylus({ position, rotation }: StylusProps): ReactElement {
+/**
+ * The rim of frame that shows around the glass from above, and the black border between the
+ * glass edge and the first lit pixel. Together they are the 8.45 mm this device insets its
+ * display by — a border five times the phone's, and one of the two things that keep a tablet
+ * from reading as a phone at this size. (The other is the corner, which is proportionally
+ * tighter here: 18 mm on a 177 mm side, against 12.5 on 78.)
+ */
+const RIM = 0.0012;
+const BEZEL = 0.00725;
+const GLASS_INSET = RIM;
+const DISPLAY_INSET = RIM + BEZEL;
+
+/**
+ * The apps, bound here rather than in the draw: the stations are the authored record and
+ * their accents are the room's own tuning, so this is where the two meet. Module scope keeps
+ * the array's identity stable — `useTabletScreenTexture` has it as an effect dependency, and
+ * a fresh array per render would repaint and re-upload the texture on every frame.
+ */
+const APPS: readonly HomeApp[] = stationIndex.map(({ slug, label }) => ({
+  label,
+  accent: getStation(slug).accent,
+}));
+
+const SCREEN_Y = TABLET.thickness;
+/**
+ * The two panels over the body's top face, at the same steps the phone uses: tenths of a
+ * millimeter, and deliberately not hairlines — the room's camera runs a 0.1–60 m frustum, and
+ * on a depth buffer that shallow the glass punches through the display from across the desk.
+ */
+const GLASS_Y = SCREEN_Y + 0.00015;
+const DISPLAY_Y = SCREEN_Y + 0.0005;
+const DISPLAY_WIDTH = TABLET.width - DISPLAY_INSET * 2;
+const DISPLAY_LENGTH = TABLET.length - DISPLAY_INSET * 2;
+
+/**
+ * Left of the keyboard, which starts at x ≈ -0.4, and set back from the front edge: this is
+ * the corner of the desk the drawing tablet used to hold, and it is the one clear patch of
+ * surface big enough for a 25 cm object. Turned slightly, the way something put down beside
+ * the thing you are actually using is.
+ */
+export const TABLET_POSITION = [-0.62, DESK_TOP_Y, -0.04] as const;
+export const TABLET_TURN = 0.12;
+
+export function Tablet(): ReactElement {
+  const screen = useTabletScreenTexture(APPS);
+  const parts = useDisposable(() => ({
+    body: createSlabBody(TABLET),
+    glass: createSlabFace(TABLET, GLASS_INSET),
+    display: createSlabFace(TABLET, DISPLAY_INSET),
+  }));
+
   return (
-    <group position={position} rotation={rotation}>
-      <mesh>
-        <cylinderGeometry args={[BARREL_TAIL_RADIUS, BARREL_TIP_RADIUS, BARREL_LENGTH, 14]} />
-        <meshStandardMaterial color="#161c22" roughness={0.45} metalness={0.55} />
+    <group position={TABLET_POSITION} rotation={[0, TABLET_TURN, 0]}>
+      <mesh geometry={parts.body} position={[0, TABLET.fillet, 0]} rotation={FACE_UP}>
+        <meshStandardMaterial {...SLAB_FRAME} />
       </mesh>
-      <mesh position={[0, -BARREL_HALF + GRIP_LENGTH / 2, 0]}>
-        <cylinderGeometry args={[STYLUS_RADIUS, 0.0052, GRIP_LENGTH, 14]} />
-        <meshStandardMaterial color="#0b1015" roughness={0.88} metalness={0.12} />
+      <mesh geometry={parts.glass} position={[0, GLASS_Y, 0]} rotation={FACE_UP}>
+        <meshStandardMaterial {...SLAB_GLASS} />
       </mesh>
-      <mesh position={[0, -BARREL_HALF - TIP_LENGTH / 2, 0]} rotation={[Math.PI, 0, 0]}>
-        <coneGeometry args={[BARREL_TIP_RADIUS, TIP_LENGTH, 14]} />
-        <meshStandardMaterial color="#0d1216" roughness={0.5} metalness={0.5} />
+      {/* Unlit, like the phone's: a lit material adds the room's light to what the panel
+          emits, so every colored hotspot sweeping the desk washes a second copy of the home
+          screen over the real one. A screen emits; it does not also catch the light. */}
+      <mesh geometry={parts.display} position={[0, DISPLAY_Y, 0]} rotation={FACE_UP}>
+        <meshBasicMaterial map={screen} toneMapped={false} />
       </mesh>
-      <mesh position={[0, BARREL_HALF, 0]}>
-        <sphereGeometry args={[BARREL_TAIL_RADIUS, 14, 10]} />
-        <meshStandardMaterial color="#1a2530" roughness={0.4} metalness={0.6} />
-      </mesh>
-      <mesh position={[0, -BARREL_HALF + GRIP_LENGTH + 0.003, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.0055, 0.0011, 8, 20]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
-      <mesh position={[0.0048, 0.014, 0]}>
-        <capsuleGeometry args={[0.0015, 0.013, 4, 10]} />
-        <meshStandardMaterial color="#22303a" roughness={0.6} metalness={0.4} />
-      </mesh>
-    </group>
-  );
-}
-
-const SLAB_WIDTH = 0.2;
-const SLAB_DEPTH = 0.3;
-const SLAB_HEIGHT = 0.012;
-const SLAB_TOP = SLAB_HEIGHT / 2;
-const ACTIVE_AREA_Z = 0.012;
-const ACTIVE_AREA_WIDTH = 0.176;
-const ACTIVE_AREA_DEPTH = 0.252;
-const FRAME_INSET = 0.0035;
-const BEZEL_GROOVE_Z = -SLAB_DEPTH / 2 + 0.018;
-const SLAB_LIFT = 0.008;
-const STYLUS_X = -0.142;
-
-export function GraphicsTablet(): ReactElement {
-  const screenTexture = useTabletScreenTexture();
-
-  return (
-    <group position={[-0.62, DESK_TOP_Y + SLAB_LIFT, -0.04]} rotation={[0, 0.12, 0]}>
-      <RoundedBox args={[SLAB_WIDTH, SLAB_HEIGHT, SLAB_DEPTH]} radius={0.006} smoothness={2}>
-        <meshStandardMaterial color="#13181d" roughness={0.5} metalness={0.4} />
-      </RoundedBox>
-      <mesh position={[0, SLAB_TOP - 0.0004, ACTIVE_AREA_Z]}>
-        <boxGeometry
-          args={[ACTIVE_AREA_WIDTH + FRAME_INSET * 2, 0.0012, ACTIVE_AREA_DEPTH + FRAME_INSET * 2]}
-        />
-        <meshStandardMaterial color="#05080b" roughness={0.35} metalness={0.5} />
-      </mesh>
-      <mesh position={[0, SLAB_TOP + 0.0004, ACTIVE_AREA_Z]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[ACTIVE_AREA_WIDTH, ACTIVE_AREA_DEPTH]} />
-        <meshStandardMaterial
-          map={screenTexture}
-          emissive="#ffffff"
-          emissiveMap={screenTexture}
-          emissiveIntensity={0.7}
-          toneMapped={false}
-        />
-      </mesh>
-      <mesh position={[-0.012, SLAB_TOP - 0.0007, BEZEL_GROOVE_Z]}>
-        <boxGeometry args={[0.11, 0.0014, 0.005]} />
-        <meshStandardMaterial color="#05080b" roughness={0.8} metalness={0.2} />
-      </mesh>
-      <mesh position={[0.062, SLAB_TOP - 0.0006, BEZEL_GROOVE_Z]}>
-        <sphereGeometry args={[0.0026, 8, 8]} />
-        <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-      </mesh>
-      <Stylus
-        position={[STYLUS_X, STYLUS_RADIUS - SLAB_LIFT, 0.02]}
-        rotation={[Math.PI / 2, 0, 0.12]}
-      />
-      <pointLight
-        position={[0, 0.05, ACTIVE_AREA_Z]}
-        intensity={0.09}
-        distance={0.38}
-        decay={2}
-        color={worldColors.accent}
+      <ContactShadows
+        position={[0, 0.0007, 0]}
+        scale={0.44}
+        resolution={256}
+        blur={1.6}
+        far={0.05}
+        opacity={0.5}
+        color="#01050a"
+        frames={1}
       />
     </group>
   );
 }
+
+/** The modeled display, for the spec that holds the canvas to the panel it is painted on. */
+export const DISPLAY = {
+  width: DISPLAY_WIDTH,
+  length: DISPLAY_LENGTH,
+  aspect: DISPLAY_LENGTH / DISPLAY_WIDTH,
+  canvasAspect: TABLET_SCREEN.height / TABLET_SCREEN.width,
+} as const;

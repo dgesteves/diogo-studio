@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { BackSide, LinearMipmapLinearFilter, type CanvasTexture } from "three";
+import { BackSide, type CanvasTexture } from "three";
 import { useDisposable } from "../gpu";
 import { DESK_TOP_Y } from "../room";
 import { COASTER, Coaster } from "./coaster";
@@ -246,14 +246,11 @@ export function paintMugPrint(ctx: CanvasRenderingContext2D): void {
 }
 
 function createMugPrintTexture(): CanvasTexture {
-  const { canvas, texture } = createCanvasTexture(MUG_PRINT.width, MUG_PRINT.height);
-
-  // Painted once and then read from across the room at a glancing angle, like a book's cloth
-  // and unlike a screen — so it gets the mipmap chain `createCanvasTexture` leaves off.
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.anisotropy = 4;
-
+  const { canvas, texture } = createCanvasTexture(MUG_PRINT.width, MUG_PRINT.height, {
+    // Painted once and then read from across the room at a glancing angle, like a book's
+    // cloth and unlike a screen.
+    mipmapped: true,
+  });
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
 

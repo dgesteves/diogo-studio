@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { type CanvasTexture } from "three";
 import { siteConfig } from "@/content/profile";
 import { worldColors } from "../materials";
-import { divider, fillScreen, MONO, scanlines, INK, SOFT } from "./kit";
+import { divider, fillScreen, fit, MONO, scanlines, INK, SOFT } from "./kit";
 import { useScreenTexture } from "./texture";
 
 /**
@@ -185,14 +185,6 @@ export type StatusView = {
   focus: string;
 };
 
-function fitValue(ctx: CanvasRenderingContext2D, text: string, maxWidth: number): string {
-  let value = text;
-  while (value.length > 1 && ctx.measureText(value).width > maxWidth) {
-    value = `${value.slice(0, -2)}…`;
-  }
-  return value;
-}
-
 export function drawTerminal(ctx: CanvasRenderingContext2D, view: StatusView): void {
   const W = ctx.canvas.width;
 
@@ -233,22 +225,22 @@ export function drawTerminal(ctx: CanvasRenderingContext2D, view: StatusView): v
     ctx.fillStyle = "rgba(34, 211, 238, 0.5)";
     ctx.fillText("▸", valueX - 30, y);
     ctx.fillStyle = "rgba(232,246,252,0.72)";
-    ctx.fillText(fitValue(ctx, row.value, maxValueWidth), valueX, y);
+    ctx.fillText(fit(ctx, row.value, maxValueWidth), valueX, y);
   }
 }
 
 const FOCUS_INTERVAL_MS = 3000;
 
-const LISBON_TIME = new Intl.DateTimeFormat("en-US", {
-  timeZone: "Europe/Lisbon",
+const STUDIO_TIME = new Intl.DateTimeFormat("en-US", {
+  timeZone: siteConfig.timeZone,
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
   hourCycle: "h23",
 });
 
-const LISBON_DATE = new Intl.DateTimeFormat("en-US", {
-  timeZone: "Europe/Lisbon",
+const STUDIO_DATE = new Intl.DateTimeFormat("en-US", {
+  timeZone: siteConfig.timeZone,
   weekday: "short",
   day: "2-digit",
   month: "short",
@@ -276,8 +268,8 @@ export function useCenterScreenTexture(): CanvasTexture {
     paint((ctx) =>
       drawTerminal(ctx, {
         rows: STATUS_ROWS,
-        time: LISBON_TIME.format(now),
-        date: LISBON_DATE.format(now),
+        time: STUDIO_TIME.format(now),
+        date: STUDIO_DATE.format(now),
         uptime: formatUptime(now - (bootAt.current ?? now)),
         focus,
       }),

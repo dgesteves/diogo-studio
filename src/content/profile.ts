@@ -21,6 +21,12 @@ export const siteConfig = {
     locality: "Lisbon",
     country: "PT",
   },
+  /**
+   * The zone the studio keeps, as IANA rather than as prose: `location` above is what a
+   * reader is told, this is what a clock is set to. Every screen in the 3D room that shows
+   * a time reads it from here, so they cannot drift apart.
+   */
+  timeZone: "Europe/Lisbon",
   knowsAbout: [
     "Frontend platform engineering",
     "AI-native product engineering",

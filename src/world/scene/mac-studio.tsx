@@ -3,7 +3,6 @@
 import { type ReactElement } from "react";
 import {
   ExtrudeGeometry,
-  LinearMipmapLinearFilter,
   Shape,
   ShapeGeometry,
   type BufferGeometry,
@@ -190,14 +189,11 @@ export function paintMark(ctx: CanvasRenderingContext2D): void {
 }
 
 function createMarkTexture(): CanvasTexture {
-  const { canvas, texture } = createCanvasTexture(MARK_PIXELS, MARK_PIXELS);
-
-  // Read from above at a glancing angle across the room, never repainted: the same case as
-  // a book's cloth, so it takes the mipmap chain `createCanvasTexture` leaves off.
-  texture.generateMipmaps = true;
-  texture.minFilter = LinearMipmapLinearFilter;
-  texture.anisotropy = 4;
-
+  const { canvas, texture } = createCanvasTexture(MARK_PIXELS, MARK_PIXELS, {
+    // Read from above at a glancing angle across the room, never repainted: the same case
+    // as a book's cloth.
+    mipmapped: true,
+  });
   const ctx = canvas.getContext("2d");
   if (!ctx) return texture;
 

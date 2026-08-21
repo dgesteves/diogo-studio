@@ -5,7 +5,7 @@ import { RoundedBox } from "@react-three/drei";
 import { ExtrudeGeometry, Shape, type BufferGeometry } from "three";
 import { useDisposable } from "../gpu";
 import { anodizedMetalMaterial, darkMetalMaterial, portMaterial, worldColors } from "../materials";
-import { CONTROL_SCREEN, KEYS, useControlDeckTexture } from "../screens/control-deck";
+import { CONTROL_SCREEN, KEY_LAMPS, KEYS, useControlDeckTexture } from "../screens/control-deck";
 import { StatusLed } from "./status-led";
 
 /**
@@ -178,7 +178,7 @@ function PortBank(): ReactElement {
       ))}
       <StatusLed
         position={[LED_X, SKIRT_PORT_Y, PORT_DEPTH / 2 + 0.0012]}
-        color={worldColors.accentBright}
+        color={worldColors.statusOk}
         radius={0.0024}
         blinkSpeed={1.6}
       />
@@ -186,7 +186,11 @@ function PortBank(): ReactElement {
   );
 }
 
-/** The soft keys and the jog dial, in the same count and order as the chips on the screen. */
+/**
+ * The soft keys and the jog dial, in the same count and order as the chips on the screen —
+ * and each key's bar in that chip's lamp, so the row is read as four controls rather than as
+ * one lit strip broken into four.
+ */
 function ControlRow(): ReactElement {
   return (
     <group>
@@ -199,7 +203,7 @@ function ControlRow(): ReactElement {
             </RoundedBox>
             <mesh position={[0, KEY_HEIGHT / 2 + 0.0002, 0.006]}>
               <boxGeometry args={[KEY_SIZE * 0.5, 0.0006, 0.0018]} />
-              <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
+              <meshBasicMaterial color={KEY_LAMPS[key]} toneMapped={false} />
             </mesh>
           </group>
         );
