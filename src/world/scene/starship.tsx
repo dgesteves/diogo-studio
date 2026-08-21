@@ -61,18 +61,23 @@ const SCALE = BOOSTER_MODEL_HEIGHT / (STAND_HEIGHT + BOOSTER_HEIGHT);
 /** Not authored: the ship is shorter because the real one is, at the same scale. */
 export const SHIP_MODEL_HEIGHT = (STAND_HEIGHT + SHIP_HEIGHT) * SCALE;
 
-/** The tiled windward half of the hull, turned toward the room by `SHIP_YAW` below. */
+/**
+ * The tiled windward half of the hull. Where the band starts is aimed at the room in its own
+ * right rather than by turning the whole model: the two want opposite things, so `SHIP_YAW`
+ * sets the silhouette and this offset carries the seam back to where the yaw used to put it.
+ */
 const TILE_STANDOFF = 0.09;
-const TILE_START = -Math.PI / 2;
+const TILE_ORIENT = -0.35;
+const TILE_START = -Math.PI / 2 + TILE_ORIENT;
 const TILE_SWEEP = Math.PI;
 
 /**
- * The ship is turned on its stand rather than square to the room. Facing its tiled half at
- * the camera renders a black rod: the shape only reads as Starship when the seam between the
- * tiles and the bare stainless is visible, which needs the model turned so that most of what
- * faces the room is the bare side.
+ * Turned on its stand, but barely. Past about a quarter turn one flap pair swings behind the
+ * hull and the ship reads as a lumpy cone rather than a vehicle; this is the most it takes to
+ * be off-square without losing the second pair. The tiles used to be aimed by turning the
+ * model further, which is what cost the flaps — `TILE_ORIENT` aims them now.
  */
-const SHIP_YAW = -0.6;
+const SHIP_YAW = -0.25;
 
 const STAINLESS = { color: "#c2ccd4", roughness: 0.3, metalness: 0.85 } as const;
 /** Tiles read as a lit mid-gray, not as shadow: near-black turned the ship into a silhouette. */
