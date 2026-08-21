@@ -170,7 +170,15 @@ export function Keyboard(): ReactElement {
 
 function KeycapField(): ReactElement {
   return (
-    <Instances limit={KEYCAPS.length} position={[0, CAP_Y, 0]}>
+    /* Never culled, for the reason `scene/macbook.tsx` carries: the bounds are the base cap's
+       and are measured before drei places the instances, so whether the board survives a close
+       camera comes down to which frame won the race. */
+    <Instances
+      limit={KEYCAPS.length}
+      range={KEYCAPS.length}
+      frustumCulled={false}
+      position={[0, CAP_Y, 0]}
+    >
       <boxGeometry args={[1, KEYCAP_HEIGHT, KEYCAP_DEPTH]} />
       <meshStandardMaterial color="#ffffff" roughness={0.82} metalness={0.12} />
       {KEYCAPS.map((cap) => (
