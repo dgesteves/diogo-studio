@@ -11,9 +11,11 @@ import {
   TABLE_TOP_Y,
   TABLE_Z,
   TV_CENTER_Y,
+  TV_CONSOLE,
   TV_WALL_Z,
 } from "./lounge";
 import { REMOTE } from "./remote";
+import { SOFA, SOFA_BLOCKS } from "./sofa";
 
 /**
  * The corner of the room a visitor explores rather than navigates to: a sofa facing a
@@ -36,6 +38,13 @@ afterEach(async () => {
   stub?.restore();
   stub = undefined;
 });
+
+/**
+ * The lounge assembles five groups in one fixed order — rug, sofa, table, television, lamp —
+ * and three of the claims below are about how two of them stand relative to a third. Read by
+ * position in that order rather than by shape: the sofa and the table are both dark boxes.
+ */
+const PIECE = { rug: 0, sofa: 1, table: 2 } as const;
 
 /** The lounge's own root, which is the first group below the scene. */
 function loungeRoot(objects: readonly { type: string }[]) {
@@ -111,7 +120,7 @@ describe("Lounge", () => {
 
     const rug = scene.meshesWith("PlaneGeometry")[0];
     const rugBox = worldBox(rug!);
-    const seating = worldBox(loungeRoot(scene.objects).children[1]!);
+    const seating = worldBox(loungeRoot(scene.objects).children[PIECE.sofa]!);
 
     expect(SOFA_Z).toBeGreaterThan(TV_WALL_Z);
     expect(TABLE_Z).toBeGreaterThan(TV_WALL_Z);
@@ -121,6 +130,74 @@ describe("Lounge", () => {
     expect(seating.max.x).toBeLessThanOrEqual(rugBox.max.x + EPSILON);
     expect(seating.min.z).toBeGreaterThanOrEqual(rugBox.min.z - EPSILON);
     expect(seating.max.z).toBeLessThanOrEqual(rugBox.max.z + EPSILON);
+  });
+
+  /**
+   * `SOFA_X` derives the piece's place from the wall rather than typing it, which is what
+   * makes it survive a re-proportioned sectional — so the claim is that the outer arm stands
+   * against the wall and not through it. The rug reaches the wall exactly, so no assertion
+   * about the lounge as a whole can see this: only the sofa's own box can.
+   */
+  it("pushes the sofa's outer arm against the right wall, clear of it by a reveal", async () => {
+    const scene = await lounge();
+    const seating = worldBox(loungeRoot(scene.objects).children[PIECE.sofa]!);
+
+    expect(ROOM.maxX - seating.max.x).toBeGreaterThan(0);
+    expect(ROOM.maxX - seating.max.x).toBeLessThan(0.05);
+  });
+
+  /**
+   * The sectional is an L, and the sofa's own world box is the box of the L's bounds — most of
+   * which is the empty floor the coffee table stands in. So "the table is not inside the sofa"
+   * cannot be asked of that box: it overlaps by design. It has to be asked of the chaise, the
+   * arm that turns the corner, which is why the chaise is picked back out of the blocks here
+   * rather than assumed to be some width typed into this file.
+   *
+   * Two numbers pay for the clearance and neither is obviously about the table: the sofa's own
+   * place against the wall, which carries the chaise `+x` past the table's reach, and `SOFA_Z`,
+   * which carries its front behind the table's. Move either back and the table stands inside
+   * the chaise, which renders as a plausible lounge until you look at where the legs go.
+   */
+  it("keeps the coffee table clear of the chaise it now shares the rug with", async () => {
+    const scene = await lounge();
+    const pieces = loungeRoot(scene.objects).children;
+    const seating = worldBox(pieces[PIECE.sofa]!);
+    const table = worldBox(pieces[PIECE.table]!);
+
+    // The sofa is centered on its own `x` and placed by its back face, so those two edges of
+    // its world box are where its local origin is — which is what turns a block into a room.
+    const origin = new Vector3(seating.max.x - SOFA.width / 2, 0, seating.max.z);
+    const overhang = SOFA_BLOCKS.filter(
+      (block) => block.center[2] - block.size[2] / 2 < -SOFA.runDepth,
+    );
+    const chaise = new Box3();
+    for (const block of overhang) {
+      const half = new Vector3(...block.size).multiplyScalar(0.5);
+      const center = origin.clone().add(new Vector3(...block.center));
+      chaise.expandByPoint(center.clone().sub(half));
+      chaise.expandByPoint(center.clone().add(half));
+    }
+
+    expect(SOFA.depth).toBeGreaterThan(SOFA.runDepth + 0.4);
+    expect(overhang.length).toBeGreaterThan(0);
+    expect(chaise.intersectsBox(table)).toBe(false);
+  });
+
+  /**
+   * The sofa is as far back as the lounge band allows, and "as far back as it goes" is only
+   * true while both walkways survive: the console's front face, a gap, the table, a gap, the
+   * seats. Pushing the sofa back again without moving the table takes it out of the second
+   * one, which renders as a coffee table wedged against a shin.
+   */
+  it("leaves a walkway on both sides of the coffee table", async () => {
+    const scene = await lounge();
+    const pieces = loungeRoot(scene.objects).children;
+    const table = worldBox(pieces[PIECE.table]!);
+    const consoleFront = LOUNGE_ORIGIN[2] + TV_CONSOLE.centerZ + TV_CONSOLE.depth / 2;
+    const runFront = LOUNGE_ORIGIN[2] + SOFA_Z - SOFA.runDepth;
+
+    expect(table.min.z - consoleFront).toBeGreaterThan(0.2);
+    expect(runFront - table.max.z).toBeGreaterThan(0.2);
   });
 
   it("lights the screen from the channel it is showing", async () => {

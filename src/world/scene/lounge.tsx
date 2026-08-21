@@ -1,5 +1,6 @@
 "use client";
 
+import { ROOM } from "../room";
 import { type Vec3 } from "../stations";
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
@@ -8,6 +9,7 @@ import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
 import { Macbook } from "./macbook";
 import { Remote } from "./remote";
+import { Sofa, SOFA } from "./sofa";
 import { Soundbar, SOUNDBAR } from "./soundbar";
 
 /**
@@ -22,8 +24,31 @@ import { Soundbar, SOUNDBAR } from "./soundbar";
 export const LOUNGE_ORIGIN = [3.6, 0, -0.9] as const satisfies Vec3;
 const LOUNGE_ROTATION_Y = 0;
 
-export const SOFA_Z = 1.05;
-export const TABLE_Z = -0.2;
+/** The reveal between the sectional's outer arm and the wall it is pushed against. */
+const SOFA_WALL_GAP = 0.02;
+/**
+ * Hard against the right wall rather than centered on the television, which is what leaves the
+ * lounge an open floor instead of a corridor down either side of the sofa. Derived from the
+ * room rather than typed, so a wider sectional stays against the wall instead of through it.
+ */
+const SOFA_X = ROOM.maxX - LOUNGE_ORIGIN[0] - SOFA_WALL_GAP - SOFA.width / 2;
+/**
+ * The sectional's back face, not its center: it is an L, so a center is a number no part of
+ * it stands on. `scene/sofa.tsx` builds forward from here, toward the television at `-z`.
+ *
+ * Set away from the television rather than toward it. The lounge is a corner a visitor stands
+ * in, not a row of seats packed against a screen, and pulling the sofa to the back of the rug
+ * is what leaves the coffee table a walkway on both sides rather than a shin's width on one.
+ * The rug behind it is the bound: the whole piece has to stay on it.
+ */
+export const SOFA_Z = 2.25;
+/**
+ * Set between the television it faces and the middle of the run of seats it serves, which are
+ * not the same `x` now that the sofa stands against the wall. Its clearance from the chaise is
+ * not this number's doing — see `lounge.dom.test.tsx`.
+ */
+const TABLE_X = -0.15;
+export const TABLE_Z = 0.25;
 /**
  * The unit under the television. Exported as a footprint because it is one end of the only
  * clear stretch of the back wall, and `scene/plant.tsx` stands in what is left of it.
@@ -32,104 +57,30 @@ export const TV_CONSOLE = { width: 1.9, height: 0.4, depth: 0.4, centerZ: -1.2 }
 export const TV_WALL_Z = -1.35;
 export const TV_CENTER_Y = 1.5;
 
-const UPHOLSTERY = { color: "#16202a", roughness: 0.85, metalness: 0.05 } as const;
 const FRAME = { color: "#0c1116", roughness: 0.6, metalness: 0.35 } as const;
 const SURFACE = { color: "#12181f", roughness: 0.55, metalness: 0.3 } as const;
 
-const RUG_CENTER_Z = 0.2;
+/**
+ * The rug is what the lounge *is* — the corner is otherwise the same floor as the desk's — so
+ * it is given by its two edges rather than by a center. The far one stops short of the
+ * television's cabinet; the near one is set by the sofa, which has to stand entirely on it and
+ * is pulled well back from the screen so the coffee table has floor on both sides.
+ */
+const RUG = { width: 3.6, farZ: -1.3, nearZ: 2.55 } as const;
+const RUG_DEPTH = RUG.nearZ - RUG.farZ;
+const RUG_CENTER_Z = (RUG.nearZ + RUG.farZ) / 2;
 
 function LoungeRug(): ReactElement {
   return (
     <group position={[0, 0, RUG_CENTER_Z]}>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} receiveShadow>
-        <planeGeometry args={[3.6, 3.0]} />
+        <planeGeometry args={[RUG.width, RUG_DEPTH]} />
         <meshStandardMaterial color="#0c141b" roughness={0.95} metalness={0} />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.014, 0]}>
         <ringGeometry args={[1.28, 1.4, 48]} />
         <meshStandardMaterial color="#1d4a56" roughness={0.9} metalness={0} />
       </mesh>
-    </group>
-  );
-}
-
-const WIDTH = 2.2;
-const DEPTH = 0.95;
-const SEAT_TOP = 0.42;
-const SEAT_X = [-0.7, 0, 0.7] as const;
-const FOOT_X = [-0.95, 0.95] as const;
-const FOOT_Z = [-0.36, 0.36] as const;
-
-function LoungeSofa(): ReactElement {
-  return (
-    <group position={[0, 0, SOFA_Z]}>
-      <RoundedBox
-        args={[WIDTH, 0.34, DEPTH]}
-        radius={0.05}
-        smoothness={3}
-        position={[0, 0.27, 0]}
-        castShadow
-      >
-        <meshStandardMaterial {...UPHOLSTERY} />
-      </RoundedBox>
-
-      {SEAT_X.map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.66, 0.16, 0.78]}
-          radius={0.06}
-          smoothness={3}
-          position={[x, SEAT_TOP, 0]}
-          castShadow
-        >
-          <meshStandardMaterial {...UPHOLSTERY} />
-        </RoundedBox>
-      ))}
-
-      <RoundedBox
-        args={[WIDTH, 0.6, 0.2]}
-        radius={0.06}
-        smoothness={3}
-        position={[0, 0.62, 0.4]}
-        castShadow
-      >
-        <meshStandardMaterial {...UPHOLSTERY} />
-      </RoundedBox>
-
-      {SEAT_X.map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.62, 0.42, 0.14]}
-          radius={0.07}
-          smoothness={3}
-          position={[x, 0.62, 0.28]}
-          rotation={[0.12, 0, 0]}
-        >
-          <meshStandardMaterial color="#1c2a36" roughness={0.85} metalness={0.05} />
-        </RoundedBox>
-      ))}
-
-      {[-WIDTH / 2 + 0.12, WIDTH / 2 - 0.12].map((x) => (
-        <RoundedBox
-          key={x}
-          args={[0.22, 0.5, DEPTH]}
-          radius={0.07}
-          smoothness={3}
-          position={[x, 0.46, 0]}
-          castShadow
-        >
-          <meshStandardMaterial {...UPHOLSTERY} />
-        </RoundedBox>
-      ))}
-
-      {FOOT_X.map((x) =>
-        FOOT_Z.map((z) => (
-          <mesh key={`${x},${z}`} position={[x, 0.05, z]}>
-            <cylinderGeometry args={[0.03, 0.025, 0.1, 10]} />
-            <meshStandardMaterial {...FRAME} />
-          </mesh>
-        )),
-      )}
     </group>
   );
 }
@@ -343,7 +294,9 @@ export function Lounge(): ReactElement {
   return (
     <group position={LOUNGE_ORIGIN} rotation={[0, LOUNGE_ROTATION_Y, 0]}>
       <LoungeRug />
-      <LoungeSofa />
+      <group position={[SOFA_X, 0, SOFA_Z]}>
+        <Sofa />
+      </group>
       <LoungeCoffeeTable />
       <LoungeTv />
       <LoungeLamp />
