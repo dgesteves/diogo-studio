@@ -1,7 +1,7 @@
 import { Vector3 } from "three";
 import { describe, expect, it } from "vitest";
 
-import { DESK_DEPTH, DESK_TOP_Y } from "../room";
+import { DESK_DEPTH, DESK_LEG_HEIGHT, DESK_TOP_Y } from "../room";
 import { createShell, type Sheet } from "./shell";
 import {
   AERON,
@@ -344,15 +344,23 @@ describe("where it is parked", () => {
   const placed = (sheets: readonly Sheet[]): readonly Vector3[] =>
     points(sheets).map((point) =>
       point
+        .multiplyScalar(CHAIR_PLACEMENT.scale)
         .applyAxisAngle(new Vector3(0, 1, 0), CHAIR_PLACEMENT.turn)
         .add(new Vector3(CHAIR_PLACEMENT.x, 0, CHAIR_PLACEMENT.z)),
     );
 
-  it("sits at a working height under this desk", () => {
-    const clearance = DESK_TOP_Y - AERON.seatY;
+  /**
+   * The chair is measured at 1:1 but parked oversized, so the real 21 cm of leg room is not
+   * what holds any more. What does is the ceiling that scale factor has: the seat crown still
+   * has to pass under the desk's underside, or the chair reads as one that could never be
+   * rolled in — and it still has to sit well below the working surface.
+   */
+  it("stands taller than the real chair and still passes under this desk", () => {
+    const seat = AERON.seatY * CHAIR_PLACEMENT.scale;
 
-    expect(clearance).toBeGreaterThan(0.2);
-    expect(clearance).toBeLessThan(0.3);
+    expect(seat).toBeGreaterThan(AERON.seatY);
+    expect(seat).toBeLessThan(DESK_LEG_HEIGHT);
+    expect(DESK_TOP_Y - seat).toBeGreaterThan(0.05);
   });
 
   it("never puts anything at desk height through the desk", () => {

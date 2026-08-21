@@ -1068,14 +1068,25 @@ function ChairPanels(): ReactElement {
  * got up from is. The model faces the room — that is the frame every measurement above is in —
  * so the half turn here is what puts it at the desk, and pushing it any closer than this is
  * what would put the armpads through the desk top.
+ *
+ * The `scale` is the one place this chair is not the real one. The desk it is parked at is
+ * three meters of it at a real 0.73 height, so a 1:1 Aeron in front of that reads as a chair
+ * for a smaller room — its crown barely clears the desk top from where the camera stands.
+ * A sixth over is enough to fix that and little enough that the chair still reads as a chair
+ * at this desk; a quarter over, tried first, made it the piece of furniture the eye lands on.
+ * The hard ceiling is near 1.3: by 1.35 the seat crown has passed the desk's underside, so it
+ * becomes a chair that could never be rolled in, and the armpads reach through the front edge.
+ * `chair.test.ts` holds that end and applies this factor itself — the measured numbers above
+ * stay 1:1, so nothing else in the file has to know.
  */
-export const CHAIR_PLACEMENT = { x: 0.06, z: 0.95, turn: Math.PI - 0.13 } as const;
+export const CHAIR_PLACEMENT = { x: 0.06, z: 0.95, turn: Math.PI - 0.13, scale: 1.15 } as const;
 
 export function Chair(): ReactElement {
   return (
     <group
       position={[CHAIR_PLACEMENT.x, 0, CHAIR_PLACEMENT.z]}
       rotation={[0, CHAIR_PLACEMENT.turn, 0]}
+      scale={CHAIR_PLACEMENT.scale}
     >
       <ChairFrame />
       <ChairPanels />
