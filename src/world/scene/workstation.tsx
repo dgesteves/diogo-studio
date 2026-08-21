@@ -1,7 +1,6 @@
 "use client";
 
 import { type ReactElement } from "react";
-import { ContactShadows } from "@react-three/drei";
 import { DESK_TOP_Y } from "../room";
 import { CONTROL_DECK, ControlDeck } from "./control-deck";
 import { MAC_STUDIO, MacStudio } from "./mac-studio";
@@ -38,16 +37,6 @@ export function DeskHardware(): ReactElement {
       <group position={[DECK_X, DESK_TOP_Y, HARDWARE_CENTER_Z]}>
         <ControlDeck />
       </group>
-      <ContactShadows
-        position={[0, DESK_TOP_Y + 0.0009, HARDWARE_CENTER_Z]}
-        scale={0.95}
-        resolution={512}
-        blur={2}
-        far={0.12}
-        opacity={0.62}
-        color="#01050a"
-        frames={1}
-      />
     </group>
   );
 }

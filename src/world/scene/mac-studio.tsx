@@ -37,9 +37,13 @@ export const MAC_STUDIO = {
   cornerRadius: 0.027,
   /** The top and bottom fillets, which are a fifth of the corner and no more. */
   edgeFillet: 0.0055,
-  /** The dark intake the aluminum stands on, seen as a shadow line under the body. */
-  baseHeight: 0.012,
-  baseInset: 0.011,
+  /**
+   * The dark intake the aluminum stands on. A reveal, not a plinth: at 0.012 it was a black
+   * slab the machine was sitting on top of, which is what the desk shadow was blamed for
+   * first. The aluminum takes back whatever this gives up — `BODY_HEIGHT` is the remainder.
+   */
+  baseHeight: 0.004,
+  baseInset: 0.005,
 } as const;
 
 export const BODY_HEIGHT = MAC_STUDIO.height - MAC_STUDIO.baseHeight;
