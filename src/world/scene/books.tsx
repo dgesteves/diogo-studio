@@ -80,8 +80,23 @@ export const BOOK_CLOTHS: Catalog<BookCloth> = [
  * cool white rather than cream for the same reason the ink is — nothing in this room is warm.
  */
 const PAGE_PAPER = "#ced5d9";
-const PAGE_LINE = "rgba(88, 102, 110, 0.36)";
-const PAGE_SHADE = "rgba(14, 20, 24, 0.3)";
+/** One leaf, and the gap between two gatherings. */
+const PAGE_LEAF = "rgba(88, 102, 110, 0.15)";
+const PAGE_GATHERING = "rgba(46, 56, 64, 0.5)";
+/**
+ * A block across its own thickness: darkest where it meets each board, lightest in the
+ * middle. Without it a stacked book's fore-edge is a flat white bar, brighter than anything
+ * else this room contains.
+ */
+const PAGE_SHADE: readonly (readonly [number, string])[] = [
+  [0, "rgba(10, 16, 20, 0.55)"],
+  [0.18, "rgba(10, 16, 20, 0.14)"],
+  [0.5, "rgba(255, 255, 255, 0.05)"],
+  [0.82, "rgba(10, 16, 20, 0.18)"],
+  [1, "rgba(10, 16, 20, 0.5)"],
+];
+/** The board edge showing at each end of the block, as a share of the book's thickness. */
+const BOARD_SHARE = 0.09;
 
 /** The spine's own shading: an edge-dark, center-light wash that reads as a rounded back. */
 const SPINE_SHADE: readonly (readonly [number, string])[] = [
@@ -241,48 +256,113 @@ export type BookPlacement = {
 };
 
 /**
- * The atlas. A cell is sized for the largest spine the room contains, at a resolution set by
- * the writing station — the camera sits about 1.6 m off the bookshelf there, where a spine
- * covers rather more screen than a smaller cell would have pixels for. The cost is real and
- * deliberate: at 48×256 a cell is ~48 KB, so the bookshelf's 83 spines are ~4.7 MB and the
- * floating shelves' 38 are ~2.4 MB. See `docs/decisions.md`.
+ * The atlas. A shelved book's cell is sized for the largest spine the room contains, at a
+ * resolution set by the writing station — the camera sits about 1.6 m off the bookshelf
+ * there, where a spine covers rather more screen than a smaller cell would have pixels for.
+ * The cost is real and deliberate: at 48×256 a cell is ~48 KB, so the bookshelf's 83 spines
+ * are ~4.7 MB and the floating shelves' 38 are ~2.4 MB. See `docs/decisions.md`.
  */
 export const BOOK_CELL = { width: 48, height: 256 } as const;
+
+/**
+ * A stacked book's cell, which has to hold something a shelved one never shows: a cover, two
+ * orders of magnitude more surface than a spine and the face a visitor standing over a
+ * coffee table sees most of. Painted into a shelf cell it came out at a quarter of the
+ * room's pixels-per-meter — a seven-pixel title smeared across twenty centimeters of board —
+ * so it gets a cell that holds it at the same scale as everything else instead.
+ *
+ * This is affordable only because there are three of them: one cell is ~197 KB, so the whole
+ * coffee table costs under 600 KB against the bookshelf's 4.7 MB. It is not a size the
+ * shelves could be given.
+ */
+export const STACKED_CELL = { width: 128, height: 384 } as const;
 export const BOOK_PIXELS_PER_METER = 512;
 const ATLAS_COLUMNS = 16;
 
 export type BookAtlasLayout = {
+  cell: { width: number; height: number };
   columns: number;
   rows: number;
   width: number;
   height: number;
 };
 
-export function bookAtlasLayout(count: number): BookAtlasLayout {
-  const columns = Math.min(ATLAS_COLUMNS, Math.max(1, count));
-  const rows = Math.max(1, Math.ceil(count / columns));
+/**
+ * The cell is a property of the atlas rather than of the room, because the two poses need
+ * different ones and every cell in one canvas has to be the same size for the index to be
+ * the cell. Each shelving unit and the coffee table build their own, and no atlas in the
+ * room mixes poses — a mixed one would simply pay the stacked cell for all of them.
+ */
+export function bookAtlasLayout(books: readonly BookPlacement[]): BookAtlasLayout {
+  const cell = books.some((book) => book.pose.kind === "flat") ? STACKED_CELL : BOOK_CELL;
+  const columns = Math.min(ATLAS_COLUMNS, Math.max(1, books.length));
+  const rows = Math.max(1, Math.ceil(books.length / columns));
 
   return {
+    cell,
     columns,
     rows,
-    width: columns * BOOK_CELL.width,
-    height: rows * BOOK_CELL.height,
+    width: columns * cell.width,
+    height: rows * cell.height,
   };
 }
 
 /**
- * A cell is three zones down its length, and every one of them has to stay a zone: the
- * covers take their color from a patch of *unpainted* cloth, so anything that grew into the
- * band between the page block and the spine would print the spine's own ink on them.
+ * A cell is three zones down its length, and every one of them has to stay a zone. The two
+ * poses divide it the other way round from each other, because the pose inverts which faces
+ * a visitor actually sees.
  */
 const CELL_INSET = 2;
-const PAGE_ZONE = { top: 2, height: 28 } as const;
-const COVER_ZONE = { top: 34, height: 20 } as const;
-const SPINE_ZONE = { top: 58, bottom: BOOK_CELL.height - CELL_INSET } as const;
-const SPINE_MAX_WIDTH = BOOK_CELL.width - CELL_INSET * 2;
-const SPINE_MAX_HEIGHT = SPINE_ZONE.bottom - SPINE_ZONE.top;
+/** The gutter between two zones — enough that no filtered texel reaches the next one. */
+const ZONE_GAP = 4;
 const SPINE_MIN_WIDTH = 6;
 const SPINE_MIN_HEIGHT = 24;
+
+type CellZones = {
+  /** Where the cover sits and the most of the cell it may take. */
+  cover: Rect;
+  pages: { top: number; height: number };
+  /** The spine takes the length left under the other two, and stands on `foot`. */
+  spine: { top: number; foot: number };
+};
+
+/**
+ * A shelved book's cell, in the order the three zones run down it: block, cover, spine. Its
+ * cover is the face against the wall and never printed, so the zone is a swatch of
+ * *unpainted* cloth the other two have to stay clear of — anything that grew into it would
+ * print the spine's own ink on the sides of the book next to this one.
+ */
+const SHELVED_ZONES: CellZones = {
+  pages: { top: CELL_INSET, height: 28 },
+  cover: { x: CELL_INSET + 6, y: 34, width: 16, height: 16 },
+  spine: { top: 58, foot: BOOK_CELL.height - CELL_INSET },
+};
+
+/**
+ * A stacked book's, which is the same three zones with the sizes traded: cover first and
+ * largest, because on a table it is the face in shot rather than the one against the wall.
+ * It is drawn at the room's own pixels-per-meter — 164 px is a 0.32 m board — and the block
+ * and the spine take what is left under it.
+ */
+const STACKED_COVER_HEIGHT = 164;
+const STACKED_PAGE_HEIGHT = 24;
+const STACKED_ZONES: CellZones = {
+  cover: {
+    x: CELL_INSET,
+    y: CELL_INSET,
+    width: STACKED_CELL.width - CELL_INSET * 2,
+    height: STACKED_COVER_HEIGHT,
+  },
+  pages: { top: CELL_INSET + STACKED_COVER_HEIGHT + ZONE_GAP, height: STACKED_PAGE_HEIGHT },
+  spine: {
+    top: CELL_INSET + STACKED_COVER_HEIGHT + ZONE_GAP + STACKED_PAGE_HEIGHT + ZONE_GAP,
+    foot: STACKED_CELL.height - CELL_INSET,
+  },
+};
+
+function cellZones(pose: BookPose): CellZones {
+  return pose.kind === "flat" ? STACKED_ZONES : SHELVED_ZONES;
+}
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
@@ -298,6 +378,16 @@ export function spineFaceSize(size: Vec3, pose: BookPose): { thickness: number; 
   return { thickness: Math.min(a, b), height: Math.max(a, b) };
 }
 
+/**
+ * The cover face's own dimensions, in meters — the shorter extent across, the longer up, the
+ * way the spine's are, so a cover is printed portrait and a book that is wider than it is
+ * tall is turned rather than lettered sideways. A stacked book's covers are its top and its
+ * bottom, so they are its footprint.
+ */
+export function coverFaceSize(size: Vec3): { width: number; height: number } {
+  return { width: Math.min(size[0], size[2]), height: Math.max(size[0], size[2]) };
+}
+
 function clamp(value: number, low: number, high: number): number {
   return Math.min(Math.max(value, low), high);
 }
@@ -308,38 +398,58 @@ export function bookCellRects(
   layout: BookAtlasLayout,
   book: BookPlacement,
 ): Record<FacePrint, Rect> {
-  const originX = (index % layout.columns) * BOOK_CELL.width;
-  const originY = Math.floor(index / layout.columns) * BOOK_CELL.height;
+  const originX = (index % layout.columns) * layout.cell.width;
+  const originY = Math.floor(index / layout.columns) * layout.cell.height;
+  const zones = cellZones(book.pose);
+  const stacked = book.pose.kind === "flat";
+  const across = layout.cell.width - CELL_INSET * 2;
+
   const { thickness, height } = spineFaceSize(book.size, book.pose);
-  const width = clamp(
-    Math.round(thickness * BOOK_PIXELS_PER_METER),
-    SPINE_MIN_WIDTH,
-    SPINE_MAX_WIDTH,
-  );
+  const width = clamp(Math.round(thickness * BOOK_PIXELS_PER_METER), SPINE_MIN_WIDTH, across);
   const length = clamp(
     Math.round(height * BOOK_PIXELS_PER_METER),
     SPINE_MIN_HEIGHT,
-    SPINE_MAX_HEIGHT,
+    zones.spine.foot - zones.spine.top,
   );
 
+  // A cover is drawn at the same pixels-per-meter as a spine, and scaled down whole if the
+  // zone cannot hold it — never squeezed, which would letter a board out of proportion to
+  // the spine beside it.
+  const cover = coverFaceSize(book.size);
+  const wanted = {
+    width: Math.round(cover.width * BOOK_PIXELS_PER_METER),
+    height: Math.round(cover.height * BOOK_PIXELS_PER_METER),
+  };
+  const fit = Math.min(zones.cover.width / wanted.width, zones.cover.height / wanted.height, 1);
+
   return {
+    // A shelved spine stands on the foot of its cell so a short book is short rather than
+    // floating; a stacked one hangs from under the block, because what is under it is the
+    // end of the cell rather than a shelf.
     spine: {
       x: originX + CELL_INSET,
-      y: originY + SPINE_ZONE.bottom - length,
+      y: originY + (stacked ? zones.spine.top : zones.spine.foot - length),
       width,
       height: length,
     },
+    // The block is uniform along its length and detailed only across the thickness, so this
+    // rect's width is resolution rather than art — one value serves all three cut edges of
+    // a stacked book however differently long they are.
     pages: {
       x: originX + CELL_INSET,
-      y: originY + PAGE_ZONE.top,
-      width,
-      height: PAGE_ZONE.height,
+      y: originY + zones.pages.top,
+      width: across,
+      height: zones.pages.height,
     },
     cover: {
-      x: originX + CELL_INSET + 6,
-      y: originY + COVER_ZONE.top,
-      width: 16,
-      height: COVER_ZONE.height - 4,
+      x: originX + zones.cover.x,
+      y: originY + zones.cover.y,
+      width: stacked
+        ? Math.max(SPINE_MIN_WIDTH, Math.round(wanted.width * fit))
+        : zones.cover.width,
+      height: stacked
+        ? Math.max(SPINE_MIN_HEIGHT, Math.round(wanted.height * fit))
+        : zones.cover.height,
     },
   };
 }
@@ -365,46 +475,77 @@ const MARK_AT = 0.9;
 const GRAIN_STROKES = 26;
 const CAP_HEIGHT = 2;
 
+/**
+ * The cut edges of the block. Two things about it are decided by the pose rather than drawn:
+ *
+ * **The boards inset the block across the thickness and nowhere else.** The cloth turning
+ * over a real binding is a couple of millimeters, and the rect's other axis runs the whole
+ * length of the face — up to a third of a meter on a stacked book's fore-edge, where an inset
+ * of the same two pixels printed those millimeters as five centimeters of black. That is what
+ * made a stacked book read as a white slab wedged between two dark ones. Along the length
+ * the block runs edge to edge, which also lets one rect serve all three cut edges of a
+ * stacked book however differently long they are.
+ *
+ * **Every leaf, not every other one.** At a shelved book's scale the gapped striations were
+ * a texture; at a stacked one's they were corrugation.
+ */
 function paintPageBlock(
   ctx: CanvasRenderingContext2D,
   rect: Rect,
   grain: PageGrain,
   random: () => number,
 ): void {
-  // The inset is the cover boards standing proud of the block they hold, which is the whole
-  // of what stops a book from reading as a solid bar seen end-on.
-  const inset = 2;
-  const x = rect.x + inset;
-  const y = rect.y + inset;
-  const width = Math.max(2, rect.width - inset * 2);
-  const height = Math.max(2, rect.height - inset * 2);
+  const across = grain === "horizontal" ? rect.height : rect.width;
+  const board = Math.max(1, Math.round(across * BOARD_SHARE));
+  const flat = grain === "horizontal";
+  const x = flat ? rect.x : rect.x + board;
+  const y = flat ? rect.y + board : rect.y;
+  const width = flat ? rect.width : Math.max(1, rect.width - board * 2);
+  const height = flat ? Math.max(1, rect.height - board * 2) : rect.height;
+  const leaves = flat ? height : width;
 
   ctx.fillStyle = PAGE_PAPER;
   ctx.fillRect(x, y, width, height);
 
-  ctx.fillStyle = PAGE_LINE;
-  if (grain === "horizontal") {
-    for (let line = y + 1; line < y + height; line += 2) {
-      if (random() < 0.55) ctx.fillRect(x, line, width, 1);
-    }
-  } else {
-    for (let line = x + 1; line < x + width; line += 2) {
-      if (random() < 0.55) ctx.fillRect(line, y, 1, height);
-    }
+  for (let leaf = 0; leaf < leaves; leaf += 1) {
+    const gathering = random() < 0.14;
+    if (!gathering && random() < 0.4) continue;
+    ctx.fillStyle = gathering ? PAGE_GATHERING : PAGE_LEAF;
+    if (flat) ctx.fillRect(x, y + leaf, width, 1);
+    else ctx.fillRect(x + leaf, y, 1, height);
   }
 
-  ctx.fillStyle = PAGE_SHADE;
-  ctx.fillRect(x, y, width, 1);
-  ctx.fillRect(x, y, 1, height);
+  const shade = flat
+    ? ctx.createLinearGradient(0, y, 0, y + height)
+    : ctx.createLinearGradient(x, 0, x + width, 0);
+  for (const [stop, color] of PAGE_SHADE) shade.addColorStop(stop, color);
+  ctx.fillStyle = shade;
+  ctx.fillRect(x, y, width, height);
 }
 
 type TitleSetting = { lines: readonly string[]; size: number; turned: boolean };
 
 /**
- * The largest these lines can be set on this spine, one way round. Canvas has no "fit this
- * box", so the lines are measured once at a probe size and the result is scaled to whichever
- * of the two directions runs out first, capped so a squat book is not lettered in slab.
+ * The largest these lines fit in, set one way round. Canvas has no "fit this box", so they
+ * are measured once at a probe size and scaled to whichever of the two directions runs out
+ * first — `along` the lines, `across` the stack of them — capped so a squat box is not
+ * lettered in slab.
  */
+function fitLines(
+  ctx: CanvasRenderingContext2D,
+  lines: readonly string[],
+  along: number,
+  across: number,
+  leading: number,
+  cap: number,
+): number {
+  ctx.font = `600 ${PROBE_PX}px ${BOOK_FONT}`;
+  const widest = Math.max(1, ...lines.map((line) => ctx.measureText(line).width));
+
+  return Math.min((PROBE_PX * along) / widest, across / (lines.length * leading), cap);
+}
+
+/** The largest these lines can be set on this spine, one way round. */
 function setTitle(
   ctx: CanvasRenderingContext2D,
   rect: Rect,
@@ -414,13 +555,9 @@ function setTitle(
   const along = rect.height * (TITLE_BOTTOM - TITLE_TOP);
   const across = Math.max(1, rect.width - 4);
 
-  ctx.font = `600 ${PROBE_PX}px ${BOOK_FONT}`;
-  const widest = Math.max(1, ...lines.map((line) => ctx.measureText(line).width));
-  const stack = lines.length * TITLE_LEADING;
-
   const size = turned
-    ? Math.min((PROBE_PX * along) / widest, across / stack, rect.width * 0.44)
-    : Math.min((PROBE_PX * across) / widest, along / stack, rect.height * 0.085);
+    ? fitLines(ctx, lines, along, across, TITLE_LEADING, rect.width * 0.44)
+    : fitLines(ctx, lines, across, along, TITLE_LEADING, rect.height * 0.085);
 
   return { lines, size, turned };
 }
@@ -473,11 +610,13 @@ function paintTitle(ctx: CanvasRenderingContext2D, rect: Rect, design: BookDesig
  * printed in the band's color rather than the title's ink — a mark louder than the title it
  * sits under is the wrong way round, and it ties the foot of the spine to its head.
  */
-function paintEmblem(ctx: CanvasRenderingContext2D, rect: Rect, design: BookDesign): void {
-  const x = rect.x + rect.width / 2;
-  const y = rect.y + rect.height * MARK_AT;
-  const radius = Math.max(1.5, Math.min(rect.width * 0.17, rect.height * 0.023));
-
+function paintEmblem(
+  ctx: CanvasRenderingContext2D,
+  design: BookDesign,
+  x: number,
+  y: number,
+  radius: number,
+): void {
   ctx.fillStyle = design.cloth.band;
 
   switch (design.emblem) {
@@ -567,7 +706,87 @@ function paintSpine(
   ctx.fillRect(x, y + height - CAP_HEIGHT, width, CAP_HEIGHT);
 
   paintTitle(ctx, rect, design);
-  paintEmblem(ctx, rect, design);
+  paintEmblem(
+    ctx,
+    design,
+    rect.x + rect.width / 2,
+    rect.y + rect.height * MARK_AT,
+    Math.max(1.5, Math.min(rect.width * 0.17, rect.height * 0.023)),
+  );
+}
+
+/**
+ * The board a stacked book shows face up: a sheen across the cloth, the title blocked on it,
+ * a rule under the title and the publisher's mark at the foot. It is the same binding the
+ * spine is printed in and says the same thing, because it is the same book — what it is not
+ * is a patch of flat cloth, which is what the shelved layout hands its covers and what made
+ * three books on a table read as three slabs.
+ */
+const COVER_TITLE_TOP = 0.22;
+const COVER_TITLE_BOTTOM = 0.6;
+const COVER_TITLE_LEADING = 1.22;
+const COVER_RULE_AT = 0.68;
+const COVER_MARK_AT = 0.85;
+const MIN_COVER_TITLE_PX = 3.5;
+/** The board's own edge, which is what separates a cover from the block it closes over. */
+const COVER_EDGE = "rgba(0, 0, 0, 0.45)";
+const COVER_SHEEN: readonly (readonly [number, string])[] = [
+  [0, "rgba(255, 255, 255, 0.1)"],
+  [0.55, "rgba(255, 255, 255, 0.02)"],
+  [1, "rgba(0, 0, 0, 0.18)"],
+];
+
+function paintCover(ctx: CanvasRenderingContext2D, rect: Rect, design: BookDesign): void {
+  const { x, y, width, height } = rect;
+
+  const sheen = ctx.createLinearGradient(x, y, x + width, y + height);
+  for (const [stop, color] of COVER_SHEEN) sheen.addColorStop(stop, color);
+  ctx.fillStyle = sheen;
+  ctx.fillRect(x, y, width, height);
+
+  ctx.fillStyle = COVER_EDGE;
+  ctx.fillRect(x, y, width, 1);
+  ctx.fillRect(x, y + height - 1, width, 1);
+  ctx.fillRect(x, y, 1, height);
+  ctx.fillRect(x + width - 1, y, 1, height);
+
+  const size = fitLines(
+    ctx,
+    design.title,
+    width * 0.76,
+    height * (COVER_TITLE_BOTTOM - COVER_TITLE_TOP),
+    COVER_TITLE_LEADING,
+    height * 0.14,
+  );
+
+  if (size >= MIN_COVER_TITLE_PX) {
+    ctx.fillStyle = design.cloth.ink;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.font = `600 ${size.toFixed(2)}px ${BOOK_FONT}`;
+
+    const middle = y + height * ((COVER_TITLE_TOP + COVER_TITLE_BOTTOM) / 2);
+    design.title.forEach((line, index) => {
+      const offset = (index - (design.title.length - 1) / 2) * size * COVER_TITLE_LEADING;
+      ctx.fillText(line, x + width / 2, middle + offset);
+    });
+  }
+
+  ctx.fillStyle = design.cloth.band;
+  ctx.fillRect(
+    x + width * 0.3,
+    y + Math.round(height * COVER_RULE_AT),
+    Math.max(1, Math.round(width * 0.4)),
+    Math.max(1, Math.round(height * 0.012)),
+  );
+
+  paintEmblem(
+    ctx,
+    design,
+    x + width / 2,
+    y + height * COVER_MARK_AT,
+    Math.max(1.5, Math.min(width * 0.07, height * 0.05)),
+  );
 }
 
 /** Paints every book into its own cell. The index *is* the cell, for both art and UVs. */
@@ -575,28 +794,32 @@ export function paintBookAtlas(
   ctx: CanvasRenderingContext2D,
   books: readonly BookPlacement[],
 ): void {
-  const layout = bookAtlasLayout(books.length);
+  const layout = bookAtlasLayout(books);
 
   books.forEach((book, index) => {
     const rects = bookCellRects(index, layout, book);
     const random = mulberry32(book.design.grain * 977 + index + 1);
 
-    // Flooded first, so the patch the covers sample is this book's cloth and nothing else.
+    // Flooded first, so the patch a shelved book's covers sample is this book's cloth and
+    // nothing else, and a stacked one's board is printed over its own binding.
     ctx.fillStyle = book.design.cloth.cloth;
     ctx.fillRect(
-      (index % layout.columns) * BOOK_CELL.width,
-      Math.floor(index / layout.columns) * BOOK_CELL.height,
-      BOOK_CELL.width,
-      BOOK_CELL.height,
+      (index % layout.columns) * layout.cell.width,
+      Math.floor(index / layout.columns) * layout.cell.height,
+      layout.cell.width,
+      layout.cell.height,
     );
 
     paintPageBlock(ctx, rects.pages, pageGrain(book.pose), random);
     paintSpine(ctx, rects.spine, book.design, random);
+    // Only a stacked book. A shelved one's covers face the wall, the shelf and its
+    // neighbors, so they stay the swatch of unpainted cloth the flood above left them.
+    if (book.pose.kind === "flat") paintCover(ctx, rects.cover, book.design);
   });
 }
 
 export function createBookAtlasTexture(books: readonly BookPlacement[]): CanvasTexture {
-  const layout = bookAtlasLayout(books.length);
+  const layout = bookAtlasLayout(books);
   const { canvas, texture } = createCanvasTexture(layout.width, layout.height, {
     // A shelf is the opposite of a screen: painted once, then read at a glancing angle from
     // across the room, where an unmipmapped band edge crawls on every camera move.
@@ -673,7 +896,7 @@ export function faceUV(
  * once here instead — and it buys the per-book UVs instancing cannot express.
  */
 export function createBookGeometry(books: readonly BookPlacement[]): BufferGeometry {
-  const layout = bookAtlasLayout(books.length);
+  const layout = bookAtlasLayout(books);
   const positions: number[] = [];
   const normals: number[] = [];
   const uvs: number[] = [];
@@ -719,8 +942,10 @@ export function createBookGeometry(books: readonly BookPlacement[]): BufferGeome
         normals.push(bookNormal.x, bookNormal.y, bookNormal.z);
       }
 
-      // Only the spine is printed along the book's length, so only it can end up turned.
-      uvs.push(...faceUV(rects[print], layout, print === "spine" && alongV < alongU));
+      // The spine and the cover are both printed portrait up their cell, so either can land
+      // on a face whose long axis is the other one and need turning. The block is drawn
+      // across its thickness, which `pageGrain` has already resolved, so it never turns.
+      uvs.push(...faceUV(rects[print], layout, print !== "pages" && alongV < alongU));
       indices.push(first, first + 1, first + 2, first, first + 2, first + 3);
     }
   });

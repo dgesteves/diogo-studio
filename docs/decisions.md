@@ -24,6 +24,40 @@ Two consequences worth stating, because they are what keep this file cheap to ow
 
 ---
 
+## 2026-08-21 — A stacked book gets a bigger atlas cell than a shelved one
+
+The three books on the lounge coffee table were bound by the same routine as the 121 on the
+shelves and still read as slabs. The 2026-08-19 atlas was designed for the one face a shelved
+book shows — the spine — and the flat pose inverts which faces are visible, so both of the
+faces it does show were art nobody had ever looked at.
+
+**The page block was inset in the wrong axis.** The two-pixel inset that reads as the cover
+boards standing proud of the block is right across a book's _thickness_ and meaningless along
+its length: the cloth turning over a real binding is a couple of millimeters. On a shelved
+book's top face that printed a two-centimeter border nobody noticed. On a stacked book's
+fore-edge the same two pixels covered a third of a meter, so the block came out as a white bar
+framed in black — a slab wedged between two others. The inset is now across the thickness
+only, which also means one rect serves all three of a stacked book's cut edges however
+differently long they are, and the striations went from every other pixel to every pixel
+because the gapped version reads as corrugation at that scale.
+
+**The cover had no art at all.** A shelved book's covers face the wall, the shelf and its
+neighbors, so the layout gave them a sixteen-pixel swatch of unpainted cloth — correct, and
+exactly wrong for the face a visitor standing over a coffee table sees most of.
+
+Fixing the second one is what forced the cell size to move. A cover is two orders of magnitude
+more surface than a spine, and painted into a 48×256 cell it came out at a quarter of the
+room's pixels-per-meter: a seven-pixel title smeared across twenty centimeters of board. So
+**the cell is now a property of the atlas rather than of the room** — `BOOK_CELL` for shelved
+books, `STACKED_CELL` at 128×384 for stacked ones — and `bookAtlasLayout` takes the books
+instead of a count so it can choose.
+
+The shelves could not be given that cell: 121 spines at 197 KB each is an atlas nobody should
+download, against the 4.7 MB the bookshelf already costs. It is affordable here only because
+there are three of them, under 600 KB for the whole table. A mixed atlas would simply pay the
+stacked cell for every book in it, which is correct but wasteful — no atlas in the room mixes
+poses, and none should.
+
 ## 2026-08-20 — The coaster's face is unlit, off-palette, and sized by the camera
 
 The mug now stands on a coaster with an etched face — rings, a tick dial, a segmented gauge

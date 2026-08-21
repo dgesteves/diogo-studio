@@ -4,6 +4,8 @@ import {
   bookAtlasLayout,
   bookCellRects,
   BOOK_CELL,
+  STACKED_CELL,
+  coverFaceSize,
   BOOK_CLOTHS,
   BOOK_PIXELS_PER_METER,
   bookDesign,
@@ -41,6 +43,16 @@ function place(size: [number, number, number], pose: BookPose): BookPlacement {
     design: bookDesign(0),
   };
 }
+
+/** A row of shelved books, for the assertions that only care how many there are. */
+function shelved(count: number): BookPlacement[] {
+  return Array.from({ length: count }, () =>
+    place([0.13, 0.3, 0.04], { kind: "upright", spine: "px" }),
+  );
+}
+
+/** The coffee table's, restated rather than imported: `lounge.tsx` is a client module. */
+const STACKED_BOOK = place([0.24, 0.028, 0.32], { kind: "flat", spine: "nx" });
 
 describe("bookDesign", () => {
   const designs = Array.from({ length: 200 }, (_, order) => bookDesign(order));
@@ -82,26 +94,39 @@ describe("bookDesign", () => {
 describe("bookAtlasLayout", () => {
   it("holds every cell it is asked for, without a row of waste", () => {
     for (const count of [1, 3, 16, 17, 38, 83, 121]) {
-      const layout = bookAtlasLayout(count);
+      const books = shelved(count);
+      const layout = bookAtlasLayout(books);
       expect.soft(layout.columns * layout.rows, `${count} books`).toBeGreaterThanOrEqual(count);
       expect.soft((layout.rows - 1) * layout.columns).toBeLessThan(count);
-      expect.soft(layout.width).toBe(layout.columns * BOOK_CELL.width);
-      expect.soft(layout.height).toBe(layout.rows * BOOK_CELL.height);
+      expect.soft(layout.width).toBe(layout.columns * layout.cell.width);
+      expect.soft(layout.height).toBe(layout.rows * layout.cell.height);
     }
   });
 
   /** A single book must still get a canvas, or a one-book shelf renders untextured. */
   it("never returns an empty canvas", () => {
     for (const count of [0, 1]) {
-      const layout = bookAtlasLayout(count);
+      const layout = bookAtlasLayout(shelved(count));
       expect.soft(layout.width).toBeGreaterThan(0);
       expect.soft(layout.height).toBeGreaterThan(0);
     }
   });
+
+  /**
+   * A stacked book needs a cell big enough for a cover, and the shelves cannot be given one:
+   * 121 spines at that size is an atlas nobody should download. So the cell is a property of
+   * the canvas, and one stacked book in it moves every cell up — which is only affordable
+   * because no atlas in the room mixes poses.
+   */
+  it("sizes the cell for the pose the books are in", () => {
+    expect(bookAtlasLayout(shelved(8)).cell).toBe(BOOK_CELL);
+    expect(bookAtlasLayout([...shelved(2), STACKED_BOOK]).cell).toBe(STACKED_CELL);
+    expect(STACKED_CELL.width).toBeGreaterThan(BOOK_CELL.width);
+  });
 });
 
 describe("bookCellRects", () => {
-  const layout = bookAtlasLayout(ROOM_BOOKS.length);
+  const layout = bookAtlasLayout(ROOM_BOOKS);
 
   /**
    * The one thing that silently ruins a shelf: the covers take their color from a patch of
@@ -111,18 +136,18 @@ describe("bookCellRects", () => {
   it("keeps all three prints inside the book's own cell, and clear of each other", () => {
     for (const [index, book] of ROOM_BOOKS.entries()) {
       const rects = bookCellRects(index, layout, book);
-      const left = (index % layout.columns) * BOOK_CELL.width;
-      const top = Math.floor(index / layout.columns) * BOOK_CELL.height;
+      const left = (index % layout.columns) * layout.cell.width;
+      const top = Math.floor(index / layout.columns) * layout.cell.height;
 
       for (const [print, rect] of Object.entries(rects)) {
         expect.soft(rect.x, `${print} spills left`).toBeGreaterThanOrEqual(left);
         expect.soft(rect.y, `${print} spills up`).toBeGreaterThanOrEqual(top);
         expect
           .soft(rect.x + rect.width, `${print} spills right`)
-          .toBeLessThanOrEqual(left + BOOK_CELL.width);
+          .toBeLessThanOrEqual(left + layout.cell.width);
         expect
           .soft(rect.y + rect.height, `${print} spills down`)
-          .toBeLessThanOrEqual(top + BOOK_CELL.height);
+          .toBeLessThanOrEqual(top + layout.cell.height);
         expect.soft(rect.width).toBeGreaterThan(0);
         expect.soft(rect.height).toBeGreaterThan(0);
       }
@@ -130,6 +155,52 @@ describe("bookCellRects", () => {
       expect.soft(rects.pages.y + rects.pages.height).toBeLessThanOrEqual(rects.cover.y);
       expect.soft(rects.cover.y + rects.cover.height).toBeLessThanOrEqual(rects.spine.y);
     }
+  });
+
+  /**
+   * A stacked book's cell runs the other way round — cover, block, spine — because the cover
+   * is the face it actually shows. The same thing has to hold of it: three zones that never
+   * reach each other, in a cell that holds all three.
+   */
+  it("keeps a stacked book's three prints inside its cell, and clear of each other", () => {
+    const stackedLayout = bookAtlasLayout([STACKED_BOOK]);
+    const rects = bookCellRects(0, stackedLayout, STACKED_BOOK);
+
+    for (const [print, rect] of Object.entries(rects)) {
+      expect.soft(rect.x, `${print} spills left`).toBeGreaterThanOrEqual(0);
+      expect.soft(rect.y, `${print} spills up`).toBeGreaterThanOrEqual(0);
+      expect
+        .soft(rect.x + rect.width, `${print} spills right`)
+        .toBeLessThanOrEqual(stackedLayout.cell.width);
+      expect
+        .soft(rect.y + rect.height, `${print} spills down`)
+        .toBeLessThanOrEqual(stackedLayout.cell.height);
+    }
+
+    expect.soft(rects.cover.y + rects.cover.height).toBeLessThanOrEqual(rects.pages.y);
+    expect.soft(rects.pages.y + rects.pages.height).toBeLessThanOrEqual(rects.spine.y);
+  });
+
+  /**
+   * The whole reason a stacked book gets its own cell: painted into a shelf cell the cover
+   * came out at a quarter of the room's pixels-per-meter, which is a seven-pixel title
+   * smeared over twenty centimeters of board.
+   */
+  it("draws a stacked cover at the same pixels-per-meter as a spine, in proportion", () => {
+    const layout = bookAtlasLayout([STACKED_BOOK]);
+    const { cover, spine } = bookCellRects(0, layout, STACKED_BOOK);
+    const face = coverFaceSize(STACKED_BOOK.size);
+
+    expect(cover.width).toBe(Math.round(face.width * BOOK_PIXELS_PER_METER));
+    expect(cover.height).toBe(Math.round(face.height * BOOK_PIXELS_PER_METER));
+    // The board and the spine beside it are the same book, so they are the same height.
+    expect(cover.height).toBe(spine.height);
+  });
+
+  /** Portrait, so a cover is never lettered sideways relative to its own spine. */
+  it("reads a cover as the shorter and longer extents of the book's footprint", () => {
+    expect(coverFaceSize([0.24, 0.028, 0.32])).toEqual({ width: 0.24, height: 0.32 });
+    expect(coverFaceSize([0.32, 0.028, 0.24])).toEqual({ width: 0.24, height: 0.32 });
   });
 
   /**
@@ -143,7 +214,7 @@ describe("bookCellRects", () => {
     const rects = bookCellRects(0, layout, largest);
 
     expect(rects.spine.y).toBeGreaterThan(rects.cover.y + rects.cover.height);
-    expect(rects.spine.x + rects.spine.width).toBeLessThanOrEqual(BOOK_CELL.width);
+    expect(rects.spine.x + rects.spine.width).toBeLessThanOrEqual(layout.cell.width);
     // And it is drawn at true scale rather than clamped down to fit.
     expect(rects.spine.height).toBe(Math.round(0.38 * BOOK_PIXELS_PER_METER));
     expect(rects.spine.width).toBe(Math.round(0.076 * BOOK_PIXELS_PER_METER));
@@ -218,8 +289,8 @@ describe("a book's faces", () => {
 });
 
 describe("faceUV", () => {
-  const layout = bookAtlasLayout(16);
-  const rect = { x: 0, y: 0, width: BOOK_CELL.width, height: BOOK_CELL.height };
+  const layout = bookAtlasLayout(shelved(16));
+  const rect = { x: 0, y: 0, width: layout.cell.width, height: layout.cell.height };
 
   it("puts the image's top edge at the higher v, because canvas y runs the other way", () => {
     const [, v0, , , , v2] = faceUV(rect, layout, false);
@@ -294,19 +365,19 @@ describe("createBookGeometry", () => {
    * perfectly and is wrong on every shelf.
    */
   it("keeps every book's UVs inside that book's own cell", () => {
-    const layout = bookAtlasLayout(SHELF_BOOKS.length);
+    const layout = bookAtlasLayout(SHELF_BOOKS);
 
     for (let vertex = 0; vertex < uvs.count; vertex += 1) {
       const index = Math.floor(vertex / 24);
-      const left = (index % layout.columns) * BOOK_CELL.width;
-      const top = Math.floor(index / layout.columns) * BOOK_CELL.height;
+      const left = (index % layout.columns) * layout.cell.width;
+      const top = Math.floor(index / layout.columns) * layout.cell.height;
       const x = uvs.getX(vertex) * layout.width;
       const y = (1 - uvs.getY(vertex)) * layout.height;
 
       expect.soft(x, `book ${index} samples another cell`).toBeGreaterThanOrEqual(left - 1e-6);
-      expect.soft(x).toBeLessThanOrEqual(left + BOOK_CELL.width + 1e-6);
+      expect.soft(x).toBeLessThanOrEqual(left + layout.cell.width + 1e-6);
       expect.soft(y).toBeGreaterThanOrEqual(top - 1e-6);
-      expect.soft(y).toBeLessThanOrEqual(top + BOOK_CELL.height + 1e-6);
+      expect.soft(y).toBeLessThanOrEqual(top + layout.cell.height + 1e-6);
     }
   });
 

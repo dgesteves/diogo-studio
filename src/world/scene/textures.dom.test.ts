@@ -272,7 +272,7 @@ describe("keyboard legend texture", () => {
  */
 describe("book atlas texture", () => {
   const books = SHELF_BOOKS.slice(0, 12);
-  const layout = bookAtlasLayout(books.length);
+  const layout = bookAtlasLayout(books);
 
   function paint(row: readonly BookPlacement[] = books): RecordingContext {
     const recording = createRecordingContext({ width: layout.width, height: layout.height });
