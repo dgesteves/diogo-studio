@@ -6,6 +6,7 @@ import { RoundedBox } from "@react-three/drei";
 import { worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
+import { Macbook } from "./macbook";
 
 /**
  * The corner the room is not working in: rug, sofa, lamp, coffee table and the TV above the
@@ -185,7 +186,6 @@ function LoungeLamp(): ReactElement {
   );
 }
 
-const LAPTOP_BODY = { color: "#0e1419", roughness: 0.45, metalness: 0.5 } as const;
 const REMOTE_BODY = { color: "#0b1014", roughness: 0.6, metalness: 0.25 } as const;
 
 /**
@@ -217,30 +217,20 @@ type LoungeTableItemsProps = {
   topY: number;
 };
 
+/**
+ * The laptop's corner of the table: turned toward the sofa rather than square to it, and set
+ * far enough right that its 35 cm footprint stays on the glass inlay and clear of the books.
+ * `topY` is the inlay's own face, so the position below carries the two offsets that are the
+ * laptop's own business and nothing else.
+ */
+const MACBOOK_TURN = -0.3;
+const MACBOOK_OFFSET = { x: 0.28, z: -0.05 } as const;
+
 function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
   return (
     <group>
-      <group position={[0.32, topY, 0]} rotation={[0, -0.35, 0]}>
-        <RoundedBox
-          args={[0.3, 0.016, 0.22]}
-          radius={0.006}
-          smoothness={2}
-          position={[0, 0.008, 0]}
-        >
-          <meshStandardMaterial {...LAPTOP_BODY} />
-        </RoundedBox>
-        <RoundedBox
-          args={[0.3, 0.012, 0.22]}
-          radius={0.006}
-          smoothness={2}
-          position={[0, 0.022, 0]}
-        >
-          <meshStandardMaterial {...LAPTOP_BODY} />
-        </RoundedBox>
-        <mesh position={[0.12, 0.016, 0.111]}>
-          <circleGeometry args={[0.004, 10]} />
-          <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
-        </mesh>
+      <group position={[MACBOOK_OFFSET.x, topY, MACBOOK_OFFSET.z]} rotation={[0, MACBOOK_TURN, 0]}>
+        <Macbook />
       </group>
 
       <group position={[-0.36, topY, 0.04]}>

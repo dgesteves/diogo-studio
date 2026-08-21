@@ -22,13 +22,15 @@ import {
   KEY_LAMPS,
   KEYS,
 } from "./control-deck";
+import { drawMacbookDesktop, MACBOOK_SCREEN } from "./macbook";
 import { drawPhoneHome, PHONE_SCREEN } from "./phone";
 import { drawTabletHome, TABLET_SCREEN } from "./tablet";
 import { monogram, type HomeApp } from "./home";
 
 /**
- * The three screens on the studio desk, the control deck's panel, and the two devices lying
- * on it — the phone by the mouse and the tablet beside the keyboard.
+ * The three screens on the studio desk, the control deck's panel, the two devices lying on it
+ * — the phone by the mouse and the tablet beside the keyboard — and the laptop's desktop
+ * across the room.
  * They redraw on a frame or a timer, so what matters is that a given input paints one exact
  * thing — and that the inputs that move (a caret, a frame rate, a clock, a level) each change
  * the picture.
@@ -460,5 +462,81 @@ describe("tablet home screen", () => {
 
     expect(squares.size).toBe(shown.length);
     for (const app of shown) expect.soft(valuesOf("fillStyle")).toContain(app.accent);
+  });
+});
+
+/**
+ * The laptop's desktop. It shows the same stations the two devices on the desk show, so what
+ * this file has to hold is the two things that make it a *desktop* rather than a third copy of
+ * a home screen — the menu bar it shares with a notch, and the window standing open on it.
+ */
+describe("laptop desktop", () => {
+  // Short enough to survive both the sidebar and a tile caption: the elision that longer ones
+  // get is the next test's claim, not this fixture's business.
+  const APPS: readonly HomeApp[] = [
+    { label: "Studio", accent: "#22d3ee" },
+    { label: "Work", accent: "#a78bfa" },
+    { label: "Now", accent: "#34d399" },
+  ];
+  const view = { apps: APPS, clock: "09:41", date: "Friday, August 21" };
+  const desktop = (): RecordingContext =>
+    paint((ctx) => drawMacbookDesktop(ctx, view), MACBOOK_SCREEN);
+
+  it("hangs the clock and the date off the right of the menu bar", () => {
+    const { runs } = desktop();
+    const right = runs.find((run) => run.align === "right");
+
+    expect(right?.text).toBe("Friday, August 21   09:41");
+    expect(right?.y).toBeLessThan(MACBOOK_SCREEN.width * 0.03);
+  });
+
+  /**
+   * The notch is a piece the panel does not have, so it is painted over the bar rather than
+   * under it, and it hangs off the top edge — the only rounded rectangle on the screen whose
+   * two upper corners are square.
+   */
+  it("cuts the notch out of the middle of the menu bar", () => {
+    const [x, y, width, , radii] =
+      desktop()
+        .callsTo("roundRect")
+        .find((call) => call[1] === 0) ?? [];
+
+    expect(Number(x) + Number(width) / 2).toBeCloseTo(MACBOOK_SCREEN.width / 2, 6);
+    expect(y).toBe(0);
+    expect(radii).toEqual([0, 0, expect.any(Number), expect.any(Number)]);
+  });
+
+  it("lists every station down the sidebar and names each tile in the grid", () => {
+    const { runs } = desktop();
+    const sidebar = runs.filter((run) => run.align === "left").map((run) => run.text);
+    const captions = runs.filter((run) => run.align === "center").map((run) => run.text);
+
+    for (const app of APPS) {
+      expect.soft(sidebar, app.label).toContain(app.label);
+      expect.soft(captions, app.label).toContain(app.label);
+    }
+  });
+
+  /** A station name too long for the sidebar is elided there, not run into the pane. */
+  it("elides a name the sidebar cannot fit rather than overrunning it", () => {
+    const long = [{ label: "A station with a very long name indeed", accent: "#22d3ee" }];
+    const { runs } = paint(
+      (ctx) => drawMacbookDesktop(ctx, { ...view, apps: long }),
+      MACBOOK_SCREEN,
+    );
+
+    expect(runs.some((run) => run.text.endsWith("…"))).toBe(true);
+  });
+
+  it("repaints when the minute does, and only then", () => {
+    const first = desktop()
+      .runs.map((run) => run.text)
+      .join("|");
+    const later = paint(
+      (ctx) => drawMacbookDesktop(ctx, { ...view, clock: "09:42" }),
+      MACBOOK_SCREEN,
+    );
+
+    expect(later.runs.map((run) => run.text).join("|")).not.toBe(first);
   });
 });
