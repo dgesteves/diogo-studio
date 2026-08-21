@@ -19,7 +19,9 @@ import {
 import { createCityFacadeTexture, createSkyTexture } from "./city";
 import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH, useKeyboardLegendTexture } from "./keyboard";
 import { createGlowTexture, createMoonTexture } from "./moon";
+import { createRemoteFaceTexture, REMOTE_PRINT } from "./remote";
 import { SHELF_BOOKS } from "./shelving";
+import { createPerforationTexture } from "./soundbar";
 
 /**
  * The canvas textures the scene paints for itself: the lit windows on the city towers, the
@@ -36,6 +38,12 @@ import { SHELF_BOOKS } from "./shelving";
 const FACADE = { width: 128, height: 256 };
 const PIXELS_PER_METER = 1500;
 const LIT_WINDOW_COLORS = ["#22d3ee", "#67e8f9", "#7dd3fc", "#fbbf24", "#f6efe1"];
+/** The perforation tile, and the field it holds: 8 holes across 128 px, so a 16 px pitch. */
+const PERFORATION_TILE = 128;
+const PERFORATION_HOLES = 8;
+const PERFORATION_PITCH = PERFORATION_TILE / PERFORATION_HOLES;
+/** The remote's field: a power/back rank above the clickpad and three ranks below it. */
+const REMOTE_KEYS = 8;
 
 let stub: { contexts: readonly RecordingContext[]; restore: () => void } | undefined;
 
@@ -387,5 +395,97 @@ describe("book atlas texture", () => {
   it("paints the same shelf every time", () => {
     // Two contexts rather than two passes: the stub numbers its gradient handles globally.
     expect(paint().transcript).toEqual(paint().transcript);
+  });
+});
+
+describe("the soundbar's perforation", () => {
+  function paint(): RecordingContext {
+    const contexts = record();
+    createPerforationTexture();
+    return contexts[0]!;
+  }
+
+  it("fills the tile with a staggered field rather than a grid", () => {
+    const rows = paint()
+      .callsTo("arc")
+      .map(([x, y]) => ({ x: Number(x), y: Number(y) }));
+
+    // Row spacing is the pitch and column spacing is the pitch, so a field this size is 64
+    // holes — but the two phases are what make it read as perforation instead of graph paper.
+    expect(rows.length).toBeGreaterThanOrEqual(PERFORATION_HOLES ** 2);
+    const phases = new Set(rows.map((hole) => ((hole.x % PERFORATION_PITCH) + 16) % 16));
+    expect(phases.size).toBe(2);
+  });
+
+  /**
+   * The tile repeats across the wrap, so a hole the stagger pushes onto its edge has to be
+   * painted at both edges. Left half-drawn it is a column of half-holes every 24 mm running
+   * the length of the bar — which is a seam, and the one defect this texture can have that a
+   * uniform field is otherwise immune to.
+   */
+  it("paints a hole that lands on the seam at both edges of the tile", () => {
+    const xs = paint()
+      .callsTo("arc")
+      .map(([x]) => Number(x));
+
+    expect(xs).toContain(0);
+    expect(xs).toContain(PERFORATION_TILE);
+  });
+
+  it("hands the context back with a hole gradient rather than a flat fill", () => {
+    const gradients = paint().callsTo("createRadialGradient");
+
+    // Inner radius, then outer: a hole drawn from the outside in is a stud, not a hole.
+    for (const [, , inner, , , outer] of gradients.slice(0, 8)) {
+      expect.soft(Number(inner)).toBeLessThan(Number(outer));
+    }
+  });
+});
+
+describe("the remote's face", () => {
+  function paint(): RecordingContext {
+    const contexts = record();
+    createRemoteFaceTexture();
+    return contexts[0]!;
+  }
+
+  /**
+   * The layout is written in millimeters from the top of a 35 × 136 mm face, and the canvas is
+   * pixels — so the one thing that can go wrong silently is a scale that puts a key off the
+   * panel, where it is simply never seen.
+   */
+  it("keeps the clickpad and every key inside the face", () => {
+    const face = paint();
+
+    for (const [x, y, radius] of face.callsTo("arc")) {
+      expect.soft(Number(x) - Number(radius)).toBeGreaterThanOrEqual(0);
+      expect.soft(Number(x) + Number(radius)).toBeLessThanOrEqual(REMOTE_PRINT.width);
+      expect.soft(Number(y) - Number(radius)).toBeGreaterThanOrEqual(0);
+      expect.soft(Number(y) + Number(radius)).toBeLessThanOrEqual(REMOTE_PRINT.height);
+    }
+  });
+
+  it("prints a clickpad above three ranks of keys, which is what says remote", () => {
+    const circles = paint()
+      .callsTo("arc")
+      .map(([x, y, radius]) => ({ x: Number(x), y: Number(y), radius: Number(radius) }));
+
+    const pad = circles.reduce((widest, circle) =>
+      circle.radius > widest.radius ? circle : widest,
+    );
+    // Grouped by radius rather than picked by size: the glyph inside a key is a circle too,
+    // and so is the ring around the pad's own center button, so "small" catches four things
+    // that are not keys. The six drawn alike are the field.
+    const sizes = new Map<number, { x: number; y: number }[]>();
+    for (const circle of circles) {
+      sizes.set(circle.radius, [...(sizes.get(circle.radius) ?? []), circle]);
+    }
+    const keys = [...sizes.values()].find((group) => group.length === REMOTE_KEYS);
+    if (!keys) throw new Error("The remote prints no rank of keys");
+
+    // Two columns, one rank above the pad and three below it.
+    expect(new Set(keys.map((key) => key.x)).size).toBe(2);
+    expect(keys.filter((key) => key.y < pad.y)).toHaveLength(2);
+    expect(keys.filter((key) => key.y > pad.y)).toHaveLength(REMOTE_KEYS - 2);
   });
 });

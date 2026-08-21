@@ -1,10 +1,19 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { Box3, Vector3, type MeshBasicMaterial, type MeshStandardMaterial, type Mesh } from "three";
-import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
+import { materialOf, renderScene, unmountScenes } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 import { worldColors } from "../materials";
 import { ROOM } from "../room";
-import { LOUNGE_ORIGIN, Lounge, SOFA_Z, TABLE_Z, TV_CENTER_Y, TV_WALL_Z } from "./lounge";
+import {
+  LOUNGE_ORIGIN,
+  Lounge,
+  SOFA_Z,
+  TABLE_TOP_Y,
+  TABLE_Z,
+  TV_CENTER_Y,
+  TV_WALL_Z,
+} from "./lounge";
+import { REMOTE } from "./remote";
 
 /**
  * The corner of the room a visitor explores rather than navigates to: a sofa facing a
@@ -37,6 +46,12 @@ function loungeRoot(objects: readonly { type: string }[]) {
 
 function worldBox(object: object): Box3 {
   return new Box3().setFromObject(object as Mesh);
+}
+
+/** A mesh's own size, in its own frame — which is where a device's measurements are written. */
+function localSize(mesh: Mesh): Vector3 {
+  mesh.geometry.computeBoundingBox();
+  return (mesh.geometry.boundingBox ?? new Box3()).getSize(new Vector3());
 }
 
 async function lounge() {
@@ -167,21 +182,41 @@ describe("Lounge", () => {
   it("rides the soundbar on top of the console instead of inside it", async () => {
     const scene = await lounge();
 
-    // Wide and shallow, which is the soundbar's grille and nothing else on this side of the
-    // room: the mark on the laptop's lid is the other small plane down here, and picking on
-    // height alone found that instead the day the laptop was built.
-    const grille = scene.meshesWith("PlaneGeometry").find((mesh) => {
-      const { width = 0, height = 1 } = geometryParams(mesh);
-      return height < 0.1 && width > 0.5;
-    });
+    // The bar is the one mesh in the room wearing two materials — flat ends and a perforated
+    // wrap — which picks it out of a corner that is otherwise all dark boxes without asking
+    // where it is. Picking on size alone found the laptop's lid the day that was built.
+    const wrap = scene.meshes.find((mesh) => Array.isArray(mesh.material));
     // The soundbar is handed a `topY` and places itself; the console it belongs to is the
     // sibling of its own group, which is what makes this a claim about that number.
-    const soundbar = grille!.parent!;
+    const soundbar = wrap!.parent!;
     const cabinet = soundbar.parent!.children.find(
       (child): child is Mesh => (child as Mesh).geometry?.type === "ExtrudeGeometry",
     );
 
     expect(worldBox(soundbar).min.y).toBeGreaterThanOrEqual(worldBox(cabinet!).max.y - EPSILON);
+  });
+
+  /**
+   * The remote's shape comes from `slab.ts`, whose extrusion starts at `-bevelThickness` — so
+   * a body set down at the surface it is meant to lie on sinks a chamfer into it, and one
+   * lifted by any other number floats. The one it replaced floated 8 mm. Read against the
+   * table rather than against its own `position`, because the offset that would be wrong is
+   * two groups above it.
+   */
+  it("lays the remote on the table rather than in it or above it", async () => {
+    const scene = await lounge();
+
+    const remote = scene.meshes.find((mesh) => {
+      const size = localSize(mesh);
+      return (
+        Math.abs(size.x - REMOTE.width) < EPSILON && Math.abs(size.y - REMOTE.length) < EPSILON
+      );
+    });
+    if (!remote) throw new Error("The lounge table carries no remote");
+
+    const restsOn = worldBox(remote).min.y - (LOUNGE_ORIGIN[1] + TABLE_TOP_Y);
+    expect(restsOn).toBeGreaterThanOrEqual(-EPSILON);
+    expect(restsOn).toBeLessThan(0.003);
   });
 
   /**
