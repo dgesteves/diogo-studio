@@ -2,6 +2,7 @@ import ReactThreeTestRenderer from "@react-three/test-renderer";
 import { act } from "@testing-library/react";
 import { useStore, type RootState, type RootStore } from "@react-three/fiber";
 import { useLayoutEffect, type ReactElement, type ReactNode } from "react";
+import { Box3 } from "three";
 import type { Light, Material, Mesh, Object3D } from "three";
 
 /**
@@ -59,6 +60,11 @@ export function materialOf<T extends Material>(mesh: Mesh | undefined): T {
     throw new Error(`Expected a single material, got ${String(material)}`);
   }
   return material as T;
+}
+
+/** An object's extents in world space — where a piece of furniture stands, not how big it is. */
+export function worldBox(object: object): Box3 {
+  return new Box3().setFromObject(object as Mesh);
 }
 
 /** The geometry parameters three records when it builds a primitive from JSX args. */

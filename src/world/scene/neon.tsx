@@ -3,7 +3,7 @@
 import { type ReactElement } from "react";
 import { Html } from "@react-three/drei";
 import { worldColors, useWorldPalette } from "../materials";
-import { BACK_WALL_Z } from "../room";
+import { BACK_WALL_Z, LEFT_WALL_RULE } from "../room";
 import { siteConfig } from "@/content/profile";
 
 export function WorldNeon(): ReactElement {
@@ -42,8 +42,11 @@ export function WorldNeon(): ReactElement {
         decay={2}
       />
 
-      <mesh position={[-2.27, 1.7, 2.6]} rotation={[0, Math.PI / 2, 0]}>
-        <boxGeometry args={[3.2, 0.012, 0.012]} />
+      <mesh
+        position={[LEFT_WALL_RULE.x, LEFT_WALL_RULE.y, LEFT_WALL_RULE.centerZ]}
+        rotation={[0, Math.PI / 2, 0]}
+      >
+        <boxGeometry args={[LEFT_WALL_RULE.length, 0.012, 0.012]} />
         <meshBasicMaterial color={worldColors.accentSoft} toneMapped={false} />
       </mesh>
     </group>

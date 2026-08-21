@@ -2,8 +2,9 @@ import type * as Drei from "@react-three/drei";
 import { act } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Color, SRGBColorSpace, Texture, type MeshStandardMaterial } from "three";
-import { geometryParams, materialOf, renderScene, unmountScenes } from "@tests/r3f";
+import { geometryParams, materialOf, renderScene, unmountScenes, worldBox } from "@tests/r3f";
 import { worldPalettes } from "../materials";
+import { BOOKCASE_SPAN, ROOM } from "../room";
 import { setWorldMode, type WorldMode } from "../store";
 
 /**
@@ -25,7 +26,7 @@ vi.mock("@react-three/drei", async (importOriginal) => ({
   useTexture: () => photograph,
 }));
 
-const { PRINT_ASPECT, WallShelves } = await import("./shelving");
+const { Bookshelf, PRINT_ASPECT, WallShelves } = await import("./shelving");
 
 afterEach(unmountScenes);
 
@@ -71,5 +72,27 @@ describe("the framed print", () => {
 
     const brightness = (color: Color) => color.r + color.g + color.b;
     expect(brightness(night.color)).toBeLessThan(brightness(day.color));
+  });
+});
+
+describe("the bookcase", () => {
+  /**
+   * One group position stands it against two walls, so it is asserted against the room rather
+   * than against the number that placed it: a case built wider than the span it is placed by
+   * either opens a gap in the corner or stands its far side inside the front wall, and neither
+   * shows up in a spec that reads the position back.
+   */
+  it("stands in the corner where the left wall meets the front one", async () => {
+    const scene = await renderScene(<Bookshelf />);
+    const group = scene.objects.find((object) => object.type === "Group");
+    if (!group) throw new Error("The bookcase rendered no group");
+    const box = worldBox(group);
+
+    expect(box.max.z).toBeCloseTo(ROOM.maxZ, 1);
+    expect(box.max.z).toBeLessThanOrEqual(ROOM.maxZ);
+    expect(box.min.x).toBeCloseTo(ROOM.minX, 1);
+    expect(box.min.x).toBeGreaterThanOrEqual(ROOM.minX);
+
+    expect(box.max.z - box.min.z).toBeCloseTo(BOOKCASE_SPAN);
   });
 });

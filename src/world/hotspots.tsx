@@ -2,7 +2,14 @@
 
 import { type PageSlug, stationIndex } from "@/content/pages";
 import { type Vec3, type WorldStation } from "./stations";
-import { WALL_SCREEN, WALL_SCREEN_Z } from "./room";
+import {
+  BOOKCASE_SPAN,
+  BOOKCASE_Z,
+  CONTACT_DOOR_Z,
+  LEFT_WALL_PLANT_Z,
+  WALL_SCREEN,
+  WALL_SCREEN_Z,
+} from "./room";
 import {
   CanvasTexture,
   LinearFilter,
@@ -51,7 +58,12 @@ export const furnitureHotspots = {
     glow: "floor",
     groundY: FLOOR_Y,
   },
-  writing: { center: [-2.18, 1.15, 3.7], size: [0.4, 2.3, 1.15], glow: "floor", groundY: FLOOR_Y },
+  writing: {
+    center: [-2.18, 1.15, BOOKCASE_Z],
+    size: [0.4, 2.3, BOOKCASE_SPAN],
+    glow: "floor",
+    groundY: FLOOR_Y,
+  },
   speaking: { center: [1.38, 0.9, -0.1], size: [0.3, 0.55, 0.3], glow: "floor", groundY: FLOOR_Y },
   openSource: {
     center: [3.6, 1.5, -2.25],
@@ -59,7 +71,12 @@ export const furnitureHotspots = {
     glow: "floor",
     groundY: FLOOR_Y,
   },
-  lab: { center: [-1.8, 0.5, 1.4], size: [0.75, 1.05, 0.75], glow: "floor", groundY: FLOOR_Y },
+  lab: {
+    center: [-1.8, 0.5, LEFT_WALL_PLANT_Z],
+    size: [0.75, 1.05, 0.75],
+    glow: "floor",
+    groundY: FLOOR_Y,
+  },
   caseStudies: {
     center: [-0.6, 0.8, 0.34],
     size: [0.28, 0.16, 0.38],
@@ -68,7 +85,7 @@ export const furnitureHotspots = {
   },
   now: { center: [0.95, 0.8, 0.3], size: [0.18, 0.2, 0.18], glow: "floor", groundY: DESK_Y },
   contact: {
-    center: [-2.25, 1.05, 2.4],
+    center: [-2.25, 1.05, CONTACT_DOOR_Z],
     size: [0.16, 2.0, 0.95],
     glow: "floor",
     groundY: FLOOR_Y,

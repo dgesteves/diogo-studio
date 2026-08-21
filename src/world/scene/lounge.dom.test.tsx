@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { Box3, Vector3, type MeshBasicMaterial, type MeshStandardMaterial, type Mesh } from "three";
-import { materialOf, renderScene, unmountScenes } from "@tests/r3f";
+import { materialOf, renderScene, unmountScenes, worldBox } from "@tests/r3f";
 import { stubCanvasContexts, type RecordingContext } from "@tests/recording-ctx";
 import { worldColors } from "../materials";
 import { ROOM } from "../room";
@@ -51,10 +51,6 @@ function loungeRoot(objects: readonly { type: string }[]) {
   const group = objects.find((object) => object.type === "Group");
   if (!group) throw new Error("The lounge rendered no group");
   return group as unknown as Mesh;
-}
-
-function worldBox(object: object): Box3 {
-  return new Box3().setFromObject(object as Mesh);
 }
 
 /** A mesh's own size, in its own frame — which is where a device's measurements are written. */
