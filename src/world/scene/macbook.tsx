@@ -442,12 +442,25 @@ const KEY_WELL = {
   emissiveIntensity: 0.02,
 } as const;
 /**
- * Black, and barely metal at all. At any real metalness the caps take their color from what
- * they reflect, and everything in this room is cyan — so a "dark gray" keyboard rendered as a
- * slate-blue one, which is the note that came back off the first build. A key is molded
- * plastic; it has almost no specular to give.
+ * Black, and not metal at all. At any metalness the caps take their color from what they
+ * reflect, and everything in this room is cyan — so a "dark gray" keyboard rendered as a
+ * slate-blue one, which is the note that came back off the first build.
+ *
+ * Dropping metalness is not enough on its own, which is the note that came back off the
+ * second: a dielectric in three.js reflects 4% head-on but 100% at a grazing angle, and the
+ * caps are flat panels lying face up, so the whole field turns to sheen the moment the camera
+ * comes down toward table height — black from above, gray from the sofa. `specularIntensity`
+ * is what bounds that (it scales the grazing end of the Fresnel curve, which `roughness`
+ * does not), and it is the one knob `MeshStandardMaterial` does not expose — hence the
+ * physical material here and nowhere else on this object. A key is molded plastic: matte from
+ * every angle is the *more* accurate answer, not a cheat to dodge the highlight.
  */
-const KEYCAP = { color: "#101315", roughness: 0.86, metalness: 0.04 } as const;
+const KEYCAP = {
+  color: "#0b0e10",
+  roughness: 0.9,
+  metalness: 0,
+  specularIntensity: 0.25,
+} as const;
 /** Perforated, so it reads a shade under the deck it is cut into rather than beside it. */
 const GRILLE_FACE = { color: "#585e65", roughness: 0.66, metalness: 0.3 } as const;
 /** Glass, so it is the deck's own tone taken smoother rather than a lighter panel laid on
@@ -476,9 +489,20 @@ function Keys(): ReactElement {
 
   return (
     <group>
-      <Instances limit={KEYCAPS.length} position={[0, CAP_TOP - KEY_HEIGHT / 2, WELL_Z]}>
+      {/* Culled on the base cap's bounds rather than the field's, and the bounds are measured
+          before drei has placed a single instance — so the sphere comes out empty and the whole
+          board disappears whenever the camera is closer than about a meter, leaving the bare
+          well plate reading as a gray slab where the keys should be. `scene/shelving.tsx` hit
+          this with the puzzle stickers. Off, because the field is one small draw call that is
+          only ever in shot when the laptop is. */}
+      <Instances
+        limit={KEYCAPS.length}
+        range={KEYCAPS.length}
+        frustumCulled={false}
+        position={[0, CAP_TOP - KEY_HEIGHT / 2, WELL_Z]}
+      >
         <boxGeometry args={[1, KEY_HEIGHT, 1]} />
-        <meshStandardMaterial {...KEYCAP} />
+        <meshPhysicalMaterial {...KEYCAP} />
         {KEYCAPS.map((cap) => (
           <Instance key={cap.id} position={[cap.x, 0, cap.z]} scale={[cap.width, 1, cap.depth]} />
         ))}
