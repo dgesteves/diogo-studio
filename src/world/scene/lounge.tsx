@@ -6,19 +6,12 @@ import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { ExtrudeGeometry, Path, Shape, type BufferGeometry } from "three";
 import { useDisposable } from "../gpu";
-import { anodizedMetalMaterial, worldColors } from "../materials";
+import { anodizedMetalMaterial, tableTopMaterial, worldColors } from "../materials";
 import { useLoungeTvTexture } from "../screens/tv";
 import { bookDesign, Books, type BookPlacement } from "./books";
 import { Macbook } from "./macbook";
 import { Remote } from "./remote";
-import {
-  createSlabBody,
-  createSlabFace,
-  FACE_UP,
-  slabOutline,
-  SLAB_GLASS,
-  type SlabSpec,
-} from "./slab";
+import { createSlabBody, createSlabFace, FACE_UP, slabOutline, type SlabSpec } from "./slab";
 import { createSledLoop, type SledSpec } from "./sled";
 import { Sofa, SOFA } from "./sofa";
 import { Soundbar, SOUNDBAR } from "./soundbar";
@@ -181,7 +174,7 @@ type LoungeTableItemsProps = {
 
 /**
  * The laptop's corner of the table: turned toward the sofa rather than square to it, and set
- * far enough right that its 35 cm footprint stays on the glass inlay and clear of the books.
+ * far enough right that its 35 cm footprint stays on the inlaid panel and clear of the books.
  * `topY` is the inlay's own face, so the position below carries the two offsets that are the
  * laptop's own business and nothing else.
  */
@@ -207,8 +200,8 @@ function LoungeTableItems({ topY }: LoungeTableItemsProps): ReactElement {
 }
 
 /**
- * The top is a glass slab, so its shape comes from `slab.ts` — the same primitive as the phone
- * and the tablet, at a hundred times the area.
+ * The top is a slab, so its shape comes from `slab.ts` — the same primitive as the phone and
+ * the tablet, at a hundred times the area.
  *
  * A `RoundedBox` is what it was, and a `RoundedBox` is a bar of soap: one radius rounds all
  * twelve edges alike, so the thing has no edge at all and reads as a slab of the same dark
@@ -229,22 +222,28 @@ const TOP: SlabSpec = {
 /** The underside, which is what the base has to reach and what the room measures against. */
 const TOP_BOTTOM_Y = 0.32;
 /**
- * The glass field and the light are on opposite faces of the slab, and that is the whole
- * design. Above: a border of graphite, then smoked glass, and nothing lit at all — a lit line
- * on a table top is a strip somebody stuck on, and it competes with the two screens the table
- * carries. Below: a channel of accent recessed under the overhang, which puts the light on the
- * rug instead of in the eye. The top then reads as floating on its own glow, which is the
- * effect a lounge table like this is bought for.
+ * The inlaid panel and the light are on opposite faces of the slab, and that is the whole
+ * design. Above: a border of graphite, then a panel in the same finish as the desk, and
+ * nothing lit at all — a lit line on a table top is a strip somebody stuck on, and it competes
+ * with the two screens the table carries. Below: a channel of accent recessed under the
+ * overhang, which puts the light on the rug instead of in the eye. The top then reads as
+ * floating on its own glow, which is the effect a lounge table like this is bought for.
  *
- * The step between the frame and the glass is tenths of a millimeter, and deliberately not a
+ * The panel is `tableTopMaterial`, not the devices' `SLAB_GLASS`. Cover glass is near-black
+ * because a phone's screen is off; on 0.9 m² of table it is not smoked glass but an unlit
+ * hole, and from anywhere the desk is in frame the two surfaces read as different materials
+ * rather than as one room. The border and the chamfer are what keep it a panel and not a
+ * second desk.
+ *
+ * The step between the frame and the panel is tenths of a millimeter, and deliberately not a
  * hairline — `scene/phone.tsx` documents what this room's shallow depth buffer does to two
  * panels any closer than that.
  */
-const GLASS_INSET = 0.021;
-const GLASS_Y = TOP_BOTTOM_Y + TOP.thickness + 0.002;
+const INLAY_INSET = 0.021;
+const INLAY_Y = TOP_BOTTOM_Y + TOP.thickness + 0.002;
 
 /** The face everything on the table stands on, exported because two specs read it back. */
-export const TABLE_TOP_Y = GLASS_Y;
+export const TABLE_TOP_Y = INLAY_Y;
 
 /**
  * The channel: set back under the edge so the slab's own overhang hides the emitter, and
@@ -308,7 +307,7 @@ function LoungeCoffeeTable(): ReactElement {
   const parts = useDisposable(() => ({
     top: createSlabBody(TOP),
     channel: createChannel(),
-    glass: createSlabFace(TOP, GLASS_INSET),
+    inlay: createSlabFace(TOP, INLAY_INSET),
     loop: createSledLoop(SLED),
   }));
 
@@ -334,8 +333,8 @@ function LoungeCoffeeTable(): ReactElement {
         color={worldColors.accent}
       />
 
-      <mesh geometry={parts.glass} position={[0, GLASS_Y, 0]} rotation={FACE_UP}>
-        <meshStandardMaterial {...SLAB_GLASS} />
+      <mesh geometry={parts.inlay} position={[0, INLAY_Y, 0]} rotation={FACE_UP}>
+        <meshStandardMaterial {...tableTopMaterial} />
       </mesh>
 
       {SLED_TURNS.map((turn) => (

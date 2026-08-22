@@ -3,7 +3,12 @@
 import { type ReactElement } from "react";
 import { RoundedBox } from "@react-three/drei";
 import { DoubleSide } from "three";
-import { anodizedMetalMaterial, worldColors, darkMetalMaterial } from "../materials";
+import {
+  anodizedMetalMaterial,
+  worldColors,
+  darkMetalMaterial,
+  tableTopMaterial,
+} from "../materials";
 import { DESK_DEPTH, DESK_LEG_HEIGHT, DESK_TOP_THICKNESS, DESK_TOP_Y } from "../room";
 import { type Vec3 } from "../stations";
 import { useDisposable } from "../gpu";
@@ -54,7 +59,7 @@ export function Desk(): ReactElement {
   return (
     <group position={[0, DESK_LEG_HEIGHT, 0]}>
       <RoundedBox args={[DESK_WIDTH, DESK_TOP_THICKNESS, DESK_DEPTH]} radius={0.02} smoothness={2}>
-        <meshStandardMaterial color="#0d1216" roughness={0.55} metalness={0.25} />
+        <meshStandardMaterial {...tableTopMaterial} />
       </RoundedBox>
       <mesh position={[0, 0.005, DESK_DEPTH / 2 + 0.005]}>
         <boxGeometry args={[2.8, 0.006, 0.006]} />
