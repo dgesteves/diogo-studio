@@ -327,7 +327,7 @@ describe("Lounge", () => {
    * Emissive geometry lights nothing in three.js, so without a lamp of its own the channel is
    * a bright line on a table standing in its own shadow — a decal. The pool it throws on the
    * rug is what makes the glow read as a source, and it belongs under the top: put it above
-   * and it washes the glass the table is trying to keep dark.
+   * and it washes the panel the table is trying to keep dark.
    */
   it("casts the underglow from beneath the top, in the accent color", async () => {
     const scene = await lounge();
@@ -345,30 +345,30 @@ describe("Lounge", () => {
   });
 
   /**
-   * The glass is a field inset into the frame, not a sheet over the whole top: the border
+   * The panel is a field inset into the frame, not a sheet over the whole top: the border
    * around it is what makes the table a tray with a panel in it rather than one dark box.
    * Sized to the top, it would swallow the border and the chamfer both, and nothing else in
    * this file would notice.
    */
-  it("insets the glass into the frame, leaving a border all around", async () => {
+  it("insets the panel into the frame, leaving a border all around", async () => {
     const scene = await lounge();
     const table = loungeRoot(scene.objects).children[PIECE.table]!;
 
     const panel = table.children.find(
       (child): child is Mesh => (child as Mesh).geometry?.type === "ShapeGeometry",
     );
-    if (!panel) throw new Error("The coffee table has no glass");
+    if (!panel) throw new Error("The coffee table has no inlaid panel");
 
-    const glass = worldBox(panel);
+    const inlay = worldBox(panel);
     const top = worldBox(tableTop(table));
-    const border = glass.min.x - top.min.x;
+    const border = inlay.min.x - top.min.x;
 
     expect(border).toBeGreaterThan(0.01);
-    expect(top.max.x - glass.max.x).toBeCloseTo(border, 3);
-    expect(glass.min.z - top.min.z).toBeCloseTo(border, 3);
-    expect(top.max.z - glass.max.z).toBeCloseTo(border, 3);
+    expect(top.max.x - inlay.max.x).toBeCloseTo(border, 3);
+    expect(inlay.min.z - top.min.z).toBeCloseTo(border, 3);
+    expect(top.max.z - inlay.max.z).toBeCloseTo(border, 3);
     // On top of the frame, and under whatever the table carries.
-    expect(glass.min.y).toBeCloseTo(LOUNGE_ORIGIN[1] + TABLE_TOP_Y, 3);
+    expect(inlay.min.y).toBeCloseTo(LOUNGE_ORIGIN[1] + TABLE_TOP_Y, 3);
   });
 
   /**

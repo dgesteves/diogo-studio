@@ -234,9 +234,6 @@ export function bodyTopAt(t: number, across: number): number {
 const LENGTH_ROWS = 150;
 const ACROSS_COLUMNS = 60;
 
-/** Where the two lamps under the strip sit, in meters from the middle of the body. */
-const SPILL = [-0.04, 0.04] as const;
-
 /** Where the lit seam sits on the flank, as a fraction of the shoulder height. */
 const SEAM_AT = 0.5;
 const SEAM_HALF = 0.022;
@@ -527,21 +524,11 @@ function MouseGlow(): ReactElement {
         />
       </mesh>
       {/*
-        The spill the strip throws onto the desk, one lamp per end so the pool follows the
-        body rather than sitting under its middle. Kept tighter than the body: a pool wider
-        than the mouse is the whole read of the object from across the room, and it stops
-        looking like light coming off it and starts looking like something it floats on.
+        No lamps under the strip. Two sat 4 mm over the desk, and a point light that close to a
+        flat top lights a disc of it: from a standing camera the pair read as two glowing spots
+        on the desk beside the mouse rather than as light coming off the strip. The halo band
+        above is the spill, and Bloom is what spreads it.
       */}
-      {SPILL.map((z) => (
-        <pointLight
-          key={z}
-          position={[0, 0.004, z]}
-          intensity={0.05}
-          distance={0.105}
-          decay={2}
-          color={worldColors.accent}
-        />
-      ))}
     </>
   );
 }

@@ -49,6 +49,14 @@ export const anodizedMetalMaterial = {
 
 export const portMaterial = { color: "#04070a", roughness: 0.9, metalness: 0.15 } as const;
 
+/**
+ * The finish of a surface a visitor puts something down on — the desk top and the lounge
+ * table's inlaid panel. Shared rather than typed twice: the two tops are the same stock in the
+ * same room, and when the table's panel carried the devices' near-black cover glass instead,
+ * it read across the floor as a different material — a dark hole where the desk read graphite.
+ */
+export const tableTopMaterial = { color: "#0d1216", roughness: 0.55, metalness: 0.25 } as const;
+
 export type WorldPalette = {
   background: string;
   fogColor: string;
