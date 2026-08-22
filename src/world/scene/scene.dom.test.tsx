@@ -69,16 +69,28 @@ describe("StudioScene", () => {
     expect(day.meshes).toHaveLength(SCENE_MESH_COUNT);
   });
 
-  it("sizes the room shell from the shared ROOM constants", async () => {
+  /**
+   * The shell is a closed box, not four oversized planes. It was the latter until the window
+   * was cut into it, at which point every wall hung out past a corner and into the city view
+   * as a slab suspended over the skyline — so nothing here may be wider than the span it
+   * closes, and the floor may not reach past the glass.
+   */
+  it("sizes the room shell to the room and no further", async () => {
     const scene = await studio();
 
-    const walls = scene
-      .meshesWith("PlaneGeometry")
-      .map(geometryParams)
-      .filter((params) => params.width === ROOM.wallSpan);
+    const panels = scene.meshesWith("PlaneGeometry").map(geometryParams);
+    const sized = (width: number, height: number): boolean =>
+      panels.some((panel) => panel.width === width && panel.height === height);
 
-    expect(walls.length).toBeGreaterThan(0);
-    expect(walls.some((params) => params.height === ROOM.wallHeight)).toBe(true);
+    // The back and front walls span the room's width, the right wall its depth, and each of
+    // them stops at the ceiling. The left wall is the four panels the window leaves of it.
+    expect(sized(ROOM.width, ROOM.wallHeight)).toBe(true);
+    expect(sized(ROOM.depth, ROOM.wallHeight)).toBe(true);
+    // Floor and ceiling are the footprint exactly, so neither shows past the glass.
+    expect(sized(ROOM.width, ROOM.depth)).toBe(true);
+    for (const panel of panels.filter((panel) => panel.height === ROOM.wallHeight)) {
+      expect.soft(panel.width).toBeLessThanOrEqual(Math.max(ROOM.width, ROOM.depth));
+    }
   });
 });
 

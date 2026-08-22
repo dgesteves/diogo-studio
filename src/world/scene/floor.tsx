@@ -10,20 +10,41 @@ import { ROOM } from "../room";
  */
 
 /**
+ * The slab is the room's own footprint and not a meter more. It was a 16 × 12 m plane centered
+ * on the world rather than on the room, so it ran eight meters out past the window wall and
+ * hung under the city as a lit shelf. The grid is authored as a unit square and scaled onto the
+ * footprint for the same reason: `gridHelper` is always square, and the room is not.
+ *
  * Deliberately not `MeshReflectorMaterial`: it re-rendered the whole scene into a
  * 256px buffer every frame (~227 extra draw calls, ~47% of the frame's total) and
  * with `mirror={0}` / `mixStrength={0.45}` its only output was multiplying this
  * near-black color by at most 1.45 — imperceptible for half the frame budget.
  */
+const GRID_DIVISIONS = 16;
+/** The finer grid under the desk, kept inside the shell rather than centered on the world. */
+const INNER_GRID_SPAN = 4.4;
+const INNER_GRID_DIVISIONS = 18;
+
 export function GridFloor(): ReactElement {
   return (
     <group>
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.001, 0]} receiveShadow>
-        <planeGeometry args={[16, 12]} />
+      <mesh
+        rotation={[-Math.PI / 2, 0, 0]}
+        position={[ROOM.centerX, -0.001, ROOM.centerZ]}
+        receiveShadow
+      >
+        <planeGeometry args={[ROOM.width, ROOM.depth]} />
         <meshStandardMaterial color="#070b0e" roughness={0.9} metalness={0.2} />
       </mesh>
-      <gridHelper args={[16, 32, "#1a2530", "#0e1620"]} position={[0, 0.001, 0]} />
-      <gridHelper args={[5, 20, "#1a2a36", "#0b141d"]} position={[0, 0.002, 0]} />
+      <gridHelper
+        args={[1, GRID_DIVISIONS, "#1a2530", "#0e1620"]}
+        scale={[ROOM.width, 1, ROOM.depth]}
+        position={[ROOM.centerX, 0.001, ROOM.centerZ]}
+      />
+      <gridHelper
+        args={[INNER_GRID_SPAN, INNER_GRID_DIVISIONS, "#1a2a36", "#0b141d"]}
+        position={[0, 0.002, 0]}
+      />
     </group>
   );
 }
