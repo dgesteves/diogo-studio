@@ -893,15 +893,22 @@ export function CityWindow(): ReactElement {
         position={[ROOM.minX, CITY_WINDOW.centerY, CITY_WINDOW.centerZ]}
         rotation={[0, Math.PI / 2, 0]}
       >
+        {/*
+          Unlit, deliberately. This was a `meshStandardMaterial` at `roughness: 0.08` — a
+          near-mirror — so every point light in the room threw a tight specular highlight onto
+          it: half a dozen pin-sharp dots scattered across the glass, which bloom then blew up
+          into white and cyan stars hanging in front of the skyline. They tracked the camera,
+          so they read as fireflies in the city rather than as reflections on a pane. Glass this
+          size shows its tint and nothing else; the frame is what says there is a window here.
+        */}
         <mesh position={[0, 0, 0.04]}>
           <planeGeometry args={[W, H]} />
-          <meshStandardMaterial
+          <meshBasicMaterial
             color={worldColors.accent}
             transparent
             opacity={0.035}
-            roughness={0.08}
-            metalness={0}
             depthWrite={false}
+            toneMapped={false}
           />
         </mesh>
 
