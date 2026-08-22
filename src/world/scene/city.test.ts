@@ -9,7 +9,7 @@ import {
   STREET_Y,
   type TowerSpec,
 } from "./city";
-import { ROOM } from "../room";
+import { CITY_WINDOW, ROOM } from "../room";
 
 /**
  * The skyline, read back out of the buffers rather than off a render.
@@ -135,20 +135,60 @@ describe("the skyline's composition", () => {
   });
 
   /**
-   * A camera at any station but the square-on one looks out *along* the wall rather than
-   * through it, at roughly 45°. The flanks are what those sightlines land on: drift one back
-   * toward the middle and it hides behind a tower already there, drift it out and the window
-   * goes back to showing bare haze, which is what every oblique station used to get.
+   * The property the composed skyline cannot express: that the city does not run out.
+   *
+   * Free-look puts a visitor against the glass, and a window seen from 30 cm away is not a
+   * frame but a fan — the sightline through its far edge leaves at better than 80° off the
+   * normal, and turning your head sweeps the whole of it. Every one of those angles has to
+   * land on a building. It used to stop at 47°, so walking to the window and looking along it
+   * ran the city out into bare sky, and no station camera could ever see that.
+   *
+   * So this measures coverage rather than placement: each tower's angular span from the
+   * window, unioned per side, checked for holes. A tower moved or resized closes or opens a
+   * gap that nothing else here would notice.
    */
-  it("stands the flanks on the oblique sightlines", () => {
-    const flanks = CITY_TOWERS.filter((tower) => tower.flank);
+  const REACH_DEG = { back: 84, front: 74 } as const;
+  const MAX_GAP_DEG = 2;
 
-    expect(flanks.length).toBeGreaterThan(4);
-    for (const tower of flanks) {
-      const angle = Math.abs(tower.side) / tower.out;
+  function spansToward(sign: -1 | 1): { lo: number; hi: number }[] {
+    return CITY_TOWERS.flatMap((tower) => {
+      const near = Math.abs(tower.side) - tower.width / 2;
+      // A tower straddling the centerline covers the first degrees of both sides.
+      if (tower.side * sign < 0 && near > 0) return [];
+      const angle = (lateral: number): number =>
+        (Math.atan(Math.max(lateral, 0) / tower.out) * 180) / Math.PI;
+      return [{ lo: angle(near), hi: angle(Math.abs(tower.side) + tower.width / 2) }];
+    }).sort((a, b) => a.lo - b.lo);
+  }
+
+  function firstGap(sign: -1 | 1, reach: number): string {
+    let covered = 0;
+    for (const span of spansToward(sign)) {
+      if (span.lo > covered + MAX_GAP_DEG) break;
+      covered = Math.max(covered, span.hi);
+    }
+    return covered >= reach ? "none" : `sky from ${covered.toFixed(0)}° to ${reach}°`;
+  }
+
+  it("leaves no wedge of sky between the towers, either way along the glass", () => {
+    expect(firstGap(-1, REACH_DEG.back)).toBe("none");
+    expect(firstGap(1, REACH_DEG.front)).toBe("none");
+  });
+
+  /**
+   * A neighbor shorter than this floor is one the room looks over, so it fills nothing. The
+   * oblique families are read almost horizontally and have to clear the window outright.
+   */
+  it("builds the oblique towers tall enough to reach the window", () => {
+    const grazing = CITY_TOWERS.filter(
+      (tower) => tower.flank && Math.abs(tower.side) / tower.out > 1,
+    );
+
+    expect(grazing.length).toBeGreaterThan(4);
+    for (const tower of grazing) {
       expect
-        .soft(`${tower.key}: ${angle.toFixed(2)}`)
-        .toBe(`${tower.key}: ${Math.min(Math.max(angle, 0.6), 1.3).toFixed(2)}`);
+        .soft(`${tower.key} tops out at ${topOf(tower) > CITY_WINDOW.centerY}`)
+        .toBe(`${tower.key} tops out at true`);
     }
   });
 
@@ -159,7 +199,7 @@ describe("the skyline's composition", () => {
    */
   it("crops the reveal with the near pair and nothing else", () => {
     const cropping = CITY_TOWERS.filter(
-      (tower) => topOf(tower) > ROOM.wallCenterY + IN_FRAME_RISE * tower.out,
+      (tower) => !tower.flank && topOf(tower) > ROOM.wallCenterY + IN_FRAME_RISE * tower.out,
     ).map((tower) => tower.key);
 
     expect(cropping).toEqual(["spire", "ledge"]);
