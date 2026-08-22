@@ -17,7 +17,12 @@ import {
   paintBookAtlas,
   type BookPlacement,
 } from "./books";
-import { createFacadeTexture, createHazeTexture, createSkyTexture } from "./city";
+import {
+  createFacadeTexture,
+  createHazeTexture,
+  createSkyTexture,
+  createStreetTexture,
+} from "./city";
 import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH, useKeyboardLegendTexture } from "./keyboard";
 import { createRemoteFaceTexture, REMOTE_PRINT } from "./remote";
 import { SHELF_BOOKS } from "./shelving";
@@ -229,6 +234,58 @@ describe("sky and haze ramps", () => {
     const contexts = record();
     createSkyTexture();
     createSkyTexture();
+
+    expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
+  });
+});
+
+/** The street sheet: 512 px square, tiled, two city blocks across. */
+const STREET = { size: 512, blocks: 2 };
+
+describe("street texture", () => {
+  it("returns a texture rather than throwing when the browser refuses a context", () => {
+    expect(() => createStreetTexture()).not.toThrow();
+    expect(createStreetTexture().image).toBeInstanceOf(HTMLCanvasElement);
+  });
+
+  /** It is laid over a square kilometer of ground, so it has to tile in both axes. */
+  it("tiles across the ground evenly", () => {
+    const texture = createStreetTexture();
+
+    expect(texture.wrapS).toBe(RepeatWrapping);
+    expect(texture.wrapT).toBe(RepeatWrapping);
+    expect(texture.repeat.x).toBeGreaterThan(1);
+    expect(texture.repeat.x).toBe(texture.repeat.y);
+    // Minified to nothing from thirty storeys up unless the mip chain is built.
+    expect(texture.generateMipmaps).toBe(true);
+  });
+
+  /**
+   * The roadway is what carries the grid at distance — a lamp is well under a texel from up
+   * there, so a street painted only as lamps averages out of the mip chain entirely. Each
+   * avenue is laid twice: the asphalt, then the light over it.
+   */
+  it("lays every avenue as lit surface, not as a line of lamps", () => {
+    const contexts = record();
+    createStreetTexture();
+    const sheet = contexts[0]!;
+
+    const full = sheet
+      .callsTo("fillRect")
+      .map((args) => args.map(Number))
+      .filter(([, , w, h]) => (w === STREET.size) !== (h === STREET.size));
+    // Two avenues each way, painted asphalt-then-light.
+    expect(full).toHaveLength(STREET.blocks * 2 * 2);
+
+    const washes = sheet.valuesOf("globalAlpha").map(Number);
+    expect(washes.some((alpha) => alpha > 0.4)).toBe(true);
+    expect(washes.at(-1)).toBe(1);
+  });
+
+  it("paints the same streets every time", () => {
+    const contexts = record();
+    createStreetTexture();
+    createStreetTexture();
 
     expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
   });

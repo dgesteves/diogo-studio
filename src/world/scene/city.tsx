@@ -105,19 +105,26 @@ const SKY_STOPS = [
 ] as const;
 
 /**
- * The haze: the same ramp again, carrying an alpha that peaks at the horizon and thins with
- * altitude. Three shells of it stand between the viewer and the far bank, so a tower loses
- * contrast with every one it sits behind.
+ * The haze: the same ramp again, carrying an alpha for how much air a sightline crosses. Three
+ * shells of it stand between the viewer and the far bank, so a tower loses contrast with every
+ * one it stands behind.
+ *
+ * The alpha peaks hard at the horizon and falls away **both** ways, which is the whole point of
+ * it. It used to stay near-opaque all the way down to the nadir, on the reasoning that haze
+ * pools low — but a viewer this high looks *through* that pool rather than along it, and three
+ * shells at that density laid five parts in eight of flat haze over everything below the sill.
+ * The canyon floor was behind it, and so was every street lit on it.
  */
 const HAZE_STOPS = [
-  [0.0, "rgba(10,17,24,0.95)"],
-  [0.4, "rgba(17,32,43,0.92)"],
-  [0.48, "rgba(38,62,76,0.95)"],
+  [0.0, "rgba(10,17,24,0.08)"],
+  [0.28, "rgba(13,22,31,0.18)"],
+  [0.4, "rgba(17,32,43,0.46)"],
+  [0.47, "rgba(38,62,76,0.86)"],
   [0.5, "rgba(51,80,95,1)"],
-  [0.53, "rgba(32,51,63,0.9)"],
-  [0.6, "rgba(19,31,41,0.6)"],
-  [0.72, "rgba(11,18,26,0.28)"],
-  [1.0, "rgba(6,10,15,0.1)"],
+  [0.54, "rgba(32,51,63,0.78)"],
+  [0.62, "rgba(19,31,41,0.44)"],
+  [0.75, "rgba(11,18,26,0.18)"],
+  [1.0, "rgba(6,10,15,0.06)"],
 ] as const;
 
 const SKY_TEXTURE_WIDTH = 8;
@@ -266,6 +273,104 @@ function occupiedRuns(rand: () => number, bays: number): (readonly [number, numb
     bay += length + 1 + Math.floor(rand() * 5);
   }
   return runs;
+}
+
+/**
+ * The ground the city stands on, and the streets lit across it.
+ *
+ * It began as one flat plate, which is what a canyon floor looks like from a window when it
+ * carries nothing: the towers stopped on a uniform slab and the depth went out of the view from
+ * the sill down. What a floor thirty storeys below actually shows is its lighting — a grid of
+ * avenues picked out in sodium with the blocks going black between them.
+ *
+ * The roadway carries that, not the lamps. A street lamp is well under a texel from up here, so
+ * a street drawn as lamps averages to nothing in the mip chain and the grid disappears at
+ * exactly the distance it is supposed to read at; what survives minification is the roadway
+ * itself being brighter than the blocks it runs between. The lamps are drawn on top of it for
+ * the near ground, where they are the difference between a lit strip and a street.
+ */
+const GROUND_SPAN = DOME_RADIUS * 2.1;
+/** One tile of the sheet, in meters: two city blocks across. */
+const GROUND_TILE = 200;
+const GROUND_TEXTURE = 512;
+const GROUND_BLOCKS = 2;
+/** How wide an avenue runs, against the block pitch it separates. */
+const AVENUE_FRACTION = 0.15;
+
+const ASPHALT = "#161d26";
+const BLOCK_ROOF = "#080d13";
+const LAMP = "#ffcb8a";
+/** A lit window or a roof light on the low-rise between the avenues. */
+const BLOCK_LIGHT = "#cfd9e4";
+
+export function createStreetTexture(): CanvasTexture {
+  const { canvas, texture } = createCanvasTexture(GROUND_TEXTURE, GROUND_TEXTURE, {
+    mipmapped: true,
+  });
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+  texture.repeat.set(GROUND_SPAN / GROUND_TILE, GROUND_SPAN / GROUND_TILE);
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return texture;
+
+  const rand = mulberry32(CITY_SEED + 2);
+  const pitch = GROUND_TEXTURE / GROUND_BLOCKS;
+  const avenue = Math.round(pitch * AVENUE_FRACTION);
+  const lampStep = avenue * 0.7;
+
+  // Blocks first: they are most of a city, and they are the dark part of it.
+  ctx.fillStyle = BLOCK_ROOF;
+  ctx.fillRect(0, 0, GROUND_TEXTURE, GROUND_TEXTURE);
+
+  const roadway = (x: number, y: number, width: number, height: number): void => {
+    ctx.fillStyle = ASPHALT;
+    ctx.fillRect(x, y, width, height);
+    ctx.globalAlpha = 0.5 + rand() * 0.14;
+    ctx.fillStyle = LAMP;
+    ctx.fillRect(x, y, width, height);
+    ctx.globalAlpha = 1;
+  };
+
+  for (let lane = 0; lane < GROUND_BLOCKS; lane += 1) {
+    roadway(lane * pitch, 0, avenue, GROUND_TEXTURE);
+    roadway(0, lane * pitch, GROUND_TEXTURE, avenue);
+  }
+
+  // The crossings, which are the brightest thing on any grid seen from above.
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = LAMP;
+  for (let row = 0; row < GROUND_BLOCKS; row += 1) {
+    for (let column = 0; column < GROUND_BLOCKS; column += 1) {
+      ctx.fillRect(column * pitch, row * pitch, avenue, avenue);
+    }
+  }
+
+  ctx.fillStyle = LAMP;
+  for (let i = 0; i * lampStep < GROUND_TEXTURE; i += 1) {
+    const along = i * lampStep;
+    for (let lane = 0; lane < GROUND_BLOCKS; lane += 1) {
+      const across = lane * pitch;
+      ctx.globalAlpha = 0.55 + rand() * 0.45;
+      ctx.fillRect(along, across, 3, 3);
+      ctx.fillRect(across, along, 3, 3);
+      ctx.fillRect(along, across + avenue - 3, 3, 3);
+      ctx.fillRect(across + avenue - 3, along, 3, 3);
+    }
+  }
+
+  // Low-rise between the avenues: without it a block is a hole, and a city has no holes.
+  ctx.fillStyle = BLOCK_LIGHT;
+  for (let i = 0; i < 220; i += 1) {
+    const bx = avenue + rand() * (pitch - avenue) + Math.floor(rand() * GROUND_BLOCKS) * pitch;
+    const by = avenue + rand() * (pitch - avenue) + Math.floor(rand() * GROUND_BLOCKS) * pitch;
+    ctx.globalAlpha = 0.2 + rand() * 0.5;
+    ctx.fillRect(bx, by, 2 + rand() * 4, 2 + rand() * 3);
+  }
+
+  ctx.globalAlpha = 1;
+  texture.needsUpdate = true;
+  return texture;
 }
 
 /* ------------------------------------------------------------------ the skyline itself */
@@ -999,6 +1104,7 @@ function Skyline(): ReactElement {
   const facade = useDisposable(() => createFacadeTexture());
   const sky = useDisposable(() => createSkyTexture());
   const haze = useDisposable(() => createHazeTexture());
+  const streets = useDisposable(() => createStreetTexture());
   const city = useDisposable(() => createCityGeometry());
 
   return (
@@ -1020,6 +1126,14 @@ function Skyline(): ReactElement {
         </mesh>
         <mesh geometry={city.beacons}>
           <meshBasicMaterial vertexColors toneMapped={false} fog={false} />
+        </mesh>
+
+        <mesh
+          position={[ROOM.minX - DOME_RADIUS / 3, STREET_Y, CITY_WINDOW.centerZ]}
+          rotation={[-Math.PI / 2, 0, 0]}
+        >
+          <planeGeometry args={[GROUND_SPAN, GROUND_SPAN]} />
+          <meshBasicMaterial map={streets} toneMapped={false} fog={false} />
         </mesh>
       </group>
 
