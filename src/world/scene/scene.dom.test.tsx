@@ -19,8 +19,9 @@ import { StatusLed } from "./status-led";
  * clusters, and their failure mode is a mesh silently disappearing — a lower bound
  * would not catch that. Change it only when you mean to change the scene.
  *
- * It last moved from 197 when the desk's four posts became the two sled loops the lounge table
- * stands on — one bent bar per end, so two meshes carry what four used to.
+ * The ceiling fixtures were rebuilt without changing it: the flat housing, the diffuser, the
+ * core and the four trim bars became one extruded body, a lens, a hairline and the four posts
+ * the fixture now hangs from — seven meshes each, the same seven it cost before.
  */
 const SCENE_MESH_COUNT = 195;
 
