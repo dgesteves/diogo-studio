@@ -30,10 +30,6 @@ export const ORBIT = {
   returnDelayMs: 2200,
   phiMinRad: 0.2,
   phiMaxRad: 1.52,
-  idleAzimuthRad: 0.05,
-  idlePolarRad: 0.025,
-  parallaxAzimuthRad: 0.1,
-  parallaxPolarRad: 0.06,
   introGlide: 1.1,
   idleGlide: 2.4,
   activeGlide: 9,
@@ -116,7 +112,7 @@ export function WorldCamera({ active, input }: WorldCameraProps): null {
   const ready = useRef(false);
   const intro = useRef(false);
 
-  useFrame(({ camera, clock, pointer, size }, delta) => {
+  useFrame(({ camera, size }, delta) => {
     if (getExploreSnapshot()) {
       camera.getWorldDirection(forward.current);
       look.current.copy(camera.position).add(forward.current);
@@ -140,14 +136,15 @@ export function WorldCamera({ active, input }: WorldCameraProps): null {
     a.polar = damp(a.polar, idle ? 0 : i.polar, rate, delta);
     a.zoom = damp(a.zoom, idle ? 1 : i.zoom, rate, delta);
 
-    const t = clock.elapsedTime;
-    const driftAz = Math.sin(t * 0.1) * ORBIT.idleAzimuthRad + pointer.x * ORBIT.parallaxAzimuthRad;
-    const driftPolar = Math.cos(t * 0.08) * ORBIT.idlePolarRad - pointer.y * ORBIT.parallaxPolarRad;
-
+    // The camera holds the framing it settles on. It used to carry a permanent sine drift plus
+    // a pointer parallax on top of every station, so nothing in the room was ever still: the
+    // whole view breathed, and the city outside the window — being the furthest thing from the
+    // pivot — swung more than anything else in it. A station is a fixed shot. What moves the
+    // camera is the visitor dragging it, and nothing else.
     spherical.current.setFromVector3(direction.current);
-    spherical.current.theta += a.azimuth + driftAz;
+    spherical.current.theta += a.azimuth;
     spherical.current.phi = MathUtils.clamp(
-      spherical.current.phi + a.polar + driftPolar,
+      spherical.current.phi + a.polar,
       ORBIT.phiMinRad,
       ORBIT.phiMaxRad,
     );

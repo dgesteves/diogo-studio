@@ -74,6 +74,9 @@ export function PerfReporter(): null {
 /** Never let a stalled driver keep the scene hidden behind the boot screen. */
 const COMPILE_TIMEOUT_MS = 8000;
 
+/** Past the city's backdrop dome, which is the furthest thing any camera in here can see. */
+const CAMERA_FAR = 960;
+
 /**
  * Warms up every material in the scene without blocking the main thread.
  *
@@ -154,7 +157,18 @@ export function WorldCanvas({
       <PerfReporter />
       <BootProgressReporter />
 
-      <PerspectiveCamera makeDefault fov={44} near={0.1} far={60} position={home.position} />
+      {/*
+        The far plane clears the city rather than the room: the skyline outside the window is
+        modelled at true scale, so the backdrop it stands against is ~700 m out. Nothing in the
+        room is past 15 m, which is where a depth buffer this deep keeps its precision anyway.
+      */}
+      <PerspectiveCamera
+        makeDefault
+        fov={44}
+        near={0.1}
+        far={CAMERA_FAR}
+        position={home.position}
+      />
       <WorldCamera active={active} input={orbitInput} />
       {explore ? (
         <ExploreController input={exploreInput} />

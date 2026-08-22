@@ -22,6 +22,12 @@ import { StatusLed } from "./status-led";
  * The ceiling fixtures were rebuilt without changing it: the flat housing, the diffuser, the
  * core and the four trim bars became one extruded body, a lens, a hairline and the four posts
  * the fixture now hangs from — seven meshes each, the same seven it cost before.
+ *
+ * The city cost three fewer than the one it replaced, and covers a great deal more: a sky
+ * plane, a painted horizon band, a moon, a star and six instanced building groups came to
+ * eleven; a backdrop dome, one buffer per finish, three shells of haze and the ground they
+ * stand on come to eleven — the two over the original nine being the masonry and ribbon
+ * cladding sheets, which is one mesh each for a whole family of buildings.
  */
 const SCENE_MESH_COUNT = 195;
 
@@ -69,16 +75,28 @@ describe("StudioScene", () => {
     expect(day.meshes).toHaveLength(SCENE_MESH_COUNT);
   });
 
-  it("sizes the room shell from the shared ROOM constants", async () => {
+  /**
+   * The shell is a closed box, not four oversized planes. It was the latter until the window
+   * was cut into it, at which point every wall hung out past a corner and into the city view
+   * as a slab suspended over the skyline — so nothing here may be wider than the span it
+   * closes, and the floor may not reach past the glass.
+   */
+  it("sizes the room shell to the room and no further", async () => {
     const scene = await studio();
 
-    const walls = scene
-      .meshesWith("PlaneGeometry")
-      .map(geometryParams)
-      .filter((params) => params.width === ROOM.wallSpan);
+    const panels = scene.meshesWith("PlaneGeometry").map(geometryParams);
+    const sized = (width: number, height: number): boolean =>
+      panels.some((panel) => panel.width === width && panel.height === height);
 
-    expect(walls.length).toBeGreaterThan(0);
-    expect(walls.some((params) => params.height === ROOM.wallHeight)).toBe(true);
+    // The back and front walls span the room's width, the right wall its depth, and each of
+    // them stops at the ceiling. The left wall is the four panels the window leaves of it.
+    expect(sized(ROOM.width, ROOM.wallHeight)).toBe(true);
+    expect(sized(ROOM.depth, ROOM.wallHeight)).toBe(true);
+    // Floor and ceiling are the footprint exactly, so neither shows past the glass.
+    expect(sized(ROOM.width, ROOM.depth)).toBe(true);
+    for (const panel of panels.filter((panel) => panel.height === ROOM.wallHeight)) {
+      expect.soft(panel.width).toBeLessThanOrEqual(Math.max(ROOM.width, ROOM.depth));
+    }
   });
 });
 

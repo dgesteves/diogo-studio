@@ -6,15 +6,33 @@
  * `utils/framing`, the explore bounds and the hotspot anchors all derive from `ROOM` — while
  * materials only decide how a surface looks.
  */
+const MIN_X = -2.3;
+const MAX_X = 5.4;
+const MIN_Z = -2.3;
+const MAX_Z = 5;
+const CEILING_Y = 3.8;
+
+/**
+ * The shell is sized to the room and nothing more. It used to be a 22 × 10 m plane per wall,
+ * on the assumption that no camera would ever see an edge — but the window is a hole in one of
+ * those walls, so every one of them hung out into the view as a slab floating over the city,
+ * and the floor ran eight meters past the glass. A closed box is the only version that has a
+ * clean outside, which is why these are derived rather than authored.
+ */
 export const ROOM = {
-  minX: -2.3,
-  maxX: 5.4,
-  minZ: -2.3,
-  maxZ: 5,
-  wallSpan: 22,
-  wallHeight: 10,
-  wallCenterY: 3,
-  ceilingY: 3.8,
+  minX: MIN_X,
+  maxX: MAX_X,
+  minZ: MIN_Z,
+  maxZ: MAX_Z,
+  /** Left wall to right wall, and back wall to front wall. */
+  width: MAX_X - MIN_X,
+  depth: MAX_Z - MIN_Z,
+  centerX: (MIN_X + MAX_X) / 2,
+  centerZ: (MIN_Z + MAX_Z) / 2,
+  /** Floor to ceiling: a wall reaches the slab above it and stops. */
+  wallHeight: CEILING_Y,
+  wallCenterY: CEILING_Y / 2,
+  ceilingY: CEILING_Y,
 } as const;
 
 export const DESK_TOP_THICKNESS = 0.06;

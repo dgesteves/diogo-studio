@@ -26,8 +26,8 @@ import type { Vec3 } from "../stations";
  * **One atlas, one cell per book.** Each book is painted into its own cell of a canvas
  * texture, so no two spines on a shelf are the same object. The hexes below are pigments a
  * routine paints with, not surface tokens: `world/materials.ts` owns what a *material* is
- * made of, and a palette a canvas mixes lives with the routine that mixes it, as the city's
- * lit windows and the moon's do.
+ * made of, and a palette a canvas mixes lives with the routine that mixes it, as the
+ * city's lit offices do.
  *
  * **One mesh per shelving unit.** Per-cell art means per-book UVs, which an `InstancedMesh`
  * cannot carry — every instance shares one geometry. So the boxes are merged into a single
