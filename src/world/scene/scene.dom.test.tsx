@@ -22,8 +22,13 @@ import { StatusLed } from "./status-led";
  * The ceiling fixtures were rebuilt without changing it: the flat housing, the diffuser, the
  * core and the four trim bars became one extruded body, a lens, a hairline and the four posts
  * the fixture now hangs from — seven meshes each, the same seven it cost before.
+ *
+ * The city cost three fewer than the one it replaced, and covers a great deal more: a sky
+ * plane, a painted horizon band, a moon, a star and six instanced building groups came to
+ * eleven; a backdrop dome, one buffer each for facades, roofs, crowns and beacons, and three
+ * shells of haze come to eight.
  */
-const SCENE_MESH_COUNT = 195;
+const SCENE_MESH_COUNT = 192;
 
 afterEach(unmountScenes);
 

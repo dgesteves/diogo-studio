@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { RepeatWrapping } from "three";
 
 import {
   createRecordingContext,
@@ -16,16 +17,15 @@ import {
   paintBookAtlas,
   type BookPlacement,
 } from "./books";
-import { createCityFacadeTexture, createSkyTexture } from "./city";
+import { createFacadeTexture, createHazeTexture, createSkyTexture } from "./city";
 import { KEYCAPS, KEY_FIELD_DEPTH, KEY_FIELD_WIDTH, useKeyboardLegendTexture } from "./keyboard";
-import { createGlowTexture, createMoonTexture } from "./moon";
 import { createRemoteFaceTexture, REMOTE_PRINT } from "./remote";
 import { SHELF_BOOKS } from "./shelving";
 import { createPerforationTexture } from "./soundbar";
 
 /**
- * The canvas textures the scene paints for itself: the lit windows on the city towers, the
- * sky behind them, the moon above, and the legends on the keycaps. Each builds its own
+ * The canvas textures the scene paints for itself: the curtain wall the city is clad in, the
+ * sky and the haze behind it, and the legends on the keycaps. Each builds its own
  * canvas through `createCanvasTexture`, so none of them can be handed a context — the
  * recording stub answers `getContext` for the whole prototype instead.
  *
@@ -35,9 +35,10 @@ import { createPerforationTexture } from "./soundbar";
  * on mount rather than rendering an unpainted tower.
  */
 
-const FACADE = { width: 128, height: 256 };
+/** The facade sheet: 16 bays of 32 px across, 32 floors of 32 px up. */
+const FACADE = { width: 512, height: 1024, bays: 16, floors: 32, bayPx: 32, floorPx: 32 };
 const PIXELS_PER_METER = 1500;
-const LIT_WINDOW_COLORS = ["#22d3ee", "#67e8f9", "#7dd3fc", "#fbbf24", "#f6efe1"];
+const OFFICE_LIGHT = ["#ffdfaa", "#f3f7fb", "#c6dcef", "#86d6e8"];
 /** The perforation tile, and the field it holds: 8 holes across 128 px, so a 16 px pitch. */
 const PERFORATION_TILE = 128;
 const PERFORATION_HOLES = 8;
@@ -57,35 +58,60 @@ afterEach(() => {
   stub = undefined;
 });
 
-/** The rectangles a facade paints after its base coat: one per lit window. */
+/**
+ * The panes: everything painted at bay width, which is the pane itself plus the ceiling wash
+ * and sill line over it. The mullions are painted on every floor, lit or not, so matching on
+ * "not a full-width coat" would count a dark floor as a lit one.
+ */
+const PANE_WIDTH = FACADE.bayPx - 3;
+
 function windows(recording: RecordingContext): readonly (readonly number[])[] {
   return recording
     .callsTo("fillRect")
     .map((args) => args.map(Number))
-    .filter(([, , w, h]) => w !== FACADE.width || h !== FACADE.height);
+    .filter(([, , w]) => w === PANE_WIDTH);
 }
 
-describe("city facade texture", () => {
+describe("curtain wall texture", () => {
   it("returns a texture rather than throwing when the browser refuses a context", () => {
     // jsdom's own answer, and a real browser's once too many contexts are live.
-    expect(() => createCityFacadeTexture(100)).not.toThrow();
-    expect(createCityFacadeTexture(100).image).toBeInstanceOf(HTMLCanvasElement);
+    expect(() => createFacadeTexture()).not.toThrow();
+    expect(createFacadeTexture().image).toBeInstanceOf(HTMLCanvasElement);
   });
 
-  it("lights some of the windows and leaves the rest dark", () => {
-    const contexts = record();
-    createCityFacadeTexture(100);
+  /**
+   * The sheet is tiled across every tower in the city, so it has to repeat in both axes.
+   * Clamped, a tower reads as one stretched storey.
+   */
+  it("repeats in both axes", () => {
+    const texture = createFacadeTexture();
 
-    const lit = windows(contexts[0]!);
-    // 5 columns × 18 rows, each skipped a little over a quarter of the time. A tower with
-    // every window lit, or none, is a different building.
-    expect(lit.length).toBeGreaterThan(40);
-    expect(lit.length).toBeLessThan(90);
+    expect(texture.wrapS).toBe(RepeatWrapping);
+    expect(texture.wrapT).toBe(RepeatWrapping);
   });
 
-  it("keeps every window inside the facade and in the lit palette", () => {
+  it("lights some of the floors and leaves the rest dark", () => {
     const contexts = record();
-    createCityFacadeTexture(100);
+    createFacadeTexture();
+
+    // A floor's glass band is the one full-width rect painted per floor after the base coat.
+    const bands = contexts[0]!
+      .callsTo("fillRect")
+      .map((args) => args.map(Number))
+      .filter(([, , w, h]) => w === FACADE.width && h !== FACADE.height);
+    expect(bands).toHaveLength(FACADE.floors);
+
+    // A city with every floor lit, or none, is a rendering of something else.
+    const litFloors = new Set(
+      windows(contexts[0]!).map(([, y]) => Math.floor(y! / FACADE.floorPx)),
+    );
+    expect(litFloors.size).toBeGreaterThan(10);
+    expect(litFloors.size).toBeLessThan(FACADE.floors);
+  });
+
+  it("keeps every pane inside the sheet and in the office palette", () => {
+    const contexts = record();
+    createFacadeTexture();
     const facade = contexts[0]!;
 
     for (const [x, y, w, h] of windows(facade)) {
@@ -94,14 +120,39 @@ describe("city facade texture", () => {
       expect.soft(x! + w!).toBeLessThanOrEqual(FACADE.width);
       expect.soft(y! + h!).toBeLessThanOrEqual(FACADE.height);
     }
-    for (const style of facade.valuesOf("fillStyle").slice(1)) {
-      expect.soft(LIT_WINDOW_COLORS).toContain(style);
-    }
+
+    const lit = facade
+      .valuesOf("fillStyle")
+      .filter((style) => OFFICE_LIGHT.includes(String(style)));
+    expect(lit.length).toBeGreaterThan(0);
   });
 
-  it("varies the brightness per window and hands the context back opaque", () => {
+  /**
+   * Offices light by the floor plate, so a lit floor is a run of neighboring bays. Scattered
+   * single panes are what made the previous city read as an advent calendar.
+   */
+  it("lights bays in runs rather than one at a time", () => {
     const contexts = record();
-    createCityFacadeTexture(100);
+    createFacadeTexture();
+
+    const byFloor = new Map<number, number[]>();
+    for (const [x, y, , h] of windows(contexts[0]!)) {
+      // The ceiling wash and the sill line are painted over a pane already counted.
+      if (h !== FACADE.floorPx - 10) continue;
+      const floor = Math.floor(y! / FACADE.floorPx);
+      byFloor.set(floor, [...(byFloor.get(floor) ?? []), Math.round(x! / FACADE.bayPx)]);
+    }
+
+    const runs = [...byFloor.values()].filter((bays) => {
+      const sorted = [...new Set(bays)].sort((a, b) => a - b);
+      return sorted.some((bay, i) => i > 0 && bay === sorted[i - 1]! + 1);
+    });
+    expect(runs.length).toBeGreaterThan(byFloor.size / 2);
+  });
+
+  it("varies the brightness per pane and hands the context back opaque", () => {
+    const contexts = record();
+    createFacadeTexture();
 
     const alphas = contexts[0]!.valuesOf("globalAlpha").map(Number);
     expect(new Set(alphas.slice(0, -1)).size).toBeGreaterThan(1);
@@ -111,89 +162,73 @@ describe("city facade texture", () => {
     expect(alphas.at(-1)).toBe(1);
   });
 
-  it("paints the same tower for a seed and a different one per variant", () => {
+  it("paints the same city every time", () => {
     const contexts = record();
-    createCityFacadeTexture(100);
-    createCityFacadeTexture(100);
-    createCityFacadeTexture(101);
+    createFacadeTexture();
+    createFacadeTexture();
 
     expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
-    expect(contexts[2]!.transcript).not.toEqual(contexts[0]!.transcript);
   });
 });
 
-describe("sky texture", () => {
-  it("runs the horizon gradient top to bottom with its stops in order", () => {
+describe("sky and haze ramps", () => {
+  /**
+   * Both are painted onto spheres concentric with the room, so the texture's `v` is latitude
+   * and 0.5 is the horizon. The stops are authored in `v` and painted in canvas space, which
+   * runs the other way — so they come out descending, and a set that is not monotonic at all
+   * puts the light-pollution band somewhere other than the horizon.
+   */
+  it.each([
+    ["sky", createSkyTexture],
+    ["haze", createHazeTexture],
+  ])("runs the %s ramp zenith to nadir with its stops in order", (_name, make) => {
     const contexts = record();
-    createSkyTexture();
-    const sky = contexts[0]!;
+    make();
+    const ramp = contexts[0]!;
 
-    expect(sky.callsTo("createLinearGradient")[0]).toEqual([0, 0, 0, 256]);
-    const offsets = sky.callsTo("gradient#1.addColorStop").map(([offset]) => Number(offset));
-    // Out of order, the band that reads as a horizon lands somewhere else entirely.
-    expect(offsets).toEqual([...offsets].sort((a, b) => a - b));
-    expect(offsets.at(0)).toBe(0);
-    expect(offsets.at(-1)).toBe(1);
+    expect(ramp.callsTo("createLinearGradient")[0]).toEqual([0, 0, 0, 512]);
+    const offsets = ramp.callsTo("gradient#1.addColorStop").map(([offset]) => Number(offset));
+    expect(offsets).toEqual([...offsets].sort((a, b) => b - a));
+    expect(offsets.at(0)).toBe(1);
+    expect(offsets.at(-1)).toBe(0);
+    // The horizon has to be a stop of its own, or the band is an interpolation artifact.
+    expect(offsets).toContain(0.5);
   });
 
-  it("scatters the stars above the horizon and nowhere else", () => {
+  /** No moon and no stars: a metropolis erases both, and nothing here paints one. */
+  it("paints the sky as one gradient and nothing else", () => {
     const contexts = record();
     createSkyTexture();
     const sky = contexts[0]!;
 
-    const stars = sky.callsTo("fillRect").filter(([, , w, h]) => w === 1 && h === 1);
-    expect(stars).toHaveLength(90);
-    for (const [x, y] of stars) {
-      expect.soft(Number(x)).toBeLessThan(64);
-      // Below 110 the gradient is already daylit; a star there reads as a dead pixel.
-      expect.soft(Number(y)).toBeLessThan(110);
-    }
-    expect(sky.valuesOf("globalAlpha").at(-1)).toBe(1);
+    expect(sky.callsTo("createRadialGradient")).toHaveLength(0);
+    expect(sky.callsTo("arc")).toHaveLength(0);
+    expect(sky.callsTo("fillRect")).toHaveLength(1);
+  });
+
+  /** The haze is a wash the city is seen through, so every stop of it has to carry alpha. */
+  it("gives the haze an alpha that peaks at the horizon", () => {
+    const contexts = record();
+    createHazeTexture();
+    const stops = contexts[0]!.callsTo("gradient#1.addColorStop");
+
+    const alphaAt = new Map(
+      stops.map(([offset, color]) => [
+        Number(offset),
+        Number(/rgba\([^)]*,\s*([\d.]+)\)/.exec(String(color))?.[1] ?? NaN),
+      ]),
+    );
+    for (const alpha of alphaAt.values()) expect.soft(alpha).not.toBeNaN();
+    // v is flipped into canvas space, so the horizon is the 0.5 stop either way, and the
+    // zenith is the stop at 0 — where the haze has to be thin or it fogs the sky itself.
+    expect(alphaAt.get(0.5)).toBe(1);
+    expect(alphaAt.get(0)).toBeLessThan(0.5);
   });
 
   it("paints the same sky every time", () => {
     const contexts = record();
     createSkyTexture();
     createSkyTexture();
-
-    expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
-  });
-});
-
-describe("moon textures", () => {
-  it("fades the glow to nothing before it reaches the edge of its quad", () => {
-    const contexts = record();
-    createGlowTexture();
-    const glow = contexts[0]!;
-
-    expect(glow.callsTo("createRadialGradient")[0]).toEqual([64, 64, 0, 64, 64, 64]);
-    const stops = glow.callsTo("gradient#1.addColorStop");
-    // The last stop has to be fully transparent, or the glow paints a visible square.
-    expect(String(stops.at(-1)?.[1])).toMatch(/,\s*0\)$/);
-    expect(stops.at(-1)?.[0]).toBe(1);
-  });
-
-  it("mottles the moon with maria and craters, all of them on the disc", () => {
-    const contexts = record();
-    createMoonTexture();
-    const moon = contexts[0]!;
-
-    expect(moon.callsTo("createRadialGradient")).toHaveLength(8);
-    const craters = moon.callsTo("arc").map((args) => args.map(Number));
-    expect(craters).toHaveLength(24);
-    for (const [x, y, r] of craters) {
-      expect.soft(x!).toBeGreaterThanOrEqual(0);
-      expect.soft(x!).toBeLessThanOrEqual(128);
-      expect.soft(y!).toBeGreaterThanOrEqual(0);
-      expect.soft(y!).toBeLessThanOrEqual(128);
-      expect.soft(r!).toBeGreaterThan(0);
-    }
-  });
-
-  it("paints the same moon every time", () => {
-    const contexts = record();
-    createMoonTexture();
-    createMoonTexture();
 
     expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
   });
