@@ -28,17 +28,24 @@ import { createCanvasTexture } from "../screens/texture";
  *
  * Four things carry it, and none of them is a draw call per building:
  *
- * - **One curtain wall, tiled.** Every tower samples the same seamless facade sheet, scaled so
- *   a floor is `FLOOR_HEIGHT` and a bay is `BAY_WIDTH` on every building in the city. Towers
- *   differ by where they start reading it, which is a UV offset rather than a texture each.
- * - **One geometry per finish.** Facades, roofs, crowns and beacons merge into four buffers
- *   with the placement baked in — the pattern `scene/books.tsx` uses, and for the same reason:
- *   per-face UVs are what instancing cannot express. Nothing out here animates, so the
- *   transform an `InstancedMesh` would carry per copy is spent once at build time instead.
- * - **Facets, not shading.** The materials are unlit — a city at night is lit from inside, not
- *   by anything in this room — so the turn of a corner has to come from somewhere. Each face
- *   carries a vertex color set from how squarely it faces the glass, which is what stops a
- *   tower reading as a flat sticker.
+ * - **Three cladding sheets, tiled.** Every tower samples one of three seamless facade sheets
+ *   — a curtain wall, a punched masonry wall, a concrete ribbon slab — all scaled so a floor
+ *   is `FLOOR_HEIGHT` on every building in the city, and read from a different place in the
+ *   sheet by each tower, which is a UV offset rather than a texture apiece. One sheet is what
+ *   made the last skyline read as one building repeated thirty times: the body tint multiplies
+ *   a sheet that is nearly black to begin with, so tinting cannot separate two towers and only
+ *   a different *rhythm* can.
+ * - **One geometry per finish.** The three walls, the roofs, the crowns and the beacons merge
+ *   into six buffers with the placement baked in — the pattern `scene/books.tsx` uses, and for
+ *   the same reason: per-face UVs are what instancing cannot express. Nothing out here
+ *   animates, so the transform an `InstancedMesh` would carry per copy is spent once at build
+ *   time instead.
+ * - **Facets and altitude, not shading.** The materials are unlit — a city at night is lit
+ *   from inside, not by anything in this room — so the turn of a corner has to come from
+ *   somewhere. Every vertex carries a color set from how squarely its face turns to the glass
+ *   and from how high up the shaft it sits, the second because the murk a lit city sits in is
+ *   *below* the viewer: without it a two-hundred-meter shaft is one flat value from street to
+ *   crown, which is the last thing that reads as an extruded rectangle.
  * - **Depth as haze, not as fog.** The room's fog is 30 m deep and near-black; the city is
  *   600 m deep and washes *lighter* with distance, the way a lit atmosphere does. So the city
  *   opts out of the scene fog and buys its own: nested shells of horizon-colored haze that
@@ -57,7 +64,6 @@ export const IN_FRAME_RISE = 0.36;
 
 /** Every distance out here is meters, the unit the room is already built in. */
 export const FLOOR_HEIGHT = 3.9;
-const BAY_WIDTH = 1.45;
 
 /**
  * How far the studio floor stands above the street — twenty-nine storeys, high in a tall
@@ -94,14 +100,19 @@ const CITY_SEED = 20260822;
  */
 const SKY_STOPS = [
   [0.0, "#04060b"],
-  [0.28, "#060b13"],
-  [0.41, "#0b1622"],
-  [0.472, "#16293a"],
-  [0.5, "#33505f"],
-  [0.523, "#20333f"],
-  [0.57, "#131f29"],
-  [0.68, "#0b1219"],
-  [1.0, "#05080b"],
+  [0.3, "#070c13"],
+  [0.42, "#0e1a24"],
+  [0.47, "#1e3040"],
+  [0.492, "#3a4a51"],
+  // The sodium line: the horizon of a lit city is warm and everything above it is not, and the
+  // whole ramp used to be one blue-grey, which is a sky over open country rather than over
+  // streets. It is a couple of degrees of latitude wide, so it reads as a line and not a wash.
+  [0.5, "#5a5b52"],
+  [0.508, "#44515a"],
+  [0.53, "#26353f"],
+  [0.58, "#14202a"],
+  [0.7, "#0a1017"],
+  [1.0, "#04070b"],
 ] as const;
 
 /**
@@ -117,79 +128,154 @@ const SKY_STOPS = [
  */
 const HAZE_STOPS = [
   [0.0, "rgba(10,17,24,0.08)"],
-  [0.28, "rgba(13,22,31,0.18)"],
-  [0.4, "rgba(17,32,43,0.46)"],
-  [0.47, "rgba(38,62,76,0.86)"],
-  [0.5, "rgba(51,80,95,1)"],
-  [0.54, "rgba(32,51,63,0.78)"],
-  [0.62, "rgba(19,31,41,0.44)"],
-  [0.75, "rgba(11,18,26,0.18)"],
+  [0.28, "rgba(14,21,28,0.18)"],
+  [0.4, "rgba(22,33,41,0.46)"],
+  [0.47, "rgba(52,64,70,0.86)"],
+  // Carrying the same warmth the sky does, because these are the same air: haze that stayed
+  // blue while the sky behind it turned warm made the far bank read as a separate picture.
+  [0.5, "rgba(78,82,76,1)"],
+  [0.54, "rgba(44,55,63,0.78)"],
+  [0.62, "rgba(22,33,42,0.44)"],
+  [0.75, "rgba(12,19,26,0.18)"],
   [1.0, "rgba(6,10,15,0.06)"],
 ] as const;
 
-const SKY_TEXTURE_WIDTH = 8;
+/**
+ * The sky sheet. The haze only ever needs the ramp, so it stays a strip; the sky is wide
+ * enough to carry weather, because a perfectly smooth gradient is the lightbox tell — a sky
+ * with nothing in it is a backlit panel, and the eye finds that faster than it finds any
+ * building. What goes on it is cloud lit from underneath, which is what a city's own glow
+ * does to an overcast: pale along the bottom edge of a band and cold along the top.
+ */
+const SKY_TEXTURE_WIDTH = 384;
+const HAZE_TEXTURE_WIDTH = 8;
 const SKY_TEXTURE_HEIGHT = 512;
 
 function paintVerticalRamp(
   stops: readonly (readonly [number, string])[],
+  width: number,
   mipmapped: boolean,
-): CanvasTexture {
-  const { canvas, texture } = createCanvasTexture(SKY_TEXTURE_WIDTH, SKY_TEXTURE_HEIGHT, {
-    mipmapped,
-  });
+): { ctx: CanvasRenderingContext2D | null; texture: CanvasTexture } {
+  const { canvas, texture } = createCanvasTexture(width, SKY_TEXTURE_HEIGHT, { mipmapped });
   const ctx = canvas.getContext("2d");
-  if (!ctx) return texture;
+  if (!ctx) return { ctx, texture };
 
   // Canvas y runs down and texture v runs up, so the ramp is painted from the zenith.
   const gradient = ctx.createLinearGradient(0, 0, 0, SKY_TEXTURE_HEIGHT);
   for (const [offset, color] of stops) gradient.addColorStop(1 - offset, color);
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, SKY_TEXTURE_WIDTH, SKY_TEXTURE_HEIGHT);
+  ctx.fillRect(0, 0, width, SKY_TEXTURE_HEIGHT);
 
+  texture.needsUpdate = true;
+  return { ctx, texture };
+}
+
+/**
+ * The bands of cloud, drawn column by column so they wrap.
+ *
+ * A cloud on a sphere has to meet itself at u = 0, so the edge of a band is a sum of sines
+ * whose periods divide the sheet exactly — no noise field, no seam to hide. Each column is
+ * then one soft vertical gradient, which is what gives a band an underside and a top rather
+ * than a hard rim.
+ */
+type CloudBand = {
+  /** Latitude of the band's center, on the same 0..1 scale the ramp's stops use. */
+  at: number;
+  /** How deep the band is in that scale, and how far its edge wanders. */
+  depth: number;
+  drift: number;
+  /** The lit underside and the cold top, and how strongly the band shows at all. */
+  under: string;
+  over: string;
+  alpha: number;
+};
+
+const CLOUD_BANDS: readonly CloudBand[] = [
+  { at: 0.548, depth: 0.05, drift: 0.016, under: "#6a6357", over: "#1b2831", alpha: 0.5 },
+  { at: 0.605, depth: 0.075, drift: 0.028, under: "#43484c", over: "#111c26", alpha: 0.38 },
+  { at: 0.7, depth: 0.1, drift: 0.036, under: "#2a3239", over: "#0a1017", alpha: 0.3 },
+  { at: 0.515, depth: 0.022, drift: 0.008, under: "#8a7f68", over: "#3d4750", alpha: 0.42 },
+  // Two bands well up the dome. A visitor at the glass can look almost straight up through it,
+  // and everything above thirty degrees was open sky with nothing in it.
+  { at: 0.79, depth: 0.13, drift: 0.05, under: "#1c242c", over: "#080e14", alpha: 0.34 },
+  { at: 0.9, depth: 0.11, drift: 0.042, under: "#141b22", over: "#060b10", alpha: 0.26 },
+];
+
+function paintClouds(ctx: CanvasRenderingContext2D, rand: () => number): void {
+  for (const band of CLOUD_BANDS) {
+    const phase = [rand(), rand(), rand()].map((roll) => roll * Math.PI * 2);
+
+    for (let x = 0; x < SKY_TEXTURE_WIDTH; x += 1) {
+      const u = (x / SKY_TEXTURE_WIDTH) * Math.PI * 2;
+      const wander =
+        Math.sin(u + (phase[0] ?? 0)) * 0.5 +
+        Math.sin(u * 3 + (phase[1] ?? 0)) * 0.32 +
+        Math.sin(u * 7 + (phase[2] ?? 0)) * 0.18;
+      const center = band.at + wander * band.drift;
+      // Latitude 1 is the zenith and canvas y 0 is the top, so the two run opposite ways.
+      const top = (1 - (center + band.depth / 2)) * SKY_TEXTURE_HEIGHT;
+      const height = band.depth * SKY_TEXTURE_HEIGHT;
+
+      const column = ctx.createLinearGradient(0, top, 0, top + height);
+      column.addColorStop(0, "rgba(0,0,0,0)");
+      column.addColorStop(0.45, band.over);
+      column.addColorStop(0.82, band.under);
+      column.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.globalAlpha = band.alpha * (0.7 + 0.3 * (0.5 + 0.5 * wander));
+      ctx.fillStyle = column;
+      ctx.fillRect(x, top, 1, height);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+export function createSkyTexture(): CanvasTexture {
+  const { ctx, texture } = paintVerticalRamp(SKY_STOPS, SKY_TEXTURE_WIDTH, true);
+  if (!ctx) return texture;
+  paintClouds(ctx, mulberry32(CITY_SEED + 5));
   texture.needsUpdate = true;
   return texture;
 }
 
-export function createSkyTexture(): CanvasTexture {
-  return paintVerticalRamp(SKY_STOPS, false);
-}
-
 export function createHazeTexture(): CanvasTexture {
-  return paintVerticalRamp(HAZE_STOPS, false);
+  return paintVerticalRamp(HAZE_STOPS, HAZE_TEXTURE_WIDTH, false).texture;
 }
 
 /**
- * The curtain wall every tower is clad in: one seamless sheet of glass, mullions and lit
- * floors, tiled across the whole city so a storey is the same height on every building in it.
+ * What the towers are clad in. Two sheets, because one is what made the last skyline read as
+ * one building repeated: every tower in it was the same curtain wall at the same tone, and a
+ * city is not built by one developer in one decade.
  *
- * Offices light by the floor plate, not by the window — a lit floor is a run of bays with the
- * ceiling washed white and the sill in shadow, and the floor above it is often dark. That is
- * what the runs and the top edge below are for. Scattering individually lit windows over a
- * facade, which is what this used to do, reads as an advent calendar.
+ * Both tile seamlessly and both keep `FLOOR_HEIGHT` as their storey, so the two families line
+ * up floor for floor across the view. What differs is the rhythm — a bay of glass is narrow
+ * and continuous, a masonry pier is wide and the window inside it is a hole — and how they
+ * light: an office lights by the floor plate, a residential or hotel block lights by the room.
+ *
+ * Each is painted once into a canvas and read by every tower wearing it, offset so no two
+ * start at the same place in the sheet.
  */
-const FACADE_BAYS = 16;
-const FACADE_FLOORS = 32;
-const BAY_PX = 32;
-const FLOOR_PX = 32;
-const FACADE_WIDTH = FACADE_BAYS * BAY_PX;
+const FACADE_FLOORS = 48;
+const FLOOR_PX = 34;
 const FACADE_HEIGHT = FACADE_FLOORS * FLOOR_PX;
 
-/**
- * What one tile of the sheet measures on a building. Every UV out here is in tiles — the unit
- * the texture repeats in — rather than in bays and floors, which is the difference between a
- * tower wearing sixteen windows across and wearing two hundred and fifty.
- */
-const TILE_SPAN = FACADE_BAYS * BAY_WIDTH;
-const TILE_RISE = FACADE_FLOORS * FLOOR_HEIGHT;
 /** The band of structure under each floor's glass, and the mullion between each pair of bays. */
-const SPANDREL_PX = 10;
+const SPANDREL_PX = 11;
 const MULLION_PX = 3;
 
-const GLASS = "#0a1017";
-const SPANDREL = "#101a23";
-const MULLION = "#1e2b37";
+const GLASS = "#0b1119";
+/**
+ * The spandrel used to sit within a couple of values of the glass, which meant an unlit floor
+ * had no floor line in it at all: a dark tower was a flat panel with a few lit stripes printed
+ * on, and the storeys only existed where somebody had left a light on. It is the horizontal
+ * grain — the transom over each floor's head and the shadow under its sill — that says a
+ * facade is storeys tall rather than a wall.
+ */
+const SPANDREL = "#151f29";
+const SPANDREL_SHADOW = "#080d13";
+const MULLION = "#22303d";
 /** The cool line where a pane catches the sky. Hard-edged: a soft one reads as a smudge. */
 const PANE_HIGHLIGHT = "rgba(120,160,185,0.5)";
+const TRANSOM_HIGHLIGHT = "rgba(96,128,150,0.34)";
 
 /**
  * Pigments the facade is painted with, not surface tokens: warm desk lamps, the neutral white
@@ -198,8 +284,22 @@ const PANE_HIGHLIGHT = "rgba(120,160,185,0.5)";
  */
 const OFFICE_LIGHT = ["#ffdfaa", "#f3f7fb", "#c6dcef", "#86d6e8"] as const;
 
-/** The unlit body tone the facade sheet is multiplied by; the sheet carries the windows. */
-const GLASS_TONE = "#9fb4c6";
+/** The warmer, softer set a lived-in room throws: lamps and screens, not ceiling grids. */
+const ROOM_LIGHT = ["#ffcd8e", "#ffe6bd", "#e8d5b8", "#9fc4dd"] as const;
+
+/**
+ * What a ribbon floor lights in. The same office palette minus its cyan, because a ribbon run
+ * is the full width of the slab: on a curtain wall the cyan lands on three bays and reads as
+ * one late meeting room, and on a ribbon it lands on forty meters of continuous glazing and
+ * reads as a lit tube taped to the building.
+ */
+const RIBBON_LIGHT = ["#ffdfaa", "#f3f7fb", "#c6dcef"] as const;
+
+function pickRibbonLight(roll: number): string {
+  if (roll < 0.46) return RIBBON_LIGHT[0];
+  if (roll < 0.82) return RIBBON_LIGHT[1];
+  return RIBBON_LIGHT[2];
+}
 
 function pickOfficeLight(roll: number): string {
   if (roll < 0.44) return OFFICE_LIGHT[0];
@@ -208,8 +308,67 @@ function pickOfficeLight(roll: number): string {
   return OFFICE_LIGHT[3];
 }
 
+function pickRoomLight(roll: number): string {
+  if (roll < 0.5) return ROOM_LIGHT[0];
+  if (roll < 0.8) return ROOM_LIGHT[1];
+  if (roll < 0.94) return ROOM_LIGHT[2];
+  return ROOM_LIGHT[3];
+}
+
+/**
+ * A lit pane, painted as light in a room rather than as a filled rectangle.
+ *
+ * The flat fill is what made the last sheet read as stickers: a lit bay came out as one solid
+ * pastel block, and a run of them as a painted stripe. What a lit floor actually shows through
+ * glass is a gradient — the ceiling is the brightest thing in the room and the sill the
+ * darkest — interrupted by whatever stands between the light and the window. So the pane gets
+ * the ramp, a hard ceiling line at its head, and a few dark notches along the lower half for
+ * the partitions and desks that break it up. None of the three is legible on its own at this
+ * distance; together they are the difference between a window and a swatch.
+ */
+function paintLitPane(
+  ctx: CanvasRenderingContext2D,
+  rand: () => number,
+  tint: string,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  strength: number,
+): void {
+  const ramp = ctx.createLinearGradient(0, y, 0, y + height);
+  ramp.addColorStop(0, tint);
+  ramp.addColorStop(0.42, tint);
+  ramp.addColorStop(1, GLASS);
+
+  ctx.globalAlpha = strength;
+  ctx.fillStyle = ramp;
+  ctx.fillRect(x, y, width, height);
+
+  // The ceiling wash, and the sill left in its own shadow under it.
+  ctx.globalAlpha = Math.min(1, strength + 0.26);
+  ctx.fillStyle = tint;
+  ctx.fillRect(x, y, width, Math.max(1, Math.round(height * 0.13)));
+
+  ctx.globalAlpha = strength * 0.72;
+  ctx.fillStyle = SPANDREL_SHADOW;
+  for (let notch = Math.round(rand() * 2); notch >= 0; notch -= 1) {
+    const w = 2 + rand() * (width * 0.34);
+    ctx.fillRect(x + rand() * (width - w), y + height * (0.5 + rand() * 0.3), w, height * 0.3);
+  }
+
+  ctx.globalAlpha = 1;
+}
+
+/* -------------------------------------------------------------------- the curtain wall */
+
+const GLASS_BAYS = 18;
+const GLASS_BAY_PX = 30;
+const GLASS_BAY_WIDTH = 1.32;
+const GLASS_WIDTH = GLASS_BAYS * GLASS_BAY_PX;
+
 export function createFacadeTexture(): CanvasTexture {
-  const { canvas, texture } = createCanvasTexture(FACADE_WIDTH, FACADE_HEIGHT, { mipmapped: true });
+  const { canvas, texture } = createCanvasTexture(GLASS_WIDTH, FACADE_HEIGHT, { mipmapped: true });
   texture.wrapS = RepeatWrapping;
   texture.wrapT = RepeatWrapping;
 
@@ -218,19 +377,29 @@ export function createFacadeTexture(): CanvasTexture {
 
   const rand = mulberry32(CITY_SEED);
   const glassHeight = FLOOR_PX - SPANDREL_PX;
-  const paneWidth = BAY_PX - MULLION_PX;
+  const paneWidth = GLASS_BAY_PX - MULLION_PX;
 
   ctx.fillStyle = SPANDREL;
-  ctx.fillRect(0, 0, FACADE_WIDTH, FACADE_HEIGHT);
+  ctx.fillRect(0, 0, GLASS_WIDTH, FACADE_HEIGHT);
 
   for (let floor = 0; floor < FACADE_FLOORS; floor += 1) {
     const top = floor * FLOOR_PX + SPANDREL_PX;
 
+    // The floor line: a shadow under the sill and a lit transom over the head, which is what
+    // survives minification when every window on the storey is dark.
+    ctx.fillStyle = SPANDREL_SHADOW;
+    ctx.fillRect(0, top - 3, GLASS_WIDTH, 3);
+    ctx.fillStyle = TRANSOM_HIGHLIGHT;
+    ctx.fillRect(0, floor * FLOOR_PX, GLASS_WIDTH, 1);
+
     ctx.fillStyle = GLASS;
-    ctx.fillRect(0, top, FACADE_WIDTH, glassHeight);
-    ctx.fillStyle = MULLION;
-    for (let bay = 0; bay < FACADE_BAYS; bay += 1) {
-      ctx.fillRect(bay * BAY_PX, floor * FLOOR_PX, MULLION_PX, FLOOR_PX);
+    ctx.fillRect(0, top, GLASS_WIDTH, glassHeight);
+    for (let bay = 0; bay < GLASS_BAYS; bay += 1) {
+      ctx.fillStyle = MULLION;
+      ctx.fillRect(bay * GLASS_BAY_PX, floor * FLOOR_PX, MULLION_PX, FLOOR_PX);
+      // A mullion is an extrusion, so its outer edge catches the sky and its inner one doesn't.
+      ctx.fillStyle = TRANSOM_HIGHLIGHT;
+      ctx.fillRect(bay * GLASS_BAY_PX, floor * FLOOR_PX, 1, FLOOR_PX);
     }
 
     // Dark floors are most of any skyline after hours, and they are what gives the lit ones
@@ -240,18 +409,17 @@ export function createFacadeTexture(): CanvasTexture {
 
     const tint = pickOfficeLight(rand());
     // A whole floor lit at once is a trading floor or a lobby; most are partial runs.
-    const runs = rand() < 0.12 ? [[0, FACADE_BAYS]] : occupiedRuns(rand, FACADE_BAYS);
+    const runs = rand() < 0.12 ? [[0, GLASS_BAYS]] : occupiedRuns(rand, GLASS_BAYS);
 
     for (const [start, end] of runs) {
+      // One room's worth of light falls off across the plate it lights, so a run is not a
+      // constant: it is brightest where the lamps are and dims toward whichever end is empty.
+      const peak = 0.46 + rand() * 0.5;
       for (let bay = start; bay < end; bay += 1) {
-        const x = bay * BAY_PX + MULLION_PX;
-        ctx.globalAlpha = 0.38 + rand() * 0.52;
-        ctx.fillStyle = tint;
-        ctx.fillRect(x, top, paneWidth, glassHeight);
-        // The ceiling wash: the brightest part of a lit office is the top of the glass.
-        ctx.globalAlpha = Math.min(1, ctx.globalAlpha + 0.22);
-        ctx.fillRect(x, top, paneWidth, 3);
-        ctx.globalAlpha = 1;
+        const across = end === start + 1 ? 0.5 : (bay - start) / (end - 1 - start);
+        const falloff = 0.66 + 0.34 * Math.sin(across * Math.PI);
+        const x = bay * GLASS_BAY_PX + MULLION_PX;
+        paintLitPane(ctx, rand, tint, x, top, paneWidth, glassHeight, peak * falloff);
         ctx.fillStyle = PANE_HIGHLIGHT;
         ctx.fillRect(x, top + glassHeight - 1, paneWidth, 1);
       }
@@ -275,6 +443,213 @@ function occupiedRuns(rand: () => number, bays: number): (readonly [number, numb
   return runs;
 }
 
+/* ------------------------------------------------------------------------- the masonry */
+
+/**
+ * The other half of the city: a pier-and-spandrel block, where the wall is the structure and
+ * the window is a hole punched in it.
+ *
+ * It exists for contrast rather than for accuracy. A curtain wall is a continuous plane, so
+ * twenty of them side by side average to one texture at any distance; a punched facade has a
+ * pier between every window, which reads as a *vertical* rhythm even when the windows are too
+ * small to resolve. Putting a third of the towers in it is what stops the skyline looking
+ * printed from a single sheet — and it lights differently too, one room at a time.
+ */
+const STONE_BAYS = 14;
+const STONE_BAY_PX = 38;
+const STONE_BAY_WIDTH = 2.5;
+const STONE_WIDTH = STONE_BAYS * STONE_BAY_PX;
+
+const STONE = "#32343a";
+const STONE_PIER = "#3f424a";
+const STONE_REVEAL = "#141518";
+const STONE_DARK_WINDOW = "#0a0c10";
+
+export function createMasonryTexture(): CanvasTexture {
+  const { canvas, texture } = createCanvasTexture(STONE_WIDTH, FACADE_HEIGHT, { mipmapped: true });
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return texture;
+
+  const rand = mulberry32(CITY_SEED + 7);
+  const openingWidth = Math.round(STONE_BAY_PX * 0.5);
+  const openingHeight = Math.round(FLOOR_PX * 0.52);
+  const inset = Math.round((STONE_BAY_PX - openingWidth) / 2);
+  /** The bay the lifts and the stair run up: masonry all the way, no window on any floor. */
+  const service = Math.floor(rand() * STONE_BAYS);
+
+  ctx.fillStyle = STONE;
+  ctx.fillRect(0, 0, STONE_WIDTH, FACADE_HEIGHT);
+
+  // The piers: wall between the windows, and no two courses of it quite the same value.
+  for (let bay = 0; bay < STONE_BAYS; bay += 1) {
+    ctx.globalAlpha = 0.35 + rand() * 0.5;
+    ctx.fillStyle = STONE_PIER;
+    ctx.fillRect(bay * STONE_BAY_PX, 0, inset, FACADE_HEIGHT);
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = STONE_REVEAL;
+    ctx.fillRect(bay * STONE_BAY_PX + inset - 1, 0, 1, FACADE_HEIGHT);
+  }
+  ctx.globalAlpha = 1;
+
+  // The floor course, and a heavier cornice every few storeys: a wall this tall is banded, and
+  // an unbroken grid of identical openings is graph paper rather than a building.
+  const CORNICE_EVERY = 6;
+  for (let floor = 0; floor < FACADE_FLOORS; floor += 1) {
+    ctx.fillStyle = STONE_REVEAL;
+    ctx.fillRect(0, floor * FLOOR_PX, STONE_WIDTH, 2);
+    if (floor % CORNICE_EVERY !== 0) continue;
+    ctx.fillStyle = STONE_PIER;
+    ctx.fillRect(0, floor * FLOOR_PX - 3, STONE_WIDTH, 3);
+    ctx.fillStyle = STONE_REVEAL;
+    ctx.fillRect(0, floor * FLOOR_PX + 2, STONE_WIDTH, 2);
+  }
+
+  for (let floor = 0; floor < FACADE_FLOORS; floor += 1) {
+    const top = floor * FLOOR_PX + Math.round((FLOOR_PX - openingHeight) / 2);
+
+    for (let bay = 0; bay < STONE_BAYS; bay += 1) {
+      if (bay === service) continue;
+      const x = bay * STONE_BAY_PX + inset;
+
+      // The reveal: a punched window is set back in the wall, and the shadow it casts on its
+      // own head is most of what says so.
+      ctx.fillStyle = STONE_REVEAL;
+      ctx.fillRect(x - 1, top - 1, openingWidth + 2, openingHeight + 2);
+      ctx.fillStyle = STONE_DARK_WINDOW;
+      ctx.fillRect(x, top, openingWidth, openingHeight);
+
+      // Rooms light one at a time, and a neighbor's light is no reason for yours to be on.
+      if (rand() < 0.72) continue;
+      paintLitPane(
+        ctx,
+        rand,
+        pickRoomLight(rand()),
+        x,
+        top,
+        openingWidth,
+        openingHeight,
+        0.4 + rand() * 0.5,
+      );
+    }
+  }
+
+  ctx.globalAlpha = 1;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/* --------------------------------------------------------------------- the ribbon slab */
+
+/**
+ * The third sheet: a concrete frame with the glass run through it in continuous bands.
+ *
+ * Two glass towers side by side are two glass towers however their tints differ, because the
+ * tint multiplies a sheet that is nearly black to begin with — the body color barely survives
+ * it, and what the eye actually reads is the *rhythm*. A curtain wall's rhythm is vertical,
+ * a punched wall's is a grid, and this one has none at all: the glazing is a horizontal ribbon
+ * from corner to corner, broken only by the columns, and it lights in long unbroken lines.
+ *
+ * It is also the pale one. The spandrel is concrete rather than glass, so these towers stand
+ * a full stop lighter than their neighbors and give the skyline something to be dark against.
+ */
+const RIBBON_BAYS = 20;
+const RIBBON_BAY_PX = 26;
+const RIBBON_BAY_WIDTH = 1.6;
+const RIBBON_WIDTH = RIBBON_BAYS * RIBBON_BAY_PX;
+/** Every fifth bay carries a column, which is the only vertical on the whole facade. */
+const RIBBON_COLUMN_BAYS = 5;
+
+const CONCRETE = "#666b71";
+const CONCRETE_SHADE = "#494e55";
+const CONCRETE_LIP = "#8d939b";
+
+export function createRibbonTexture(): CanvasTexture {
+  const { canvas, texture } = createCanvasTexture(RIBBON_WIDTH, FACADE_HEIGHT, { mipmapped: true });
+  texture.wrapS = RepeatWrapping;
+  texture.wrapT = RepeatWrapping;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return texture;
+
+  const rand = mulberry32(CITY_SEED + 11);
+  const bandHeight = Math.round(FLOOR_PX * 0.46);
+  const bandTop = Math.round((FLOOR_PX - bandHeight) / 2);
+
+  ctx.fillStyle = CONCRETE;
+  ctx.fillRect(0, 0, RIBBON_WIDTH, FACADE_HEIGHT);
+
+  for (let floor = 0; floor < FACADE_FLOORS; floor += 1) {
+    const top = floor * FLOOR_PX + bandTop;
+
+    // The band, set back behind the slab edge: a lip catches light over it and its own shadow
+    // falls under it, which is the whole of why a ribbon facade reads as deep.
+    ctx.fillStyle = CONCRETE_LIP;
+    ctx.fillRect(0, top - 2, RIBBON_WIDTH, 1);
+    ctx.fillStyle = CONCRETE_SHADE;
+    ctx.fillRect(0, top - 1, RIBBON_WIDTH, 1);
+    ctx.fillStyle = GLASS;
+    ctx.fillRect(0, top, RIBBON_WIDTH, bandHeight);
+
+    if (rand() > 0.46) {
+      const tint = pickRibbonLight(rand());
+      for (const [start, end] of occupiedRuns(rand, RIBBON_BAYS)) {
+        const x = start * RIBBON_BAY_PX;
+        const width = (end - start) * RIBBON_BAY_PX;
+        paintLitPane(ctx, rand, tint, x, top, width, bandHeight, 0.4 + rand() * 0.46);
+      }
+    }
+
+    ctx.fillStyle = CONCRETE_SHADE;
+    ctx.fillRect(0, top + bandHeight, RIBBON_WIDTH, 1);
+  }
+
+  // The columns, last, so they stand in front of every band they cross.
+  for (let bay = 0; bay < RIBBON_BAYS; bay += RIBBON_COLUMN_BAYS) {
+    ctx.fillStyle = CONCRETE;
+    ctx.fillRect(bay * RIBBON_BAY_PX, 0, 4, FACADE_HEIGHT);
+    ctx.fillStyle = CONCRETE_LIP;
+    ctx.fillRect(bay * RIBBON_BAY_PX, 0, 1, FACADE_HEIGHT);
+  }
+
+  ctx.globalAlpha = 1;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+/**
+ * What one tile of a sheet measures on a building. Every UV out here is in tiles — the unit
+ * the texture repeats in — rather than in bays and floors, which is the difference between a
+ * tower wearing sixteen windows across and wearing two hundred and fifty.
+ */
+const TILE_RISE = FACADE_FLOORS * FLOOR_HEIGHT;
+
+const CLADDINGS = {
+  glass: { span: GLASS_BAYS * GLASS_BAY_WIDTH, tone: "#9fb4c6" },
+  stone: { span: STONE_BAYS * STONE_BAY_WIDTH, tone: "#b9b3a8" },
+  ribbon: { span: RIBBON_BAYS * RIBBON_BAY_WIDTH, tone: "#a7afb5" },
+} as const;
+
+type Cladding = keyof typeof CLADDINGS;
+
+/**
+ * The tints a glass tower's body is multiplied by. One value for the whole city is what made
+ * the last skyline monochrome — every tower the same teal, so the only thing separating one
+ * from the next was its silhouette. These are all within a stop of each other; the spread is
+ * meant to be felt rather than counted.
+ */
+const GLASS_TONES = [
+  "#9fb4c6",
+  "#7f9fae",
+  "#b0b6c2",
+  "#8aa8b2",
+  "#a9bcd2",
+  "#6f8c99",
+  "#c2c3c0",
+] as const;
+
 /**
  * The ground the city stands on, and the streets lit across it.
  *
@@ -288,20 +663,157 @@ function occupiedRuns(rand: () => number, bays: number): (readonly [number, numb
  * exactly the distance it is supposed to read at; what survives minification is the roadway
  * itself being brighter than the blocks it runs between. The lamps are drawn on top of it for
  * the near ground, where they are the difference between a lit strip and a street.
+ *
+ * What it must *not* be is the roadway painted sodium end to end, which is what the first
+ * version of that reasoning produced: a tan ribbon the width of a city block, flat from kerb to
+ * kerb, reading as carpet laid between the towers. Light on a street comes from two rows of
+ * lamps standing along its edges, so the road is brightest at the kerbs and darkest down the
+ * middle, and that cross-section is what makes it a street. It averages to the same value in
+ * the mip chain and looks like a road at every distance short of it.
  */
 const GROUND_SPAN = DOME_RADIUS * 2.1;
-/** One tile of the sheet, in meters: two city blocks across. */
-const GROUND_TILE = 200;
-const GROUND_TEXTURE = 512;
-const GROUND_BLOCKS = 2;
+/** One tile of the sheet, in meters: three city blocks across. */
+const GROUND_TILE = 240;
+const GROUND_TEXTURE = 1024;
+const GROUND_BLOCKS = 3;
 /** How wide an avenue runs, against the block pitch it separates. */
-const AVENUE_FRACTION = 0.15;
+const AVENUE_FRACTION = 0.115;
+/** The service street that halves each block: narrower, and lit by fewer lamps. */
+const SERVICE_FRACTION = 0.055;
 
-const ASPHALT = "#161d26";
-const BLOCK_ROOF = "#080d13";
-const LAMP = "#ffcb8a";
+const ASPHALT = "#111820";
+/** The tones a low-rise roof comes in. Tar, gravel, a newer membrane, a painted deck. */
+const BLOCK_ROOFS = ["#0b1219", "#101820", "#151d26", "#1b232c", "#0d151d", "#222a33"] as const;
+/** The alley between two of them, and the parapet edge the street lamps catch. */
+const ALLEY = "#05080c";
+const PARAPET = "#3a4048";
+const LAMP = "#ffb469";
 /** A lit window or a roof light on the low-rise between the avenues. */
 const BLOCK_LIGHT = "#cfd9e4";
+
+/**
+ * One roof plate. The plate is nearly black and its edge is not: a parapet stands a meter
+ * proud of it and the avenue lamps rake it, so a roof is outlined on whichever sides the light
+ * reaches. That outline is the whole read — it is what turns a field into buildings.
+ *
+ * Two sides, and not always the same two: a parapet on all four made the field read as tiled
+ * floor rather than as roofs standing at their own heights.
+ */
+function paintRoofPlate(
+  ctx: CanvasRenderingContext2D,
+  rand: () => number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  if (width < 3 || height < 3) return;
+  ctx.fillStyle = BLOCK_ROOFS[Math.floor(rand() * BLOCK_ROOFS.length)] ?? ALLEY;
+  ctx.fillRect(x, y, width - 1, height - 1);
+
+  ctx.globalAlpha = 0.22 + rand() * 0.4;
+  ctx.fillStyle = PARAPET;
+  if (rand() < 0.5) ctx.fillRect(x, y, width - 1, 1);
+  else ctx.fillRect(x, y + height - 2, width - 1, 1);
+  if (rand() < 0.5) ctx.fillRect(x, y, 1, height - 1);
+  else ctx.fillRect(x + width - 2, y, 1, height - 1);
+  ctx.globalAlpha = 1;
+
+  // Rooftop plant: a lift overrun, a tank, a run of ducts. Dark, and it casts nothing.
+  for (let unit = Math.round(rand() * 2) - 1; unit >= 0; unit -= 1) {
+    ctx.fillStyle = ALLEY;
+    ctx.fillRect(
+      x + rand() * width * 0.6,
+      y + rand() * height * 0.6,
+      2 + rand() * 4,
+      2 + rand() * 3,
+    );
+  }
+}
+
+/**
+ * A parcel of a block, roofed. This is what the blocks were missing: they were one flat dark
+ * value between the streets, so the ground read as a lit grid drawn on a void — and a void is
+ * exactly what a viewer this high is looking down into for most of the frame.
+ *
+ * The parcel is cut down to plates by splitting it at a random fraction rather than gridding
+ * it, because a grid of equal plates is a floor tile and a block is not: lot widths on any real
+ * street run from a shopfront to a department store, and the unequal run is the tell.
+ */
+function paintRoofs(
+  ctx: CanvasRenderingContext2D,
+  rand: () => number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+): void {
+  const split = (at: number, horizontal: boolean): void => {
+    if (horizontal) {
+      paintRoofs(ctx, rand, x, y, at, height);
+      paintRoofs(ctx, rand, x + at, y, width - at, height);
+      return;
+    }
+    paintRoofs(ctx, rand, x, y, width, at);
+    paintRoofs(ctx, rand, x, y + at, width, height - at);
+  };
+
+  if (width < 22 && height < 22) return paintRoofPlate(ctx, rand, x, y, width, height);
+  if (width < 34 && height < 34 && rand() < 0.45) {
+    return paintRoofPlate(ctx, rand, x, y, width, height);
+  }
+
+  const cut = 0.3 + rand() * 0.4;
+  const horizontal = width >= height;
+  split(Math.round((horizontal ? width : height) * cut), horizontal);
+}
+
+/**
+ * One roadway: dark tarmac, then the two aprons of light its kerb lamps throw, then the lamps
+ * themselves. The road runs the long way; its width is the short one.
+ */
+function paintRoadway(
+  ctx: CanvasRenderingContext2D,
+  rand: () => number,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  gain: number,
+): void {
+  const vertical = height > width;
+  const span = vertical ? width : height;
+  const apron = Math.max(1, Math.round(span * 0.2));
+  const step = Math.max(6, Math.round(span * 1.9));
+
+  ctx.fillStyle = ASPHALT;
+  ctx.fillRect(x, y, width, height);
+
+  ctx.globalAlpha = 0.26 * gain;
+  ctx.fillStyle = LAMP;
+  if (vertical) {
+    ctx.fillRect(x, y, apron, height);
+    ctx.fillRect(x + width - apron, y, apron, height);
+  } else {
+    ctx.fillRect(x, y, width, apron);
+    ctx.fillRect(x, y + height - apron, width, apron);
+  }
+
+  // The lamps standing in those aprons. Two texels each: enough to read from the sill, small
+  // enough to average back into the apron as soon as the ground is more than a block away.
+  const run = vertical ? height : width;
+  for (let along = step / 2; along < run; along += step) {
+    ctx.globalAlpha = (0.5 + rand() * 0.45) * gain;
+    if (vertical) {
+      ctx.fillRect(x + 1, y + along, 2, 2);
+      ctx.fillRect(x + width - 3, y + along + step / 2, 2, 2);
+    } else {
+      ctx.fillRect(x + along, y + 1, 2, 2);
+      ctx.fillRect(x + along + step / 2, y + height - 3, 2, 2);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
 
 export function createStreetTexture(): CanvasTexture {
   const { canvas, texture } = createCanvasTexture(GROUND_TEXTURE, GROUND_TEXTURE, {
@@ -317,55 +829,59 @@ export function createStreetTexture(): CanvasTexture {
   const rand = mulberry32(CITY_SEED + 2);
   const pitch = GROUND_TEXTURE / GROUND_BLOCKS;
   const avenue = Math.round(pitch * AVENUE_FRACTION);
-  const lampStep = avenue * 0.7;
+  const service = Math.round(pitch * SERVICE_FRACTION);
 
-  // Blocks first: they are most of a city, and they are the dark part of it.
-  ctx.fillStyle = BLOCK_ROOF;
+  ctx.fillStyle = ALLEY;
   ctx.fillRect(0, 0, GROUND_TEXTURE, GROUND_TEXTURE);
 
-  const roadway = (x: number, y: number, width: number, height: number): void => {
-    ctx.fillStyle = ASPHALT;
-    ctx.fillRect(x, y, width, height);
-    ctx.globalAlpha = 0.5 + rand() * 0.14;
-    ctx.fillStyle = LAMP;
-    ctx.fillRect(x, y, width, height);
-    ctx.globalAlpha = 1;
-  };
-
-  for (let lane = 0; lane < GROUND_BLOCKS; lane += 1) {
-    roadway(lane * pitch, 0, avenue, GROUND_TEXTURE);
-    roadway(0, lane * pitch, GROUND_TEXTURE, avenue);
-  }
-
-  // The crossings, which are the brightest thing on any grid seen from above.
-  ctx.globalAlpha = 0.55;
-  ctx.fillStyle = LAMP;
+  // The buildable land: each block quartered by its service streets, and each quarter roofed.
+  const bands = [
+    [0, Math.round(pitch / 2)],
+    [Math.round(pitch / 2), Math.round(pitch)],
+  ] as const;
   for (let row = 0; row < GROUND_BLOCKS; row += 1) {
     for (let column = 0; column < GROUND_BLOCKS; column += 1) {
-      ctx.fillRect(column * pitch, row * pitch, avenue, avenue);
+      for (const [y0, y1] of bands) {
+        for (const [x0, x1] of bands) {
+          const x = Math.round(column * pitch + x0 + (x0 === 0 ? avenue : service));
+          const y = Math.round(row * pitch + y0 + (y0 === 0 ? avenue : service));
+          const width = Math.round(column * pitch + x1) - x;
+          const height = Math.round(row * pitch + y1) - y;
+          paintRoofs(ctx, rand, x, y, width, height);
+        }
+      }
     }
   }
 
-  ctx.fillStyle = LAMP;
-  for (let i = 0; i * lampStep < GROUND_TEXTURE; i += 1) {
-    const along = i * lampStep;
-    for (let lane = 0; lane < GROUND_BLOCKS; lane += 1) {
-      const across = lane * pitch;
-      ctx.globalAlpha = 0.55 + rand() * 0.45;
-      ctx.fillRect(along, across, 3, 3);
-      ctx.fillRect(across, along, 3, 3);
-      ctx.fillRect(along, across + avenue - 3, 3, 3);
-      ctx.fillRect(across + avenue - 3, along, 3, 3);
+  for (let lane = 0; lane < GROUND_BLOCKS; lane += 1) {
+    // The service street runs down the middle of the block its avenue starts.
+    const mid = Math.round(lane * pitch + pitch / 2);
+    paintRoadway(ctx, rand, mid, 0, service, GROUND_TEXTURE, 0.55);
+    paintRoadway(ctx, rand, 0, mid, GROUND_TEXTURE, service, 0.55);
+    paintRoadway(ctx, rand, Math.round(lane * pitch), 0, avenue, GROUND_TEXTURE, 1);
+    paintRoadway(ctx, rand, 0, Math.round(lane * pitch), GROUND_TEXTURE, avenue, 1);
+  }
+
+  // The crossings, which are the brightest thing on any grid seen from above: two roads' worth
+  // of lamps meet over one square, and the signals stand in it.
+  for (let row = 0; row < GROUND_BLOCKS; row += 1) {
+    for (let column = 0; column < GROUND_BLOCKS; column += 1) {
+      const x = Math.round(column * pitch);
+      const y = Math.round(row * pitch);
+      ctx.globalAlpha = 0.34;
+      ctx.fillStyle = LAMP;
+      ctx.fillRect(x, y, avenue, avenue);
+      ctx.globalAlpha = 0.8;
+      ctx.fillRect(x + 1, y + 1, 2, 2);
+      ctx.fillRect(x + avenue - 3, y + avenue - 3, 2, 2);
     }
   }
 
-  // Low-rise between the avenues: without it a block is a hole, and a city has no holes.
-  ctx.fillStyle = BLOCK_LIGHT;
-  for (let i = 0; i < 220; i += 1) {
-    const bx = avenue + rand() * (pitch - avenue) + Math.floor(rand() * GROUND_BLOCKS) * pitch;
-    const by = avenue + rand() * (pitch - avenue) + Math.floor(rand() * GROUND_BLOCKS) * pitch;
-    ctx.globalAlpha = 0.2 + rand() * 0.5;
-    ctx.fillRect(bx, by, 2 + rand() * 4, 2 + rand() * 3);
+  // Roof lights, skylights and the odd lit stairwell on the low-rise between the avenues.
+  for (let i = 0; i < 380; i += 1) {
+    ctx.globalAlpha = 0.16 + rand() * 0.42;
+    ctx.fillStyle = rand() < 0.3 ? LAMP : BLOCK_LIGHT;
+    ctx.fillRect(rand() * GROUND_TEXTURE, rand() * GROUND_TEXTURE, 2 + rand() * 4, 2 + rand() * 3);
   }
 
   ctx.globalAlpha = 1;
@@ -395,6 +911,8 @@ export type TowerSpec = {
   taper?: number;
   /** `[fraction of the rise, footprint scale from there up]`, in order. */
   setbacks?: readonly (readonly [number, number])[];
+  /** Which sheet the shaft is clad in. Glass unless it says otherwise. */
+  clad?: Cladding;
   /** A lit band let into the parapet — what a tower wears instead of a floodlight. */
   crown?: boolean;
   /** A mast above the roof, in meters. */
@@ -439,6 +957,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   },
   {
     key: "ledge",
+    clad: "ribbon",
     out: 88,
     side: 36,
     width: 32,
@@ -450,7 +969,17 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   },
 
   // The rank that makes the skyline: tops inside the opening, sky above every one of them.
-  { key: "slab", out: 140, side: 18, width: 64, depth: 26, yaw: 0.12, floors: 32, crown: true },
+  {
+    key: "slab",
+    clad: "stone",
+    out: 140,
+    side: 18,
+    width: 64,
+    depth: 26,
+    yaw: 0.12,
+    floors: 32,
+    crown: true,
+  },
   {
     key: "pin",
     out: 158,
@@ -463,11 +992,32 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     crown: true,
     mast: 12,
   },
-  { key: "deck", out: 168, side: -12, width: 52, depth: 42, chamfer: 3, floors: 17, mech: 3 },
-  { key: "block", out: 176, side: 44, width: 38, depth: 34, chamfer: 3, floors: 22 },
-  { key: "court", out: 218, side: 30, width: 44, depth: 38, floors: 14, mech: 2 },
+  {
+    key: "deck",
+    clad: "stone",
+    out: 168,
+    side: -12,
+    width: 52,
+    depth: 42,
+    chamfer: 3,
+    floors: 17,
+    mech: 3,
+  },
+  {
+    key: "block",
+    clad: "stone",
+    out: 176,
+    side: 44,
+    width: 38,
+    depth: 34,
+    chamfer: 3,
+    mech: 2,
+    floors: 22,
+  },
+  { key: "court", clad: "stone", out: 218, side: 30, width: 44, depth: 38, floors: 14, mech: 2 },
   {
     key: "crest",
+    clad: "ribbon",
     out: 232,
     side: -8,
     width: 34,
@@ -479,14 +1029,53 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     crown: true,
     mast: 18,
   },
-  { key: "twin-a", out: 246, side: 70, width: 28, depth: 26, chamfer: 3, floors: 36, crown: true },
-  { key: "stack", out: 254, side: -84, width: 36, depth: 34, floors: 30 },
-  { key: "twin-b", out: 262, side: 92, width: 28, depth: 26, chamfer: 3, floors: 32, crown: true },
-  { key: "terrace", out: 296, side: -40, width: 50, depth: 42, floors: 20, mech: 2 },
+  {
+    key: "twin-a",
+    clad: "ribbon",
+    out: 246,
+    side: 70,
+    width: 28,
+    depth: 26,
+    chamfer: 3,
+    floors: 36,
+    crown: true,
+  },
+  { key: "stack", clad: "stone", out: 254, side: -84, width: 36, depth: 34, floors: 30 },
+  {
+    key: "twin-b",
+    out: 262,
+    side: 92,
+    width: 28,
+    depth: 26,
+    chamfer: 3,
+    clad: "ribbon",
+    floors: 32,
+    crown: true,
+  },
+  { key: "terrace", clad: "stone", out: 296, side: -40, width: 50, depth: 42, floors: 20, mech: 2 },
 
   // The banks behind the haze. Lower and broader: detail here is spent on nothing.
-  { key: "ridge", out: 330, side: 108, width: 42, depth: 36, chamfer: 3, floors: 34 },
-  { key: "bar", out: 352, side: -128, width: 50, depth: 32, yaw: -0.1, floors: 26 },
+  {
+    key: "ridge",
+    clad: "ribbon",
+    out: 330,
+    side: 108,
+    width: 42,
+    depth: 36,
+    chamfer: 3,
+    floors: 34,
+  },
+  {
+    key: "bar",
+    clad: "stone",
+    out: 352,
+    side: -128,
+    width: 50,
+    depth: 32,
+    yaw: -0.1,
+    mech: 3,
+    floors: 26,
+  },
   {
     key: "needle",
     out: 372,
@@ -498,22 +1087,50 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     taper: 0.7,
     crown: true,
   },
-  { key: "mass", out: 392, side: -56, width: 44, depth: 40, chamfer: 4, floors: 30 },
-  { key: "plate", out: 428, side: 168, width: 46, depth: 34, floors: 24 },
+  {
+    key: "mass",
+    clad: "ribbon",
+    out: 392,
+    side: -56,
+    width: 44,
+    depth: 40,
+    chamfer: 4,
+    floors: 30,
+  },
+  { key: "plate", clad: "stone", out: 428, side: 168, width: 46, depth: 34, mech: 3, floors: 24 },
   { key: "col", out: 452, side: -198, width: 32, depth: 30, chamfer: 3, floors: 38, crown: true },
-  { key: "far-a", out: 482, side: 60, width: 38, depth: 34, floors: 28 },
-  { key: "far-b", out: 512, side: -92, width: 42, depth: 36, chamfer: 3, floors: 32 },
+  { key: "far-a", clad: "ribbon", out: 482, side: 60, width: 38, depth: 34, floors: 28 },
+  {
+    key: "far-b",
+    clad: "stone",
+    out: 512,
+    side: -92,
+    width: 42,
+    depth: 36,
+    chamfer: 3,
+    floors: 32,
+  },
   { key: "far-c", out: 538, side: 214, width: 36, depth: 32, floors: 26 },
-  { key: "far-d", out: 566, side: -252, width: 40, depth: 36, floors: 22 },
-  { key: "far-e", out: 592, side: 138, width: 46, depth: 38, chamfer: 3, floors: 34 },
+  { key: "far-d", clad: "stone", out: 566, side: -252, width: 40, depth: 36, mech: 2, floors: 22 },
+  {
+    key: "far-e",
+    clad: "ribbon",
+    out: 592,
+    side: 138,
+    width: 46,
+    depth: 38,
+    chamfer: 3,
+    floors: 34,
+  },
   { key: "far-f", out: 618, side: -18, width: 42, depth: 36, floors: 28 },
-  { key: "far-g", out: 646, side: -160, width: 48, depth: 40, floors: 24 },
+  { key: "far-g", clad: "stone", out: 646, side: -160, width: 48, depth: 40, mech: 2, floors: 24 },
 
   // The flanks. A camera anywhere but square-on to the glass looks out along the wall rather
   // than through it, and every one of those sightlines used to leave the window on bare haze.
   {
     flank: true,
     key: "flank-a",
+    clad: "ribbon",
     out: 118,
     side: -112,
     width: 34,
@@ -522,7 +1139,16 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     floors: 34,
     crown: true,
   },
-  { flank: true, key: "flank-b", out: 196, side: -184, width: 40, depth: 34, floors: 28 },
+  {
+    flank: true,
+    key: "flank-b",
+    clad: "stone",
+    out: 196,
+    side: -184,
+    width: 40,
+    depth: 34,
+    floors: 28,
+  },
   {
     flank: true,
     key: "flank-c",
@@ -537,6 +1163,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "flank-e",
+    clad: "ribbon",
     out: 152,
     side: 128,
     width: 32,
@@ -563,7 +1190,16 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     floors: 41,
     crown: true,
   },
-  { flank: true, key: "flank-h", out: 164, side: -149, width: 44, depth: 34, floors: 36 },
+  {
+    flank: true,
+    key: "flank-h",
+    clad: "stone",
+    out: 164,
+    side: -149,
+    width: 44,
+    depth: 34,
+    floors: 36,
+  },
   {
     flank: true,
     key: "flank-i",
@@ -578,6 +1214,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "flank-j",
+    clad: "ribbon",
     out: 173,
     side: -266,
     width: 54,
@@ -589,6 +1226,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "flank-k",
+    clad: "stone",
     out: 172,
     side: 108,
     width: 48,
@@ -599,6 +1237,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "flank-l",
+    clad: "stone",
     out: 154,
     side: 139,
     width: 48,
@@ -617,10 +1256,20 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     floors: 42,
     crown: true,
   },
-  { flank: true, key: "flank-n", out: 165, side: 243, width: 50, depth: 34, floors: 33 },
+  {
+    flank: true,
+    key: "flank-n",
+    clad: "stone",
+    out: 165,
+    side: 243,
+    width: 50,
+    depth: 34,
+    floors: 33,
+  },
   {
     flank: true,
     key: "flank-o",
+    clad: "ribbon",
     out: 137,
     side: 239,
     width: 40,
@@ -639,6 +1288,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "street-a",
+    clad: "stone",
     out: 68,
     side: -131,
     width: 68,
@@ -649,6 +1299,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "street-b",
+    clad: "ribbon",
     out: 56,
     side: -162,
     width: 62,
@@ -671,6 +1322,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "street-d",
+    clad: "stone",
     out: 52,
     side: -248,
     width: 74,
@@ -693,6 +1345,7 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
   {
     flank: true,
     key: "street-f",
+    clad: "stone",
     out: 57,
     side: -461,
     width: 84,
@@ -712,7 +1365,16 @@ export const CITY_TOWERS: readonly TowerSpec[] = [
     chamfer: 4,
     floors: 44,
   },
-  { flank: true, key: "street-i", out: 74, side: 240, width: 74, depth: 60, floors: 46 },
+  {
+    flank: true,
+    key: "street-i",
+    clad: "stone",
+    out: 74,
+    side: 240,
+    width: 74,
+    depth: 60,
+    floors: 46,
+  },
   {
     flank: true,
     key: "street-j",
@@ -731,8 +1393,13 @@ const BEACON_COLOR = "#ff5545";
 const BEACON_SIZE = 1.1;
 
 const CROWN_HEIGHT = 1.2;
-/** Bright enough to catch the bloom, dark enough that the band never reads as a white lid. */
-const CROWN_COLOR = "#5b7f95";
+/**
+ * What a crown is lit in. Bright enough to catch the bloom, dark enough that the band never
+ * reads as a white lid — and more than one of them, because a single value put the same strip
+ * of pale blue on the head of every crowned tower in the city, which is the sort of repetition
+ * the eye finds before it finds the buildings.
+ */
+const CROWN_COLORS = ["#5b6f7c", "#6f7681", "#7d7361", "#5f6c70", "#7b828a"] as const;
 const MAST_WIDTH = 0.7;
 const ROOF_COLOR = "#0c1219";
 const ROOF_KERB = 0.9;
@@ -817,6 +1484,24 @@ function facetShade(normalX: number): number {
   return 0.34 + 0.66 * (0.5 + 0.5 * normalX);
 }
 
+/**
+ * Aerial perspective, applied up a single tower rather than across the view.
+ *
+ * The haze shells already separate the near towers from the far ones. What they cannot do is
+ * separate the bottom of one tower from its top, and a two-hundred-meter shaft at one flat
+ * value is the last thing holding these to reading as extruded rectangles. In a lit city the
+ * murk is *below* you: the glow pooled over the streets washes the lower storeys and thins out
+ * with every floor above them, so a facade is palest at its base and cleanest at its crown.
+ */
+const GLOW_BASE = 1.24;
+const GLOW_TOP = 0.86;
+const GLOW_RISE = FACADE_FLOORS * FLOOR_HEIGHT;
+
+function groundGlow(y: number): number {
+  const rise = Math.min(1, Math.max(0, (y - STREET_Y) / GLOW_RISE));
+  return GLOW_BASE + (GLOW_TOP - GLOW_BASE) * rise;
+}
+
 type Quad = readonly [Corner, number, Corner, number];
 
 function pushQuad(
@@ -855,16 +1540,17 @@ function pushQuadTapered(
   bottom: Quad,
   top: Quad,
   uv: readonly [number, number, number, number],
-  rgb: readonly [number, number, number],
+  rgbBottom: readonly [number, number, number],
+  rgbTop: readonly [number, number, number],
 ): void {
   const first = target.positions.length / 3;
-  const corners: readonly (readonly [Corner, number])[] = [
-    [bottom[0], bottom[1]],
-    [bottom[2], bottom[3]],
-    [top[2], top[3]],
-    [top[0], top[1]],
+  const corners: readonly (readonly [Corner, number, readonly [number, number, number]])[] = [
+    [bottom[0], bottom[1], rgbBottom],
+    [bottom[2], bottom[3], rgbBottom],
+    [top[2], top[3], rgbTop],
+    [top[0], top[1], rgbTop],
   ];
-  for (const [corner, y] of corners) {
+  for (const [corner, y, rgb] of corners) {
     target.positions.push(center[0] + corner[0], y, center[1] + corner[1]);
     target.colors.push(rgb[0], rgb[1], rgb[2]);
   }
@@ -903,6 +1589,8 @@ function scaleRing(ring: readonly Corner[], scale: number, yaw: number): readonl
 
 type CityGeometry = {
   facades: BufferGeometry;
+  masonry: BufferGeometry;
+  ribbons: BufferGeometry;
   roofs: BufferGeometry;
   crowns: BufferGeometry;
   beacons: BufferGeometry;
@@ -960,6 +1648,8 @@ type Tower = {
   center: readonly [number, number];
   yaw: number;
   tone: number;
+  /** The body tint this tower's sheet is multiplied by, picked once per building. */
+  body: string;
   /** The ring and height the shaft finished on: what everything above it stands on. */
   topRing: readonly Corner[];
   topY: number;
@@ -967,7 +1657,10 @@ type Tower = {
 
 /** The shaft: every segment's four-to-eight walls, and the cap that closes each one. */
 function pushShaft(city: Buffers, tower: Tower, uOffset: number, vOffset: number): Tower {
-  const { spec, center, yaw, tone } = tower;
+  const { spec, center, yaw, tone, body } = tower;
+  const clad = spec.clad ?? "glass";
+  const span = CLADDINGS[clad].span;
+  const wall = clad === "glass" ? city.facades : clad === "stone" ? city.masonry : city.ribbons;
   const footprint = chamferedRect(spec.width, spec.depth, spec.chamfer ?? 0);
   let topRing = tower.topRing;
   let topY = tower.topY;
@@ -977,22 +1670,26 @@ function pushShaft(city: Buffers, tower: Tower, uOffset: number, vOffset: number
     const top = scaleRing(footprint, segment.top, yaw);
     const v0 = (segment.y0 - STREET_Y) / TILE_RISE + vOffset;
     const v1 = (segment.y1 - STREET_Y) / TILE_RISE + vOffset;
+    const glow0 = groundGlow(segment.y0);
+    const glow1 = groundGlow(segment.y1);
 
     let run = uOffset;
     for (const { a, b, aTop, bTop } of wallsBetween(bottom, top)) {
-      const u1 = run + (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1) / TILE_SPAN;
+      const u1 = run + (Math.hypot(b[0] - a[0], b[1] - a[1]) || 1) / span;
+      const shade = edgeShade(a, b) * tone;
       pushQuadTapered(
-        city.facades,
+        wall,
         center,
         [a, segment.y0, b, segment.y0],
         [aTop, segment.y1, bTop, segment.y1],
         [run, v0, u1, v1],
-        rgbOf(GLASS_TONE, edgeShade(a, b) * tone),
+        rgbOf(body, shade * glow0),
+        rgbOf(body, shade * glow1),
       );
       run = u1;
     }
 
-    pushCap(city.roofs, center, top, segment.y1, rgbOf(ROOF_COLOR, tone));
+    pushCap(city.roofs, center, top, segment.y1, rgbOf(ROOF_COLOR, tone * glow1));
     topRing = top;
     topY = segment.y1;
   }
@@ -1005,18 +1702,32 @@ function pushShaft(city: Buffers, tower: Tower, uOffset: number, vOffset: number
  * other one gets the parapet alone, so the roof plate reads as a surface with an edge rather
  * than a lid resting on the shaft.
  */
-function pushCrown(city: Buffers, tower: Tower): void {
+function pushCrown(city: Buffers, tower: Tower, rand: () => number): void {
   const { spec, center, tone, topRing, topY } = tower;
+  const glow = groundGlow(topY);
 
   if (spec.crown) {
+    const color = CROWN_COLORS[Math.floor(rand() * CROWN_COLORS.length)] ?? CROWN_COLORS[0];
     const band = scaleRing(topRing, 1.012, 0);
-    pushBand(city.crowns, center, band, topY - CROWN_HEIGHT, topY, rgbOf(CROWN_COLOR, 1));
+    pushBand(
+      city.crowns,
+      center,
+      band,
+      topY - CROWN_HEIGHT,
+      topY,
+      rgbOf(color, 0.58 + rand() * 0.3),
+    );
+    // A parapet still stands above the band; without it the lit strip is the top of the tower
+    // and the crown reads as a lid rather than as something let into one.
+    const kerb = scaleRing(topRing, 1.01, 0);
+    pushBand(city.roofs, center, kerb, topY, topY + ROOF_KERB * 0.6, rgbOf(ROOF_COLOR, 1.4 * tone));
+    pushCap(city.roofs, center, kerb, topY + ROOF_KERB * 0.6, rgbOf(ROOF_COLOR, 0.8 * tone));
     return;
   }
 
   const kerb = scaleRing(topRing, 1.01, 0);
-  pushBand(city.roofs, center, kerb, topY, topY + ROOF_KERB, rgbOf(ROOF_COLOR, 1.6 * tone));
-  pushCap(city.roofs, center, kerb, topY + ROOF_KERB, rgbOf(ROOF_COLOR, 0.8 * tone));
+  pushBand(city.roofs, center, kerb, topY, topY + ROOF_KERB, rgbOf(ROOF_COLOR, 1.6 * tone * glow));
+  pushCap(city.roofs, center, kerb, topY + ROOF_KERB, rgbOf(ROOF_COLOR, 0.8 * tone * glow));
 }
 
 /** Rooftop plant, for the buildings low enough that a viewer looks down onto their roofs. */
@@ -1061,6 +1772,8 @@ export function createCityGeometry(): CityGeometry {
   const rand = mulberry32(CITY_SEED + 1);
   const city: Buffers = {
     facades: buffer(),
+    masonry: buffer(),
+    ribbons: buffer(),
     roofs: buffer(),
     crowns: buffer(),
     beacons: buffer(),
@@ -1068,25 +1781,32 @@ export function createCityGeometry(): CityGeometry {
 
   for (const spec of CITY_TOWERS) {
     const yaw = spec.yaw ?? 0;
+    const clad = spec.clad ?? "glass";
     const base: Tower = {
       spec,
       center: [ROOM.minX - spec.out, CITY_WINDOW.centerZ + spec.side],
       yaw,
       // Enough spread that no two shafts are the same value, not enough to read as a palette.
-      tone: 0.82 + rand() * 0.18,
+      tone: 0.74 + rand() * 0.3,
+      body:
+        clad === "glass"
+          ? (GLASS_TONES[Math.floor(rand() * GLASS_TONES.length)] ?? CLADDINGS.glass.tone)
+          : CLADDINGS[clad].tone,
       topRing: scaleRing(chamferedRect(spec.width, spec.depth, spec.chamfer ?? 0), 1, yaw),
       topY: STREET_Y,
     };
     // Two towers reading the sheet from the same place would be the same building.
     const tower = pushShaft(city, base, rand(), rand());
 
-    pushCrown(city, tower);
+    pushCrown(city, tower, rand);
     pushMast(city, tower);
     pushRoofPlant(city, tower, rand);
   }
 
   return {
     facades: toGeometry(city.facades, true),
+    masonry: toGeometry(city.masonry, true),
+    ribbons: toGeometry(city.ribbons, true),
     roofs: toGeometry(city.roofs, false),
     crowns: toGeometry(city.crowns, false),
     beacons: toGeometry(city.beacons, false),
@@ -1102,6 +1822,8 @@ const HAZE_SHELLS = [
 
 function Skyline(): ReactElement {
   const facade = useDisposable(() => createFacadeTexture());
+  const masonry = useDisposable(() => createMasonryTexture());
+  const ribbon = useDisposable(() => createRibbonTexture());
   const sky = useDisposable(() => createSkyTexture());
   const haze = useDisposable(() => createHazeTexture());
   const streets = useDisposable(() => createStreetTexture());
@@ -1117,6 +1839,12 @@ function Skyline(): ReactElement {
       <group position={[-DOME_CENTER[0], -DOME_CENTER[1], -DOME_CENTER[2]]}>
         <mesh geometry={city.facades}>
           <meshBasicMaterial map={facade} vertexColors toneMapped={false} fog={false} />
+        </mesh>
+        <mesh geometry={city.masonry}>
+          <meshBasicMaterial map={masonry} vertexColors toneMapped={false} fog={false} />
+        </mesh>
+        <mesh geometry={city.ribbons}>
+          <meshBasicMaterial map={ribbon} vertexColors toneMapped={false} fog={false} />
         </mesh>
         <mesh geometry={city.roofs}>
           <meshBasicMaterial vertexColors toneMapped={false} fog={false} />

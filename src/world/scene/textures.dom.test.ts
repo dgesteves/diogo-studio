@@ -20,6 +20,8 @@ import {
 import {
   createFacadeTexture,
   createHazeTexture,
+  createMasonryTexture,
+  createRibbonTexture,
   createSkyTexture,
   createStreetTexture,
 } from "./city";
@@ -40,10 +42,27 @@ import { createPerforationTexture } from "./soundbar";
  * on mount rather than rendering an unpainted tower.
  */
 
-/** The facade sheet: 16 bays of 32 px across, 32 floors of 32 px up. */
-const FACADE = { width: 512, height: 1024, bays: 16, floors: 32, bayPx: 32, floorPx: 32 };
+/**
+ * The curtain-wall sheet: 18 bays of 30 px across, 48 floors of 34 px up. Forty-eight rather
+ * than thirty-two because a 56-storey tower read the old sheet nearly twice over, and the
+ * repeat was legible on the pair that crop the window.
+ */
+const FACADE = {
+  width: 540,
+  height: 1632,
+  bays: 18,
+  floors: 48,
+  bayPx: 30,
+  floorPx: 34,
+  /** The glass band under each floor's spandrel: what a lit pane fills. */
+  glassPx: 23,
+};
 const PIXELS_PER_METER = 1500;
 const OFFICE_LIGHT = ["#ffdfaa", "#f3f7fb", "#c6dcef", "#86d6e8"];
+/** The one the ribbon slab may not use, for the reason its own spec gives. */
+const CYAN_OFFICE_LIGHT = "#86d6e8";
+/** The warmer set a lived-in room throws, which is what the masonry block lights in. */
+const ROOM_LIGHT = ["#ffcd8e", "#ffe6bd", "#e8d5b8", "#9fc4dd"];
 /** The perforation tile, and the field it holds: 8 holes across 128 px, so a 16 px pitch. */
 const PERFORATION_TILE = 128;
 const PERFORATION_HOLES = 8;
@@ -99,11 +118,13 @@ describe("curtain wall texture", () => {
     const contexts = record();
     createFacadeTexture();
 
-    // A floor's glass band is the one full-width rect painted per floor after the base coat.
+    // A floor's glass band is the full-width rect painted at the band's own height. The other
+    // full-width rects per floor are the sill shadow and the transom line, which are the floor
+    // grain a dark storey is read by — they are 3 px and 1 px, not a band.
     const bands = contexts[0]!
       .callsTo("fillRect")
       .map((args) => args.map(Number))
-      .filter(([, , w, h]) => w === FACADE.width && h !== FACADE.height);
+      .filter(([, , w, h]) => w === FACADE.width && h === FACADE.glassPx);
     expect(bands).toHaveLength(FACADE.floors);
 
     // A city with every floor lit, or none, is a rendering of something else.
@@ -143,7 +164,7 @@ describe("curtain wall texture", () => {
     const byFloor = new Map<number, number[]>();
     for (const [x, y, , h] of windows(contexts[0]!)) {
       // The ceiling wash and the sill line are painted over a pane already counted.
-      if (h !== FACADE.floorPx - 10) continue;
+      if (h !== FACADE.glassPx) continue;
       const floor = Math.floor(y! / FACADE.floorPx);
       byFloor.set(floor, [...(byFloor.get(floor) ?? []), Math.round(x! / FACADE.bayPx)]);
     }
@@ -176,6 +197,146 @@ describe("curtain wall texture", () => {
   });
 });
 
+/**
+ * The other two sheets a tower can be clad in. They exist because one sheet is what made the
+ * last skyline read as one building repeated: the body tint multiplies a sheet that is nearly
+ * black to begin with, so two glass towers stay two glass towers however they are tinted, and
+ * only a different rhythm separates them. Each is checked for the rhythm that is its whole
+ * reason to exist — otherwise a sheet can drift into looking like the one beside it and
+ * nothing fails.
+ */
+const MASONRY = { width: 532, bays: 14, bayPx: 38, floors: 48, floorPx: 34 };
+const RIBBON = { width: 520, bays: 20, bayPx: 26, floors: 48, floorPx: 34 };
+
+describe("masonry texture", () => {
+  it("returns a texture rather than throwing when the browser refuses a context", () => {
+    expect(() => createMasonryTexture()).not.toThrow();
+    expect(createMasonryTexture().image).toBeInstanceOf(HTMLCanvasElement);
+  });
+
+  it("repeats in both axes", () => {
+    const texture = createMasonryTexture();
+
+    expect(texture.wrapS).toBe(RepeatWrapping);
+    expect(texture.wrapT).toBe(RepeatWrapping);
+  });
+
+  /**
+   * A punched wall is a grid of holes in masonry, and the two things that say so are the pier
+   * standing between every pair of openings and the reveal that sets each opening back into the
+   * wall. Without them this is the curtain wall again with fewer windows.
+   */
+  it("punches every opening into a wall rather than glazing the bay", () => {
+    const contexts = record();
+    createMasonryTexture();
+    const sheet = contexts[0]!;
+
+    const rects = sheet.callsTo("fillRect").map((args) => args.map(Number));
+    // The base coat is the same height, so a pier is one that does not span the whole sheet.
+    const piers = rects.filter(
+      ([, , w, h]) => h === MASONRY.floors * MASONRY.floorPx && w !== MASONRY.width,
+    );
+    // One pier per bay, and a shadow down the inner edge of each.
+    expect(piers).toHaveLength(MASONRY.bays * 2);
+
+    const openings = rects.filter(([, , w]) => w === Math.round(MASONRY.bayPx * 0.5));
+    expect(openings.length).toBeGreaterThan(MASONRY.floors);
+    for (const [x, , w] of openings) {
+      expect.soft(x!).toBeGreaterThanOrEqual(0);
+      expect.soft(x! + w!).toBeLessThanOrEqual(MASONRY.width);
+    }
+  });
+
+  /**
+   * A residential or hotel block lights one room at a time, which is the other half of what
+   * separates it from an office tower — offices light by the floor plate, in runs. So most
+   * openings stay dark, and the lit ones do not queue up along a storey.
+   */
+  it("lights rooms one at a time rather than by the floor", () => {
+    const contexts = record();
+    createMasonryTexture();
+
+    const lit = contexts[0]!
+      .valuesOf("fillStyle")
+      .filter((style) => ROOM_LIGHT.includes(String(style)));
+    expect(lit.length).toBeGreaterThan(0);
+    expect(lit.length).toBeLessThan(MASONRY.bays * MASONRY.floors * 0.5);
+  });
+
+  it("paints the same wall every time", () => {
+    const contexts = record();
+    createMasonryTexture();
+    createMasonryTexture();
+
+    expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
+  });
+});
+
+describe("ribbon texture", () => {
+  it("returns a texture rather than throwing when the browser refuses a context", () => {
+    expect(() => createRibbonTexture()).not.toThrow();
+    expect(createRibbonTexture().image).toBeInstanceOf(HTMLCanvasElement);
+  });
+
+  it("repeats in both axes", () => {
+    const texture = createRibbonTexture();
+
+    expect(texture.wrapS).toBe(RepeatWrapping);
+    expect(texture.wrapT).toBe(RepeatWrapping);
+  });
+
+  /**
+   * The ribbon's rhythm is horizontal and nothing else: the glazing runs corner to corner on
+   * every storey, and the only verticals on the whole facade are the columns. A band that
+   * stopped short of the edge, or a mullion between the bays, would make this a curtain wall
+   * with wider spandrels.
+   */
+  it("runs the glazing corner to corner and breaks it only with columns", () => {
+    const contexts = record();
+    createRibbonTexture();
+    const rects = contexts[0]!.callsTo("fillRect").map((args) => args.map(Number));
+
+    const bands = rects.filter(
+      ([, , w, h]) => w === RIBBON.width && h === Math.round(RIBBON.floorPx * 0.46),
+    );
+    expect(bands).toHaveLength(RIBBON.floors);
+
+    // The base coat is the same height, so a column is one that does not span the whole sheet.
+    const columns = rects.filter(
+      ([, , w, h]) => h === RIBBON.floors * RIBBON.floorPx && w !== RIBBON.width,
+    );
+    // A column and its lit edge, every fifth bay — and they are painted after the bands, so
+    // each one stands in front of every storey it crosses.
+    expect(columns).toHaveLength((RIBBON.bays / 5) * 2);
+    expect(rects.indexOf(columns[0]!)).toBeGreaterThan(rects.indexOf(bands.at(-1)!));
+  });
+
+  /**
+   * A run on a ribbon is the width of the slab, so the cyan an office floor may be lit in
+   * lands on forty meters of continuous glazing and reads as a lit tube taped to the building.
+   * The curtain wall keeps it; this sheet must not.
+   */
+  it("keeps the cyan office light off a facade that lights in unbroken lines", () => {
+    const contexts = record();
+    createRibbonTexture();
+
+    const styles = contexts[0]!.valuesOf("fillStyle").map(String);
+    expect(styles).not.toContain(CYAN_OFFICE_LIGHT);
+    expect(styles.some((style) => OFFICE_LIGHT.includes(style))).toBe(true);
+  });
+
+  it("paints the same slab every time", () => {
+    const contexts = record();
+    createRibbonTexture();
+    createRibbonTexture();
+
+    expect(contexts[1]!.transcript).toEqual(contexts[0]!.transcript);
+  });
+});
+
+/** The sky sheet: wide enough to carry cloud. The haze only ever needs the ramp. */
+const SKY = { width: 384, height: 512 };
+
 describe("sky and haze ramps", () => {
   /**
    * Both are painted onto spheres concentric with the room, so the texture's `v` is latitude
@@ -200,15 +361,29 @@ describe("sky and haze ramps", () => {
     expect(offsets).toContain(0.5);
   });
 
-  /** No moon and no stars: a metropolis erases both, and nothing here paints one. */
-  it("paints the sky as one gradient and nothing else", () => {
+  /**
+   * No moon and no stars: a metropolis erases both, and nothing here paints one. What the sky
+   * does carry is cloud, and the way it is drawn is the property worth holding — one soft
+   * vertical gradient per column of the sheet, so a band has an underside and a top and wraps
+   * at the seam. A disc or an arc out here would be a moon; a rect wider than a column would
+   * be a hard-edged band with a visible end.
+   */
+  it("paints the sky as vertical ramps and nothing else", () => {
     const contexts = record();
     createSkyTexture();
     const sky = contexts[0]!;
 
     expect(sky.callsTo("createRadialGradient")).toHaveLength(0);
     expect(sky.callsTo("arc")).toHaveLength(0);
-    expect(sky.callsTo("fillRect")).toHaveLength(1);
+
+    const rects = sky.callsTo("fillRect").map((args) => args.map(Number));
+    // The base coat, then one column per cloud band's width.
+    expect(rects[0]).toEqual([0, 0, SKY.width, SKY.height]);
+    for (const [, , width] of rects.slice(1)) expect.soft(width).toBe(1);
+    expect(rects.length).toBeGreaterThan(SKY.width);
+
+    // Every gradient is vertical: a horizontal one would run cloud along the sheet instead.
+    for (const [x0, , x1] of sky.callsTo("createLinearGradient")) expect.soft(x0).toBe(x1);
   });
 
   /** The haze is a wash the city is seen through, so every stop of it has to carry alpha. */
@@ -239,8 +414,11 @@ describe("sky and haze ramps", () => {
   });
 });
 
-/** The street sheet: 512 px square, tiled, two city blocks across. */
-const STREET = { size: 512, blocks: 2 };
+/**
+ * The street sheet: 1024 px square, tiled, three city blocks across — and each block halved
+ * again by a service street, so a tile carries six roads each way rather than two.
+ */
+const STREET = { size: 1024, blocks: 3, roadsEachWay: 6 };
 
 describe("street texture", () => {
   it("returns a texture rather than throwing when the browser refuses a context", () => {
@@ -262,10 +440,16 @@ describe("street texture", () => {
 
   /**
    * The roadway is what carries the grid at distance — a lamp is well under a texel from up
-   * there, so a street painted only as lamps averages out of the mip chain entirely. Each
-   * avenue is laid twice: the asphalt, then the light over it.
+   * there, so a street painted only as lamps averages out of the mip chain entirely.
+   *
+   * But it must not be the roadway painted sodium kerb to kerb either, which is what the first
+   * version of that reasoning produced: a tan ribbon a block wide, flat across, reading as
+   * carpet laid between the towers. Light on a street comes from two rows of lamps standing at
+   * its edges, so each road is laid three times — the asphalt, then an apron under each kerb —
+   * and the aprons together are a minority of its width. That cross-section is what makes it a
+   * street, and it averages to the same value in the mip chain either way.
    */
-  it("lays every avenue as lit surface, not as a line of lamps", () => {
+  it("lights every roadway from its kerbs rather than across its whole width", () => {
     const contexts = record();
     createStreetTexture();
     const sheet = contexts[0]!;
@@ -274,8 +458,32 @@ describe("street texture", () => {
       .callsTo("fillRect")
       .map((args) => args.map(Number))
       .filter(([, , w, h]) => (w === STREET.size) !== (h === STREET.size));
-    // Two avenues each way, painted asphalt-then-light.
-    expect(full).toHaveLength(STREET.blocks * 2 * 2);
+    // Asphalt plus two aprons, on every road running each way.
+    expect(full).toHaveLength(STREET.roadsEachWay * 2 * 3);
+
+    // Read the roads running one way: the tarmac is the widest rect starting at its own kerb,
+    // and the two aprons are the rects that sit inside it.
+    const down = full
+      .filter(([, , , h]) => h === STREET.size)
+      .map(([x, , w]) => ({ from: x!, to: x! + w!, width: w! }));
+    const tarmac = down.filter(
+      (rect) =>
+        !down.some(
+          (other) => other.width > rect.width && other.from <= rect.from && other.to >= rect.to,
+        ),
+    );
+    expect(tarmac).toHaveLength(STREET.roadsEachWay);
+
+    for (const road of tarmac) {
+      const aprons = down.filter(
+        (rect) => rect !== road && rect.from >= road.from && rect.to <= road.to,
+      );
+      expect.soft(aprons).toHaveLength(2);
+      // Both kerbs are lit and the crown of the road is not, which is the cross-section.
+      const lit = aprons.reduce((total, apron) => total + apron.width, 0);
+      expect.soft(lit / road.width).toBeLessThan(0.5);
+      expect.soft(lit).toBeGreaterThan(0);
+    }
 
     const washes = sheet.valuesOf("globalAlpha").map(Number);
     expect(washes.some((alpha) => alpha > 0.4)).toBe(true);

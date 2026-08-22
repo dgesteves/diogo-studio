@@ -25,10 +25,11 @@ import { StatusLed } from "./status-led";
  *
  * The city cost three fewer than the one it replaced, and covers a great deal more: a sky
  * plane, a painted horizon band, a moon, a star and six instanced building groups came to
- * eleven; a backdrop dome, one buffer each for facades, roofs, crowns and beacons, and three
- * shells of haze, and the ground they stand on, come to nine.
+ * eleven; a backdrop dome, one buffer per finish, three shells of haze and the ground they
+ * stand on come to eleven — the two over the original nine being the masonry and ribbon
+ * cladding sheets, which is one mesh each for a whole family of buildings.
  */
-const SCENE_MESH_COUNT = 193;
+const SCENE_MESH_COUNT = 195;
 
 afterEach(unmountScenes);
 

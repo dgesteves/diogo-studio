@@ -31,6 +31,9 @@ import { CITY_WINDOW, ROOM } from "../room";
 
 const geometry = createCityGeometry();
 
+/** The three cladding buffers. Which one a tower lands in is `TowerSpec.clad`. */
+const WALLS = ["facades", "masonry", "ribbons"] as const;
+
 type Triangle = { normal: Vector3; centroid: Vector3 };
 
 function trianglesOf(name: keyof ReturnType<typeof createCityGeometry>): Triangle[] {
@@ -66,18 +69,24 @@ function topOf(spec: TowerSpec): number {
 }
 
 describe("the city's geometry", () => {
-  it("builds a facade, a roof, a crown and a beacon buffer, all indexed", () => {
-    for (const name of ["facades", "roofs", "crowns", "beacons"] as const) {
+  it("builds three walls, a roof, a crown and a beacon buffer, all indexed", () => {
+    for (const name of [...WALLS, "roofs", "crowns", "beacons"] as const) {
       expect.soft(geometry[name].getIndex()?.count ?? 0).toBeGreaterThan(0);
       expect.soft(geometry[name].getAttribute("color").count).toBeGreaterThan(0);
     }
-    // Only the facades are textured; the rest carry their finish in the vertex color.
-    expect(geometry.facades.getAttribute("uv")).toBeDefined();
+    // Only the walls are textured; the rest carry their finish in the vertex color.
+    for (const name of WALLS) expect.soft(geometry[name].getAttribute("uv")).toBeDefined();
     expect(geometry.roofs.getAttribute("uv")).toBeUndefined();
   });
 
+  /**
+   * The winding check has to read all three walls at once rather than one of them. Every tower
+   * is emitted through the same code either way, but which buffer a face lands in is decided
+   * by its cladding — so checking `facades` alone leaves the extreme face unread whenever the
+   * outermost tower on a side happens to wear stone or concrete.
+   */
   it("turns every outermost facade outward", () => {
-    const triangles = trianglesOf("facades");
+    const triangles = WALLS.flatMap((name) => trianglesOf(name));
 
     expect(extreme(triangles, "x", 1).normal.x).toBeGreaterThan(0.5);
     expect(extreme(triangles, "x", -1).normal.x).toBeLessThan(-0.5);
@@ -86,7 +95,7 @@ describe("the city's geometry", () => {
   });
 
   it("stands the facades up and lays the roofs flat", () => {
-    for (const { normal } of trianglesOf("facades")) {
+    for (const { normal } of WALLS.flatMap((name) => trianglesOf(name))) {
       // A taper leans a wall, but never off the vertical by more than a wall's worth.
       expect.soft(Math.abs(normal.y)).toBeLessThan(0.5);
     }
@@ -101,7 +110,7 @@ describe("the city's geometry", () => {
     const bounds = geometry.facades.boundingSphere;
     expect(bounds).not.toBeNull();
 
-    for (const { centroid } of trianglesOf("facades")) {
+    for (const { centroid } of WALLS.flatMap((name) => trianglesOf(name))) {
       expect.soft(centroid.x).toBeLessThan(ROOM.minX);
       expect.soft(centroid.y).toBeGreaterThanOrEqual(STREET_Y);
     }
@@ -123,6 +132,21 @@ describe("the skyline's composition", () => {
   it("names every tower once", () => {
     const keys = CITY_TOWERS.map((tower) => tower.key);
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  /**
+   * Every sheet has to be worn by enough towers to be seen, and no sheet by so many that it is
+   * the city's one look — which is the failure the second and third sheets were added to fix.
+   * The reveal only ever shows a handful of buildings at once, so a cladding on three of fifty
+   * is a cladding most cameras never find.
+   */
+  it("spreads the three claddings across the skyline", () => {
+    const worn = CITY_TOWERS.map((tower) => tower.clad ?? "glass");
+
+    for (const clad of ["glass", "stone", "ribbon"] as const) {
+      const share = worn.filter((candidate) => candidate === clad).length / worn.length;
+      expect.soft(`${clad}: ${share > 0.15 && share < 0.55}`).toBe(`${clad}: true`);
+    }
   });
 
   it("keeps the composed skyline inside the reveal", () => {
