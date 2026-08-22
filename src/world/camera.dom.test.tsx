@@ -15,9 +15,10 @@ import { neutralOrbitState, type OrbitInputState } from "./input";
  * visitor sees on arrival — landing somewhere other than the station they deep-linked to,
  * the world cropping on a narrow screen, or the camera drifting through a wall.
  *
- * Nothing here compares two positions captured at different moments. The authored framing
- * is never still: `ORBIT.idleAzimuthRad` keeps a slow sine drift on the target the whole
- * time, so an absolute position is only meaningful against the station it belongs to.
+ * A settled camera holds still. It did not always: a sine drift and a pointer parallax used
+ * to ride on top of every station, which is why nothing here used to compare two positions
+ * captured at different moments. That is now a property worth asserting rather than a hazard
+ * to write around.
  */
 
 const WIDE = { width: 1920, height: 1080 };
@@ -75,6 +76,24 @@ describe("WorldCamera", () => {
     await scene.advance(1);
 
     expect(camera.position.distanceTo(stationPosition("about"))).toBeLessThan(0.2);
+  });
+
+  /**
+   * The one property a fixed shot has. A sine drift and a pointer parallax used to ride on
+   * every station, so the room never stopped breathing — and the city outside the window, being
+   * the furthest thing from the pivot, swung further than anything inside it. Untouched, a
+   * settled camera does not move at all.
+   */
+  it("holds the framing once it has settled, with nothing driving it", async () => {
+    const { scene, camera } = await mount("about");
+    await settle(scene);
+
+    const rested = camera.position.clone();
+    const aim = camera.quaternion.clone();
+    await settle(scene, 900);
+
+    expect(camera.position.distanceTo(rested)).toBeLessThan(1e-6);
+    expect(camera.quaternion.angleTo(aim)).toBeLessThan(1e-6);
   });
 
   it("settles onto the station a route change moved to", async () => {
