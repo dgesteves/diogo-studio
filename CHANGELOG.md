@@ -1,5 +1,47 @@
 # Changelog
 
+## [1.15.0](https://github.com/dgesteves/diogo-studio/compare/v1.14.0...v1.15.0) (2026-08-22)
+
+
+### Features
+
+* **world:** a stacked book shows a printed cover and a page block, not two slabs ([d7eebed](https://github.com/dgesteves/diogo-studio/commit/d7eebedf574413e0c52b5b8a7e6785329e0dfcc5))
+* **world:** an iPhone, an iPad and a Pencil on the desk, and a chair with a frame ([#232](https://github.com/dgesteves/diogo-studio/issues/232)) ([0f3cb75](https://github.com/dgesteves/diogo-studio/commit/0f3cb75ffb31b289e1a4f941c931e176f970bcf9))
+* **world:** books are bound and titled, in the room's palette rather… ([#230](https://github.com/dgesteves/diogo-studio/issues/230)) ([466c566](https://github.com/dgesteves/diogo-studio/commit/466c566d979422480f29649b2c748bac0c15d18a))
+* **world:** the ceiling lights hang from posts behind a chamfered well, not a lit plate on the plaster ([17716df](https://github.com/dgesteves/diogo-studio/commit/17716df8dc95876852ae5875f9227bcd5d32de10))
+* **world:** the desk is modeled from the objects on it, not boxed ([#231](https://github.com/dgesteves/diogo-studio/issues/231)) ([9a16b41](https://github.com/dgesteves/diogo-studio/commit/9a16b4143d95687ba02fc2a09c04f2647dda545e))
+* **world:** the room's four plants are grown from sheets, not clumped icosahedra ([e0157dd](https://github.com/dgesteves/diogo-studio/commit/e0157dda36b1a5048617326a6b83e0c74404beda))
+* **world:** the soundbar wears a grille and the remote a button fiel… ([#235](https://github.com/dgesteves/diogo-studio/issues/235)) ([ab9ff44](https://github.com/dgesteves/diogo-studio/commit/ab9ff440fcf39fe7b423ab639d76bf99ceb03480))
+* **world:** three floating shelves, and the models that stand on them ([#229](https://github.com/dgesteves/diogo-studio/issues/229)) ([4c7954d](https://github.com/dgesteves/diogo-studio/commit/4c7954d55ee41c021b3938c579da2ae3e444c48a))
+
+
+### Bug Fixes
+
+* **world:** the bookcase stands in the corner and the window reaches … ([#237](https://github.com/dgesteves/diogo-studio/issues/237)) ([165559a](https://github.com/dgesteves/diogo-studio/commit/165559abb4f585557d836a1a1bc9b774b6edf008))
+* **world:** the boot screen stops flashing, and the gate keeps one set of controls ([#227](https://github.com/dgesteves/diogo-studio/issues/227)) ([84e23d9](https://github.com/dgesteves/diogo-studio/commit/84e23d9cf168b190835d2ec397df00b038c86246))
+* **world:** the coffee table's items rest on the table, not on a floating slab ([b46abd3](https://github.com/dgesteves/diogo-studio/commit/b46abd3ff9e38afa85aa4e80512358ed724c9db1))
+* **world:** the Mac Studio stands on the desk rather than on a black slab ([a0ebc50](https://github.com/dgesteves/diogo-studio/commit/a0ebc50df1cdc20bc48bb84e177d379c2b8a4f18))
+* **world:** the rug reaches toward the shelf wall instead of stopping in open floor ([ab44e3e](https://github.com/dgesteves/diogo-studio/commit/ab44e3e44e5c9401e4cb115d8b7cc8dd8ac8fcc4))
+* **world:** the ship keeps its second pair of flaps and still shows its seam ([a90ff51](https://github.com/dgesteves/diogo-studio/commit/a90ff513c1289ec960b8146e21ac5049d948e6a2))
+
+
+### Documentation
+
+* **env:** .env.example carries the Upstash pair ([580c722](https://github.com/dgesteves/diogo-studio/commit/580c722a1c68d08177633133e6bb6742494e68a2))
+* the two bounded plans go, and their findings land in decisions.md ([c353ab0](https://github.com/dgesteves/diogo-studio/commit/c353ab00914a82e2fee2ca0267c29854a23f1483))
+* world-poster.png is a placeholder, and its weight is an og:image constraint ([c8906af](https://github.com/dgesteves/diogo-studio/commit/c8906af64cab2c4caaa2f07bc13d06f64ab899b1))
+
+
+### Tests
+
+* scene specs walk a live world, and the jsdom deadline is set rather than inherited ([6d1e6fa](https://github.com/dgesteves/diogo-studio/commit/6d1e6fae74cbccd1212fd134a4dc2e690abc3f91))
+* the fixture domain is the one the site actually serves ([683b845](https://github.com/dgesteves/diogo-studio/commit/683b8458038d472fea316ab6332c95746b57be91))
+
+
+### Miscellaneous Chores
+
+* remove unused git blame ignore configuration ([3654c02](https://github.com/dgesteves/diogo-studio/commit/3654c02092cc3ecbea37ad8934b721fe63957215))
+
 ## [1.14.0](https://github.com/dgesteves/diogo-studio/compare/v1.13.0...v1.14.0) (2026-08-16)
 
 
