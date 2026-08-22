@@ -270,13 +270,12 @@ export function ControlDeck(): ReactElement {
         />
       </mesh>
       <PortBank />
-      <pointLight
-        position={onFace(0, SCREEN_S, 0.06)}
-        intensity={0.08}
-        distance={0.36}
-        decay={2}
-        color={worldColors.accent}
-      />
+      {/*
+        The console throws no lamp of its own. A point light off the face lit a 36 cm disc of
+        desk in front of the deck, and a disc on a flat top reads as a circle painted on it —
+        the emissive screen above is what a visitor reads the console's light from, and Bloom
+        already spreads it.
+      */}
     </group>
   );
 }

@@ -89,6 +89,16 @@ const HEADBAND_RADIUS = 0.14;
 const HEADBAND_TUBE = 0.016;
 const EARCUP_Y = HEADBAND_Y - EARCUP_RADIUS - 0.004;
 const BASE_TOP = 0.018;
+const BASE_TOP_RADIUS = 0.088;
+const BASE_BOTTOM_RADIUS = 0.098;
+/**
+ * The stand's accent is a slot let into the plinth's flank, at half its height so the tube sits
+ * flush in the taper. It used to be a torus lying in the plinth's *top* face, a hair above it:
+ * a horizontal neon circle on a horizontal plate, which at desk height is indistinguishable
+ * from a ring painted on the desk. An accent goes on an edge you can see the thickness of.
+ */
+const BASE_BAND_RADIUS = (BASE_TOP_RADIUS + BASE_BOTTOM_RADIUS) / 2;
+const BASE_BAND_TUBE = 0.0022;
 const POST_TOP = HEADBAND_Y + HEADBAND_RADIUS - HEADBAND_TUBE;
 const YOKE_X = HEADBAND_RADIUS - EARCUP_X;
 const YOKE_HEIGHT = HEADBAND_Y - EARCUP_Y + 0.012;
@@ -97,12 +107,12 @@ const SHELL_MATERIAL = { color: "#0c1116", roughness: 0.55, metalness: 0.45 } as
 function Headphones(): ReactElement {
   return (
     <group position={[1.12, DESK_TOP_Y, 0.05]}>
-      <mesh position={[0, 0.009, 0]}>
-        <cylinderGeometry args={[0.088, 0.098, 0.018, 24]} />
+      <mesh position={[0, BASE_TOP / 2, 0]}>
+        <cylinderGeometry args={[BASE_TOP_RADIUS, BASE_BOTTOM_RADIUS, BASE_TOP, 24]} />
         <meshStandardMaterial {...darkMetalMaterial} />
       </mesh>
-      <mesh position={[0, 0.019, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.072, 0.0024, 10, 32]} />
+      <mesh position={[0, BASE_TOP / 2, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[BASE_BAND_RADIUS, BASE_BAND_TUBE, 8, 40]} />
         <meshBasicMaterial color={worldColors.accent} toneMapped={false} />
       </mesh>
       <mesh position={[0, (BASE_TOP + POST_TOP) / 2, 0]}>
@@ -116,13 +126,13 @@ function Headphones(): ReactElement {
       {EARCUP_SIDES.map((side) => (
         <Earcup key={side} side={side} />
       ))}
-      <pointLight
-        position={[0, EARCUP_Y, 0.2]}
-        intensity={0.12}
-        distance={0.6}
-        decay={2}
-        color={worldColors.accent}
-      />
+      {/*
+        No accent lamp in front of the cups. An accent `pointLight` a few centimeters over the
+        desk paints a lit disc on three meters of matte top, and with nothing above the disc
+        that could have thrown it — this one stood 20 cm *forward* of the stand, over bare desk
+        — the disc reads as a circle on the table rather than as spill. The earcup rings are
+        the accent; Bloom carries them.
+      */}
     </group>
   );
 }
